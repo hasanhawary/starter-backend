@@ -1,16 +1,13 @@
 {
-    "*name": {
-        "ar": "\u0627\u0633\u0645 \u062a\u062c\u0631\u064a\u0628\u064a",
-        "en": "Sample Name"
-    },
-    "description": {
-        "ar": "\u0648\u0635\u0641 \u062a\u062c\u0631\u064a\u0628\u064a",
-        "en": "Sample Description"
-    },
-    "^phone": "phone",
-    "photo": "file",
- 	"*content": "string",
-
-    "status": "enum[pending,approved,rejected]",
-    "country_id": 1
+  "*name":"string",
+  "^phone": "string",
+  "^email": "string",
+  "country_id": 1,
+  "city_id": 1,
+  "source": "enum[call,website,facebook,referral,walkin,portal]",
+  "budget_min": "float",
+  "budget_max": "float",
+  "stage_id": 1,
+  "status": "enum[new,active,nurturing,archived]",
+  "notes": "string"
 }

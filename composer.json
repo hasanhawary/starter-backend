@@ -28,7 +28,7 @@
         "hasanhawary/permission-manager": "*",
         "hasanhawary/report-builder": "*",
         "hasanhawary/export-builder": "*",
-        "hasanhawary/dynamic-cli":  "*@dev"
+        "hasanhawary/dynamic-cli":  "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -39,12 +39,6 @@
         "phpunit/phpunit": "^10.5",
         "spatie/laravel-ignition": "^2.4"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "./packages/dynamic-cli"
-        }
-    ],
     "autoload": {
         "files": [
             "app/Helpers/App.php"
