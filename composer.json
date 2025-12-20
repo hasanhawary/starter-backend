@@ -11,6 +11,12 @@
         "php": "^8.3",
         "ext-fileinfo": "*",
         "directorytree/ldaprecord-laravel": "^3.4",
+        "hasanhawary/dynamic-cli": "*",
+        "hasanhawary/export-builder": "*",
+        "hasanhawary/lookup-manager": "*",
+        "hasanhawary/media-manager": "*",
+        "hasanhawary/permission-manager": "*",
+        "hasanhawary/report-builder": "*",
         "jenssegers/date": "^2.0",
         "laravel/framework": "^11.0",
         "laravel/pulse": "^1.2",
@@ -23,12 +29,7 @@
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-permission": "^6.4",
         "spatie/laravel-translatable": "^6.7",
-        "hasanhawary/media-manager": "*",
-        "hasanhawary/lookup-manager": "*",
-        "hasanhawary/permission-manager": "*",
-        "hasanhawary/report-builder": "*",
-        "hasanhawary/export-builder": "*",
-        "hasanhawary/dynamic-cli":  "*"
+        "stancl/tenancy": "^3.9"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
