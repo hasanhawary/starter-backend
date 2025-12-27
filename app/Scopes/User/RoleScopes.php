@@ -9,7 +9,7 @@ trait RoleScopes
     public function scopeRelated(Builder $builder): void
     {
         $builder->when(!auth()->user()->can('view-all-role'), function ($subQuery) {
-            $subQuery->where('created_by', auth()->id());
+            $subQuery->where('created_by', auth('admin')->id());
         })
             ->excludeRoot()
             ->excludeLoggedInRole();
@@ -22,6 +22,6 @@ trait RoleScopes
 
     public function scopeExcludeLoggedInRole(Builder $query): Builder
     {
-        return $query->whereNotIn('id', auth()->user()->roles()->pluck('id')->toArray());
+        return $query->whereNotIn('id', auth('admin')->user()->roles()->pluck('id')->toArray());
     }
 }

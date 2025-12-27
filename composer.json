@@ -27,9 +27,9 @@
         "opcodesio/log-viewer": "^3.8",
         "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-activitylog": "^4.10",
+        "spatie/laravel-multitenancy": "^4.0",
         "spatie/laravel-permission": "^6.4",
-        "spatie/laravel-translatable": "^6.7",
-        "stancl/tenancy": "^3.9"
+        "spatie/laravel-translatable": "^6.7"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
