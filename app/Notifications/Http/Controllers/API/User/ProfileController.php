@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\API\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\UpdateUserProfileRequest;
-use App\Http\Resources\User\UserResource;
+use App\Http\Requests\Central\User\UpdateUserProfileRequest;
+use App\Http\Resources\Central\User\UserResource;
 use App\Models\User;
-use HasanHawary\MediaManager\Facades\Media;
 use Exception;
+use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -32,7 +32,7 @@ class ProfileController extends Controller
     public function updateProfile(UpdateUserProfileRequest $request): JsonResponse
     {
         $data = Arr::except(array_filter($request->validated(), fn($value) => $value !== null), 'avatar');
-    
+
         auth()->user()->update($data);
 
         return successResponse(auth()->user()->refresh(), trans('api.profile_updated'));

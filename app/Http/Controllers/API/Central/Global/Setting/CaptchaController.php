@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API\Global\Setting;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\CaptchaRequest;
+use App\Http\Requests\Central\Auth\CaptchaRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;

@@ -2,7 +2,7 @@
 
 namespace App\Trait\Global;
 
-use App\Http\Requests\Global\Other\ModelBatchRequest;
+use App\Http\Requests\Central\Global\Other\ModelBatchRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Spatie\Permission\Exceptions\UnauthorizedException;

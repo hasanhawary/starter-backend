@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\Tenant\Global\Export;
 
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Global\Export\ExportRequest;
+use App\Http\Requests\Central\Global\Export\ExportRequest;
 use HasanHawary\ExportBuilder\ExportBuilder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 

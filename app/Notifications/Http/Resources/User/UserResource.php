@@ -3,9 +3,10 @@
 namespace App\Http\Resources\User;
 
 use App\Enum\User\UserGenderEnum;
-use App\Http\Resources\DataEntry\CountryResource;
-use App\Http\Resources\Global\Other\BasicResource;
-use App\Http\Resources\Global\Other\BasicUserResource;
+use App\Http\Resources\Central\DataEntry\CountryResource;
+use App\Http\Resources\Central\Global\Other\BasicResource;
+use App\Http\Resources\Central\Global\Other\BasicUserResource;
+use App\Http\Resources\Central\User\RoleResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

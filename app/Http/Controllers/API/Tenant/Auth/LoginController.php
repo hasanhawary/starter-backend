@@ -5,8 +5,8 @@ namespace App\Http\Controllers\API\Tenant\Auth;
 use App\Exceptions\InactiveUserException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Resources\Auth\LoginResource;
+use App\Http\Requests\Central\Auth\LoginRequest;
+use App\Http\Resources\Central\Auth\LoginResource;
 use App\Models\User;
 use App\Services\Auth\LoginService;
 use App\Services\Auth\ThrottleService;
@@ -39,6 +39,7 @@ class LoginController extends Controller
                 ->setModel(User::class)
                 ->attempt($request->validated());
 
+            dd($user);
             $this->throttleService->clearRateLimit($key);
 
             return successResponse(new LoginResource($user['user'], $user['token']), __('api.login_success'));

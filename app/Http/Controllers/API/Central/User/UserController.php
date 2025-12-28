@@ -6,10 +6,10 @@ use App\Filters\Global\OrderByFilter;
 use App\Filters\Global\TrashedFilter;
 use App\Filters\User\UserFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Global\Other\DeleteAllRequest;
-use App\Http\Requests\Global\Other\PageRequest;
-use App\Http\Requests\User\UserRequest;
-use App\Http\Resources\User\UserResource;
+use App\Http\Requests\Central\Global\Other\DeleteAllRequest;
+use App\Http\Requests\Central\Global\Other\PageRequest;
+use App\Http\Requests\Central\User\UserRequest;
+use App\Http\Resources\Central\User\UserResource;
 use App\Mail\BasicMail;
 use App\Models\Role;
 use App\Models\User;
@@ -92,7 +92,7 @@ class UserController extends Controller
             DB::afterCommit(function () use ($user, $request) {
                 $this->sendUserCredentialsEmail($user->refresh(), $request);
             });
-            
+
             return successResponse(new UserResource($user->refresh()->load('roles')), __('api.updated_success'));
         });
     }

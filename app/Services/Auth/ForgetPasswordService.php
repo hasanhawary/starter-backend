@@ -1,11 +1,10 @@
 <?php
 namespace App\Services\Auth;
 
-use App\Http\Requests\Auth\ForgetPasswordRequest;
-use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Central\Auth\ForgetPasswordRequest;
+use App\Http\Requests\Central\Auth\ResetPasswordRequest;
 use App\Models\User;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\App;
 use Random\RandomException;
 
 class ForgetPasswordService

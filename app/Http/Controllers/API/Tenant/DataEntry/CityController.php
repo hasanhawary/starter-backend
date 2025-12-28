@@ -4,9 +4,9 @@ namespace App\Http\Controllers\API\Tenant\DataEntry;
 
 use App\Filters\Global\OrderByFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\DataEntry\CityRequest;
-use App\Http\Requests\Global\Other\PageRequest;
-use App\Http\Resources\DataEntry\CityResource;
+use App\Http\Requests\Central\DataEntry\CityRequest;
+use App\Http\Requests\Central\Global\Other\PageRequest;
+use App\Http\Resources\Central\DataEntry\CityResource;
 use App\Models\City;
 use App\Trait\Global\HasSoftDeleteMethods;
 use Illuminate\Http\JsonResponse;

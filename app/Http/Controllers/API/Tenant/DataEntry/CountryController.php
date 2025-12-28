@@ -4,9 +4,9 @@ namespace App\Http\Controllers\API\Tenant\DataEntry;
 
 use App\Filters\Global\JsonDisplayNameFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\DataEntry\CountryRequest;
-use App\Http\Requests\Global\Other\PageRequest;
-use App\Http\Resources\DataEntry\CountryResource;
+use App\Http\Requests\Central\DataEntry\CountryRequest;
+use App\Http\Requests\Central\Global\Other\PageRequest;
+use App\Http\Resources\Central\DataEntry\CountryResource;
 use App\Models\Country;
 use App\Trait\Global\HasSoftDeleteMethods;
 use Illuminate\Http\JsonResponse;

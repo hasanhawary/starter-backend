@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\Global\Help;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Global\Help\HelpEnumRequest;
-use App\Http\Requests\Global\Help\HelpModelRequest;
+use App\Http\Requests\Central\Global\Help\HelpEnumRequest;
+use App\Http\Requests\Central\Global\Help\HelpModelRequest;
 use HasanHawary\LookupManager\Facades\Lookup;
 use Illuminate\Http\JsonResponse;
 

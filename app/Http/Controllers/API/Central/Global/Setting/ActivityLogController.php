@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Global\Setting;
 use App\Filters\Global\OrderByFilter;
 use App\Filters\Setting\ActivityLogFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Global\Setting\ActivityLogResource;
+use App\Http\Resources\Central\Global\Setting\ActivityLogResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;

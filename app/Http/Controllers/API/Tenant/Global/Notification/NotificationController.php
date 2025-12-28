@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\Tenant\Global\Notification;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Global\Notification\NotificationRequest;
-use App\Http\Resources\Global\Notification\NotificationResource;
+use App\Http\Requests\Central\Global\Notification\NotificationRequest;
+use App\Http\Resources\Central\Global\Notification\NotificationResource;
 use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
 

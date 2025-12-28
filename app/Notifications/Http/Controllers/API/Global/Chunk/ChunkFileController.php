@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API\Global\Chunk;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Global\Chunk\ChunkFileRequest;
+use App\Http\Requests\Central\Global\Chunk\ChunkFileRequest;
 use HasanHawary\MediaManager\Support\ChunkResolver;
 use Illuminate\Http\JsonResponse;
 

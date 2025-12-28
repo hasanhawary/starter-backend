@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\Global\Report;
 
 use App\Enum\Global\ReportChartTypeEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Global\Report\ReportRequest;
+use App\Http\Requests\Central\Global\Report\ReportRequest;
 use HasanHawary\ReportBuilder\ReportBuilder;
 use Illuminate\Http\JsonResponse;
 

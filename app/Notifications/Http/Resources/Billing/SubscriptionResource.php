@@ -2,10 +2,9 @@
 
 namespace App\Http\Resources\Billing;
 
-use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Billing\PlanResource;
 use App\Enum\Billing\SubscriptionStatusEnum;
-use App\Http\Resources\Global\Other\BasicUserResource;
+use App\Http\Resources\Central\Billing\PlanResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class SubscriptionResource extends JsonResource
 {

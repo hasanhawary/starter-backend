@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API\Tenant\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Central\Auth\ResetPasswordRequest;
 use App\Services\Auth\ForgetPasswordService;
 use Illuminate\Http\JsonResponse;
 

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\API\DataEntry;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\DataEntry\ProductRequest;
-use App\Http\Requests\Global\Other\PageRequest;
 use App\Filters\Global\OrderByFilter;
-use App\Http\Resources\DataEntry\ProductResource;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Central\DataEntry\ProductRequest;
+use App\Http\Requests\Central\Global\Other\PageRequest;
+use App\Http\Resources\Central\DataEntry\ProductResource;
 use App\Models\Product;
 use App\Trait\Global\HasSoftDeleteMethods;
 use Illuminate\Http\JsonResponse;

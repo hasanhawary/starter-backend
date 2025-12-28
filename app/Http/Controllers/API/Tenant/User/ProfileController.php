@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\Tenant\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\UpdateUserProfileRequest;
-use App\Http\Resources\User\UserResource;
+use App\Http\Requests\Central\User\UpdateUserProfileRequest;
+use App\Http\Resources\Central\User\UserResource;
 use App\Models\User;
 use Exception;
 use HasanHawary\MediaManager\Facades\Media;

@@ -4,10 +4,10 @@ namespace App\Http\Controllers\API\User;
 
 use App\Filters\Global\JsonDisplayNameFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Global\Other\DeleteAllRequest;
-use App\Http\Requests\Global\Other\PageRequest;
-use App\Http\Requests\User\PermissionRequest;
-use App\Http\Resources\User\PermissionResource;
+use App\Http\Requests\Central\Global\Other\DeleteAllRequest;
+use App\Http\Requests\Central\Global\Other\PageRequest;
+use App\Http\Requests\Central\User\PermissionRequest;
+use App\Http\Resources\Central\User\PermissionResource;
 use App\Models\Permission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
