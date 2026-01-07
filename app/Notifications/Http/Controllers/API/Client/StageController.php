@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\API\Client;
 
-use App\Filters\Global\OrderByFilter;
+use App\Filters\Central\Global\OrderByFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Client\StageRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Client\StageResource;
-use App\Models\Stage;
+use App\Models\Central\Stage;
 use App\Trait\Global\HasSoftDeleteMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;

@@ -1,7 +1,7 @@
 <?php
 namespace Database\Seeders\Central;
 
-use App\Models\Country;
+use App\Models\Central\Country;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

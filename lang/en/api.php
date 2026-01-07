@@ -23,7 +23,6 @@ return [
     'checkout' => 'Check-out',
     'mail_fail' => 'Mail configuration error',
     'mail_success' => 'Mail sent successfully',
-    'locations' => 'Locations',
     'users_count' => 'Number of users',
     'root' => 'Root',
     'admin' => 'Admin',

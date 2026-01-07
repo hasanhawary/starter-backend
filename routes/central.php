@@ -1,26 +1,24 @@
 <?php
 
-use App\Http\Controllers\API\Billing\PlanController;
-use App\Http\Controllers\API\Billing\PlanFeatureController;
-use App\Http\Controllers\API\Billing\SubscriptionController;
-use App\Http\Controllers\API\Billing\SubscriptionUsageController;
-use App\Http\Controllers\API\Tenant\Auth\ForgetPasswordController;
-use App\Http\Controllers\API\Tenant\Auth\LoginController;
-use App\Http\Controllers\API\Tenant\Auth\ResetPasswordController;
-use App\Http\Controllers\API\Tenant\DataEntry\CountryController;
-use App\Http\Controllers\API\Tenant\Global\Chunk\ChunkFileController;
-use App\Http\Controllers\API\Tenant\Global\Export\ExportController;
-use App\Http\Controllers\API\Tenant\Global\Help\HelpController;
-use App\Http\Controllers\API\Tenant\Global\Notification\NotificationController;
-use App\Http\Controllers\API\Tenant\Global\Report\ReportController;
-use App\Http\Controllers\API\Tenant\Global\Setting\ActivityLogController;
-use App\Http\Controllers\API\Tenant\Global\Setting\CaptchaController;
-use App\Http\Controllers\API\Tenant\Global\Setting\SettingController;
-use App\Http\Controllers\API\Tenant\User\PermissionController;
-use App\Http\Controllers\API\Tenant\User\ProfileController;
-use App\Http\Controllers\API\Tenant\User\RoleController;
-use App\Http\Controllers\API\Tenant\User\UserController;
+use App\Http\Controllers\API\Central\Admin\AdminController;
+use App\Http\Controllers\API\Central\Auth\ForgetPasswordController;
+use App\Http\Controllers\API\Central\Auth\LoginController;
+use App\Http\Controllers\API\Central\Auth\ResetPasswordController;
+use App\Http\Controllers\API\Central\DataEntry\CountryController;
+use App\Http\Controllers\API\Central\Global\Chunk\ChunkFileController;
+use App\Http\Controllers\API\Central\Global\Export\ExportController;
+use App\Http\Controllers\API\Central\Global\Help\HelpController;
+use App\Http\Controllers\API\Central\Global\Notification\NotificationController;
+use App\Http\Controllers\API\Central\Global\Report\ReportController;
+use App\Http\Controllers\API\Central\Global\Setting\ActivityLogController;
+use App\Http\Controllers\API\Central\Global\Setting\CaptchaController;
+use App\Http\Controllers\API\Central\Global\Setting\SettingController;
+use App\Http\Controllers\API\Central\Admin\PermissionController;
+use App\Http\Controllers\API\Central\Admin\ProfileController;
+use App\Http\Controllers\API\Central\Admin\RoleController;
 use Illuminate\Support\Facades\Route;
+
+Route::prefix('central')->group(function () {
     /*
     |--------------------------------------------------------------------------
     | Captcha Routes
@@ -58,13 +56,13 @@ use Illuminate\Support\Facades\Route;
         | User Routes
         |--------------------------------------------------------------------------
         */
-        Route::prefix('users')->name('users.')->group(function () {
-            Route::delete('delete-all', [UserController::class, 'destroyAll'])->name('destroyAll');
-            Route::post('{id}/restore', [UserController::class, 'restore'])->name('restore');
-            Route::post('{user}/change-status', [UserController::class, 'changeStatus'])->name('changeStatus');
-            Route::delete('{id}/force-delete', [UserController::class, 'forceDelete'])->name('forceDelete');
+        Route::prefix('admins')->name('admins.')->group(function () {
+            Route::delete('delete-all', [AdminController::class, 'destroyAll'])->name('destroyAll');
+            Route::post('{id}/restore', [AdminController::class, 'restore'])->name('restore');
+            Route::post('{user}/change-status', [AdminController::class, 'changeStatus'])->name('changeStatus');
+            Route::delete('{id}/force-delete', [AdminController::class, 'forceDelete'])->name('forceDelete');
 
-            Route::apiResource('/', UserController::class)->parameters(['' => 'user']);
+            Route::apiResource('/', AdminController::class)->parameters(['' => 'admin']);
         });
 
         //Role Routes
@@ -146,3 +144,4 @@ use Illuminate\Support\Facades\Route;
             });
         });
 
+});

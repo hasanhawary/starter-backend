@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\API\Tenant\DataEntry;
 
-use App\Filters\Global\JsonDisplayNameFilter;
+use App\Filters\Central\Global\JsonDisplayNameFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\DataEntry\CountryRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\DataEntry\CountryResource;
-use App\Models\Country;
+use App\Models\Central\Country;
 use App\Trait\Global\HasSoftDeleteMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;

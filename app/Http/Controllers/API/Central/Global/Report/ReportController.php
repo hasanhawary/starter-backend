@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Global\Report;
+namespace App\Http\Controllers\API\Central\Global\Report;
 
 use App\Enum\Global\ReportChartTypeEnum;
 use App\Http\Controllers\Controller;

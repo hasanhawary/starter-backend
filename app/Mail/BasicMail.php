@@ -1,7 +1,8 @@
 <?php
 namespace App\Mail;
 
-use App\Models\User;
+use App\Models\Central\Admin;
+use App\Models\Tenant\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -11,11 +12,11 @@ class BasicMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public User | null $user, public array $data)
+    public function __construct(public User|Admin | null $user, public array $data)
     {
     }
 
-    public function build(): BasicMail
+    public function build(): self
     {
         $subject = parseKeyValueString($this->data['title']);
 

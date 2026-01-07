@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email');
-            $table->string('phone_code')->nullable();
+            $table->foreignId('phone_code_id')->nullable()->constrained('countries')->nullOnDelete();
             $table->string('phone')->nullable();
             $table->string('avatar')->nullable();
             $table->string('password');

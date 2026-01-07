@@ -10,14 +10,12 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            // Stancl tenancy uses string IDs for tenants
-            $table->string('tenant_id');
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->foreignId('plan_id')->constrained('plans')->cascadeOnDelete();
             $table->timestamp('starts_at');
             $table->timestamp('ends_at')->nullable();
             $table->string('status')->default('active'); // active, expired, cancelled
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
             $table->timestamps();
         });
     }

@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('model')->nullable();
             $table->boolean('is_env')->default(false);
             $table->string('type')->default(SettingTypeEnum::Text->value);
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('admins')->cascadeOnDelete();
             $table->timestamps();
         });
     }

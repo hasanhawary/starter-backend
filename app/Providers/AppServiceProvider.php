@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\Role;
-use App\Models\User;
+use App\Models\Central\Admin;
+use App\Models\Central\Role;
+use App\Models\Tenant\User;
 use App\Observers\User\UserObserver;
-use App\Policies\User\RolePolicy;
-use App\Policies\User\UserPolicy;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use App\Policies\Central\Admin\RolePolicy;
+use App\Policies\Central\Admin\AdminPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -30,8 +30,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
+        // Central Policies
+
         //Policies
-        Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(Admin::class, AdminPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
 
         //Observers

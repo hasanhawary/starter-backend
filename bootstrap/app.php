@@ -12,9 +12,10 @@ use Illuminate\Http\Request;
 use Spatie\Multitenancy\Http\Middleware\EnsureValidTenantSession;
 use Spatie\Multitenancy\Http\Middleware\NeedsTenant;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app =  Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
         api: __DIR__ . '/../routes/api.php',
@@ -47,7 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (UnauthorizedException $e) {
+        $exceptions->render(function (UnauthorizedException|AccessDeniedHttpException $e) {
             if (request()->acceptsJson()) {
                 return failResponse(msg: 'Unauthorized', code: 403);
             }
@@ -72,3 +73,8 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
     })->create();
+
+$app->useLangPath(base_path('lang'));
+
+return $app;
+

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\API\Billing;
+namespace App\Http\Controllers\API\Central\Billing;
 
-use App\Filters\Global\OrderByFilter;
+use App\Filters\Central\Global\OrderByFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Billing\PlanRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Billing\PlanResource;
-use App\Models\Plan;
+use App\Models\Central\Plan;
 use App\Trait\Global\HasSoftDeleteMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;

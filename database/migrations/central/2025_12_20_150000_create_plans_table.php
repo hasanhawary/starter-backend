@@ -14,9 +14,9 @@ return new class extends Migration
             $table->string('name');
             $table->decimal('price', 10, 2)->default(0);
             $table->string('billing_cycle'); // monthly, yearly
-            $table->unsignedInteger('max_users')->nullable();
+            $table->unsignedInteger('max_admins')->nullable();
             $table->unsignedInteger('max_storage_mb')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
             $table->timestamps();
         });
     }

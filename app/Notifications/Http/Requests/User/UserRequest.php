@@ -4,7 +4,7 @@ namespace App\Http\Requests\User;
 
 use App\Enum\User\UserGenderEnum;
 use App\Http\Requests\BaseFormRequest;
-use App\Models\Country;
+use App\Models\Central\Country;
 use App\Rules\ValidLength;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;

@@ -10,13 +10,12 @@ return new class extends Migration
     {
         Schema::create('subscription_usage', function (Blueprint $table) {
             $table->id();
-            $table->string('tenant_id');
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->string('feature_key');
             $table->unsignedBigInteger('used_value')->default(0);
             $table->dateTime('period_start');
             $table->dateTime('period_end');
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
             $table->timestamps();
         });
     }

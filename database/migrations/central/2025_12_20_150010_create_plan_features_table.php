@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('plan_id')->constrained('plans')->cascadeOnDelete();
             $table->string('feature_key');
             $table->string('value');
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
             $table->timestamps();
         });
     }

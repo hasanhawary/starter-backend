@@ -1,10 +1,10 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\Tenant;
 
 use App\Enum\User\UserGenderEnum;
-use App\Models\Country;
-use App\Models\User;
+use App\Models\Central\Country;
+use App\Models\Tenant\User;
 use HasanHawary\PermissionManager\Facades\Access;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;

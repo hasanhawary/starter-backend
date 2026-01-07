@@ -23,7 +23,6 @@ return [
     'checkout' => 'خروج',
     'mail_fail' => 'خطا في اعدادات البريد',
     'mail_success' => 'تم ارسال البريد بنجاح',
-    'locations' => 'المواقع',
     'users_count' => 'عدد المستخدمين',
     'root' => 'رووت',
     'admin' => 'مسؤول',

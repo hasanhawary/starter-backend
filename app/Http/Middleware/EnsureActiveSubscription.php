@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Subscription;
+use App\Models\Central\Subscription;
 use App\Services\Billing\SubscriptionService;
 use Closure;
 use Illuminate\Http\Request;

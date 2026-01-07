@@ -12,14 +12,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ensure central context
-        Tenant::withoutTenant(function () {
-            $this->call([
-                CountrySeeder::class,
-                AdminTableSeeder::class,
-                SettingTableSeeder::class,
-                TenantTableSeeder::class,
-            ]);
-        });
+        $this->call([
+            CountrySeeder::class,
+            AdminTableSeeder::class,
+            SettingTableSeeder::class,
+            TenantTableSeeder::class,
+        ]);
     }
 }

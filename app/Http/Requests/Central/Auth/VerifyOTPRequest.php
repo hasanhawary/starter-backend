@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Central\Auth;
 
 use App\Http\Requests\BaseFormRequest;
+use Illuminate\Validation\Rule;
 
 class VerifyOTPRequest extends BaseFormRequest
 {
@@ -12,8 +13,14 @@ class VerifyOTPRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email|exists:users,email,deleted_at,NULL',
-            'otp' => 'required|string|digits:4'
+            'email' => [
+                'required',
+                'email',
+                Rule::exists('users', 'email')->withoutTrashed(),
+            ],
+            'otp' => [
+                'required', 'digits:4'
+            ],
         ];
     }
 }

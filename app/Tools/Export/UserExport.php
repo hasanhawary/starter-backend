@@ -3,7 +3,7 @@
 namespace App\Tools\Export;
 
 use App\Enum\User\UserGenderEnum;
-use App\Models\User;
+use App\Models\Tenant\User;
 use HasanHawary\ExportBuilder\BaseExport;
 
 class UserExport extends BaseExport

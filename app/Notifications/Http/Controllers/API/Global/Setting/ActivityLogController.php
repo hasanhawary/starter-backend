@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\API\Global\Setting;
 
-use App\Filters\Global\OrderByFilter;
-use App\Filters\Setting\ActivityLogFilter;
+use App\Filters\Central\Global\OrderByFilter;
+use App\Filters\Central\Setting\ActivityLogFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Central\Global\Setting\ActivityLogResource;
 use Illuminate\Http\JsonResponse;

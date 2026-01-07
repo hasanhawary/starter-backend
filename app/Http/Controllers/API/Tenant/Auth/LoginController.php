@@ -7,7 +7,7 @@ use App\Exceptions\InvalidEmailAndPasswordCombinationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\LoginRequest;
 use App\Http\Resources\Central\Auth\LoginResource;
-use App\Models\User;
+use App\Models\Tenant\User;
 use App\Services\Auth\LoginService;
 use App\Services\Auth\ThrottleService;
 use Illuminate\Http\JsonResponse;

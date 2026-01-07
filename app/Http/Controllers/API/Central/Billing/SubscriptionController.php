@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\API\Billing;
+namespace App\Http\Controllers\API\Central\Billing;
 
 use App\Enum\Billing\SubscriptionStatusEnum;
-use App\Filters\Global\OrderByFilter;
+use App\Filters\Central\Global\OrderByFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Billing\ChangeSubscriptionStatusRequest;
 use App\Http\Requests\Central\Billing\RenewSubscriptionRequest;
 use App\Http\Requests\Central\Billing\SubscriptionRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Billing\SubscriptionResource;
-use App\Models\Subscription;
+use App\Models\Central\Subscription;
 use App\Services\Billing\SubscriptionService;
 use App\Trait\Global\HasSoftDeleteMethods;
 use Illuminate\Http\JsonResponse;

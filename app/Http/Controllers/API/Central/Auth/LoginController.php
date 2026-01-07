@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\API\Auth;
+namespace App\Http\Controllers\API\Central\Auth;
 
 use App\Exceptions\InactiveUserException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\LoginRequest;
 use App\Http\Resources\Central\Auth\LoginResource;
-use App\Models\User;
+use App\Models\Central\Admin;
 use App\Services\Auth\LoginService;
 use App\Services\Auth\ThrottleService;
 use Illuminate\Http\JsonResponse;
@@ -35,8 +35,8 @@ class LoginController extends Controller
 
         try {
             $user = $this->loginService
-                ->setGuard('api')
-                ->setModel(User::class)
+                ->setGuard('admin')
+                ->setModel(Admin::class)
                 ->attempt($request->validated());
 
             $this->throttleService->clearRateLimit($key);

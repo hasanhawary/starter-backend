@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Global\Help;
+namespace App\Http\Controllers\API\Central\Global\Help;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Global\Help\HelpEnumRequest;

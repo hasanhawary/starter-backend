@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\API\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Central\User\UpdateUserProfileRequest;
-use App\Http\Resources\Central\User\UserResource;
-use App\Models\User;
+use App\Http\Requests\Central\Admin\UpdateAdminProfileRequest;
+use App\Http\Resources\Central\Admin\AdminResource;
+use App\Models\Tenant\User;
 use Exception;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
@@ -21,15 +21,15 @@ class ProfileController extends Controller
     {
         $user = User::with('roles.permissions:name')->find(auth()->id());
 
-        return successResponse(new UserResource($user));
+        return successResponse(new AdminResource($user));
     }
 
     /**
-     * @param UpdateUserProfileRequest $request
+     * @param UpdateAdminProfileRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function updateProfile(UpdateUserProfileRequest $request): JsonResponse
+    public function updateProfile(UpdateAdminProfileRequest $request): JsonResponse
     {
         $data = Arr::except(array_filter($request->validated(), fn($value) => $value !== null), 'avatar');
 

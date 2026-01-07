@@ -4,7 +4,6 @@ namespace App\Services\Auth;
 
 use App\Exceptions\InactiveUserException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use LdapRecord\Auth\PasswordRequiredException;
 use LdapRecord\Auth\UsernameRequiredException;

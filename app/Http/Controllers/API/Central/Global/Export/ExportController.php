@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Global\Export;
+namespace App\Http\Controllers\API\Central\Global\Export;
 
 
 use App\Http\Controllers\Controller;

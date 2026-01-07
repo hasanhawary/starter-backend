@@ -6,7 +6,7 @@ use App\Enum\User\UserGenderEnum;
 use App\Http\Resources\Central\DataEntry\CountryResource;
 use App\Http\Resources\Central\Global\Other\BasicResource;
 use App\Http\Resources\Central\Global\Other\BasicUserResource;
-use App\Http\Resources\Central\User\RoleResource;
+use App\Http\Resources\Central\Admin\RoleResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -28,7 +28,6 @@ class UserResource extends JsonResource
             'avatar' => $this->avatar,
             'roles' => $this->whenLoaded('roles', fn() => RoleResource::collection($this->roles), []),
             'creator' => $this->whenLoaded('creator', fn() => new BasicUserResource($this->creator), ['id' => $this->created_by]),
-            'locations' => $this->whenLoaded('locations', fn() => BasicResource::collection($this->locations), []),
             'nationality' => $this->whenLoaded('nationality', fn() => new CountryResource($this->nationality), ['id' => $this->nationality_id]),
             'created_at' => $this->created_at,
         ];

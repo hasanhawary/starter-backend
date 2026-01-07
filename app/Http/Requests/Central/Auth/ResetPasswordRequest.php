@@ -4,28 +4,43 @@ namespace App\Http\Requests\Central\Auth;
 
 use App\Http\Requests\BaseFormRequest;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ResetPasswordRequest extends BaseFormRequest
 {
-
     public function rules(): array
     {
         return [
-            'otp' => 'required|string|digits:4',
-            'email' => 'required|email',
-            'password' => 'required|confirmed'
+            'otp' => ['required', 'digits:4'],
+            'email' => ['required', 'email'],
+            'password' => [
+                'required',
+                'confirmed',
+                'min:8',
+            ],
         ];
     }
 
-    /**
-     * @return void
-     */
     protected function prepareForValidation(): void
     {
         parent::prepareForValidation();
 
-        $this->merge([
-            'password' => base64_decode(Str::replaceEnd('HM', '', Str::replaceFirst('KZ', '', $this->password)))
-        ]);
+        if ($this->filled('password')) {
+            $decoded = base64_decode(
+                Str::replaceEnd(
+                    'HM',
+                    '',
+                    Str::replaceFirst('KZ', '', $this->password)
+                ),
+                true
+            );
+
+            if ($decoded !== false) {
+                $this->merge([
+                    'password' => $decoded,
+                    'password_confirmation' => $decoded,
+                ]);
+            }
+        }
     }
 }

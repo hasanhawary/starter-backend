@@ -3,27 +3,37 @@
 namespace App\Http\Requests\Central\Auth;
 
 use App\Http\Requests\BaseFormRequest;
+use Illuminate\Support\Str;
 
 class LoginRequest extends BaseFormRequest
 {
-
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
-            'password' => 'required',
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
         ];
     }
 
-    /**
-     * @return void
-     */
     protected function prepareForValidation(): void
     {
         parent::prepareForValidation();
 
-        $this->merge([
-            // 'password' => base64_decode(Str::replaceEnd('HM', '', Str::replaceFirst('KZ', '', $this->password)))
-        ]);
+        if ($this->filled('password')) {
+            $decoded = base64_decode(
+                Str::replaceEnd(
+                    'HM',
+                    '',
+                    Str::replaceFirst('KZ', '', $this->password)
+                ),
+                true
+            );
+
+            if ($decoded !== false) {
+                $this->merge([
+                    'password' => $decoded,
+                ]);
+            }
+        }
     }
 }

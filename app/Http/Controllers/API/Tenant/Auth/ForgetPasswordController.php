@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Tenant\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\ForgetPasswordRequest;
 use App\Http\Requests\Central\Auth\VerifyOTPRequest;
-use App\Models\User;
+use App\Models\Tenant\User;
 use App\Services\Auth\ForgetPasswordService;
 use Illuminate\Http\JsonResponse;
 use Random\RandomException;

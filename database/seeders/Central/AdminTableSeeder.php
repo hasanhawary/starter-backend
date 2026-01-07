@@ -3,9 +3,9 @@
 namespace Database\Seeders\Central;
 
 use App\Enum\User\UserGenderEnum;
-use App\Models\Admin;
-use App\Models\Country;
-use App\Models\User;
+use App\Models\Central\Admin;
+use App\Models\Central\Country;
+use App\Models\Tenant\User;
 use HasanHawary\PermissionManager\Facades\Access;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -39,7 +39,6 @@ class AdminTableSeeder extends Seeder
             'password' => '123456',
             'phone' => '5412545214',
             'phone_code_id' => $countryId,
-            'nationality_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
         ])->assignRole('root');
 
@@ -50,7 +49,6 @@ class AdminTableSeeder extends Seeder
             'password' => '123456',
             'phone' => '5412545215',
             'phone_code_id' => $countryId,
-            'nationality_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
         ])->assignRole('admin');
     }

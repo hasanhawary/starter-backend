@@ -15,6 +15,7 @@ class UniqueWithTrashed implements ValidationRule
      *
      * @param string $modelClass
      * @param string $resourceClass
+     * @param int|null $ignoreId
      */
     public function __construct(protected string $modelClass, protected string $resourceClass, protected ?int $ignoreId = null)
     {

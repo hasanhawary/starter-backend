@@ -2,44 +2,30 @@
 
 namespace Database\Seeders\Central;
 
-use App\Enum\User\UserGenderEnum;
-use App\Models\Country;
-use App\Models\tenant;
-use App\Models\User;
-use HasanHawary\PermissionManager\Facades\Access;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Spatie\Multitenancy\Models\Tenant;
 
 class TenantTableSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
-        \Spatie\Multitenancy\Models\Tenant::query()->firstOrCreate([
-            'email' => 'root@wakeb.com'
-        ], [
-            'name' => 'root',
-            'password' => '123456',
-            'phone' => '5412545214',
-            'phone_code_id' => $countryId,
-            'nationality_id' => $countryId,
-            'gender' => UserGenderEnum::Male->value,
-        ])->assignRole('root');
+        $tenants = [
+            [
+                'name' => 'Tenant One',
+                'domain' => 'tenant1.crm.test',
+                'database' => 'crm_tenant1',
+            ],
+            [
+                'name' => 'Tenant Two',
+                'domain' => 'tenant2.crm.test',
+                'database' => 'crm_tenant2',
+            ],
+        ];
 
-        User::query()->firstOrCreate([
-            'email' => 'admin@wakeb.com'
-        ], [
-            'name' => 'admin',
-            'password' => '123456',
-            'phone' => '5412545215',
-            'phone_code_id' => $countryId,
-            'nationality_id' => $countryId,
-            'gender' => UserGenderEnum::Male->value,
-        ])->assignRole('admin');
+        foreach ($tenants as $tenant) {
+            $tenant =  Tenant::create($tenant);
+            DB::statement("CREATE DATABASE IF NOT EXISTS `{$tenant->database}`");
+        }
     }
 }

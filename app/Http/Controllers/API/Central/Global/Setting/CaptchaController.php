@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Global\Setting;
+namespace App\Http\Controllers\API\Central\Global\Setting;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\CaptchaRequest;

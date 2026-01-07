@@ -3,7 +3,7 @@
 namespace App\Tools\Report;
 
 use App\Enum\User\UserGenderEnum;
-use App\Models\User;
+use App\Models\Tenant\User;
 use HasanHawary\ReportBuilder\BaseReport;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Support\Facades\DB;

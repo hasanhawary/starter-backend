@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\API\Auth;
+namespace App\Http\Controllers\API\Central\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\ForgetPasswordRequest;
 use App\Http\Requests\Central\Auth\VerifyOTPRequest;
-use App\Models\User;
+use App\Models\Central\Admin;
 use App\Services\Auth\ForgetPasswordService;
 use Illuminate\Http\JsonResponse;
 use Random\RandomException;
@@ -44,7 +44,7 @@ class ForgetPasswordController extends Controller
      */
     public function verify(VerifyOTPRequest $request): JsonResponse
     {
-        $user = User::where(['email' => $request->only('email')])->first();
+        $user = Admin::where(['email' => $request->only('email')])->first();
 
         if ($user->otp != $request->otp) {
             return failResponse(msg: __('passwords.invalid_otp'));

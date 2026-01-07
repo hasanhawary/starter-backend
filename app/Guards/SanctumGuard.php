@@ -24,8 +24,8 @@ class SanctumGuard extends BaseSanctumGuard
         }
 
         $isValid =
-            (!$this->expiration || $last_used_at->gt(now()->subMinutes($this->expiration)))
-            && $this->hasValidProvider($accessToken->tokenable);
+            (!$this->expiration || $last_used_at->gt(now()->subMinutes($this->expiration)));
+//            && $this->hasValidProvider($accessToken->tokenable);
 
         if (is_callable(Sanctum::$accessTokenAuthenticationCallback)) {
             $isValid = (bool) (Sanctum::$accessTokenAuthenticationCallback)($accessToken, $isValid);

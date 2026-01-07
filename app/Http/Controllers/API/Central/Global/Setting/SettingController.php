@@ -1,14 +1,14 @@
 <?php
-namespace App\Http\Controllers\API\Global\Setting;
+namespace App\Http\Controllers\API\Central\Global\Setting;
 
-use App\Filters\Setting\GroupFilter;
-use App\Filters\Setting\KeyFilter;
+use App\Filters\Central\Setting\GroupFilter;
+use App\Filters\Central\Setting\KeyFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Global\Setting\SettingRequest;
 use App\Http\Requests\Central\Global\Setting\TestCredentialsRequest;
 use App\Http\Resources\Central\Global\Setting\SettingResource;
 use App\Mail\BasicMail;
-use App\Models\Setting;
+use App\Models\Central\Setting;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;

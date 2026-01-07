@@ -4,7 +4,7 @@ namespace App\Http\Requests\DataEntry;
 
 use App\Http\Requests\BaseFormRequest;
 use App\Http\Resources\Central\DataEntry\CountryResource;
-use App\Models\Country;
+use App\Models\Central\Country;
 use App\Rules\TranslatableRequired;
 use App\Rules\UniqueWithTrashed;
 use Illuminate\Validation\Rule;

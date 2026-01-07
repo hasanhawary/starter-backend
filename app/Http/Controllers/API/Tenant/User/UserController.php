@@ -1,18 +1,18 @@
 <?php
 namespace App\Http\Controllers\API\Tenant\User;
 
-use App\Filters\Global\ActiveFilter;
-use App\Filters\Global\OrderByFilter;
-use App\Filters\Global\TrashedFilter;
-use App\Filters\User\UserFilter;
+use App\Filters\Central\Global\ActiveFilter;
+use App\Filters\Central\Global\OrderByFilter;
+use App\Filters\Central\Global\TrashedFilter;
+use App\Filters\Central\Admin\AdminFilter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Central\Admin\AdminRequest;
 use App\Http\Requests\Central\Global\Other\DeleteAllRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
-use App\Http\Requests\Central\User\UserRequest;
-use App\Http\Resources\Central\User\UserResource;
+use App\Http\Resources\Central\Admin\AdminResource;
 use App\Mail\BasicMail;
-use App\Models\Role;
-use App\Models\User;
+use App\Models\Central\Role;
+use App\Models\Tenant\User;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
@@ -34,18 +34,18 @@ class UserController extends Controller
 
         $query = app(Pipeline::class)
             ->send(User::with('roles')->related())
-            ->through([UserFilter::class, ActiveFilter::class, TrashedFilter::class, OrderByFilter::class])
+            ->through([AdminFilter::class, ActiveFilter::class, TrashedFilter::class, OrderByFilter::class])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->pageSize, UserResource::class));
+        return successResponse(fetchData($query, $request->pageSize, AdminResource::class));
     }
 
     /**
-     * @param UserRequest $request
+     * @param AdminRequest $request
      * @return JsonResponse
      * @throws Throwable
      */
-    public function store(UserRequest $request): JsonResponse
+    public function store(AdminRequest $request): JsonResponse
     {
         Gate::authorize('create', User::class);
 
@@ -58,7 +58,7 @@ class UserController extends Controller
             });
 
             return successResponse(
-                new UserResource($user->load('roles')),
+                new AdminResource($user->load('roles')),
                 __('api.created_success')
             );
         });
@@ -72,16 +72,16 @@ class UserController extends Controller
     {
         Gate::authorize('view', $user);
 
-        return successResponse(new UserResource($user->load('roles')));
+        return successResponse(new AdminResource($user->load('roles')));
     }
 
     /**
-     * @param UserRequest $request
+     * @param AdminRequest $request
      * @param User $user
      * @return JsonResponse
      * @throws Throwable
      */
-    public function update(UserRequest $request, User $user): JsonResponse
+    public function update(AdminRequest $request, User $user): JsonResponse
     {
         Gate::authorize('update', $user);
 
@@ -93,7 +93,7 @@ class UserController extends Controller
                 $this->sendUserCredentialsEmail($user->refresh(), $request);
             });
 
-            return successResponse(new UserResource($user->refresh()->load('roles')), __('api.updated_success'));
+            return successResponse(new AdminResource($user->refresh()->load('roles')), __('api.updated_success'));
         });
     }
 
@@ -168,16 +168,15 @@ class UserController extends Controller
     | Helper Methods
     |--------------------------------------------------------------------------
     */
-    private function syncRelations(User $user, UserRequest $request): void
+    private function syncRelations(User $user, AdminRequest $request): void
     {
         when($request->filled('roles'), static fn() => $user->syncRoles(Role::whereId($request->roles)->pluck('name')));
         when($request->filled('permissions'), static fn() => $user->syncPermissions($request->permissions));
-        when($request->filled('locations'), static fn() => $user->locations()->sync($request->locations));
     }
 
-    private function prepareData(UserRequest $request): array
+    private function prepareData(AdminRequest $request): array
     {
-        return Arr::except($request->validated(), ['permissions', 'roles', 'locations']);
+        return Arr::except($request->validated(), ['permissions', 'roles']);
     }
 
     private function sendUserCredentialsEmail(User $user, $request): void

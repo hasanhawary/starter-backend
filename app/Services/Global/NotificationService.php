@@ -5,7 +5,8 @@ namespace App\Services\Global;
 use App\Events\NotificationEvent;
 use App\Jobs\SendSmsJob;
 use App\Mail\BasicMail;
-use App\Models\User;
+use App\Models\Central\Admin;
+use App\Models\Tenant\User;
 use App\Notifications\UserNotify;
 use Illuminate\Support\Facades\Mail;
 
@@ -17,7 +18,7 @@ class NotificationService
      * @param array|null $types
      * @return void
      */
-    public static function resolve(User $user, array $data, ?array $types = ['notify', 'realtime']): void
+    public static function resolve(User|Admin $user, array $data, ?array $types = ['notify', 'realtime']): void
     {
         foreach ($types as $type) {
             try {

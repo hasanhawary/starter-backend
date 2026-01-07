@@ -14,12 +14,4 @@ class CaptchaRequest extends BaseFormRequest
             'token' => 'required'
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'captcha.required' => __('validation.required', ['attribute' => __('attributes.captcha')]),
-            'token.required' => __('validation.required', ['attribute' => __('attributes.token')]),
-        ];
-    }
 }

@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Permission;
-use App\Models\Role;
+use App\Models\Central\Permission;
+use App\Models\Central\Role;
 
 return [
 

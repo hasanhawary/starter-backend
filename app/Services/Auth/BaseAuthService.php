@@ -2,7 +2,7 @@
 
 namespace App\Services\Auth;
 
-use App\Models\User;
+use App\Models\Tenant\User;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseAuthService

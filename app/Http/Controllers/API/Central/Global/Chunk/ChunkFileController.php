@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Global\Chunk;
+namespace App\Http\Controllers\API\Central\Global\Chunk;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Global\Chunk\ChunkFileRequest;

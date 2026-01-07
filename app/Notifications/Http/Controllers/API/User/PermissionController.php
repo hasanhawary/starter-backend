@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\API\User;
 
-use App\Filters\Global\JsonDisplayNameFilter;
+use App\Filters\Central\Global\JsonDisplayNameFilter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Central\Admin\PermissionRequest;
 use App\Http\Requests\Central\Global\Other\DeleteAllRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
-use App\Http\Requests\Central\User\PermissionRequest;
-use App\Http\Resources\Central\User\PermissionResource;
-use App\Models\Permission;
+use App\Http\Resources\Central\Admin\PermissionResource;
+use App\Models\Central\Permission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;

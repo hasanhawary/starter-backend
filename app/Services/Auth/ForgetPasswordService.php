@@ -3,7 +3,7 @@ namespace App\Services\Auth;
 
 use App\Http\Requests\Central\Auth\ForgetPasswordRequest;
 use App\Http\Requests\Central\Auth\ResetPasswordRequest;
-use App\Models\User;
+use App\Models\Tenant\User;
 use Illuminate\Support\Carbon;
 use Random\RandomException;
 

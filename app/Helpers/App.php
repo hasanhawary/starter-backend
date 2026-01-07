@@ -1,6 +1,7 @@
 <?php
 
-use App\Models\User;
+use App\Models\Central\Admin;
+use App\Models\Tenant\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -298,10 +299,10 @@ if (!function_exists('fetchData')) {
     }
 }
 
-if (!function_exists('vImage')) {
-    function vImage($ext = null): string
+if (!function_exists('imageExtensions')) {
+    function imageExtensions(): array
     {
-        return ($ext === null) ? 'mimes:jpg,png,jpeg,png,gif,bmp' : 'mimes:' . $ext;
+        return ['jpg','png','jpeg','png','gif'];
     }
 }
 
@@ -417,6 +418,15 @@ if (!function_exists('parseKeyValueString')) {
     }
 }
 
+
+if (!function_exists('rootAdmins')) {
+    function rootAdmins(): array
+    {
+        return Admin::whereHas('roles', static fn($q) => $q->where('name', 'root'))
+            ->pluck('id')
+            ->toArray();
+    }
+}
 
 if (!function_exists('rootUsers')) {
     function rootUsers(): array

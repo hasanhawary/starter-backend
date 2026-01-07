@@ -3,7 +3,7 @@
 namespace App\Services\Billing;
 
 use App\Enum\Billing\SubscriptionStatusEnum;
-use App\Models\Subscription;
+use App\Models\Central\Subscription;
 
 class SubscriptionService
 {
