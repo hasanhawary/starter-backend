@@ -12,7 +12,7 @@ use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Billing\SubscriptionResource;
 use App\Models\Central\Subscription;
 use App\Services\Billing\SubscriptionService;
-use App\Trait\Global\HasSoftDeleteMethods;
+use App\Trait\Global\HasDeleteMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -22,11 +22,11 @@ use function __;
 
 class SubscriptionController extends Controller implements HasMiddleware
 {
-    use HasSoftDeleteMethods;
+    use HasDeleteMethods;
 
     public function __construct(protected SubscriptionService $subscriptionService)
     {
-        $this->setSoftDeleteModel(Subscription::class);
+        $this->setDeleteModel(Subscription::class);
     }
 
     public static function middleware(): array

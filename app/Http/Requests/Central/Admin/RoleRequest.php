@@ -3,22 +3,31 @@
 namespace App\Http\Requests\Central\Admin;
 
 use App\Http\Requests\BaseFormRequest;
+use App\Http\Resources\Central\Admin\AdminResource;
+use App\Http\Resources\Central\Admin\RoleResource;
 use App\Http\Resources\Central\DataEntry\CountryResource;
+use App\Models\Central\Admin;
 use App\Models\Central\Country;
+use App\Models\Tenant\Role;
 use App\Rules\TranslatableRequired;
-use App\Rules\UniqueWithTrashed;
+use App\Rules\UniqueCheck;
 use Illuminate\Validation\Rule;
 
 class RoleRequest extends BaseFormRequest
 {
     public function rules(): array
     {
-        $role = $this->route('role');
+        $roleId = $this->route('role')?->getKey();
 
         return [
             'name' => [
                 'required',
-                Rule::unique('roles', 'name')->ignore($role),
+                Rule::unique('roles', 'name')->ignore($roleId),
+                new UniqueCheck(
+                    Role::class,
+                    RoleResource::class,
+                    $roleId
+                ),
             ],
 
             'display_name' => [

@@ -19,7 +19,7 @@ class LoginRequest extends BaseFormRequest
     {
         parent::prepareForValidation();
 
-        if ($this->filled('password')) {
+        if ($this->filled('password') && config('project.auth.encryption.incoming.password')) {
             $decoded = base64_decode(
                 Str::replaceEnd(
                     'HM',

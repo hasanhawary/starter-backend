@@ -9,6 +9,7 @@ use App\Http\Requests\Central\Admin\RoleRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Admin\RoleResource;
 use App\Models\Central\Role;
+use App\Trait\Global\HasDeleteMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,15 @@ use function __;
 
 class RoleController extends Controller
 {
+    use HasDeleteMethods;
+
+    public function __construct()
+    {
+        $this->setDeleteModel(Role::class)
+            ->setDeleteGuards('delete', fn(Role $role) => !$role->roleAdmins()->exists())
+            ->beforeDelete('delete', fn(Role $role) => $role->permissions()->detach());
+    }
+
     /**
      * @param PageRequest $request
      * @return JsonResponse
@@ -81,23 +91,5 @@ class RoleController extends Controller
 
             return successResponse(new RoleResource($role->refresh()->load('permissions')), __('api.updated_success'));
         });
-    }
-
-    /**
-     * @param Role $role
-     * @return JsonResponse
-     */
-    public function destroy(Role $role): JsonResponse
-    {
-        Gate::authorize('delete', $role);
-
-        if ($role->roleAdmins()->exists()) {
-            return failResponse(msg: __('api.cant_delete'));
-        }
-
-        $role->permissions()->detach();
-        $role->deleteQuietly();
-
-        return successResponse(msg: __('api.deleted_success'));
     }
 }

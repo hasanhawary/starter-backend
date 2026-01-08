@@ -2,77 +2,81 @@
 
 namespace App\Policies\Central\Admin;
 
-use App\Models\Central\Role;
 use App\Models\Central\Admin;
+use App\Models\Central\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RolePolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * @param Admin $admin
-     * @param Role|null $role
-     * @return bool
-     */
-    public function view(Admin $admin, ?Role $role = null): bool
-    {
-        if (!($admin->can('view-all-role') || $admin->can('view-own-role'))) {
-            return false;
-        }
+    const string ROOT = 'root';
 
-        return !$role || $this->checkAdmin($admin, $role);
+    public function view(Admin $user, ?Role $role = null): bool
+    {
+        return $this->canAct($user, $role, [
+            'view-all-role',
+            'view-own-role',
+        ]);
+    }
+
+    public function create(Admin $user, ?Role $role = null): bool
+    {
+        return $user->can('create-role') && $this->ownsOrAll($user, $role);
+    }
+
+    public function update(Admin $user, Role $role): bool
+    {
+        return $user->can('update-role')
+            && ! $this->isProtectedRole($role)
+            && $this->ownsOrAll($user, $role);
+    }
+
+    public function delete(Admin $user, Role $role): bool
+    {
+        return $user->can('delete-role')
+            && ! $this->isProtectedRole($role)
+            && $this->ownsOrAll($user, $role);
+    }
+
+    public function toggleActive(Admin $user, Role $role): bool
+    {
+        return $user->can('toggle-active-role')
+            && ! $this->isProtectedRole($role)
+            && $this->ownsOrAll($user, $role);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helper Methods
+    |--------------------------------------------------------------------------
+    */
+    protected function ownsOrAll(Admin $user, ?Role $role): bool
+    {
+        return !$role
+            || $user->can('view-all-role')
+            || $role->created_by === $user->id;
     }
 
     /**
-     * @param Admin $admin
-     * @param Role|null $role
-     * @return bool
+     * Check if the role is protected (root or assigned to current user)
      */
-    public function create(Admin $admin, ?Role $role = null): bool
+    protected function isProtectedRole(Role $role): bool
     {
-        if (!$admin->can('create-role')) {
-            return false;
-        }
-
-        return !$role || $this->checkAdmin($admin, $role);
+        return $role->name === self::ROOT;
     }
 
     /**
-     * @param Admin $admin
-     * @param Role $role
-     * @return bool
+     * Check permissions + ownership
      */
-    public function update(Admin $admin, Role $role): bool
+    protected function canAct(Admin $user, ?Role $role, array $permissions): bool
     {
-        if ($role->name === 'root' || !$admin->can('update-role')) {
-            return false;
+        foreach ($permissions as $permission) {
+            if ($user->can($permission)) {
+                return $this->ownsOrAll($user, $role);
+            }
         }
 
-        return $this->checkAdmin($admin, $role);
-    }
-
-    /**
-     * @param Admin $admin
-     * @param Role $role
-     * @return bool
-     */
-    public function delete(Admin $admin, Role $role): bool
-    {
-        if (!$admin->can('delete-role')) {
-            return false;
-        }
-
-        return $this->checkAdmin($admin, $role) && $role->name !== 'root';
-    }
-
-    /**
-     * @param Admin $admin
-     * @param Role $role
-     * @return bool
-     */
-    public function checkAdmin(Admin $admin, Role $role): bool
-    {
-        return $admin->can('view-all-role') || $role->created_by === $admin->id;
+        return false;
     }
 }

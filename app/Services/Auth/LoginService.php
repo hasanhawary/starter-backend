@@ -2,8 +2,12 @@
 
 namespace App\Services\Auth;
 
-use App\Exceptions\InactiveUserException;
+use App\Enum\Global\OtpTypeEnum;
+use App\Exceptions\EmailVerifiedException;
+use App\Exceptions\InActiveUserException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
+use App\Exceptions\InvalidOtpException;
+use App\Http\Requests\Central\Auth\VerifyOtpRequest;
 use Illuminate\Support\Facades\Hash;
 use LdapRecord\Auth\PasswordRequiredException;
 use LdapRecord\Auth\UsernameRequiredException;
@@ -14,64 +18,82 @@ use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class LoginService extends BaseAuthService
 {
+    public function __construct(protected OTPService $otpService)
+    {
+    }
+
     /**
+     * Attempt login for user or admin
+     *
      * @param array|null $data
-     * @return array
-     * @throws InactiveUserException
+     * @return array ['user' => Model, 'token' => string]
+     * @throws InActiveUserException
      * @throws InvalidEmailAndPasswordCombinationException
+     * @throws EmailVerifiedException
+     * @throws InvalidOtpException
      */
     public function attempt(?array $data): array
     {
-        $user = (config('ldap.active'))
+        // LDAP login if enabled, otherwise default login
+        $user = config('project.ldap.active')
             ? $this->attemptLdapLogin($data)
             : $this->attemptDefaultLogin($data);
 
         if (!$user->is_active) {
-            throw new InactiveUserException(__('api.account_not_active'), ResponseAlias::HTTP_FORBIDDEN);
+            throw new InActiveUserException();
+        }
+
+        // OTP verification if enabled in config
+        if (config('project.auth.login_methods.otp') &&
+            config("project.auth.otp.required_for." . getModelKey($this->getModel()))) {
+            $this->verifyOtp($data);
         }
 
         $this->setLastLogin($user);
 
         return [
             'user' => $user,
-            'token' => $user->createToken($this->getGuard())->plainTextToken
+            'token' => $user->createToken($this->getGuard())->plainTextToken,
         ];
     }
 
     /**
-     * @param $data
-     * @return mixed
+     * Default login (email + password)
+     *
      * @throws InvalidEmailAndPasswordCombinationException
      */
-    public function attemptDefaultLogin($data): mixed
+    public function attemptDefaultLogin(array $data): mixed
     {
         $user = $this->getModel()
             ->query()
             ->where('email', $data['email'])
             ->first();
 
-        if (!$user || !Hash::check(@$data['password'], $user->password)) {
-            throw new InvalidEmailAndPasswordCombinationException(__('api.invalid_email_and_password'), ResponseAlias::HTTP_NOT_ACCEPTABLE);
+        if (!$user || !Hash::check($data['password'] ?? '', $user->password)) {
+            throw new InvalidEmailAndPasswordCombinationException(
+                __('api.invalid_email_and_password'),
+                ResponseAlias::HTTP_NOT_ACCEPTABLE
+            );
         }
 
         return $user;
     }
 
     /**
-     * @param $data
-     * @return mixed
+     * LDAP login fallback
+     *
      * @throws InvalidEmailAndPasswordCombinationException
      */
-    protected function attemptLdapLogin($data): mixed
+    protected function attemptLdapLogin(array $data): mixed
     {
         $username = $data['email'];
         $password = $data['password'];
 
-        $ldapUserModel = config('ldap.local') ? OpenLdapUser::class : ActiveDirectoryLdapUser::class;
+        $ldapUserModel = config('project.ldap.local') ? OpenLdapUser::class : ActiveDirectoryLdapUser::class;
         $ldapAttributes = ['uid', 'cn', 'samaccountname', 'userprincipalname', 'mail'];
 
         $ldapUser = collect($ldapAttributes)
-            ->map(fn($attr) => $ldapUserModel::where($attr, '=', $username)->first())
+            ->map(fn($attr) => $ldapUserModel::where($attr, $username)->first())
             ->filter()
             ->first();
 
@@ -84,14 +106,16 @@ class LoginService extends BaseAuthService
 
             return $this->findOrCreateUserFromLdap($ldapUser, $password);
 
-        } catch (PasswordRequiredException|UsernameRequiredException $e) {
-            throw new InvalidEmailAndPasswordCombinationException(__('api.invalid_email_and_password'), ResponseAlias::HTTP_FORBIDDEN);
+        } catch (PasswordRequiredException|UsernameRequiredException) {
+            throw new InvalidEmailAndPasswordCombinationException(
+                __('api.invalid_email_and_password'),
+                ResponseAlias::HTTP_FORBIDDEN
+            );
         }
     }
 
     /**
-     * @param  $user
-     * @return bool
+     * Update last login timestamp
      */
     public function setLastLogin($user): bool
     {
@@ -102,32 +126,44 @@ class LoginService extends BaseAuthService
     }
 
     /**
-     * @param $ldapUser
-     * @param $password
-     * @return mixed
+     * Find or create a user from LDAP
      */
     protected function findOrCreateUserFromLdap($ldapUser, $password): mixed
     {
         $parts = explode(' ', trim($ldapUser->getFirstAttribute('cn')), 2);
 
         $user = $this->getModel()->updateOrCreate([
-            'uid' => @$ldapUser->getFirstAttribute('uid'),
-            'email' => @$ldapUser->getFirstAttribute('mail'),
+            'uid' => $ldapUser->getFirstAttribute('uid'),
+            'email' => $ldapUser->getFirstAttribute('mail'),
         ], [
             'first_name' => $parts[0] ?? null,
             'last_name' => $parts[1] ?? null,
             'phone' => $ldapUser->getFirstAttribute('telephonenumber') ?? "00966",
-            'phone_code_id' => 1,
-            'guid' => isset($ldapUser->objectguid[0]) ? (string)new Guid($ldapUser->objectguid[0]) : $ldapUser->getObjectGuid(),
+            'phone_code_id' => config('project.auth.default_phone_code_id', 1),
+            'guid' => isset($ldapUser->objectguid[0])
+                ? (string)new Guid($ldapUser->objectguid[0])
+                : $ldapUser->getObjectGuid(),
             'ldap_name' => $ldapUser->getFirstAttribute('cn'),
             'password' => $password,
         ]);
 
         if ($user->wasRecentlyCreated) {
-            $user->assignRole('default_role');
+            $user->assignRole(config('project.auth.default_role', 'default_role'));
             $user->save();
         }
 
         return $user->fresh();
+    }
+
+    /**
+     * Verify OTP via OTPService
+     *
+     * @throws InvalidOtpException
+     */
+    private function verifyOtp(array $data): void
+    {
+        $this->otpService
+            ->setModel($this->getModel())
+            ->verify(new VerifyOtpRequest($data), OtpTypeEnum::Login->value);
     }
 }

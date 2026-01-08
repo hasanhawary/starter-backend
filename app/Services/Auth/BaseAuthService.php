@@ -2,7 +2,7 @@
 
 namespace App\Services\Auth;
 
-use App\Models\Tenant\User;
+use App\Exceptions\InvalidOtpException;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseAuthService
@@ -25,7 +25,7 @@ abstract class BaseAuthService
      */
     public function getModel(): Model
     {
-        return new $this->model;
+        return new $this->model();
     }
 
     /**
@@ -44,5 +44,22 @@ abstract class BaseAuthService
     public function getGuard(): string
     {
         return $this->guard;
+    }
+
+    /**
+     * @throws InvalidOtpException
+     */
+    public function resolveUser(string $email): mixed
+    {
+        $user = $this->getModel()
+            ->query()
+            ->where('email', $email)
+            ->first();
+
+        if (!$user) {
+            throw new InvalidOtpException(__('api.email_not_registered'));
+        }
+
+        return $user;
     }
 }

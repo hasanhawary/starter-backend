@@ -8,7 +8,7 @@ use App\Http\Requests\Central\Billing\PlanFeatureRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Billing\PlanFeatureResource;
 use App\Models\Central\PlanFeature;
-use App\Trait\Global\HasSoftDeleteMethods;
+use App\Trait\Global\HasDeleteMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -18,11 +18,11 @@ use function __;
 
 class PlanFeatureController extends Controller implements HasMiddleware
 {
-    use HasSoftDeleteMethods;
+    use HasDeleteMethods;
 
     public function __construct()
     {
-        $this->setSoftDeleteModel(PlanFeature::class);
+        $this->setDeleteModel(PlanFeature::class);
     }
 
     public static function middleware(): array

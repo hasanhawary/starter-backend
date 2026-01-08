@@ -29,7 +29,8 @@
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-multitenancy": "^4.0",
         "spatie/laravel-permission": "^6.4",
-        "spatie/laravel-translatable": "^6.7"
+        "spatie/laravel-translatable": "^6.7",
+        "ext-openssl": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

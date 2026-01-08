@@ -8,7 +8,7 @@ use App\Http\Requests\Central\DataEntry\CountryRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\DataEntry\CountryResource;
 use App\Models\Central\Country;
-use App\Trait\Global\HasSoftDeleteMethods;
+use App\Trait\Global\HasDeleteMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -18,21 +18,18 @@ use function __;
 
 class CountryController extends Controller implements HasMiddleware
 {
-    use HasSoftDeleteMethods;
+    use HasDeleteMethods;
 
     public function __construct()
     {
-        $this->setSoftDeleteModel(Country::class);
+        $this->setDeleteModel(Country::class);
     }
 
     public static function middleware(): array
     {
         return [
             new Middleware(PermissionMiddleware::using('create-country'), only: ['store']),
-            new Middleware(PermissionMiddleware::using('update-country'), only: ['update']),
-            new Middleware(PermissionMiddleware::using('delete-country'), only: ['destroy']),
-            new Middleware(PermissionMiddleware::using('restore-country'), only: ['restore']),
-            new Middleware(PermissionMiddleware::using('force-delete-country'), only: ['forceDelete'])
+            new Middleware(PermissionMiddleware::using('update-country'), only: ['update'])
         ];
     }
 

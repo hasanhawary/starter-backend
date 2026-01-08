@@ -4,7 +4,6 @@ namespace App\Http\Requests\Central\Auth;
 
 use App\Http\Requests\BaseFormRequest;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class ResetPasswordRequest extends BaseFormRequest
 {
@@ -25,7 +24,7 @@ class ResetPasswordRequest extends BaseFormRequest
     {
         parent::prepareForValidation();
 
-        if ($this->filled('password')) {
+        if ($this->filled('password') && config('project.auth.encryption.incoming.password')) {
             $decoded = base64_decode(
                 Str::replaceEnd(
                     'HM',

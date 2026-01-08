@@ -55,22 +55,6 @@
                         {!! !empty($rawMessage) ? $rawMessage : (!empty($parsedMessage) ? $parsedMessage : '---') !!}
                     </p>
 
-                    @if (!empty($data))
-                        <ul style="list-style: none; padding: 0; margin: 0;">
-                            @foreach (['name', 'email', 'phone', 'plain_password', 'created_at'] as $field)
-                                @if (!empty($data[$field]))
-                                    <li style="margin-bottom: 0.5rem;">
-                                        <strong
-                                            style="color: #333;">{{ ucfirst(str_replace('_', ' ', $field)) }}:</strong>
-                                        <span style="color: #555;">{{ $data[$field] }}</span>
-                                    </li>
-                                @endif
-                            @endforeach
-                        </ul>
-                    @endif
-
-
-
                     <span
                         style="color: #8E8E93; font-size: 0.75rem; font-weight: 400; font-family: 'Segoe UI', serif;">We
                         wish you a safe and enjoyable experience with us!</span>

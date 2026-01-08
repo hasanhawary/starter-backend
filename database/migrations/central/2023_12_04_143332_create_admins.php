@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email');
+            $table->json('otp_data')->nullable();
             $table->foreignId('phone_code_id')->nullable()->constrained('countries')->nullOnDelete();
             $table->string('phone')->nullable();
             $table->string('avatar')->nullable();
@@ -23,6 +24,9 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('last_login')->nullable();
+            $table->string('ldap_name')->nullable();
+            $table->string('guid')->nullable();
+            $table->string('uid')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();

@@ -1,8 +1,12 @@
 <?php
 
 use App\Http\Controllers\API\Central\Admin\AdminController;
-use App\Http\Controllers\API\Central\Auth\ForgetPasswordController;
+use App\Http\Controllers\API\Central\Admin\PermissionController;
+use App\Http\Controllers\API\Central\Admin\RoleController;
 use App\Http\Controllers\API\Central\Auth\LoginController;
+use App\Http\Controllers\API\Central\Auth\LogoutController;
+use App\Http\Controllers\API\Central\Auth\OTPController;
+use App\Http\Controllers\API\Central\Auth\ProfileController;
 use App\Http\Controllers\API\Central\Auth\ResetPasswordController;
 use App\Http\Controllers\API\Central\DataEntry\CountryController;
 use App\Http\Controllers\API\Central\Global\Chunk\ChunkFileController;
@@ -13,9 +17,7 @@ use App\Http\Controllers\API\Central\Global\Report\ReportController;
 use App\Http\Controllers\API\Central\Global\Setting\ActivityLogController;
 use App\Http\Controllers\API\Central\Global\Setting\CaptchaController;
 use App\Http\Controllers\API\Central\Global\Setting\SettingController;
-use App\Http\Controllers\API\Central\Admin\PermissionController;
-use App\Http\Controllers\API\Central\Admin\ProfileController;
-use App\Http\Controllers\API\Central\Admin\RoleController;
+use App\Http\Controllers\API\Central\Tenant\TenantController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('central')->group(function () {
@@ -34,35 +36,60 @@ Route::prefix('central')->group(function () {
     | Auth Routes
     |--------------------------------------------------------------------------
     */
-    Route::post('login', [LoginController::class, 'login']);
-    Route::post('forget', [ForgetPasswordController::class, 'forget'])->name('forget');
-    Route::post('verify-otp', [ForgetPasswordController::class, 'verify'])->name('verify');
-    Route::post('reset', [ResetPasswordController::class, 'reset'])->name('reset');
-    Route::apiResource('countries', CountryController::class)->only(['index', 'show']);
+    Route::post('login', LoginController::class);
+    Route::post('reset-password', ResetPasswordController::class);
+
+    // OTP Routes
+    Route::post('send-otp', [OTPController::class, 'send']);
+    Route::post('check-otp', [OTPController::class, 'check']);
+    Route::post('verify-otp', [OTPController::class, 'verify']);
 
     Route::middleware(['auth:sanctum'])->group(function () {
         /*
-        |--------------------------------------------------------------------------
-        | activity log Routes
-        |--------------------------------------------------------------------------
-        */
-        Route::prefix('get-activity-logs')->group(function () {
-            Route::get('/', [ActivityLogController::class, 'index']);
-            Route::get('/{activity}', [ActivityLogController::class, 'show']);
-        });
+       |--------------------------------------------------------------------------
+       | Auth Routes
+       |--------------------------------------------------------------------------
+       */
+        Route::get('me', [ProfileController::class, 'user']);
+        Route::post('update-profile', [ProfileController::class, 'updateProfile']);
+        Route::post('destroy-avatar', [ProfileController::class, 'destroyAvatar']);
+        Route::post('logout', LogoutController::class);
 
         /*
         |--------------------------------------------------------------------------
         | User Routes
         |--------------------------------------------------------------------------
         */
-        Route::prefix('admins')->name('admins.')->group(function () {
-            Route::delete('delete-all', [AdminController::class, 'destroyAll'])->name('destroyAll');
-            Route::post('{id}/restore', [AdminController::class, 'restore'])->name('restore');
-            Route::post('{user}/change-status', [AdminController::class, 'changeStatus'])->name('changeStatus');
-            Route::delete('{id}/force-delete', [AdminController::class, 'forceDelete'])->name('forceDelete');
+        Route::prefix('admins')->group(function () {
+            Route::put('{admin}/toggle-active', [AdminController::class, 'toggleActive']);
+            Route::delete('delete', [AdminController::class, 'destroy']);
+            Route::post('restore', [AdminController::class, 'restore']);
+            Route::delete('force-delete', [AdminController::class, 'forceDelete']);
+            Route::apiResource('/', AdminController::class)->parameters(['' => 'admin'])->except(['destroy']);
+        });
 
-            Route::apiResource('/', AdminController::class)->parameters(['' => 'admin']);
+        /*
+        |--------------------------------------------------------------------------
+        | Tenant Routes
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('tenants')->name('tenants.')->group(function () {
+            Route::delete('delete-all', [TenantController::class, 'destroyAll'])->name('destroyAll');
+            Route::post('{id}/restore', [TenantController::class, 'restore'])->name('restore');
+            Route::post('{tenant}/change-status', [TenantController::class, 'changeStatus'])->name('changeStatus');
+            Route::delete('{id}/force-delete', [TenantController::class, 'forceDelete'])->name('forceDelete');
+
+            Route::apiResource('/', TenantController::class)->parameters(['' => 'tenant']);
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | activity log Routes
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('activity-logs')->group(function () {
+            Route::get('/', [ActivityLogController::class, 'index'])->parameters;
+            Route::get('/{activity}', [ActivityLogController::class, 'show']);
         });
 
         //Role Routes
@@ -70,12 +97,6 @@ Route::prefix('central')->group(function () {
 
         Route::delete('permissions/delete-all', [PermissionController::class, 'destroyAll']);
         Route::apiResource('permissions', PermissionController::class);
-
-        //Profile Routes
-        Route::get('me', [ProfileController::class, 'user']);
-        Route::post('update-profile', [ProfileController::class, 'updateProfile']);
-        Route::post('destroy-avatar', [ProfileController::class, 'destroyAvatar']);
-        Route::post('logout', [LoginController::class, 'logout']);
 
         /*
         |--------------------------------------------------------------------------

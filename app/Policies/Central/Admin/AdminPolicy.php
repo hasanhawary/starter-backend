@@ -9,74 +9,92 @@ class AdminPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * @param Admin $admin
-     * @param  ?Admin $adminModel
-     * @return bool
-     */
-    public function view(Admin $admin, ?Admin $adminModel = null): bool
+    public function view(Admin $user, ?Admin $model = null): bool
     {
-        return ($admin->can('view-all-admin') || $admin->can('view-own-admin')) &&
-            (!$adminModel || $this->checkAdmin($admin, $adminModel));
+        return $this->canAct($user, $model, [
+            'view-all-admin',
+            'view-own-admin',
+        ]);
     }
 
-    /**
-     * @param Admin $admin
-     * @param Admin|null $adminModel
-     * @return bool
-     */
-    public function create(Admin $admin, ?Admin $adminModel = null): bool
+    public function create(Admin $user, ?Admin $model = null): bool
     {
-        return $admin->can('create-admin') && (!$adminModel || $this->checkAdmin($admin, $adminModel));
+        return $user->can('create-admin') && $this->ownsOrAll($user, $model);
     }
 
-    /**
-     * @param Admin $admin
-     * @param Admin $adminModel
-     * @return bool
-     */
-    public function update(Admin $admin, Admin $adminModel): bool
+    public function update(Admin $user, Admin $model): bool
     {
-        return $admin->can('update-admin') &&
-            $this->checkAdmin($admin, $adminModel) &&
-            !in_array($adminModel->id, [...rootAdmins(), auth()->id()], false);
-    }
-
-    /**
-     * @param Admin $admin
-     * @param Admin|null $adminModel
-     * @return bool
-     */
-    public function delete(Admin $admin, ?Admin $adminModel = null): bool
-    {
-        if (!$admin->can('delete-admin')) {
+        if (! $user->can('update-admin')) {
             return false;
         }
 
-        return !$adminModel || ($this->checkAdmin($admin, $adminModel) && !in_array($adminModel?->id, [...rootAdmins(), auth()->id()], false));
-    }
-
-    /**
-     * @param Admin $admin
-     * @param Admin|null $adminModel
-     * @return bool
-     */
-    public function restore(Admin $admin, ?Admin $adminModel = null): bool
-    {
-        if (!$admin->can('restore-admin')) {
+        if ($this->isProtectedAdmin($model, $user)) {
             return false;
         }
 
-        return !$adminModel || $this->checkAdmin($admin, $adminModel);
+        return $this->ownsOrAll($user, $model);
     }
 
-    /**
-     * @param Admin $admin
-     * @param Admin $adminModel
-     * @return bool
-     */
-    public function checkAdmin(Admin $admin, Admin $adminModel): bool
+    public function delete(Admin $user, ?Admin $model = null): bool
     {
-        return $admin->can('view-all-admin') || $adminModel->created_by === $admin->id;
+        if (! $user->can('delete-admin')) {
+            return false;
+        }
+
+        if ($model && $this->isProtectedAdmin($model, $user)) {
+            return false;
+        }
+
+        return $this->ownsOrAll($user, $model);
+    }
+
+    public function restore(Admin $user, ?Admin $model = null): bool
+    {
+        return $user->can('restore-admin') && $this->ownsOrAll($user, $model);
+    }
+
+    public function forceDelete(Admin $user, Admin $model): bool
+    {
+        if (! $user->can('force-delete-admin')) {
+            return false;
+        }
+
+        return ! $this->isProtectedAdmin($model, $user) && $this->ownsOrAll($user, $model);
+    }
+
+    public function toggleActive(Admin $user, Admin $model): bool
+    {
+        if (! $user->can('toggle-active-admin')) {
+            return false;
+        }
+
+        return ! $this->isProtectedAdmin($model, $user) && $this->ownsOrAll($user, $model);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helper Methods
+    |--------------------------------------------------------------------------
+    */
+    protected function ownsOrAll(Admin $user, ?Admin $model): bool
+    {
+        return !$model
+            || $user->can('view-all-admin')
+            || $model->created_by === $user->id;
+    }
+
+    protected function isProtectedAdmin(Admin $model, Admin $user): bool
+    {
+        return in_array($model->id, [...rootAdmins(), $user->id], true);
+    }
+
+    protected function canAct(Admin $user, ?Admin $model, array $permissions): bool {
+        foreach ($permissions as $permission) {
+            if ($user->can($permission)) {
+                return $this->ownsOrAll($user, $model);
+            }
+        }
+
+        return false;
     }
 }

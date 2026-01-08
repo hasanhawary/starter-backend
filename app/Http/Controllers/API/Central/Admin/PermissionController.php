@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\API\Central\Admin;
 
 use App\Filters\Central\Global\JsonDisplayNameFilter;
+use App\Filters\Central\Global\OrderByFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Admin\PermissionRequest;
 use App\Http\Requests\Central\Global\Other\DeleteAllRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Admin\PermissionResource;
+use App\Models\Central\Admin;
 use App\Models\Central\Permission;
+use App\Trait\Global\HasDeleteMethods;
+use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -18,13 +22,19 @@ use function __;
 
 class PermissionController extends Controller implements HasMiddleware
 {
+    use HasDeleteMethods;
+
+    public function __construct()
+    {
+        $this->setDeleteModel(Permission::class);
+    }
+
     public static function middleware(): array
     {
         return [
             new Middleware(PermissionMiddleware::using('read-permission'), only: ['index', 'show']),
             new Middleware(PermissionMiddleware::using('create-permission'), only: ['store']),
-            new Middleware(PermissionMiddleware::using('update-permission'), only: ['update']),
-            new Middleware(PermissionMiddleware::using('delete-permission'), only: ['destroy', 'destroyAll'])
+            new Middleware(PermissionMiddleware::using('update-permission'), only: ['update'])
         ];
     }
 
@@ -36,7 +46,7 @@ class PermissionController extends Controller implements HasMiddleware
     {
         $query = app(Pipeline::class)
             ->send(Permission::query())
-            ->through([JsonDisplayNameFilter::class])
+            ->through([JsonDisplayNameFilter::class, OrderByFilter::class])
             ->thenReturn();
 
         return successResponse(fetchData($query, $request->pageSize, PermissionResource::class));
@@ -72,23 +82,5 @@ class PermissionController extends Controller implements HasMiddleware
         $permission->update($request->validated());
 
         return successResponse(new PermissionResource($permission->refresh()), __('api.updated_success'));
-    }
-
-    /**
-     * @param Permission $permission
-     * @return JsonResponse
-     */
-    public function destroy(Permission $permission): JsonResponse
-    {
-        $permission->delete();
-
-        return successResponse(msg: __('api.deleted_success'));
-    }
-
-    public function destroyAll(DeleteAllRequest $request): JsonResponse
-    {
-        Permission::whereIn('id', $request->ids)->delete();
-
-        return successResponse(msg: __('api.deleted_success'));
     }
 }

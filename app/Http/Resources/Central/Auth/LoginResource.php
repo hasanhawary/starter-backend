@@ -3,8 +3,10 @@
 namespace App\Http\Resources\Central\Auth;
 
 use App\Models\Central\Admin;
+use App\Services\Global\EncryptionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Random\RandomException;
 
 class LoginResource extends JsonResource
 {
@@ -20,11 +22,25 @@ class LoginResource extends JsonResource
     }
 
     /**
-     * @param Request $request
-     * @return array
+     * @throws \JsonException
+     * @throws RandomException
      */
     public function toArray(Request $request): array
     {
+        $permissions = $this->roles
+            ?->flatMap(fn($role) => $role->permissions->pluck('name'))
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $roles = $this->roles?->map(fn($role) => [
+            'id' => $role->id,
+            'name' => $role->name
+        ])->toArray();
+
+        $encryptRole = config('project.auth.encryption.outgoing.roles', true);
+        $encryptPermission = config('project.auth.encryption.outgoing.permissions', true);
+
         return [
             'token' => $this->token,
             'user' => [
@@ -33,15 +49,8 @@ class LoginResource extends JsonResource
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'avatar' => $this->avatar,
-                'permissions' => $this->roles?->flatMap(function ($role) {
-                    return $role->permissions->pluck('name');
-                })->unique()->values()->toArray(),
-                'roles' => $this->roles?->map(function ($role) {
-                    return [
-                        'id' => $role->id,
-                        'name' => $role->name
-                    ];
-                }),
+                'roles' => $encryptRole ? EncryptionService::encrypt($roles) : $roles,
+                'permissions' => $encryptPermission ? EncryptionService::encrypt($permissions) : $permissions,
             ],
         ];
     }

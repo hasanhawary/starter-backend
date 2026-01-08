@@ -2,34 +2,30 @@
 
 namespace App\Http\Controllers\API\Central\Auth;
 
+use App\Exceptions\EmailVerifiedException;
+use App\Exceptions\InvalidOtpException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\ResetPasswordRequest;
-use App\Services\Auth\ForgetPasswordService;
+use App\Models\Central\Admin;
+use App\Services\Auth\ResetPasswordService;
 use Illuminate\Http\JsonResponse;
 
 class ResetPasswordController extends Controller
 {
-    protected ForgetPasswordService $forgetPasswordService;
-
-    /**
-     * @param ForgetPasswordService $forgetPasswordService
-     */
-    public function __construct(ForgetPasswordService $forgetPasswordService)
+    public function __construct(protected ResetPasswordService $forgetPasswordService)
     {
-        $this->forgetPasswordService = $forgetPasswordService;
     }
 
     /**
      * @param ResetPasswordRequest $request
      * @return JsonResponse
+     * @throws InvalidOtpException
      */
-    public function reset(ResetPasswordRequest $request): JsonResponse
+    public function __invoke(ResetPasswordRequest $request): JsonResponse
     {
-        $isPasswordReset = $this->forgetPasswordService->reset($request);
-
-        if (!$isPasswordReset) {
-            return failResponse(msg: __('api.invalid_otp_or_email'));
-        }
+        $this->forgetPasswordService
+            ->setModel(Admin::class)
+            ->reset($request);
 
         return successResponse(msg: __('api.password_reset_success'));
     }

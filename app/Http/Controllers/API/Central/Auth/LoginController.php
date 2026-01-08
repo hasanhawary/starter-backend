@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\API\Central\Auth;
 
-use App\Exceptions\InactiveUserException;
+use App\Exceptions\EmailVerifiedException;
+use App\Exceptions\InActiveUserException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
+use App\Exceptions\InvalidOtpException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\LoginRequest;
 use App\Http\Resources\Central\Auth\LoginResource;
@@ -14,48 +16,38 @@ use Illuminate\Http\JsonResponse;
 
 class LoginController extends Controller
 {
-    /**
-     * @param LoginService $loginService
-     * @param ThrottleService $throttleService
-     */
-    public function __construct(protected LoginService $loginService, protected ThrottleService $throttleService)
-    {
-    }
+    public function __construct(
+        protected LoginService $loginService,
+        protected ThrottleService $throttleService
+    ) {}
 
     /**
-     * @param LoginRequest $request
-     * @return JsonResponse
-     * @throws InvalidEmailAndPasswordCombinationException
-     * @throws InactiveUserException
+     * Handle admin login
      */
-    public function login(LoginRequest $request): JsonResponse
+    public function __invoke(LoginRequest $request): JsonResponse
     {
         $key = $this->throttleService->generateThrottleKey($request->email, $request->ip());
-        $this->throttleService->ensureIsNotRateLimited($key, 5);
+        $this->throttleService->ensureIsNotRateLimited($key, config('project.throttle.login'));
 
         try {
-            $user = $this->loginService
-                ->setGuard('admin')
+            $userData = $this->loginService
                 ->setModel(Admin::class)
+                ->setGuard('admin')
                 ->attempt($request->validated());
 
             $this->throttleService->clearRateLimit($key);
 
-            return successResponse(new LoginResource($user['user'], $user['token']), __('api.login_success'));
+            return successResponse(
+                new LoginResource($userData['user'], $userData['token']),
+                __('api.login_success')
+            );
 
-        } catch (InvalidEmailAndPasswordCombinationException $e) {
+        } catch (InvalidEmailAndPasswordCombinationException|InActiveUserException|InvalidOtpException $e) {
             $this->throttleService->incrementRateLimit($key, 400);
-            throw $e;
+            return failResponse(msg: $e->getMessage());
+        } catch (EmailVerifiedException $e) {
+
+            return failResponse(msg: $e->getMessage(), code: 403);
         }
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    public function logout(): JsonResponse
-    {
-        auth()->user()->tokens()->where('id', auth()->user()->currentAccessToken()->id)->delete();
-
-        return successResponse(msg: trans('api.user_logged_out'));
     }
 }

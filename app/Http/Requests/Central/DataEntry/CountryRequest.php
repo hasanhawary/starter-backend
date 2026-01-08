@@ -6,7 +6,7 @@ use App\Http\Requests\BaseFormRequest;
 use App\Http\Resources\Central\DataEntry\CountryResource;
 use App\Models\Central\Country;
 use App\Rules\TranslatableRequired;
-use App\Rules\UniqueWithTrashed;
+use App\Rules\UniqueCheck;
 use Illuminate\Validation\Rule;
 
 class CountryRequest extends BaseFormRequest
@@ -17,7 +17,7 @@ class CountryRequest extends BaseFormRequest
             'name' => [
                 'required',
                 'array',
-                new UniqueWithTrashed(
+                new UniqueCheck(
                     Country::class,
                     CountryResource::class,
                     $this->route('country')?->id

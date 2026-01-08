@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 class NotificationService
 {
     /**
-     * @param User $user
+     * @param User|Admin $user
      * @param array $data
      * @param array|null $types
      * @return void

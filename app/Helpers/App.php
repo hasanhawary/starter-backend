@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Central\Admin;
+use App\Models\Central\Role;
 use App\Models\Tenant\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
@@ -512,7 +513,6 @@ if (!function_exists('allAttributesFillableModels')) {
     }
 }
 
-
 function getCurrentGuard(): int|string|null
 {
     foreach (array_keys(config('auth.guards')) as $guard) {
@@ -522,3 +522,29 @@ function getCurrentGuard(): int|string|null
     }
     return null; // No guard is currently authenticated
 }
+
+if (!function_exists('encryptCode')) {
+    function encryptCode(array $data): array
+    {
+        try {
+            $key = base64_decode(str_replace('base64:', '', config('app.front_shared_key')));
+
+            $iv = random_bytes(16); // AES block size
+            $encrypted = openssl_encrypt(
+                json_encode($data, JSON_THROW_ON_ERROR),
+                'AES-256-CBC',
+                $key,
+                OPENSSL_RAW_DATA,
+                $iv
+            );
+
+            return [
+                'payload' => base64_encode($encrypted),
+                'iv' => base64_encode($iv),
+            ];
+        } catch (Error|Exception $e) {
+            return $data;
+        }
+    }
+}
+

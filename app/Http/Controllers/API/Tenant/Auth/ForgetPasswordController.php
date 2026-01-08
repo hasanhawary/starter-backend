@@ -4,20 +4,20 @@ namespace App\Http\Controllers\API\Tenant\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\ForgetPasswordRequest;
-use App\Http\Requests\Central\Auth\VerifyOTPRequest;
+use App\Http\Requests\Central\Auth\SendOtpRequest;
 use App\Models\Tenant\User;
-use App\Services\Auth\ForgetPasswordService;
+use App\Services\Auth\ResetPasswordService;
 use Illuminate\Http\JsonResponse;
 use Random\RandomException;
 
 class ForgetPasswordController extends Controller
 {
-    protected ForgetPasswordService $forgetPasswordService;
+    protected ResetPasswordService $forgetPasswordService;
 
     /**
-     * @param ForgetPasswordService $forgetPasswordService
+     * @param ResetPasswordService $forgetPasswordService
      */
-    public function __construct(ForgetPasswordService $forgetPasswordService)
+    public function __construct(ResetPasswordService $forgetPasswordService)
     {
         $this->forgetPasswordService = $forgetPasswordService;
     }
@@ -39,10 +39,10 @@ class ForgetPasswordController extends Controller
     }
 
     /**
-     * @param VerifyOTPRequest $request
+     * @param SendOtpRequest $request
      * @return JsonResponse
      */
-    public function verify(VerifyOTPRequest $request): JsonResponse
+    public function verify(SendOtpRequest $request): JsonResponse
     {
         $user = User::where(['email' => $request->only('email')])->first();
 

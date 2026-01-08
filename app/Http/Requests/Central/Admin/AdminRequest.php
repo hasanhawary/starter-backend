@@ -7,7 +7,7 @@ use App\Http\Requests\BaseFormRequest;
 use App\Http\Resources\Central\Admin\AdminResource;
 use App\Models\Central\Admin;
 use App\Models\Central\Country;
-use App\Rules\UniqueWithTrashed;
+use App\Rules\UniqueCheck;
 use App\Rules\ValidLength;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -18,7 +18,7 @@ class AdminRequest extends BaseFormRequest
 {
     public function rules(): array
     {
-        $adminId = $this->route('admin');
+        $adminId = $this->route('admin')?->getKey();
 
         return [
             'name' => ['required', 'string', 'max:50'],
@@ -39,7 +39,7 @@ class AdminRequest extends BaseFormRequest
                 'required',
                 'email',
                 Rule::unique('admins', 'email')->ignore($adminId)->withoutTrashed(),
-                new UniqueWithTrashed(
+                new UniqueCheck(
                     Admin::class,
                     AdminResource::class,
                     $adminId

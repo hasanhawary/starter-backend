@@ -204,6 +204,5 @@ return [
         'display_name.ar' => 'اسم العرض بالعربية',
         'roles'=>'الادوار'
     ],
-    'not_allowed_to_delete' => 'غير مسموح لك بحذف هذا العنصر.',
     'already_exists' => 'هذا العنصر موجود بالفعل'
 ];

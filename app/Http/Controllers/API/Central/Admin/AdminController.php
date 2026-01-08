@@ -8,24 +8,28 @@ use App\Filters\Central\Global\OrderByFilter;
 use App\Filters\Central\Global\TrashedFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Admin\AdminRequest;
-use App\Http\Requests\Central\Global\Other\DeleteAllRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Admin\AdminResource;
-use App\Mail\BasicMail;
 use App\Models\Central\Admin;
-use App\Models\Central\Country;
 use App\Models\Central\Role;
+use App\Trait\Global\HasDeleteMethods;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class AdminController extends Controller
 {
+    use HasDeleteMethods;
+
+    public function __construct()
+    {
+        $this->setDeleteModel(Admin::class)
+            ->beforeDelete('force', fn(Admin $admin) => Media::delete($admin->avatar));
+    }
+
     /**
      * @param PageRequest $request
      * @return JsonResponse
@@ -52,17 +56,12 @@ class AdminController extends Controller
         Gate::authorize('create', Admin::class);
 
         return DB::transaction(function () use ($request) {
-            $admin = Admin::create($this->prepareData($request));
+            $admin = Admin::create($request->validated());
             $this->syncRelations($admin, $request);
 
-            DB::afterCommit(function () use ($admin, $request) {
-                $this->sendAdminCredentialsEmail($admin, $request);
-            });
+            DB::afterCommit(fn() => $this->sendCredentials($admin, $request));
 
-            return successResponse(
-                new AdminResource($admin->load('roles')),
-                __('api.created_success')
-            );
+            return successResponse(new AdminResource($admin->refresh()), __('api.created_success'));
         });
     }
 
@@ -78,91 +77,19 @@ class AdminController extends Controller
     }
 
     /**
-     * @param AdminRequest $request
-     * @param Admin $admin
-     * @return JsonResponse
-     * @throws Throwable
-     */
-    public function update(AdminRequest $request, Admin $admin): JsonResponse
-    {
-        Gate::authorize('update', $admin);
-
-        return DB::transaction(function () use ($admin, $request) {
-            $admin->update($this->prepareData($request));
-            $this->syncRelations($admin, $request);
-
-            DB::afterCommit(function () use ($admin, $request) {
-                $this->sendAdminCredentialsEmail($admin->refresh(), $request);
-            });
-
-            return successResponse(new AdminResource($admin->refresh()->load('roles')), __('api.updated_success'));
-        });
-    }
-
-    /**
      * @param Admin $admin
      * @return JsonResponse
      */
-    public function destroy(Admin $admin): JsonResponse
+    public function toggleActive(Admin $admin): JsonResponse
     {
-        Gate::authorize('delete', $admin);
+        Gate::authorize('toggle-active', $admin);
 
-        Media::delete($admin->avatar);
-        $admin->delete();
+        $admin->update(['is_active' => !$admin->is_active]);
 
-        return successResponse(msg: __('api.deleted_success'));
-    }
-
-    /**
-     * @param DeleteAllRequest $request
-     * @return JsonResponse
-     */
-    public function destroyAll(DeleteAllRequest $request): JsonResponse
-    {
-        Gate::authorize('delete', Admin::class);
-
-        Admin::whereIn('id', $request->ids)->delete();
-
-        return successResponse(msg: __('api.deleted_success'));
-    }
-
-    /**
-     * @param int $id
-     * @return JsonResponse
-     */
-
-    public function restore(int $id): JsonResponse
-    {
-        Gate::authorize('restore', Admin::class);
-
-        Admin::onlyTrashed()->findOrFail($id)->restore();
-
-        return successResponse(msg: __('api.restored_success'));
-    }
-
-    /**
-     * @param int $id
-     * @return JsonResponse
-     */
-    public function forceDelete(int $id): JsonResponse
-    {
-        Gate::authorize('delete', Admin::class);
-
-        Admin::onlyTrashed()->findOrFail($id)->forceDelete();
-
-        return successResponse(msg: __('api.deleted_success'));
-    }
-
-    /**
-     * @param Admin $admin
-     * @return JsonResponse
-     */
-    public function changeStatus(Admin $admin): JsonResponse
-    {
-        $admin->is_active = !$admin->is_active;
-        $admin->save();
-
-        return successResponse(msg: __('api.updated_success'));
+        return successResponse(msg: $admin->is_active
+            ? __('api.admin_activated')
+            : __('api.admin_deactivated')
+        );
     }
 
     /*
@@ -176,30 +103,31 @@ class AdminController extends Controller
         when($request->filled('permissions'), static fn() => $admin->syncPermissions($request->permissions));
     }
 
-    private function prepareData(AdminRequest $request): array
+    /**
+     * @param Admin $admin
+     * @param AdminRequest $request
+     * @param bool $isCreate
+     * @return void
+     */
+    private function sendCredentials(Admin $admin, AdminRequest $request, bool $isCreate = true): void
     {
-        return Arr::except($request->validated(), ['permissions', 'roles']);
-    }
+        // Skip update if nothing changed
+        if (!$isCreate && !($admin->isDirty('email') || $admin->isDirty('password'))) {
+            return;
+        }
 
-    private function sendAdminCredentialsEmail(Admin $admin, $request): void
-    {
-        //TODO::Need to be handled
-        $plainPassword = (string)$request->input('password');
-        $code = Country::whereKey($request->input('phone_code_id'))->value('phone_code');
-        $number = $request->input('phone');
-
-        $fullPhone = trim(($code ?? '') . ($number ?? ''));
-        $fullPhone = preg_replace('/\s+/', '', $fullPhone) ?: '---';
-
-        $data = [
-            'title' => 'admin_data',
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'phone' => $fullPhone,
-            'plain_password' => $plainPassword,
-            'created_at' => now()->format('Y-m-d H:i'),
-        ];
-
-        $admin->sendNotification($data,['email']);
+        $admin->sendNotification([
+            'title' => $isCreate ? 'admin_data_title' : 'update_admin_data_title',
+            'msg' => sprintf(
+                $isCreate
+                    ? 'admin_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|created_at=>%s'
+                    : 'update_admin_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|updated_at=>%s',
+                $request->name,
+                $request->email,
+                $admin->getFullPhone(),
+                (string)$request->password,
+                now()->format('Y-m-d H:i')
+            )
+        ], ['email']);
     }
 }

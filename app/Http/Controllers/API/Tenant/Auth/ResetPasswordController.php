@@ -4,17 +4,17 @@ namespace App\Http\Controllers\API\Tenant\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\ResetPasswordRequest;
-use App\Services\Auth\ForgetPasswordService;
+use App\Services\Auth\ResetPasswordService;
 use Illuminate\Http\JsonResponse;
 
 class ResetPasswordController extends Controller
 {
-    protected ForgetPasswordService $forgetPasswordService;
+    protected ResetPasswordService $forgetPasswordService;
 
     /**
-     * @param ForgetPasswordService $forgetPasswordService
+     * @param ResetPasswordService $forgetPasswordService
      */
-    public function __construct(ForgetPasswordService $forgetPasswordService)
+    public function __construct(ResetPasswordService $forgetPasswordService)
     {
         $this->forgetPasswordService = $forgetPasswordService;
     }

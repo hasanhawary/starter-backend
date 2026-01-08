@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\API\Central\Global\Setting;
 
 use App\Filters\Central\Setting\GroupFilter;
@@ -74,15 +75,14 @@ class SettingController extends Controller implements HasMiddleware
     public function setConfigForUser(SettingRequest $request): JsonResponse
     {
         foreach ($request->settings as $item) {
-            $value = ! empty($item['value']) ? $item['value'] : null;
+            $value = !empty($item['value']) ? $item['value'] : null;
 
             if ($value && is_file($value)) {
-                $value =  Media::upload($item['value'],'settings')
-;
+                $value = Media::upload($item['value'], 'settings');
             }
 
             $setting = Setting::updateOrCreate([
-                'key'   => $item['key'],
+                'key' => $item['key'],
                 'group' => $item['group'],
             ], [
                 'value' => $value,
@@ -103,7 +103,7 @@ class SettingController extends Controller implements HasMiddleware
     public function testMailCredentials(TestCredentialsRequest $request): JsonResponse
     {
         Mail::to($request->email)->send(new BasicMail(null, [
-            'title'   => 'test_credentials',
+            'title' => 'test_credentials',
             'msg' => $request->body,
         ]));
 

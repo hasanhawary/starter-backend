@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API\Tenant\Auth;
 
-use App\Exceptions\InactiveUserException;
+use App\Exceptions\InActiveUserException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\Auth\LoginRequest;
@@ -26,7 +26,7 @@ class LoginController extends Controller
      * @param LoginRequest $request
      * @return JsonResponse
      * @throws InvalidEmailAndPasswordCombinationException
-     * @throws InactiveUserException
+     * @throws InActiveUserException
      */
     public function login(LoginRequest $request): JsonResponse
     {

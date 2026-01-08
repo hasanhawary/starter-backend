@@ -4,8 +4,6 @@ namespace App\Providers;
 
 use App\Models\Central\Admin;
 use App\Models\Central\Role;
-use App\Models\Tenant\User;
-use App\Observers\User\UserObserver;
 use App\Policies\Central\Admin\RolePolicy;
 use App\Policies\Central\Admin\AdminPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -35,8 +33,5 @@ class AppServiceProvider extends ServiceProvider
         //Policies
         Gate::policy(Admin::class, AdminPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
-
-        //Observers
-        User::observe(UserObserver::class);
-    }
+   }
 }

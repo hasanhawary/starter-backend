@@ -27,10 +27,10 @@ class Admin extends Authenticatable implements LdapAuthenticatable
 
     public bool $inPermission = true;
     public array $basicOperations = ['create', 'update', 'delete'];
-    public array $specialOperations = ['view-all', 'view-own', 'restore'];
+    public array $specialOperations = ['view-all', 'view-own', 'restore', 'force-delete', 'toggle-active'];
 
     protected $fillable = [
-        'name', 'email', 'phone_code_id', 'phone', 'avatar', 'gender', 'nationality_id', 'password', 'otp',
+        'name', 'email', 'phone_code_id', 'phone', 'avatar', 'gender', 'password', 'otp',
         'otp_expire_at', 'is_active', 'last_login', 'ldap_name', 'guid', 'uid', 'created_by'
     ];
 
@@ -42,6 +42,7 @@ class Admin extends Authenticatable implements LdapAuthenticatable
         'last_login' => 'datetime',
         'is_active' => 'boolean',
         'password' => 'hashed',
+        'otp_data' => 'array'
     ];
 
     /*
@@ -71,6 +72,15 @@ class Admin extends Authenticatable implements LdapAuthenticatable
         return Attribute::make(
             set: static fn($value) => bcrypt($value),
         );
+    }
+
+    public function getFullPhone(): string
+    {
+        $code = $this->phone_code_id ? Country::find($this->phone_code_id)?->phone_code : '';
+        $number = $this->phone ?? '';
+
+        $fullPhone = trim(($code ?? '') . $number);
+        return preg_replace('/\s+/', '', $fullPhone) ?: '---';
     }
 
     /*
