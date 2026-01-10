@@ -15,7 +15,7 @@ class SettingTableSeeder extends Seeder
     {
         DB::table('settings')->truncate();
 
-        $currentBrand = config('brands.default_brand', 'wakeb');
+        $currentBrand = config('brands.default_brand');
         $this->command->info("🔹 Seeder started for brand: $currentBrand");
 
         $settings = config("brands.brands.$currentBrand", []);

@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use JsonException as JsonExceptionAlias;
 
 class Setup extends Command
@@ -215,7 +216,8 @@ class Setup extends Command
     private function displaySampleUserCredentials(): void
     {
         $this->info('Sample user credentials:');
-        $this->table(['Name', 'Email', 'Password'], [['root', 'root@wakeb.com', '123456']]);
+        $domain = Str::snake(config('brands.default_brand',config('app.name')));
+        $this->table(['Name', 'Email', 'Password'], [['root', "root@$domain.com", '123456']]);
     }
 
     /**

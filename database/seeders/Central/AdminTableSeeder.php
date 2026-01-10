@@ -10,6 +10,7 @@ use HasanHawary\PermissionManager\Facades\Access;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdminTableSeeder extends Seeder
 {
@@ -31,9 +32,9 @@ class AdminTableSeeder extends Seeder
         Access::handle();
 
         $countryId = Country::first()->id;
-
+        $domain = Str::snake(config('brands.default_brand'));
         Admin::query()->firstOrCreate([
-            'email' => 'root@wakeb.com'
+            'email' => "root@$domain.com"
         ], [
             'name' => 'root',
             'password' => '123456',
@@ -43,7 +44,7 @@ class AdminTableSeeder extends Seeder
         ])->assignRole('root');
 
         Admin::query()->firstOrCreate([
-            'email' => 'admin@wakeb.com'
+            'email' => "admin@$domain.com"
         ], [
             'name' => 'admin',
             'password' => '123456',
