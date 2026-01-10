@@ -11,11 +11,17 @@ use Random\RandomException;
 class OTPService extends BaseAuthService
 {
     /**
-     * Send OTP to user for a specific purpose
+     * Send an OTP to the user for a specific purpose (login, reset password, verify email).
+     *
+     * - Respects resend delay
+     * - Generates OTP based on config
+     * - Stores OTP metadata (expiry, attempts, lock)
+     * - Sends notification
      *
      * @param SendOtpRequest $request
-     * @param string $type OTP type: login, reset_password, verify_email
+     * @param string $type
      * @return string
+     *
      * @throws InvalidOtpException
      * @throws RandomException
      */
@@ -23,40 +29,29 @@ class OTPService extends BaseAuthService
     {
         $user = $this->resolveUser($request->email);
 
-        // Prevent resending OTP too frequently
-        if (!empty($user->otp_data[$type]['sent_at']) && config('project.otp.delay')) {
-            $sentAt = Carbon::parse($user->otp_data[$type]['sent_at']);
-            $delaySeconds = (int)config('project.otp.delay');
+        $this->ensureOtpNotRecentlySent($user, $type);
 
-            $allowedAt = $sentAt->addSeconds($delaySeconds);
-
-            if (now()->lessThan($allowedAt)) {
-                $remainingSeconds = now()->diffInSeconds($allowedAt);
-
-                throw new InvalidOtpException(__('api.otp_already_sent_wait', ['seconds' => round($remainingSeconds)]));
-            }
-        }
-
-        // OTP defaults from project config
         $otpConfig = config('project.otp');
-        $otp = $otpConfig['default'] ?? random_int(1000, 9999);
-        $expiresIn = $otpConfig['expires_in'] ?? 10;
 
+        $otp = $otpConfig['default'] ?? $this->generateOtp();
+
+        $expiresIn = $otpConfig['expires_in'] ?? 10;
         $expireAt = now()->addMinutes($expiresIn);
 
-        // Save OTP in array column
         $otpData = $user->otp_data ?? [];
+
         $otpData[$type] = [
             'otp' => (string)$otp,
-            'sent_at' => now()->format('Y-m-d H:i:s'),
-            'expires_at' => $expireAt->format('Y-m-d H:i:s'),
+            'sent_at' => now()->toDateTimeString(),
+            'expires_at' => $expireAt->toDateTimeString(),
+            'attempts' => [],
+            'locked_until' => [],
         ];
 
         $user->update(['otp_data' => $otpData]);
 
-        // Send notification
         $user->sendNotification(
-            $this->getOtpTemplates($type, $otp, $expireAt, $user->name) + ['otp' => $otp],
+            $this->getOtpTemplates($type, (int)$otp, $expireAt, $user->name) + ['otp' => $otp],
             ['email']
         );
 
@@ -64,61 +59,74 @@ class OTPService extends BaseAuthService
     }
 
     /**
-     * Verify OTP for a specific type
+     * Verify an OTP and Reset it after successful validation.
+     *
+     * - Clears OTP data
+     * - Marks email as verified when type is "verify_email"
      *
      * @param VerifyOtpRequest $request
      * @param string $type
-     * @return bool
+     * @return mixed
+     *
      * @throws InvalidOtpException
      */
     public function verify(VerifyOtpRequest $request, string $type = 'login'): mixed
     {
-        $user = $this->resolveUser($request->email);
+        $user = $this->validateOtp($request, $type);
 
-        $otpData = $user->otp_data[$type] ?? null;
+        $this->resetOtp($user, $type);
 
-        if (!$otpData) {
-            throw new InvalidOtpException(__('api.invalid_otp'));
-        }
-
-        if (Carbon::parse($otpData['expires_at'])->isPast()) {
-            throw new InvalidOtpException(__('api.otp_expired'));
-        }
-
-        if ($otpData['otp'] !== (string)$request->otp) {
-            throw new InvalidOtpException(__('api.invalid_otp'));
-        }
-
-        // Clear OTP for this type
-        $otpArray = $user->otp_data;
-        unset($otpArray[$type]);
-
-        $update = ['otp_data' => $otpArray];
         if ($type === 'verify_email' && !$user->email_verified_at) {
-            $update['email_verified_at'] = now();
+            $user->update(['email_verified_at' => now()]);
         }
-
-        $user->update($update);
 
         return $user;
     }
 
     /**
-     * Check OTP without clearing it
+     * Validate an OTP without consuming or deleting it.
+     *
+     * Useful for multistep verification flows.
      *
      * @param VerifyOtpRequest $request
      * @param string $type
-     * @return bool
+     * @return mixed
+     *
      * @throws InvalidOtpException
      */
     public function check(VerifyOtpRequest $request, string $type = 'login'): mixed
     {
-        $user = $this->resolveUser($request->email);
+        return $this->validateOtp($request, $type);
+    }
 
+    /**
+     * Validate OTP existence, lock status, expiry, and value.
+     *
+     * - Checks lock timeout
+     * - Checks expiration
+     * - Increments attempts on failure
+     *
+     * @param VerifyOtpRequest $request
+     * @param string $type
+     * @return mixed
+     *
+     * @throws InvalidOtpException
+     */
+    private function validateOtp(VerifyOtpRequest $request, string $type): mixed
+    {
+        $user = $this->resolveUser($request->email);
         $otpData = $user->otp_data[$type] ?? null;
 
         if (!$otpData) {
             throw new InvalidOtpException(__('api.invalid_otp'));
+        }
+
+        $ip = request()->ip();
+        if (!empty($otpData['locked_until'][$ip]) &&
+            now()->lessThan(Carbon::parse($otpData['locked_until'][$ip]))
+        ) {
+            $seconds = now()->diffInSeconds(Carbon::parse($otpData['locked_until'][$ip]));
+            throw new InvalidOtpException(__('api.otp_locked_try_later', ['seconds' => round($seconds)]));
         }
 
         if (Carbon::parse($otpData['expires_at'])->isPast()) {
@@ -126,6 +134,7 @@ class OTPService extends BaseAuthService
         }
 
         if ($otpData['otp'] !== (string)$request->otp) {
+            $this->incrementAttempts($user, $type, request()->ip());
             throw new InvalidOtpException(__('api.invalid_otp'));
         }
 
@@ -133,7 +142,133 @@ class OTPService extends BaseAuthService
     }
 
     /**
-     * Get notification templates for each OTP type
+     * Reset (remove) OTP data after successful verification.
+     *
+     * @param mixed $user
+     * @param string $type
+     * @return void
+     */
+    private function resetOtp($user, string $type): void
+    {
+        $otpData = $user->otp_data;
+        unset($otpData[$type]);
+
+        $user->update(['otp_data' => $otpData]);
+    }
+
+    /**
+     * Prevent sending OTP again within the configured delay window.
+     *
+     * @param mixed $user
+     * @param string $type
+     * @return void
+     *
+     * @throws InvalidOtpException
+     */
+    private function ensureOtpNotRecentlySent($user, string $type): void
+    {
+        if (empty($user->otp_data[$type]['sent_at']) || !config('project.otp.delay')) {
+            return;
+        }
+
+        $sentAt = Carbon::parse($user->otp_data[$type]['sent_at']);
+        $delaySeconds = (int)config('project.otp.delay');
+
+        if (now()->lessThan($sentAt->addSeconds($delaySeconds))) {
+            $remaining = now()->diffInSeconds($sentAt->addSeconds($delaySeconds));
+            throw new InvalidOtpException(__('api.otp_already_sent_wait', ['seconds' => $remaining]));
+        }
+    }
+
+    /**
+     * Increment OTP verification attempts and lock OTP if limit is exceeded.
+     *
+     * @param mixed $user
+     * @param string $type
+     * @param string $ip
+     * @return void
+     */
+    private function incrementAttempts($user, string $type, string $ip): void
+    {
+        $config = config('project.otp');
+
+        $maxAttempts = (int) ($config['max_attempts'] ?? 5);
+        $lockSeconds = (int) ($config['lock_time'] ?? 120);
+
+        $otpData = $user->otp_data;
+
+        $otpData[$type]['attempts'][$ip] =
+            ($otpData[$type]['attempts'][$ip] ?? 0) + 1;
+
+        if ($otpData[$type]['attempts'][$ip] >= $maxAttempts) {
+            $otpData[$type]['locked_until'][$ip] = now()
+                ->addSeconds($lockSeconds)
+                ->toDateTimeString();
+        }
+
+        $user->update(['otp_data' => $otpData]);
+    }
+
+    /**
+     * Generate OTP based on configuration (length & type).
+     *
+     * @return string
+     *
+     * @throws RandomException
+     */
+    private function generateOtp(): string
+    {
+        $config = config('project.otp');
+
+        $length = (int)($config['length'] ?? 4);
+        $type = $config['type'] ?? 'numeric';
+
+        return match ($type) {
+            'alpha' => $this->randomString('ABCDEFGHIJKLMNOPQRSTUVWXYZ', $length),
+            'alphanumeric' => $this->randomString('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', $length),
+            default => $this->randomNumeric($length),
+        };
+    }
+
+    /**
+     * Generate a numeric OTP of fixed length.
+     *
+     * @param int $length
+     * @return string
+     *
+     * @throws RandomException
+     */
+    private function randomNumeric(int $length): string
+    {
+        $min = 10 ** ($length - 1);
+        $max = (10 ** $length) - 1;
+
+        return (string)random_int($min, $max);
+    }
+
+    /**
+     * Generate a random OTP string from a character set.
+     *
+     * @param string $characters
+     * @param int $length
+     * @return string
+     *
+     * @throws RandomException
+     */
+    private function randomString(string $characters, int $length): string
+    {
+        $result = '';
+        $maxIndex = strlen($characters) - 1;
+
+        for ($i = 0; $i < $length; $i++) {
+            $result .= $characters[random_int(0, $maxIndex)];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Build OTP notification templates based on OTP type.
      *
      * @param string $type
      * @param int $otp
@@ -144,24 +279,23 @@ class OTPService extends BaseAuthService
     private function getOtpTemplates(string $type, int $otp, Carbon $expireAt, string $userName): array
     {
         $expire = $expireAt->format('h:i A');
-        $platformName = config('mail.default_brand');
 
         return match ($type) {
             'login' => [
                 'title' => 'login_otp_title',
-                'msg' => "login_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}"
+                'msg' => "login_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}",
             ],
             'reset_password' => [
                 'title' => 'reset_password_otp_title',
-                'msg' => "reset_password_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}"
+                'msg' => "reset_password_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}",
             ],
             'verify_email' => [
                 'title' => 'verify_email_otp_title',
-                'msg' => "verify_email_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}"
+                'msg' => "verify_email_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}",
             ],
             default => [
                 'title' => 'default_otp_title',
-                'msg' => "default_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}"
+                'msg' => "default_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}",
             ],
         };
     }

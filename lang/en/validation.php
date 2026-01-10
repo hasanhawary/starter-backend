@@ -249,6 +249,5 @@ return [
         'otp' => 'Verification Code',
         'phone' => 'Phone',
         'permissions' => 'Permissions',
-    ],
-    'not_allowed_to_delete' => 'You are not allowed to delete this item.',
+    ]
 ];

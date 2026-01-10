@@ -25,7 +25,7 @@ class ResetPasswordService extends BaseAuthService
     {
         // Use OTPService check method
         $user = $this->otpService
-            ->setModel(Admin::class)
+            ->setModel($this->model)
             ->check(new VerifyOtpRequest($request->validated()), OtpTypeEnum::ResetPassword->value);
 
         if (!$user) {

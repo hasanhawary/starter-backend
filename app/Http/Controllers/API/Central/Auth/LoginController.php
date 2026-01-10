@@ -27,7 +27,7 @@ class LoginController extends Controller
     public function __invoke(LoginRequest $request): JsonResponse
     {
         $key = $this->throttleService->generateThrottleKey($request->email, $request->ip());
-        $this->throttleService->ensureIsNotRateLimited($key, config('project.throttle.login'));
+        $this->throttleService->ensureIsNotRateLimited($key, config('project.auth.max_login_attempts'));
 
         try {
             $userData = $this->loginService
@@ -43,7 +43,7 @@ class LoginController extends Controller
             );
 
         } catch (InvalidEmailAndPasswordCombinationException|InActiveUserException|InvalidOtpException $e) {
-            $this->throttleService->incrementRateLimit($key, 400);
+            $this->throttleService->incrementRateLimit($key, config('project.auth.lockout_time'));
             return failResponse(msg: $e->getMessage());
         } catch (EmailVerifiedException $e) {
 

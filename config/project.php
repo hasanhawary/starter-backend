@@ -51,16 +51,14 @@ return [
 
         'otp' => [
             'required_for' => [
-                'admin' => true,
+                'admin' => false,
                 'user' => false,
             ],
             'fallback_to_password' => true,
         ],
 
         'max_login_attempts' => 5,
-        'lockout_time' => 15, // minutes
-        'revoke_old_tokens' => true,
-
+        'lockout_time' => 180, // seconds
         'default_role' => 'default_role',
         'default_phone_code_id' => 1,
     ],
@@ -82,28 +80,13 @@ return [
     |--------------------------------------------------------------------------
     */
     'otp' => [
-        'default' => null,
-        'length' => 4,
-        'delay'       => null, // seconds between sends
-        'expires_in'  => 10, // minutes
+        'default' => null,        // Force a fixed OTP (for testing)
+        'length' => 6,            // Number of characters
+        'type' => 'numeric',      // numeric | alpha | alphanumeric
+        'delay' => null,          // seconds between sends
+        'expires_in' => 10,       // minutes
         'max_attempts' => 5,
-        'style' => [
-            'bg'           => '#F4F7FF',
-            'border_color' => '#D1D5DB',
-            'font_size'    => '20px',
-            'letter_spacing' => '4px',
-            'text_color'   => '#1F2937',
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Throttling
-    |--------------------------------------------------------------------------
-    */
-    'throttle' => [
-        'otp' => 5,
-        'login' => 5,
+        'lock_time' => 120        //seconds
     ],
 
     /*
@@ -135,16 +118,6 @@ return [
     'cache' => [
         'default' => env('CACHE_DRIVER', 'file'),
         'ttl' => 60, // minutes
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Security
-    |--------------------------------------------------------------------------
-    */
-    'security' => [
-        'password_min_length' => 8,
-        'force_https' => env('FORCE_HTTPS', false),
     ],
 
     /*

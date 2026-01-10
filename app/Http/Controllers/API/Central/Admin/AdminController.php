@@ -66,6 +66,26 @@ class AdminController extends Controller
     }
 
     /**
+     * @param AdminRequest $request
+     * @param Admin $admin
+     * @return JsonResponse
+     * @throws Throwable
+     */
+    public function update(AdminRequest $request, Admin $admin): JsonResponse
+    {
+        Gate::authorize('update', $admin);
+
+        return DB::transaction(function () use ($admin, $request) {
+            $admin->update($request->validated());
+            $this->syncRelations($admin, $request);
+
+            DB::afterCommit(fn() => $this->sendCredentials($admin->refresh(), $request));
+
+            return successResponse(new AdminResource($admin->refresh()), __('api.updated_success'));
+        });
+    }
+
+    /**
      * @param Admin $admin
      * @return JsonResponse
      */

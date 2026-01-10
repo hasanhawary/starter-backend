@@ -2,11 +2,14 @@
 
 namespace App\Trait\Global;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 trait HasDeleteMethods
 {
@@ -18,7 +21,7 @@ trait HasDeleteMethods
     protected array $guards = [];
     protected bool $usePolicy = true;
     protected array $beforeCallbacks = [];
-    protected array $afterCallbacks  = [];
+    protected array $afterCallbacks = [];
 
     /*
     |--------------------------------------------------------------------------
@@ -103,7 +106,7 @@ trait HasDeleteMethods
             }
 
             // Custom Guards
-            if (! $this->passesGuards($action, $model)) {
+            if (!$this->passesGuards($action, $model)) {
                 return failResponse(msg: __("api.not_allowed_to_{$action}"));
             }
 
@@ -117,10 +120,10 @@ trait HasDeleteMethods
             $this->runCallbacks($this->afterCallbacks[$action] ?? [], $model);
         }
 
-        return successResponse(msg: __("api.".
+        return successResponse(msg: __("api." .
             match ($action) {
                 'restore' => 'restored_success',
-                default   => 'deleted_success'
+                default => 'deleted_success'
             }
         ));
     }
@@ -132,13 +135,22 @@ trait HasDeleteMethods
             default => $action,
         };
 
-        Gate::authorize($ability, $model);
+        try {
+            Gate::authorize($ability, $model);
+        } catch (AuthorizationException $e) {
+            // If Gate fails, fallback to Spatie permission
+            $permission = $ability . '-' . Str::snake(class_basename($model), '-');
+
+            if (!auth()->user()?->hasPermissionTo($permission)) {
+                throw new UnauthorizedException("User does not have permission [$permission].");
+            }
+        }
     }
 
     protected function passesGuards(string $action, Model $model): bool
     {
         foreach ($this->guards[$action] ?? [] as $guard) {
-            if (is_callable($guard) && ! $guard($model)) {
+            if (is_callable($guard) && !$guard($model)) {
                 return false;
             }
         }
@@ -150,10 +162,10 @@ trait HasDeleteMethods
     {
         match ($action) {
             'restore' => $model->restore(),
-            'force'   => method_exists($model, 'forceDelete')
+            'force' => method_exists($model, 'forceDelete')
                 ? $model->forceDelete()
                 : $model->delete(),
-            default   => $model->delete(),
+            default => $model->delete(),
         };
     }
 

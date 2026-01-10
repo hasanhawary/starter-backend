@@ -419,7 +419,7 @@ if (!function_exists('emailTrans')) {
             $data,
             'emails',
             array_merge([
-                'platform_name' => brandDisplayName(),
+                'platform_name' => brandName(),
             ], $params)
         );
     }
@@ -639,17 +639,19 @@ if (!function_exists('brandSettings')) {
 }
 
 
-if (!function_exists('brandDisplayName')) {
+if (!function_exists('brandName')) {
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    function brandDisplayName(): mixed
+    function brandName($display = true): mixed
     {
-
         try {
-            return setting('general.info.name', app()->getLocale());
-        }catch (Error|Exception $e) {
+            return $display
+                ? setting('general.info.name', app()->getLocale())
+                : config('brands.default_brand');
+
+        } catch (Error|Exception $e) {
             return config('brands.default_brand');
         }
     }
