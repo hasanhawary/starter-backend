@@ -56,7 +56,7 @@ class OTPService extends BaseAuthService
 
         // Send notification
         $user->sendNotification(
-            $this->getOtpTemplates($type, $otp, $expireAt,$user->name) + ['otp' => $otp],
+            $this->getOtpTemplates($type, $otp, $expireAt, $user->name) + ['otp' => $otp],
             ['email']
         );
 
@@ -149,19 +149,19 @@ class OTPService extends BaseAuthService
         return match ($type) {
             'login' => [
                 'title' => 'login_otp_title',
-                'msg' => "login_otp_msg|platform_name={$platformName}|name={$userName}|expires_at={$expire}|otp={$otp}"
+                'msg' => "login_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}"
             ],
             'reset_password' => [
                 'title' => 'reset_password_otp_title',
-                'msg' => "reset_password_otp_msg|platform_name={$platformName}|name={$userName}|expires_at={$expire}|otp={$otp}"
+                'msg' => "reset_password_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}"
             ],
             'verify_email' => [
                 'title' => 'verify_email_otp_title',
-                'msg' => "verify_email_otp_msg|platform_name={$platformName}|name={$userName}|expires_at={$expire}|otp={$otp}"
+                'msg' => "verify_email_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}"
             ],
             default => [
                 'title' => 'default_otp_title',
-                'msg' => "default_otp_msg|platform_name={$platformName}|name={$userName}|expires_at={$expire}|otp={$otp}"
+                'msg' => "default_otp_msg|name={$userName}|expires_at={$expire}|otp={$otp}"
             ],
         };
     }

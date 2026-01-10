@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Central;
+namespace App\Models;
 
 use App\Enum\User\UserGenderEnum;
 use App\Scopes\User\AdminScopes;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Central;
+namespace App\Models;
 
 use App\Scopes\User\RoleScopes;
 use App\Trait\Global\CreatedByObserver;

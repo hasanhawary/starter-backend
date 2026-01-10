@@ -965,7 +965,7 @@
 									"query": [
 										{
 											"key": "key",
-											"value": "company_name",
+											"value": "name",
 											"disabled": true
 										},
 										{

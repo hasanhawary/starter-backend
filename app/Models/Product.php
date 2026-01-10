@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Central;
+namespace App\Models;
 
 use App\Trait\Global\CreatedByObserver;
 use App\Trait\Global\LogsActivityOptions;

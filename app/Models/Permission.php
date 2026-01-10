@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Central;
+namespace App\Models;
 
 use Spatie\Permission\Models\Permission as SpatiePermission;
 use Spatie\Translatable\HasTranslations;

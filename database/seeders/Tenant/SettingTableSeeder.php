@@ -14,7 +14,7 @@ class SettingTableSeeder extends Seeder
     {
         $settings = [
             'general_settings' => [
-                ['key' => 'company_name', 'value' => null],
+                ['key' => 'name', 'value' => null],
                 ['key' => 'name_of_copyrights', 'value' => null],
                 ['key' => 'website_address', 'value' => null],
                 ['key' => 'website_description', 'value' => null, 'type' => 'textarea'],

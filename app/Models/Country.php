@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\Central;
+namespace App\Models;
 
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Database\Eloquent\Casts\Attribute;

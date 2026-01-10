@@ -3,8 +3,10 @@
 namespace Database\Seeders\Central;
 
 use App\Models\Central\Setting;
+use App\Services\Global\SettingService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Arabic;
 
 class SettingTableSeeder extends Seeder
 {
@@ -13,14 +15,25 @@ class SettingTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('settings')->truncate();
-
         $currentBrand = config('brands.default_brand');
         $this->command->info("🔹 Seeder started for brand: $currentBrand");
 
-        $settings = config("brands.brands.$currentBrand", []);
+        $brandsConfig = config('brands.brands');
 
-        $this->storeSettings($settings);
+        if (!isset($brandsConfig[$currentBrand])) {
+            $this->command->warn("⚠️ Brand '$currentBrand' not found in config. Seeder skipped.");
+            return;
+        }
+
+        $brandSettings = $brandsConfig[$currentBrand];
+
+        DB::table('settings')->truncate();
+
+        $this->storeSettings($brandSettings);
+
+        app(SettingService::class)->clearCache();
+
+        $this->command->info("✅ Seeder finished for brand: $currentBrand");
     }
 
     /**

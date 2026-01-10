@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Central;
+namespace App\Models;
 
 class Tenant extends \Spatie\Multitenancy\Models\Tenant
 {

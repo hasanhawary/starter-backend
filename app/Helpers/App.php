@@ -409,13 +409,17 @@ if (!function_exists('transWithParams')) {
 }
 
 if (!function_exists('emailTrans')) {
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     function emailTrans(?string $data, array $params = []): ?string
     {
         return transWithParams(
             $data,
             'emails',
             array_merge([
-                'platform_name' => config('brands.default_brand'),
+                'platform_name' => brandDisplayName(),
             ], $params)
         );
     }
@@ -597,7 +601,7 @@ if (!function_exists('brandSettings')) {
         $lang = $lang ?? app()->getLocale();
 
         return [
-            'name' => setting('general.info.company_name', $lang),
+            'name' => setting('general.info.name', $lang),
             'logo' => [
                 'lg' => setting('properties.logos.website_logo_large'),
                 'lg_dark' => setting('properties.logos.website_dark_logo_large'),
@@ -631,5 +635,22 @@ if (!function_exists('brandSettings')) {
                 'youtube' => setting('social.youtube'),
             ],
         ];
+    }
+}
+
+
+if (!function_exists('brandDisplayName')) {
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    function brandDisplayName(): mixed
+    {
+
+        try {
+            return setting('general.info.name', app()->getLocale());
+        }catch (Error|Exception $e) {
+            return config('brands.default_brand');
+        }
     }
 }

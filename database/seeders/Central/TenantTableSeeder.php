@@ -24,7 +24,7 @@ class TenantTableSeeder extends Seeder
         ];
 
         foreach ($tenants as $tenant) {
-            $tenant =  Tenant::create($tenant);
+            $tenant =  Tenant::firstOrCreate($tenant);
             DB::statement("CREATE DATABASE IF NOT EXISTS `{$tenant->database}`");
         }
     }
