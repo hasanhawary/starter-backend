@@ -51,6 +51,7 @@ class SettingTableSeeder extends Seeder
                             'is_env' => $item['is_env'] ?? false,
                             'placeholder' => $item['placeholder'] ?? null,
                             'label' => $item['label'] ?? null,
+                            'is_multi_lang' => $item['is_multi_lang'] ?? false
                         ]
                     );
 

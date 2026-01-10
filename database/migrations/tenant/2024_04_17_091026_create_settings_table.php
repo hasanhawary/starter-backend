@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->json('placeholder')->nullable();
             $table->json('label')->nullable();
             $table->boolean('is_env')->default(false);
+            $table->boolean('is_multi_lang')->default(false);
             $table->string('type')->default(SettingTypeEnum::Text->value);
             $table->timestamps();
         });
