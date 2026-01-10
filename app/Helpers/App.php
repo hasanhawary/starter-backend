@@ -1,9 +1,10 @@
 <?php
 
 use App\Models\Central\Admin;
-use App\Models\Central\Role;
 use App\Models\Tenant\User;
+use App\Services\Global\SettingService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -12,6 +13,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /*
 |--------------------------------------------------------------------------
@@ -412,7 +415,7 @@ if (!function_exists('emailTrans')) {
             $data,
             'emails',
             array_merge([
-                'platform_name' => config('project.default_brand'),
+                'platform_name' => config('brands.default_brand'),
             ], $params)
         );
     }
@@ -547,22 +550,6 @@ if (!function_exists('encryptCode')) {
     }
 }
 
-if (!function_exists('mailBrand')) {
-    function mailBrand(?string $brandKey = null): array
-    {
-        $brandKey ??= config('brands.default_brand');
-
-        return Arr::get(
-            config('brands.brands'),
-            $brandKey,
-            config('brands.brands.starter')
-        );
-    }
-}
-
-
-use Illuminate\Database\Eloquent\Model;
-
 if (!function_exists('shouldVerifyOtp')) {
     function shouldVerifyOtp(Model|string $model): bool
     {
@@ -572,5 +559,77 @@ if (!function_exists('shouldVerifyOtp')) {
 
         return config('project.auth.login_methods.otp')
             && config("project.auth.otp.required_for.{$modelKey}");
+    }
+}
+
+if (!function_exists('setting')) {
+    /*
+     *
+     * Get setting value by path, optionally specify language.
+     *
+     * @param string $path Dot notation path, e.g. 'theme.colors.primary_color'
+     * @param string|null $lang Language code for multi-lang fields
+     * @param mixed $default Default value if setting not found
+     * @return mixed
+     */
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    function setting(string $path, ?string $lang = null, $default = null): mixed
+    {
+        return app(SettingService::class)->get($path, $lang, $default);
+    }
+}
+
+
+if (!function_exists('brandSettings')) {
+    /**
+     * Get all brand settings as an associative array.
+     *
+     * @param string|null $lang Optional language code. Defaults to app locale.
+     * @return array
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    function brandSettings(?string $lang = null): array
+    {
+        $lang = $lang ?? app()->getLocale();
+
+        return [
+            'name' => setting('general.info.company_name', $lang),
+            'logo' => [
+                'lg' => setting('properties.logos.website_logo_large'),
+                'lg_dark' => setting('properties.logos.website_dark_logo_large'),
+                'sm' => setting('properties.logos.website_logo_small'),
+                'sm_dark' => setting('properties.logos.website_dark_logo_small'),
+            ],
+            'theme' => [
+                'primary' => setting('theme.colors.primary_color'),
+                'secondary' => setting('theme.colors.secondary_color'),
+                'text' => setting('theme.colors.text_color'),
+                'muted' => setting('theme.colors.muted_color'),
+            ],
+            'background' => setting('mail_templates.generate.header_image'),
+            'mail_otp_style' => [
+                'otp_bg' => setting('mail_templates.otp.otp_bg'),
+                'otp_border_color' => setting('mail_templates.otp.otp_border_color'),
+                'otp_font_size' => setting('mail_templates.otp.otp_font_size'),
+                'otp_letter_spacing' => setting('mail_templates.otp.otp_letter_spacing'),
+                'otp_text_color' => setting('mail_templates.otp.otp_text_color'),
+            ],
+            'contact' => [
+                'email' => setting('general.contact.contact_email'),
+                'phone' => setting('general.contact.contact_phone'),
+                'address' => setting('general.contact.contact_address'),
+            ],
+            'social' => [
+                'instagram' => setting('social.instagram'),
+                'facebook' => setting('social.facebook'),
+                'linkedin' => setting('social.linkedin'),
+                'twitter' => setting('social.twitter'),
+                'youtube' => setting('social.youtube'),
+            ],
+        ];
     }
 }

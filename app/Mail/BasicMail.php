@@ -7,6 +7,8 @@ use App\Models\Tenant\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class BasicMail extends Mailable
 {
@@ -16,6 +18,10 @@ class BasicMail extends Mailable
     {
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function build(): self
     {
         $subject = transWithParams($this->data['title']);
@@ -23,7 +29,7 @@ class BasicMail extends Mailable
         return $this->view('emails.basic_mail')
             ->with([
                 'data' => $this->data ?? [],
-                'brand' => mailBrand($this->data['brand'] ?? null),
+                'brand' => brandSettings(),
             ])->subject($subject);
 
     }

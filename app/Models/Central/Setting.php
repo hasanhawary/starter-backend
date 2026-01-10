@@ -28,9 +28,23 @@ class Setting extends Model
     {
         return Attribute::make(
             get: function ($value) {
+                // Try to decode JSON
+                if (is_string($value)) {
+                    try {
+                        $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+                        if (is_array($decoded)) {
+                            return $decoded;
+                        }
+                    } catch (\JsonException) {
+                        // Ignore invalid JSON, keep original value
+                    }
+                }
+
+                // Handle media URLs
                 if (in_array($this->type, ['imageUploader', 'file'])) {
                     return Media::url($value);
                 }
+
                 return $value;
             },
             set: static function ($value) {
@@ -38,6 +52,7 @@ class Setting extends Model
             }
         );
     }
+
 
     /**
      * Scope a query to only include public settings.
