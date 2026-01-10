@@ -28,7 +28,7 @@ return [
     'auth' => [
         'login_methods' => [
             'password' => true,
-            'otp'      => env('AUTH_LOGIN_OTP', false),
+            'otp' => env('AUTH_LOGIN_OTP', true),
         ],
 
         'encryption' => [
@@ -51,17 +51,17 @@ return [
 
         'otp' => [
             'required_for' => [
-                'admin' => false,
-                'user'  => false,
+                'admin' => true,
+                'user' => false,
             ],
             'fallback_to_password' => true,
         ],
 
         'max_login_attempts' => 5,
-        'lockout_time'       => 15, // minutes
-        'revoke_old_tokens'  => true,
+        'lockout_time' => 15, // minutes
+        'revoke_old_tokens' => true,
 
-        'default_role'         => 'default_role',
+        'default_role' => 'default_role',
         'default_phone_code_id' => 1,
     ],
 
@@ -72,8 +72,8 @@ return [
     */
     'ldap' => [
         'active' => env('LDAP_ACTIVE', false), // enable or disable LDAP login
-        'type'   => env('LDAP_TYPE', 'ad'),    // ad or openldap
-        'local'  => env('LDAP_LOCAL', true),   // true = OpenLDAP, false = AD
+        'type' => env('LDAP_TYPE', 'ad'),    // ad or openldap
+        'local' => env('LDAP_LOCAL', true),   // true = OpenLDAP, false = AD
     ],
 
     /*
@@ -82,10 +82,18 @@ return [
     |--------------------------------------------------------------------------
     */
     'otp' => [
-        'length'       => 6,
-        'expires_in'   => 10, // minutes
+        'default' => null,
+        'length' => 4,
+        'delay'       => null, // seconds between sends
+        'expires_in'  => 10, // minutes
         'max_attempts' => 5,
-        'hash'         => false,
+        'style' => [
+            'bg'           => '#F4F7FF',
+            'border_color' => '#D1D5DB',
+            'font_size'    => '20px',
+            'letter_spacing' => '4px',
+            'text_color'   => '#1F2937',
+        ],
     ],
 
     /*
@@ -94,7 +102,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'throttle' => [
-        'otp'   => 5,
+        'otp' => 5,
         'login' => 5,
     ],
 
@@ -105,7 +113,7 @@ return [
     */
     'pagination' => [
         'per_page' => 15,
-        'max'      => 100,
+        'max' => 100,
     ],
 
     /*
@@ -126,7 +134,7 @@ return [
     */
     'cache' => [
         'default' => env('CACHE_DRIVER', 'file'),
-        'ttl'     => 60, // minutes
+        'ttl' => 60, // minutes
     ],
 
     /*
@@ -136,7 +144,7 @@ return [
     */
     'security' => [
         'password_min_length' => 8,
-        'force_https'         => env('FORCE_HTTPS', false),
+        'force_https' => env('FORCE_HTTPS', false),
     ],
 
     /*
@@ -146,7 +154,7 @@ return [
     */
     'logging' => [
         'channel' => env('LOG_CHANNEL', 'stack'),
-        'level'   => env('LOG_LEVEL', 'debug'),
+        'level' => env('LOG_LEVEL', 'debug'),
     ],
 
     /*
@@ -155,9 +163,8 @@ return [
     |--------------------------------------------------------------------------
     */
     'notifications' => [
-        'from_email'   => env('MAIL_FROM_ADDRESS', 'no-reply@myproject.com'),
-        'from_name'    => env('MAIL_FROM_NAME', 'MyProject'),
+        'from_email' => env('MAIL_FROM_ADDRESS', 'no-reply@myproject.com'),
+        'from_name' => env('MAIL_FROM_NAME', 'MyProject'),
         'sms_provider' => env('SMS_PROVIDER', 'twilio'),
-    ],
-
+    ]
 ];

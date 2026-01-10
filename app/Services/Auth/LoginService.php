@@ -44,8 +44,7 @@ class LoginService extends BaseAuthService
         }
 
         // OTP verification if enabled in config
-        if (config('project.auth.login_methods.otp') &&
-            config("project.auth.otp.required_for." . getModelKey($this->getModel()))) {
+        if (shouldVerifyOtp(getModelKey($this->model))) {
             $this->verifyOtp($data);
         }
 
@@ -163,7 +162,7 @@ class LoginService extends BaseAuthService
     private function verifyOtp(array $data): void
     {
         $this->otpService
-            ->setModel($this->getModel())
+            ->setModel($this->model)
             ->verify(new VerifyOtpRequest($data), OtpTypeEnum::Login->value);
     }
 }

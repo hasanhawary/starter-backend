@@ -6,6 +6,7 @@ use App\Exceptions\InvalidOtpException;
 use App\Http\Requests\Central\Auth\SendOtpRequest;
 use App\Http\Requests\Central\Auth\VerifyOtpRequest;
 use Carbon\Carbon;
+use Random\RandomException;
 
 class OTPService extends BaseAuthService
 {
@@ -14,16 +15,31 @@ class OTPService extends BaseAuthService
      *
      * @param SendOtpRequest $request
      * @param string $type OTP type: login, reset_password, verify_email
-     * @return int
+     * @return string
      * @throws InvalidOtpException
+     * @throws RandomException
      */
-    public function send(SendOtpRequest $request, string $type = 'login'): int
+    public function send(SendOtpRequest $request, string $type = 'login'): string
     {
         $user = $this->resolveUser($request->email);
 
+        // Prevent resending OTP too frequently
+        if (!empty($user->otp_data[$type]['sent_at']) && config('project.otp.delay')) {
+            $sentAt = Carbon::parse($user->otp_data[$type]['sent_at']);
+            $delaySeconds = (int)config('project.otp.delay');
+
+            $allowedAt = $sentAt->addSeconds($delaySeconds);
+
+            if (now()->lessThan($allowedAt)) {
+                $remainingSeconds = now()->diffInSeconds($allowedAt);
+
+                throw new InvalidOtpException(__('api.otp_already_sent_wait', ['seconds' => round($remainingSeconds)]));
+            }
+        }
+
         // OTP defaults from project config
         $otpConfig = config('project.otp');
-        $otp = $otpConfig['default'] ?? 1111;
+        $otp = $otpConfig['default'] ?? random_int(1000, 9999);
         $expiresIn = $otpConfig['expires_in'] ?? 10;
 
         $expireAt = now()->addMinutes($expiresIn);
@@ -32,14 +48,15 @@ class OTPService extends BaseAuthService
         $otpData = $user->otp_data ?? [];
         $otpData[$type] = [
             'otp' => (string)$otp,
-            'expire_at' => $expireAt->format('Y-m-d H:i:s'),
+            'sent_at' => now()->format('Y-m-d H:i:s'),
+            'expires_at' => $expireAt->format('Y-m-d H:i:s'),
         ];
 
         $user->update(['otp_data' => $otpData]);
 
         // Send notification
         $user->sendNotification(
-            $this->getOtpTemplates($type, $otp, $expireAt),
+            $this->getOtpTemplates($type, $otp, $expireAt,$user->name) + ['otp' => $otp],
             ['email']
         );
 
@@ -100,9 +117,19 @@ class OTPService extends BaseAuthService
 
         $otpData = $user->otp_data[$type] ?? null;
 
-        return $otpData
-            && Carbon::parse($otpData['expires_at'])->isFuture()
-            && $otpData['otp'] === $request->otp ? $user : null;
+        if (!$otpData) {
+            throw new InvalidOtpException(__('api.invalid_otp'));
+        }
+
+        if (Carbon::parse($otpData['expires_at'])->isPast()) {
+            throw new InvalidOtpException(__('api.otp_expired'));
+        }
+
+        if ($otpData['otp'] !== (string)$request->otp) {
+            throw new InvalidOtpException(__('api.invalid_otp'));
+        }
+
+        return $user;
     }
 
     /**
@@ -111,28 +138,30 @@ class OTPService extends BaseAuthService
      * @param string $type
      * @param int $otp
      * @param Carbon $expireAt
+     * @param string $userName
      * @return array
      */
-    private function getOtpTemplates(string $type, int $otp, Carbon $expireAt): array
+    private function getOtpTemplates(string $type, int $otp, Carbon $expireAt, string $userName): array
     {
-        $expire = $expireAt->format('H:i');
+        $expire = $expireAt->format('h:i A');
+        $platformName = config('mail.default_brand');
 
         return match ($type) {
             'login' => [
                 'title' => 'login_otp_title',
-                'msg' => "login_otp_msg|otp={$otp}|expires_at={$expire}"
+                'msg' => "login_otp_msg|platform_name={$platformName}|name={$userName}|expires_at={$expire}|otp={$otp}"
             ],
             'reset_password' => [
                 'title' => 'reset_password_otp_title',
-                'msg' => "reset_password_otp_msg|otp={$otp}|expires_at={$expire}"
+                'msg' => "reset_password_otp_msg|platform_name={$platformName}|name={$userName}|expires_at={$expire}|otp={$otp}"
             ],
             'verify_email' => [
                 'title' => 'verify_email_otp_title',
-                'msg' => "verify_email_otp_msg|otp={$otp}|expires_at={$expire}"
+                'msg' => "verify_email_otp_msg|platform_name={$platformName}|name={$userName}|expires_at={$expire}|otp={$otp}"
             ],
             default => [
                 'title' => 'default_otp_title',
-                'msg' => "default_otp_msg|otp={$otp}|expires_at={$expire}"
+                'msg' => "default_otp_msg|platform_name={$platformName}|name={$userName}|expires_at={$expire}|otp={$otp}"
             ],
         };
     }

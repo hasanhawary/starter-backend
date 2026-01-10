@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->foreignId('nationality_id')->nullable()->constrained('countries')->nullOnDelete();
             $table->string('avatar')->nullable();
             $table->string('otp')->nullable();
-            $table->timestamp('otp_expire_at')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
             $table->string('password');
             $table->string('gender')->nullable();
             $table->boolean('is_active')->default(true);

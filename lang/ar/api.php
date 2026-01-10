@@ -106,4 +106,5 @@ return [
     'user_logged_out_all_devices' => 'تم تسجيل الخروج من جميع الأجهزة بنجاح.',
     'user_logged_out_specific' => 'تم تسجيل الخروج من الجلسة المحددة بنجاح.',
     'token_not_found' => 'الجلسة المحددة غير موجودة.',
+    'otp_already_sent_wait' => 'تم إرسال رمز التحقق مسبقًا. يرجى الانتظار :seconds ثانية قبل طلب رمز جديد.',
 ];

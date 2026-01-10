@@ -2,6 +2,7 @@
 
 use App\Exceptions\AccountNotFoundException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
+use App\Exceptions\InvalidOtpException;
 use App\Exceptions\InvalidPasswordResetTokenException;
 use App\Exceptions\ModelAlreadyExistsException;
 use App\Http\Middleware\LanguageMiddleware;
@@ -69,6 +70,12 @@ $app =  Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (ModelAlreadyExistsException $e) {
             if (request()->acceptsJson()) {
                 return failResponse(data: $e->getData(), msg: $e->getMessage(), code: $e->getCode());
+            }
+        });
+
+        $exceptions->render(function (InvalidOtpException $e) {
+            if (request()->acceptsJson()) {
+                return failResponse(msg: $e->getMessage(), code: $e->getCode());
             }
         });
 

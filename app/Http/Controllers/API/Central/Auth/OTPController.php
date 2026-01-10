@@ -9,6 +9,7 @@ use App\Http\Requests\Central\Auth\VerifyOtpRequest;
 use App\Models\Central\Admin;
 use App\Services\Auth\OTPService;
 use Illuminate\Http\JsonResponse;
+use Random\RandomException;
 
 class OTPController extends Controller
 {
@@ -22,6 +23,7 @@ class OTPController extends Controller
      * @param SendOtpRequest $request
      * @return JsonResponse
      * @throws InvalidOtpException
+     * @throws RandomException
      */
     public function send(SendOtpRequest $request): JsonResponse
     {
@@ -41,7 +43,7 @@ class OTPController extends Controller
      */
     public function check(VerifyOtpRequest $request): JsonResponse
     {
-        $this->otpService
+         $this->otpService
             ->setModel(Admin::class)
             ->check($request, $request->type);
 

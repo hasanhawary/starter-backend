@@ -202,7 +202,8 @@ return [
         'permissions.*' => 'للصلاحية',
         'display_name.en' => 'اسم العرض بالإنجليزية',
         'display_name.ar' => 'اسم العرض بالعربية',
-        'roles'=>'الادوار'
+        'roles'=>'الادوار',
+        'type' => 'النوع'
     ],
     'already_exists' => 'هذا العنصر موجود بالفعل'
 ];

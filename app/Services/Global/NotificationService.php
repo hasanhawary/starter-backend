@@ -31,27 +31,28 @@ class NotificationService
                 };
 
             } catch (\Exception|\Error $exception) {
-                info("Error => " . $exception?->getMessage());
+                dd($exception);
+                logError($exception);
             }
         }
     }
 
     /**
-     * @param User $user
+     * @param User|Admin $user
      * @param array $data
      * @return void
      */
-    private static function sendNotify(User $user, array $data): void
+    private static function sendNotify(User|Admin $user, array $data): void
     {
         $user->notify(new UserNotify($data));
     }
 
     /**
-     * @param User $user
+     * @param User|Admin $user
      * @param array $data
      * @return void
      */
-    private static function sendSMS(User $user, array $data): void
+    private static function sendSMS(User|Admin $user, array $data): void
     {
         $message = self::resolveMessageContent($data);
 
@@ -61,21 +62,21 @@ class NotificationService
     }
 
     /**
-     * @param User $user
+     * @param User|Admin $user
      * @param array $data
      * @return void
      */
-    public static function sendEmail(User $user, array $data): void
+    public static function sendEmail(User|Admin $user, array $data): void
     {
         Mail::to($user->email)->send(new BasicMail($user, $data));
     }
 
     /**
-     * @param User $user
+     * @param User|Admin $user
      * @param array $data
      * @return void
      */
-    private static function sendRealtimeNotification(User $user, array $data): void
+    private static function sendRealtimeNotification(User|Admin $user, array $data): void
     {
         if (config('services.realtime.enable')) {
             event(new NotificationEvent($user->id, $data));

@@ -16,7 +16,8 @@ return new class extends Migration {
             $table->string('key');
             $table->text('value')->nullable();
             $table->text('group')->nullable();
-            $table->string('model')->nullable();
+            $table->json('placeholder')->nullable();
+            $table->json('label')->nullable();
             $table->boolean('is_env')->default(false);
             $table->string('type')->default(SettingTypeEnum::Text->value);
             $table->timestamps();

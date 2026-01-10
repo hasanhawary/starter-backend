@@ -42,8 +42,8 @@ class NotificationEvent implements ShouldBroadcast
         return [
             'id' => $this->data["id"],
             'type' => $this->data["type"],
-            'title' => !empty($this->data["title"]) ? parseKeyValueString($this->data["title"]) : '',
-            'message' => !empty($this->data["msg"]) ? parseKeyValueString($this->data["msg"]) : '',
+            'title' => !empty($this->data["title"]) ? transWithParams($this->data["title"]) : '',
+            'message' => !empty($this->data["msg"]) ? transWithParams($this->data["msg"]) : '',
             'created_at' => now()
         ];
     }

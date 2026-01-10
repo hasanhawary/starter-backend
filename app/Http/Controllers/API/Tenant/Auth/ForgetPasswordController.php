@@ -50,7 +50,7 @@ class ForgetPasswordController extends Controller
             return failResponse(msg: __('passwords.invalid_otp'));
         }
 
-        if ($user->otp_expire_at < now()) {
+        if ($user->otp_expires_at < now()) {
             return failResponse(msg: __('passwords.otp_expired'));
         }
 

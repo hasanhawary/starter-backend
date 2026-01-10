@@ -1,23 +1,17 @@
 <?php
-
 namespace App\Models\Central;
 
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Translatable\HasTranslations;
 
 class Setting extends Model
 {
-    use HasTranslations;
-
-    public bool $inPermission = true;
-    public array $translatable = ['label', 'placeholder'];
-
+    public bool $inPermission     = true;
     public array $basicOperations = ['read', 'update'];
 
-    protected $fillable = ['key', 'value', 'group', 'label', 'placeholder', 'is_env', 'type'];
+    protected $fillable = ['key', 'value', 'group', 'model', 'is_env', 'type'];
 
     /*
      |--------------------------------------------------------------------------
@@ -32,9 +26,6 @@ class Setting extends Model
                     return Media::url($value);
                 }
                 return $value;
-            },
-            set: static function ($value) {
-                return is_array($value) ? json_encode($value, JSON_THROW_ON_ERROR) : $value;
             }
         );
     }

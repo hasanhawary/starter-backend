@@ -303,7 +303,7 @@ if (!function_exists('fetchData')) {
 if (!function_exists('imageExtensions')) {
     function imageExtensions(): array
     {
-        return ['jpg','png','jpeg','png','gif'];
+        return ['jpg', 'png', 'jpeg', 'png', 'gif'];
     }
 }
 
@@ -382,40 +382,39 @@ if (!function_exists('when')) {
     }
 }
 
-if (!function_exists('parseKeyValueString')) {
-    function parseKeyValueString($data = null, string $page = 'api'): string|null
+if (!function_exists('transWithParams')) {
+    function transWithParams(?string $data, string $page = 'emails', array $params = []): ?string
     {
-        if (is_null($data)) {
+        if (!$data) {
             return null;
         }
 
-        // Split the string into key-value pairs
-        $pairs = explode('|', $data);
-        // Extract the first key (the primary identifier or title)
-        $firstPair = array_shift($pairs);
+        $parts = explode('|', $data);
+        $key = array_shift($parts);
 
-        // Return translation directly if there are no additional pairs
-        if (empty($pairs)) {
-            return __("$page.$firstPair");
+        foreach ($parts as $part) {
+            if (!str_contains($part, '=')) {
+                continue;
+            }
+
+            [$k, $v] = explode('=', $part, 2);
+            $params[trim($k)] = trim($v);
         }
 
-        // Parse key-value pairs into an associative array
-        $result = array_reduce($pairs, function (array $carry, string $pair) use ($page) {
-            if (!str_contains($pair, '=')) {
-                return $carry; // Skip invalid pairs
-            }
+        return __("$page.$key", $params);
+    }
+}
 
-            [$key, $value] = explode('=', $pair, 2);
-
-            if ($key !== 'prefix') {
-                $carry[trim($key)] = trim($value);
-            }
-
-            return $carry;
-        }, []);
-
-        // Return the translation with parameters
-        return __("$page.$firstPair", $result);
+if (!function_exists('emailTrans')) {
+    function emailTrans(?string $data, array $params = []): ?string
+    {
+        return transWithParams(
+            $data,
+            'emails',
+            array_merge([
+                'platform_name' => config('project.default_brand'),
+            ], $params)
+        );
     }
 }
 
@@ -548,3 +547,30 @@ if (!function_exists('encryptCode')) {
     }
 }
 
+if (!function_exists('mailBrand')) {
+    function mailBrand(?string $brandKey = null): array
+    {
+        $brandKey ??= config('brands.default_brand');
+
+        return Arr::get(
+            config('brands.brands'),
+            $brandKey,
+            config('brands.brands.starter')
+        );
+    }
+}
+
+
+use Illuminate\Database\Eloquent\Model;
+
+if (!function_exists('shouldVerifyOtp')) {
+    function shouldVerifyOtp(Model|string $model): bool
+    {
+        $modelKey = is_string($model)
+            ? $model
+            : getModelKey($model);
+
+        return config('project.auth.login_methods.otp')
+            && config("project.auth.otp.required_for.{$modelKey}");
+    }
+}
