@@ -31,7 +31,6 @@ class NotificationService
                 };
 
             } catch (\Exception|\Error $exception) {
-                dd($exception);
                 logError($exception);
             }
         }

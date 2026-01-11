@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\AccountNotFoundException;
+use App\Exceptions\InActiveUserException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
 use App\Exceptions\InvalidOtpException;
 use App\Exceptions\InvalidPasswordResetTokenException;
@@ -51,7 +52,7 @@ $app =  Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (UnauthorizedException|AccessDeniedHttpException $e) {
             if (request()->acceptsJson()) {
-                return failResponse(msg: 'Unauthorized', code: 403);
+                return failResponse(msg: __('api.unauthorized'), code: 403);
             }
         });
 
@@ -74,6 +75,12 @@ $app =  Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (InvalidOtpException $e) {
+            if (request()->acceptsJson()) {
+                return failResponse(msg: $e->getMessage(), code: $e->getCode());
+            }
+        });
+
+        $exceptions->render(function (InActiveUserException $e) {
             if (request()->acceptsJson()) {
                 return failResponse(msg: $e->getMessage(), code: $e->getCode());
             }

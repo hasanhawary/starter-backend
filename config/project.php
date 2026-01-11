@@ -82,7 +82,7 @@ return [
     'otp' => [
         'default' => null,        // Force a fixed OTP (for testing)
         'length' => 6,            // Number of characters
-        'type' => 'numeric',      // numeric | alpha | alphanumeric
+        'type' => 'alpha',      // numeric | alpha | alphanumeric
         'delay' => null,          // seconds between sends
         'expires_in' => 10,       // minutes
         'max_attempts' => 5,

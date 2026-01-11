@@ -3,7 +3,9 @@
 namespace App\Services\Auth;
 
 use App\Exceptions\InvalidOtpException;
+use App\Models\Admin;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Multitenancy\Models\Tenant;
 
 abstract class BaseAuthService
 {
@@ -25,6 +27,10 @@ abstract class BaseAuthService
      */
     public function getModel(): Model
     {
+        if($this->model === Admin::class){
+            Tenant::forgetCurrent();
+        }
+
         return new $this->model();
     }
 

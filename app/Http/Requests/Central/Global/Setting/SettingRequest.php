@@ -14,7 +14,6 @@ class SettingRequest extends BaseFormRequest
             'settings.*.key' => ['required', 'string'],
             'settings.*.value' => ['nullable'],
             'settings.*.group' => ['required', 'string'],
-            'settings.*.model' => ['nullable', 'string'],
         ];
     }
 }

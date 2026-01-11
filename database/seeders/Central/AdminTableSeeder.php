@@ -41,6 +41,7 @@ class AdminTableSeeder extends Seeder
             'phone' => '5412545214',
             'phone_code_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
+            'is_active' => true
         ])->assignRole('root');
 
         Admin::query()->firstOrCreate([
@@ -51,6 +52,7 @@ class AdminTableSeeder extends Seeder
             'phone' => '5412545215',
             'phone_code_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
+            'is_active' => true
         ])->assignRole('admin');
     }
 }

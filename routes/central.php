@@ -17,6 +17,7 @@ use App\Http\Controllers\API\Central\Global\Report\ReportController;
 use App\Http\Controllers\API\Central\Global\Setting\ActivityLogController;
 use App\Http\Controllers\API\Central\Global\Setting\CaptchaController;
 use App\Http\Controllers\API\Central\Global\Setting\SettingController;
+use App\Http\Controllers\API\Central\Global\Setting\TestCredentialsController;
 use App\Http\Controllers\API\Central\Tenant\TenantController;
 use Illuminate\Support\Facades\Route;
 
@@ -61,10 +62,10 @@ Route::prefix('central')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::prefix('admins')->group(function () {
-            Route::put('{admin}/toggle-active', [AdminController::class, 'toggleActive']);
             Route::delete('delete', [AdminController::class, 'destroy']);
-            Route::post('restore', [AdminController::class, 'restore']);
             Route::delete('force-delete', [AdminController::class, 'forceDelete']);
+            Route::post('restore', [AdminController::class, 'restore']);
+            Route::put('{admin}/toggle-active', [AdminController::class, 'toggleActive']);
             Route::apiResource('/', AdminController::class)->parameters(['' => 'admin'])->except(['destroy']);
         });
 
@@ -93,10 +94,10 @@ Route::prefix('central')->group(function () {
         });
 
         //Role Routes
-        Route::apiResource('roles', RoleController::class);
+        Route::delete('roles/delete', [RoleController::class,'destroy']);
+        Route::apiResource('roles', RoleController::class)->except(['destroy']);
 
-        Route::delete('permissions/delete-all', [PermissionController::class, 'destroyAll']);
-        Route::apiResource('permissions', PermissionController::class);
+        Route::get('permissions', [PermissionController::class, 'index']);
 
         /*
         |--------------------------------------------------------------------------
@@ -119,10 +120,8 @@ Route::prefix('central')->group(function () {
         | Setting Routes
         |--------------------------------------------------------------------------
         */
-        Route::get('settings', [SettingController::class, 'index']);
-        Route::get('settings', [SettingController::class, 'publicSetting']);
-        Route::post('set-settings', [SettingController::class, 'setConfigForUser']);
-        Route::post('send-test-mail', [SettingController::class, 'testMailCredentials']);
+        Route::apiResource('settings', SettingController::class)->only(['index', 'update']);
+        Route::post('send-test-mail', [TestCredentialsController::class, 'testEmail']);
 
         /*
         |--------------------------------------------------------------------------

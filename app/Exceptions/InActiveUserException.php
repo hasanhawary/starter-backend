@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class InActiveUserException extends Exception
 {
-    public function __construct(string $message = '', int $code = 401)
+    public function __construct(?string $message = null, ?int $code = null)
     {
         parent::__construct(
             $message ?? __('api.account_not_active'),

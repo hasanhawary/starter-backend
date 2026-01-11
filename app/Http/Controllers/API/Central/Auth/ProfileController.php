@@ -57,10 +57,14 @@ class ProfileController extends Controller
      */
     public function destroyAvatar(Request $request): JsonResponse
     {
+        if (empty(auth()->user()->getOriginal('avatar'))) {
+            return failResponse(msg: trans('api.no_avatar_found'));
+        }
+
         Media::delete($request->avatar);
 
         auth()->user()->update(['avatar' => null]);
 
-        return successResponse(auth()->user()->refresh(), trans('api.profile_updated'));
+        return successResponse(auth()->user()->refresh(), trans('api.avatar_deleted'));
     }
 }

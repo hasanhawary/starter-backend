@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
-class BasicMail extends Mailable implements ShouldQueue
+class BasicMailWithoutQueue extends Mailable
 {
     use Queueable, SerializesModels;
 

@@ -2,14 +2,12 @@
 
 namespace App\Trait\Global;
 
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 
 trait HasDeleteMethods
 {
@@ -96,7 +94,7 @@ trait HasDeleteMethods
         $models = $query->get();
 
         if ($models->isEmpty()) {
-            return failResponse(msg: __('api.not_found'));
+            return failResponse(msg: __('api.record_not_found'));
         }
 
         foreach ($models as $model) {
@@ -107,7 +105,7 @@ trait HasDeleteMethods
 
             // Custom Guards
             if (!$this->passesGuards($action, $model)) {
-                return failResponse(msg: __("api.not_allowed_to_{$action}"));
+                return failResponse(msg: __("api.not_allowed_to_{$action}", ['id' => $model->getKey()]));
             }
 
             // Before callbacks
@@ -135,14 +133,14 @@ trait HasDeleteMethods
             default => $action,
         };
 
-        try {
+        if (Gate::getPolicyFor($model)) {
             Gate::authorize($ability, $model);
-        } catch (AuthorizationException $e) {
-            // If Gate fails, fallback to Spatie permission
+        } else {
+            // If Gate fails, fallback to Spatie permission in case not have policy only.
             $permission = $ability . '-' . Str::snake(class_basename($model), '-');
 
             if (!auth()->user()?->hasPermissionTo($permission)) {
-                throw new UnauthorizedException("User does not have permission [$permission].");
+                abort403();
             }
         }
     }

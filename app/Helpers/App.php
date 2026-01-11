@@ -49,14 +49,14 @@ if (!function_exists('abort403')) {
     function abort403($condition = true): void
     {
         if ($condition) {
-            abort(403, trans('api.no_required_permissions'));
+            abort(403, trans('api.unauthorized'));
         }
     }
 }
 if (!function_exists('unKnownError')) {
     function unKnownError($message = null): JsonResponse|RedirectResponse
     {
-        $message = trans('dashboard.something_error') . '' . (config('debug') ? " : $message" : '');
+        $message = trans('api.something_error') . '' . (config('debug') ? " : $message" : '');
 
         return request()?->expectsJson()
             ? failResponse(msg: $message)

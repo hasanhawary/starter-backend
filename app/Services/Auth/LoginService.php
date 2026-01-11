@@ -40,7 +40,7 @@ class LoginService extends BaseAuthService
             : $this->attemptDefaultLogin($data);
 
         if (!$user->is_active) {
-            throw new InActiveUserException();
+            throw new InActiveUserException(__('api.account_not_active'));
         }
 
         // OTP verification if enabled in config

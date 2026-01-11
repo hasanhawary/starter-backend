@@ -23,8 +23,7 @@ class SettingController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware(PermissionMiddleware::using('read-setting'), only: ['index']),
-            new Middleware(PermissionMiddleware::using('update-setting'), only: ['setConfigForUser']),
+            new Middleware(PermissionMiddleware::using('update-setting'), only: ['update']),
         ];
     }
 
@@ -33,29 +32,15 @@ class SettingController extends Controller implements HasMiddleware
      */
     public function index(): JsonResponse
     {
+        $baseQuery = Setting::query();
+
+        if (auth()->check()) {
+            $baseQuery = $baseQuery->public();
+        }
+
         $query = app(Pipeline::class)
-            ->send(Setting::query())
+            ->send($baseQuery)
             ->through([KeyFilter::class, GroupFilter::class])
-            ->thenReturn();
-
-        $settings = $query->get()->groupBy('group');
-
-        // Transform each setting into a resource
-        $settingsResource = $settings->map(function ($group) {
-            return SettingResource::collection($group);
-        });
-
-        return successResponse($settingsResource);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    public function publicSetting(): JsonResponse
-    {
-        $query = app(Pipeline::class)
-            ->send(Setting::query()->public())
-            ->through([KeyFilter::class])
             ->thenReturn();
 
         $settings = $query->get()->groupBy('group');
@@ -72,7 +57,7 @@ class SettingController extends Controller implements HasMiddleware
      * @param SettingRequest $request
      * @return JsonResponse
      */
-    public function setConfigForUser(SettingRequest $request): JsonResponse
+    public function update(SettingRequest $request): JsonResponse
     {
         foreach ($request->settings as $item) {
             $value = !empty($item['value']) ? $item['value'] : null;
