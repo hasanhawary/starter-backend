@@ -111,4 +111,10 @@ return [
     'email_sent_successfully' => 'تم إرسال الرسالة إلى بريدك الإلكتروني بنجاح',
     'avatar_deleted' => 'تم حذف الصورة الشخصية بنجاح',
     'no_avatar_found' => 'لم يتم العثور على صورة شخصية',
+    'model_not_support_toggle' => 'هذا الموديل :model لا يدعم التفعيل أو التعطيل',
+    'not_allowed_to_toggle_active' => 'غير مسموح بتغيير حالة التفعيل لهذا السجل',
+    'record_activated' => 'تم تفعيل السجل بنجاح',
+    'record_deactivated' => 'تم تعطيل السجل بنجاح',
+    'model_activated' => 'تم تفعيل :model بنجاح',
+    'model_deactivated' => 'تم تعطيل :model بنجاح',
 ];

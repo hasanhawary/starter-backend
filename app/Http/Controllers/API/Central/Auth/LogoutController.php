@@ -20,7 +20,7 @@ class LogoutController extends Controller
         $user = auth('admin')->user();
 
         if (!$user) {
-            return failResponse(msg: trans('api.user_not_found'));
+            return failResponse(trans('api.user_not_found'));
         }
 
         // Logout from all devices
@@ -37,7 +37,7 @@ class LogoutController extends Controller
                 return successResponse(msg: trans('api.user_logged_out_specific'));
             }
 
-            return failResponse(msg: trans('api.token_not_found'));
+            return failResponse(trans('api.token_not_found'));
         }
 
         // Logout from current device only

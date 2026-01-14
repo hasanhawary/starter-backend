@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Central\DataEntry;
 
 use App\Filters\Central\Global\JsonDisplayNameFilter;
+use App\Filters\Central\Global\OrderByFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Central\DataEntry\CountryRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
@@ -22,7 +23,7 @@ class CountryController extends Controller implements HasMiddleware
 
     public function __construct()
     {
-        $this->setDeleteModel(Country::class);
+        $this->model = Country::class;
     }
 
     public static function middleware(): array
@@ -41,7 +42,7 @@ class CountryController extends Controller implements HasMiddleware
     {
         $query = app(Pipeline::class)
             ->send(Country::query())
-            ->through([JsonDisplayNameFilter::class])
+            ->through([JsonDisplayNameFilter::class, OrderByFilter::class])
             ->thenReturn();
 
         return successResponse(fetchData($query, $request->pageSize, CountryResource::class));

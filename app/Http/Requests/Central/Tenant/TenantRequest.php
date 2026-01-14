@@ -1,38 +1,37 @@
 <?php
 
-namespace App\Http\Requests\Central\Tenant;
+namespace App\Http\Requests\Central;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class TenantRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
-        return auth()->check();
+        return true;
     }
 
-    public function rules()
+    public function rules(): array
     {
-        $tenantId = $this->route('tenant') ? $this->route('tenant')->id : null;
-
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', Rule::unique('tenants', 'email')->ignore($tenantId)],
-            'password' => [$tenantId ? 'nullable' : 'required', 'string', 'min:8'],
-            'phone_code_id' => ['nullable', 'integer', 'exists:countries,id'],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'avatar' => ['sometimes', 'nullable', 'string'],
+            'domain' => ['nullable', 'string', 'max:255'],
+            'database' => ['nullable', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
+            'settings' => ['nullable', 'array'],
         ];
+
+        if ($this->isMethod('post')) {
+            // additional create-only rules if needed
+        }
+
+        return $rules;
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
-        // normalize phone
-        if ($this->has('phone')) {
-            $this->merge(['phone' => preg_replace('/\s+/', '', $this->input('phone'))]);
+        if ($this->has('is_active')) {
+            $this->merge(['is_active' => filter_var($this->input('is_active'), FILTER_VALIDATE_BOOLEAN)]);
         }
     }
 }
-

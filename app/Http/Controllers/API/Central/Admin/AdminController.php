@@ -13,6 +13,7 @@ use App\Http\Resources\Central\Admin\AdminResource;
 use App\Models\Central\Admin;
 use App\Models\Central\Role;
 use App\Trait\Global\HasDeleteMethods;
+use App\Trait\Global\HasToggleActiveMethods;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
@@ -22,12 +23,12 @@ use Throwable;
 
 class AdminController extends Controller
 {
-    use HasDeleteMethods;
+    use HasDeleteMethods, HasToggleActiveMethods;
 
     public function __construct()
     {
-        $this->setDeleteModel(Admin::class)
-            ->beforeDelete('force', fn(Admin $admin) => Media::delete($admin->avatar));
+        $this->model = Admin::class;
+        $this->beforeDelete('force', fn(Admin $admin) => Media::delete($admin->avatar));
     }
 
     /**
@@ -94,22 +95,6 @@ class AdminController extends Controller
         Gate::authorize('view', $admin);
 
         return successResponse(new AdminResource($admin->load('roles')));
-    }
-
-    /**
-     * @param Admin $admin
-     * @return JsonResponse
-     */
-    public function toggleActive(Admin $admin): JsonResponse
-    {
-        Gate::authorize('toggle-active', $admin);
-
-        $admin->update(['is_active' => !$admin->is_active]);
-
-        return successResponse(msg: $admin->is_active
-            ? __('api.admin_activated')
-            : __('api.admin_deactivated')
-        );
     }
 
     /*

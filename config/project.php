@@ -80,12 +80,12 @@ return [
     |--------------------------------------------------------------------------
     */
     'otp' => [
-        'default' => null,        // Force a fixed OTP (for testing)
+        'default' => '1111',        // Force a fixed OTP (for testing)
         'length' => 6,            // Number of characters
         'type' => 'alpha',      // numeric | alpha | alphanumeric
-        'delay' => null,          // seconds between sends
+        'delay' => '30',          // seconds between sends
         'expires_in' => 10,       // minutes
-        'max_attempts' => 5,
+        'max_attempts' => 1,
         'lock_time' => 120        //seconds
     ],
 

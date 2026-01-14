@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('subscription_usage', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignUuid('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->string('feature_key');
             $table->unsignedBigInteger('used_value')->default(0);
             $table->dateTime('period_start');

@@ -59,6 +59,7 @@ class RoleRequest extends BaseFormRequest
 
         $this->merge([
             'guard_name' => $this->guard_name ?? 'admin',
+            'permissions' => array_values(array_unique(array_merge($this->permissions ?? [], config('roles.default.permissions'))))
         ]);
     }
 }

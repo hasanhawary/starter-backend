@@ -26,7 +26,7 @@ class PermissionController extends Controller implements HasMiddleware
 
     public function __construct()
     {
-        $this->setDeleteModel(Permission::class);
+        $this->model = Permission::class;
     }
 
     public static function middleware(): array

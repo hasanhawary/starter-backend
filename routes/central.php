@@ -62,10 +62,10 @@ Route::prefix('central')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::prefix('admins')->group(function () {
-            Route::delete('delete', [AdminController::class, 'destroy']);
             Route::delete('force-delete', [AdminController::class, 'forceDelete']);
+            Route::delete('delete', [AdminController::class, 'destroy']);
             Route::post('restore', [AdminController::class, 'restore']);
-            Route::put('{admin}/toggle-active', [AdminController::class, 'toggleActive']);
+            Route::put('toggle-active', [AdminController::class, 'toggleActive']);
             Route::apiResource('/', AdminController::class)->parameters(['' => 'admin'])->except(['destroy']);
         });
 
@@ -74,13 +74,12 @@ Route::prefix('central')->group(function () {
         | Tenant Routes
         |--------------------------------------------------------------------------
         */
-        Route::prefix('tenants')->name('tenants.')->group(function () {
-            Route::delete('delete-all', [TenantController::class, 'destroyAll'])->name('destroyAll');
-            Route::post('{id}/restore', [TenantController::class, 'restore'])->name('restore');
-            Route::post('{tenant}/change-status', [TenantController::class, 'changeStatus'])->name('changeStatus');
-            Route::delete('{id}/force-delete', [TenantController::class, 'forceDelete'])->name('forceDelete');
-
-            Route::apiResource('/', TenantController::class)->parameters(['' => 'tenant']);
+        Route::prefix('tenants')->group(function () {
+            Route::delete('force-delete', [TenantController::class, 'forceDelete']);
+            Route::delete('delete', [TenantController::class, 'destroy']);
+            Route::post('restore', [TenantController::class, 'restore']);
+            Route::put('toggle-active', [TenantController::class, 'toggleActive']);
+            Route::apiResource('/', TenantController::class)->parameters(['' => 'admin'])->except(['destroy']);
         });
 
         /*
@@ -89,15 +88,21 @@ Route::prefix('central')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::prefix('activity-logs')->group(function () {
-            Route::get('/', [ActivityLogController::class, 'index'])->parameters;
+            Route::get('/', [ActivityLogController::class, 'index']);
             Route::get('/{activity}', [ActivityLogController::class, 'show']);
         });
 
-        //Role Routes
-        Route::delete('roles/delete', [RoleController::class,'destroy']);
-        Route::apiResource('roles', RoleController::class)->except(['destroy']);
-
+        /*
+        |--------------------------------------------------------------------------
+        | Roles && Permissions Routes
+        |--------------------------------------------------------------------------
+        */
         Route::get('permissions', [PermissionController::class, 'index']);
+
+        Route::prefix('roles')->group(function () {
+            Route::delete('delete', [RoleController::class, 'destroy']);
+            Route::apiResource('/', RoleController::class)->parameters(['' => 'role'])->except(['destroy']);
+        });
 
         /*
         |--------------------------------------------------------------------------

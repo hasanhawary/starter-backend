@@ -54,10 +54,11 @@ class AdminRequest extends BaseFormRequest
 
             'gender' => ['required', new Enum(UserGenderEnum::class)],
             'avatar' => ['sometimes', 'nullable', File::image()->max(20048)], // 20MB max
-            'roles' => [
+
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => [
                 'required',
-                'array',
-                'min:1',
+                'numeric',
                 Rule::exists('roles', 'id')->whereNot('name', 'root'),
             ],
 

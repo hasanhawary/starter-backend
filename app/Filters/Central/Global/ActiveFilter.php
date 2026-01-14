@@ -12,7 +12,7 @@ class ActiveFilter
 
         $query->when(
             request()->has('is_active'),
-            fn($query) => $query->where('is_active', request('is_active')),
+            fn($query) => $query->where('is_active', (bool)request('is_active')),
         );
 
         return $query;

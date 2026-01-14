@@ -92,7 +92,7 @@ class RoleController extends Controller
         Gate::authorize('delete', $role);
 
         if ($role->roleUsers()->exists()) {
-            return failResponse(msg: __('api.cant_delete'));
+            return failResponse(__('api.cant_delete'));
         }
 
         $role->permissions()->detach();

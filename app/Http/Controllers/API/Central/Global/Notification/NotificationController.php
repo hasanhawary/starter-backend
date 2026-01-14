@@ -22,6 +22,7 @@ class NotificationController extends Controller
             'count' => $countQuery->whereNull('open_at')->count(),
             'notifications' => fetchData($baseQuery->orderBy('created_at', 'desc'), request()->pageSize, NotificationResource::class)
         ];
+
         return successResponse($notifications);
     }
 

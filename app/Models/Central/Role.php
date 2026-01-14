@@ -15,12 +15,16 @@ class Role extends SpatieRole
 
     public bool $inPermission = true;
     public array $basicOperations = ['create', 'update', 'delete'];
-    public array $specialOperations = ['view-all', 'view-own'];
+    public array $specialOperations = ['view-all', 'view-own', 'toggle-active'];
 
     public array $translatable = ['display_name'];
 
     protected $fillable = [
-        'name', 'guard_name', 'display_name', 'created_by'
+        'name', 'guard_name', 'display_name', 'is_active', 'created_by'
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     /*

@@ -10,7 +10,7 @@ class TrashedFilter
     {
         $query = $next($request);
 
-        $query->when(request('trashed', false), fn($q) => $q->onlyTrashed());
+        $query->when(request('is_trashed', false), fn($q) => $q->onlyTrashed());
 
         return $query;
     }

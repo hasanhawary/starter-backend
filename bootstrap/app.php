@@ -34,37 +34,37 @@ $app =  Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if ($request->is('api/*')) {
-                return failResponse(msg: __('api.record_not_found'), code: $e->getStatusCode());
+                return failResponse(__('api.record_not_found'), code: $e->getStatusCode());
             }
         });
 
         $exceptions->render(function (InvalidPasswordResetTokenException $e) {
             if (request()->acceptsJson()) {
-                return failResponse(msg: $e->getMessage(), code: $e->getCode());
+                return failResponse($e->getMessage(), code: $e->getCode());
             }
         });
 
         $exceptions->render(function (AccountNotFoundException $e) {
             if (request()->acceptsJson()) {
-                return failResponse(msg: $e->getMessage(), code: $e->getCode());
+                return failResponse($e->getMessage(), code: $e->getCode());
             }
         });
 
         $exceptions->render(function (UnauthorizedException|AccessDeniedHttpException $e) {
             if (request()->acceptsJson()) {
-                return failResponse(msg: __('api.unauthorized'), code: 403);
+                return failResponse(__('api.unauthorized'), code: 403);
             }
         });
 
         $exceptions->render(function (InvalidEmailAndPasswordCombinationException $e) {
             if (request()->acceptsJson()) {
-                return failResponse(msg: $e->getMessage(), code: $e->getCode());
+                return failResponse($e->getMessage(), code: $e->getCode());
             }
         });
 
         $exceptions->render(function (InvalidEmailAndPasswordCombinationException $e) {
             if (request()->acceptsJson()) {
-                return failResponse(msg: $e->getMessage(), code: $e->getCode());
+                return failResponse($e->getMessage(), code: $e->getCode());
             }
         });
 
@@ -76,13 +76,13 @@ $app =  Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (InvalidOtpException $e) {
             if (request()->acceptsJson()) {
-                return failResponse(msg: $e->getMessage(), code: $e->getCode());
+                return failResponse($e->getMessage(), code: $e->getCode());
             }
         });
 
         $exceptions->render(function (InActiveUserException $e) {
             if (request()->acceptsJson()) {
-                return failResponse(msg: $e->getMessage(), code: $e->getCode());
+                return failResponse($e->getMessage(), code: $e->getCode());
             }
         });
 

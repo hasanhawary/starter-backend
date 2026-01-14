@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Central\Admin;
 
+use App\Filters\Central\Global\ActiveFilter;
 use App\Filters\Central\Global\JsonDisplayNameFilter;
 use App\Filters\Central\Global\OrderByFilter;
 use App\Http\Controllers\Controller;
@@ -10,6 +11,7 @@ use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Admin\RoleResource;
 use App\Models\Central\Role;
 use App\Trait\Global\HasDeleteMethods;
+use App\Trait\Global\HasToggleActiveMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\DB;
@@ -19,12 +21,13 @@ use function __;
 
 class RoleController extends Controller
 {
-    use HasDeleteMethods;
+    use HasDeleteMethods, HasToggleActiveMethods;
 
     public function __construct()
     {
-        $this->setDeleteModel(Role::class)
-            ->setDeleteGuards('delete', fn(Role $role) => !$role->roleAdmins()->exists())
+        $this->model = Role::class;
+
+        $this->setDeleteGuards('delete', fn(Role $role) => !$role->roleAdmins()->exists())
             ->beforeDelete('delete', fn(Role $role) => $role->permissions()->detach());
     }
 
@@ -38,7 +41,7 @@ class RoleController extends Controller
 
         $roles = app(Pipeline::class)
             ->send(Role::related())
-            ->through([JsonDisplayNameFilter::class, OrderByFilter::class])
+            ->through([JsonDisplayNameFilter::class, ActiveFilter::class, OrderByFilter::class])
             ->thenReturn();
 
         return successResponse(fetchData($roles, $request->pageSize, RoleResource::class));

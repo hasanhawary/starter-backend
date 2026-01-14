@@ -40,6 +40,6 @@ class CaptchaController extends Controller
             return successResponse(msg: 'Captcha Verified');
         }
 
-        return failResponse(msg: 'Captcha Incorrect', code: 422);
+        return failResponse('Captcha Incorrect', code: 422);
     }
 }

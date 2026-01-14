@@ -28,7 +28,7 @@ class ResetPasswordController extends Controller
         $isPasswordReset = $this->forgetPasswordService->reset($request);
 
         if (!$isPasswordReset) {
-            return failResponse(msg: __('api.invalid_otp_or_email'));
+            return failResponse(__('api.invalid_otp_or_email'));
         }
 
         return successResponse(msg: __('api.password_reset_success'));

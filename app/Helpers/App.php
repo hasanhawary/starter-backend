@@ -34,7 +34,7 @@ if (!function_exists('successResponse')) {
 }
 
 if (!function_exists('failResponse')) {
-    function failResponse($data = [], $msg = 'fail', $code = 400): JsonResponse
+    function failResponse($msg = 'fail', $data = [], $code = 400): JsonResponse
     {
         return response()->json([
             'status' => false,
@@ -59,7 +59,7 @@ if (!function_exists('unKnownError')) {
         $message = trans('api.something_error') . '' . (config('debug') ? " : $message" : '');
 
         return request()?->expectsJson()
-            ? failResponse(msg: $message)
+            ? failResponse($message)
             : redirect()->back()->with(['status' => 'error', 'message' => $message]);
     }
 }
@@ -117,6 +117,7 @@ if (!function_exists('isRoot')) {
         return $user->hasRole('root');
     }
 }
+
 
 /*
 |--------------------------------------------------------------------------
@@ -260,15 +261,16 @@ if (!function_exists('timeFormat')) {
 }
 
 if (!function_exists('getModelKey')) {
-    function getModelKey(?string $className = null): ?string
+    function getModelKey(?string $className = null, $trans = false): ?string
     {
         if (!$className) {
             return null;
         }
 
         $shortName = class_basename($className);
+        $snaked = Str::snake($shortName);
 
-        return strtolower(Str::snake($shortName));
+        return $trans ? resolveTrans($snaked, snaked: false) : $snaked;
     }
 }
 

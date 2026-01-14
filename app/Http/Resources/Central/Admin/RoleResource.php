@@ -18,6 +18,7 @@ class RoleResource extends JsonResource
             'display_name' => $this->getTranslations('display_name'),
             'permissions' => $this->whenLoaded('permissions', fn() => PermissionResource::collection($this->permissions), []),
             'creator' => $this->whenLoaded('creator', fn() => new BasicUserResource($this->creator), ['id' => $this->created_by]),
+            'is_active' => $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -35,9 +35,10 @@ return [
      */
     'roles' => [
         'default_role' => [
-            'home' => ['report'],
             'type' => null,
-            'permissions' => []
+            'permissions' => [
+                'report' => ['home']
+            ]
         ]
     ],
     /*
@@ -65,8 +66,8 @@ return [
      */
     'additional_operations' => [
         [
-            'name' => 'Home',
-            'operations' => ['report']
+            'name' => 'Report',
+            'operations' => ['home']
         ],
         [
             'name' => 'Log',

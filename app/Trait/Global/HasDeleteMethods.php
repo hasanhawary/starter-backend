@@ -11,15 +11,15 @@ use Illuminate\Support\Str;
 
 trait HasDeleteMethods
 {
-    protected string $model;
+    public string $model;
 
     /**
      * Action guards (delete|restore|force)
      */
-    protected array $guards = [];
-    protected bool $usePolicy = true;
-    protected array $beforeCallbacks = [];
-    protected array $afterCallbacks = [];
+    protected array $deleteGuards = [];
+    protected bool $useDeletePolicy = true;
+    protected array $beforeDeleteCallbacks = [];
+    protected array $afterDeleteCallbacks = [];
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ trait HasDeleteMethods
 
     protected function enableDeletePolicy(bool $state = true): self
     {
-        $this->usePolicy = $state;
+        $this->useDeletePolicy = $state;
         return $this;
     }
 
@@ -44,21 +44,21 @@ trait HasDeleteMethods
     protected function setDeleteGuards(string $action, callable|array $guards): self
     {
         $guards = is_array($guards) ? $guards : [$guards];
-        $this->guards[$action] = array_merge($this->guards[$action] ?? [], $guards);
+        $this->deleteGuards[$action] = array_merge($this->deleteGuards[$action] ?? [], $guards);
         return $this;
     }
 
     protected function beforeDelete(string $action, callable|array $callback): self
     {
         $callback = is_array($callback) ? $callback : [$callback];
-        $this->beforeCallbacks[$action] = array_merge($this->beforeCallbacks[$action] ?? [], $callback);
+        $this->beforeDeleteCallbacks[$action] = array_merge($this->beforeDeleteCallbacks[$action] ?? [], $callback);
         return $this;
     }
 
     protected function afterDelete(string $action, callable|array $callback): self
     {
         $callback = is_array($callback) ? $callback : [$callback];
-        $this->afterCallbacks[$action] = array_merge($this->afterCallbacks[$action] ?? [], $callback);
+        $this->afterDeleteCallbacks[$action] = array_merge($this->afterDeleteCallbacks[$action] ?? [], $callback);
         return $this;
     }
 
@@ -87,35 +87,35 @@ trait HasDeleteMethods
     | Helper Methods
     |--------------------------------------------------------------------------
     */
-    protected function handle(string $action): JsonResponse
+    private function handle(string $action): JsonResponse
     {
-        $ids = $this->resolveIds();
-        $query = $this->buildQuery($action, $ids);
+        $ids = $this->resolveDeleteIds();
+        $query = $this->buildDeleteQuery($action, $ids);
         $models = $query->get();
 
         if ($models->isEmpty()) {
-            return failResponse(msg: __('api.record_not_found'));
+            return failResponse(__('api.record_not_found'));
         }
 
         foreach ($models as $model) {
             // Policy
-            if ($this->usePolicy) {
-                $this->applyAuthorize($action, $model);
+            if ($this->useDeletePolicy) {
+                $this->applyDeleteAuthorize($action, $model);
             }
 
             // Custom Guards
-            if (!$this->passesGuards($action, $model)) {
-                return failResponse(msg: __("api.not_allowed_to_{$action}", ['id' => $model->getKey()]));
+            if (!$this->passesDeleteGuards($action, $model)) {
+                abort(403, __("api.not_allowed_to_{$action}", ['id' => $model->getKey()]));
             }
 
             // Before callbacks
-            $this->runCallbacks($this->beforeCallbacks[$action] ?? [], $model);
+            $this->runDeleteCallbacks($this->beforeDeleteCallbacks[$action] ?? [], $model);
 
             // Execute action
-            $this->execute($model, $action);
+            $this->executeDelete($model, $action);
 
             // After callbacks
-            $this->runCallbacks($this->afterCallbacks[$action] ?? [], $model);
+            $this->runDeleteCallbacks($this->afterDeleteCallbacks[$action] ?? [], $model);
         }
 
         return successResponse(msg: __("api." .
@@ -126,7 +126,7 @@ trait HasDeleteMethods
         ));
     }
 
-    protected function applyAuthorize(string $action, Model $model): void
+    protected function applyDeleteAuthorize(string $action, Model $model): void
     {
         $ability = match ($action) {
             'force' => 'force-delete',
@@ -140,14 +140,14 @@ trait HasDeleteMethods
             $permission = $ability . '-' . Str::snake(class_basename($model), '-');
 
             if (!auth()->user()?->hasPermissionTo($permission)) {
-                abort403();
+                abort(403, __("api.not_allowed_to_{$action}", ['id' => $model->getKey()]));
             }
         }
     }
 
-    protected function passesGuards(string $action, Model $model): bool
+    protected function passesDeleteGuards(string $action, Model $model): bool
     {
-        foreach ($this->guards[$action] ?? [] as $guard) {
+        foreach ($this->deleteGuards[$action] ?? [] as $guard) {
             if (is_callable($guard) && !$guard($model)) {
                 return false;
             }
@@ -156,7 +156,7 @@ trait HasDeleteMethods
         return true;
     }
 
-    protected function execute(Model $model, string $action): void
+    protected function executeDelete(Model $model, string $action): void
     {
         match ($action) {
             'restore' => $model->restore(),
@@ -167,7 +167,7 @@ trait HasDeleteMethods
         };
     }
 
-    protected function buildQuery(string $action, array $ids)
+    protected function buildDeleteQuery(string $action, array $ids)
     {
         $query = $this->model::query();
 
@@ -187,16 +187,23 @@ trait HasDeleteMethods
         );
     }
 
-    protected function resolveIds(): array
+    protected function resolveDeleteIds(): array
     {
-        return Arr::wrap(
-            request()->input('ids')
-            ?? request()->input('id')
-            ?? last(explode('/', request()->path()))
-        );
+        $ids = request()->input('ids')
+            ?? request()->input('id');
+
+        if (!$ids) {
+            $routeParams = request()->route()?->parameters();
+            if (!empty($routeParams)) {
+                $ids = array_values($routeParams)[0]; // take the first parameter
+            }
+        }
+
+        return Arr::wrap($ids); // always return as array
     }
 
-    protected function runCallbacks(array $callbacks, Model $model): void
+
+    protected function runDeleteCallbacks(array $callbacks, Model $model): void
     {
         foreach ($callbacks as $callback) {
             $callback($model);

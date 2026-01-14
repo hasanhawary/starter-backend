@@ -47,11 +47,11 @@ class ForgetPasswordController extends Controller
         $user = User::where(['email' => $request->only('email')])->first();
 
         if ($user->otp != $request->otp) {
-            return failResponse(msg: __('passwords.invalid_otp'));
+            return failResponse(__('passwords.invalid_otp'));
         }
 
         if ($user->otp_expires_at < now()) {
-            return failResponse(msg: __('passwords.otp_expired'));
+            return failResponse(__('passwords.otp_expired'));
         }
 
         return successResponse(msg: __('passwords.otp_verified'));

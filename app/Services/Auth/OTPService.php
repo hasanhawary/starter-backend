@@ -176,7 +176,7 @@ class OTPService extends BaseAuthService
 
         if (now()->lessThan($sentAt->addSeconds($delaySeconds))) {
             $remaining = now()->diffInSeconds($sentAt->addSeconds($delaySeconds));
-            throw new InvalidOtpException(__('api.otp_already_sent_wait', ['seconds' => $remaining]));
+            throw new InvalidOtpException(__('api.otp_already_sent_wait', ['seconds' => round($remaining)]));
         }
     }
 

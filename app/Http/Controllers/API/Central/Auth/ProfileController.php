@@ -25,7 +25,7 @@ class ProfileController extends Controller
         $user = Admin::with('roles.permissions')->find(auth('admin')->id());
 
         if (!$user) {
-            return failResponse(msg: trans('api.user_not_found'));
+            return failResponse(trans('api.user_not_found'));
         }
 
         // Include all active tokens/sessions
@@ -58,7 +58,7 @@ class ProfileController extends Controller
     public function destroyAvatar(Request $request): JsonResponse
     {
         if (empty(auth()->user()->getOriginal('avatar'))) {
-            return failResponse(msg: trans('api.no_avatar_found'));
+            return failResponse(trans('api.no_avatar_found'));
         }
 
         Media::delete($request->avatar);

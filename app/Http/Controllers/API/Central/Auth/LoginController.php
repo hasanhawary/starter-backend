@@ -44,10 +44,10 @@ class LoginController extends Controller
 
         } catch (InvalidEmailAndPasswordCombinationException|InActiveUserException|InvalidOtpException $e) {
             $this->throttleService->incrementRateLimit($key, config('project.auth.lockout_time'));
-            return failResponse(msg: $e->getMessage());
+            return failResponse($e->getMessage());
         } catch (EmailVerifiedException $e) {
 
-            return failResponse(msg: $e->getMessage(), code: 403);
+            return failResponse($e->getMessage(), code: 403);
         }
     }
 }
