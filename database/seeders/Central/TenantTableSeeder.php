@@ -15,11 +15,13 @@ class TenantTableSeeder extends Seeder
                 'name' => 'Tenant One',
                 'domain' => 'tenant1.crm.test',
                 'database' => 'crm_tenant1',
+                'created_by' => 1,
             ],
             [
                 'name' => 'Tenant Two',
                 'domain' => 'tenant2.crm.test',
                 'database' => 'crm_tenant2',
+                'created_by' => 1,
             ],
         ];
 

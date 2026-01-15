@@ -16,6 +16,7 @@ return new class extends Migration
 
             $table->boolean('is_active')->default(true);
             $table->json('settings')->nullable();
+            $table->foreignId('created_by')->constrained('admins')->cascadeOnDelete();
 
             $table->timestamps();
             $table->softDeletes();
