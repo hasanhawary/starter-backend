@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Spatie\Multitenancy\Models\Tenant;
 
 /*
 |--------------------------------------------------------------------------
@@ -643,18 +644,75 @@ if (!function_exists('brandSettings')) {
 
 if (!function_exists('brandName')) {
     /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * Get the brand name from settings or fallback to default.
+     *
+     * @param bool $display Whether to return the localized display name
+     * @return string
      */
-    function brandName($display = true): mixed
+    function brandName(bool $display = true): string
     {
         try {
             return $display
-                ? setting('general.info.name', app()->getLocale())
-                : config('brands.default_brand');
-
-        } catch (Error|Exception $e) {
-            return config('brands.default_brand');
+                ? setting('general.info.name', App::getLocale())
+                : config('brands.default_brand', 'Default Brand');
+        } catch (\Throwable $e) {
+            // Catch everything (Error + Exception)
+            return config('brands.default_brand', 'Default Brand');
         }
+    }
+}
+
+if (!function_exists('detectGuard')) {
+    /**
+     * Determine which auth guard to use based on the request.
+     *
+     * @return string
+     */
+    function detectGuard(): string
+    {
+        // Central API routes
+        if (request()->is('api/central/*')) {
+            Tenant::forgetCurrent(); // forget tenant for central routes
+            return 'admin';
+        }
+
+        // Tenant API routes
+        if (Tenant::checkCurrent()) {
+            return 'api';
+        }
+
+        // Fallback
+        return config('auth.defaults.guard', 'web');
+    }
+}
+
+if (!function_exists('detectPermissionGuard')) {
+    /**
+     * Detect which guard should be used for permissions.
+     *
+     * @return string
+     */
+    function detectPermissionGuard(): string
+    {
+        return match (detectGuard()) {
+            'api' => 'sanctum', // tenant API uses sanctum
+            default => detectGuard(), // fallback to same as guard
+        };
+    }
+}
+
+if (!function_exists('getAuthModel')) {
+    /**
+     * Get the user model class associated with a guard.
+     *
+     * @param string|null $guard
+     * @return class-string
+     */
+    function getAuthModel(?string $guard = null): string
+    {
+        $guard = $guard ?? detectGuard();
+        $provider = config("auth.guards.$guard.provider", 'users');
+
+        return config("auth.providers.$provider.model", User::class);
     }
 }

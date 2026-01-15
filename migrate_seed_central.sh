@@ -4,10 +4,11 @@ set -e
 
 PHP="/opt/homebrew/opt/php@8.4/bin/php"
 
-echo "Running central migrations..."
-$PHP artisan migrate:fresh --path=database/migrations/central
+echo "Running central (main) migrations..."
+
+$PHP artisan migrate:fresh --path=database/migrations/central --database=mysql --force
 
 echo "Seeding central database..."
-$PHP artisan db:seed --class=Database\\Seeders\\Central\\DatabaseSeeder
+$PHP artisan db:seed --class=Database\\Seeders\\Central\\DatabaseSeeder --force
 
 echo "Central setup completed successfully."

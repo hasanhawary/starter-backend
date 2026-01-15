@@ -3,7 +3,6 @@
 namespace App\Http\Resources\Central\Admin;
 
 use App\Enum\User\UserGenderEnum;
-use App\Http\Resources\Central\DataEntry\CountryResource;
 use App\Http\Resources\Central\Global\Other\BasicResource;
 use App\Http\Resources\Central\Global\Other\BasicUserResource;
 use Illuminate\Http\Request;

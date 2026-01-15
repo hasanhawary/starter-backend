@@ -3,23 +3,18 @@
 namespace Database\Seeders\Tenant;
 
 use Illuminate\Database\Seeder;
-use Spatie\Multitenancy\Models\Tenant;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
     {
-        $tenants = Tenant::all();
-
-        foreach ($tenants as $tenant) {
-            $tenant->makeCurrent();
-
-            $this->call([
-                UserTableSeeder::class,
-                SettingTableSeeder::class,
-            ]);
-
-            $tenant->forgetCurrent();
-        }
+        $this->call([
+            CountrySeeder::class,
+            UserTableSeeder::class,
+            SettingTableSeeder::class
+        ]);
     }
 }

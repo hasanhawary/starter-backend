@@ -3,9 +3,9 @@
 namespace App\Models\Central;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
 
-class Notification extends Model
+class Notification extends BaseModel
 {
     protected $guarded = [];
 
@@ -22,7 +22,7 @@ class Notification extends Model
     public function scopeForCurrentUser(Builder $query): Builder
     {
         return $query->where([
-            'notifiable_type' => User::class,
+            'notifiable_type' => Admin::class,
             'notifiable_id' => auth()->id(),
         ]);
     }

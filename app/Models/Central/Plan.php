@@ -2,15 +2,14 @@
 
 namespace App\Models\Central;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 use App\Trait\Global\CreatedByObserver;
 use App\Trait\Global\LogsActivityOptions;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
+use App\Models\BaseModel;
 
-class Plan extends Model
+class Plan extends BaseModel
 {
     use CreatedByObserver, LogsActivityOptions;
 

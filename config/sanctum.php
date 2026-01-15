@@ -73,6 +73,8 @@ return [
     | request. You may change the middleware listed below as required.
     |
     */
+    'personal_access_token_model' => App\Models\Central\PersonalAccessToken::class,
+
 
     'middleware' => [
         'authenticate_session' => Laravel\Sanctum\Http\Middleware\AuthenticateSession::class,

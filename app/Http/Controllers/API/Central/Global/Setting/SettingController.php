@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\Central\Global\Setting;
 
 use App\Filters\Central\Setting\GroupFilter;
 use App\Filters\Central\Setting\KeyFilter;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Global\Setting\SettingRequest;
 use App\Http\Requests\Central\Global\Setting\TestCredentialsRequest;
 use App\Http\Resources\Central\Global\Setting\SettingResource;
@@ -18,7 +18,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class SettingController extends Controller implements HasMiddleware
+class SettingController extends BaseController implements HasMiddleware
 {
     public static function middleware(): array
     {

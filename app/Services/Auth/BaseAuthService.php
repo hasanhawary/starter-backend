@@ -3,7 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Exceptions\InvalidOtpException;
-use App\Models\Admin;
+use App\Models\Central\Admin;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Multitenancy\Models\Tenant;
 

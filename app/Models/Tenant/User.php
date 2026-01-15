@@ -2,7 +2,9 @@
 
 namespace App\Models\Tenant;
 
-use App\Scopes\User\UserScopes;
+use App\Enum\User\UserGenderEnum;
+use App\Models\Central\Country;
+use App\Scopes\Tenant\User\UserScopes;
 use App\Trait\Global\ApplyNotification;
 use App\Trait\Global\CreatedByObserver;
 use App\Trait\Global\LogsActivityOptions;
@@ -10,74 +12,80 @@ use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
+use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements LdapAuthenticatable
 {
-    use UserScopes,
-        ApplyNotification,
-        CreatedByObserver,
-        Notifiable,
-        HasApiTokens,
-        HasRoles,
-        InteractsWithSockets,
-        LogsActivityOptions;
+    use SoftDeletes, AuthenticatesWithLdap, UserScopes, ApplyNotification, CreatedByObserver, Notifiable, HasApiTokens, HasRoles, InteractsWithSockets, LogsActivityOptions;
+
+    use UsesTenantConnection;
 
     protected string $guard_name = 'sanctum';
     public bool $inPermission = true;
+    public array $basicOperations = ['create', 'update', 'delete'];
+    public array $specialOperations = ['view-all', 'view-own', 'restore', 'force-delete', 'toggle-active'];
 
-    public array $basicOperations = ['create', 'update','delete'];
-    public array $specialOperations = ['view-all', 'view-own', 'export', 'restore'];
+    protected $fillable = [
+        'name', 'email', 'phone_code_id', 'phone', 'avatar', 'gender', 'password', 'otp_data',
+        'is_active', 'last_login', 'ldap_name', 'guid', 'uid', 'created_by'
+    ];
 
     protected $hidden = ['password', 'remember_token'];
-    protected $fillable = [
-        'name', 'email', 'phone_code_id', 'phone', 'avatar', 'gender', 'nationality_id', 'password', 'otp',
-        'otp_expires_at', 'is_active', 'last_login', 'ldap_name', 'guid', 'uid', 'created_by'
+    protected $with = ['phoneCode'];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'last_login' => 'datetime',
+        'is_active' => 'boolean',
+        'password' => 'hashed',
+        'gender' => UserGenderEnum::class,
+        'otp_data' => 'array'
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Activity logs
+    |--------------------------------------------------------------------------
+    */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logOnlyDirty()->logOnly($this->fillable);
+    }
 
     /*
      |--------------------------------------------------------------------------
      | Casts && Set Custom Attributes
      |--------------------------------------------------------------------------
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'otp_expires_at' => 'datetime',
-            'last_login' => 'datetime',
-            'password' => 'hashed',
-            'is_active' => 'boolean'
-        ];
-    }
-
     public function avatar(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => Media::url(paths: $value),
-            set: fn($value) => Media::replace($this->avatar)->upload($value, 'users'),
+            get: static fn($value) => Media::url($value)
         );
     }
 
     protected function password(): Attribute
     {
-        return Attribute::make(set: static fn($value) => bcrypt($value));
+        return Attribute::make(
+            set: static fn($value) => bcrypt($value),
+        );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Activity log methods
-    |--------------------------------------------------------------------------
-    */
-    public function getActivitylogOptions(): LogOptions
+    public function getFullPhone(): string
     {
-        return LogOptions::defaults()
-            ->logOnlyDirty()
-            ->logOnly(array_merge($this->fillable, []));
+        $code = $this->phone_code_id ? Country::find($this->phone_code_id)?->phone_code : '';
+        $number = $this->phone ?? '';
+
+        $fullPhone = trim(($code ?? '') . $number);
+        return preg_replace('/\s+/', '', $fullPhone) ?: '---';
     }
 
     /*
@@ -90,8 +98,8 @@ class User extends Authenticatable
         return $this->belongsTo(__CLASS__, 'created_by');
     }
 
-    public function nationality(): BelongsTo
+    public function phoneCode(): BelongsTo
     {
-        return $this->belongsTo(Country::class, 'nationality_id');
+        return $this->belongsTo(Country::class, 'phone_code_id');
     }
 }

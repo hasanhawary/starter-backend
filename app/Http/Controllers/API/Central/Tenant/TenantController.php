@@ -6,25 +6,27 @@ use App\Filters\Central\Global\ActiveFilter;
 use App\Filters\Central\Global\OrderByFilter;
 use App\Filters\Central\Global\TrashedFilter;
 use App\Filters\Central\Tenant\TenantFilter;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Global\Other\PageRequest;
-use App\Http\Requests\Central\TenantRequest;
+use App\Http\Requests\Central\Tenant\TenantRequest;
 use App\Http\Resources\Central\Tenant\TenantResource;
+use App\Jobs\Central\SetupTenantJob;
 use App\Models\Central\Tenant;
 use App\Trait\Global\HasDeleteMethods;
 use App\Trait\Global\HasToggleActiveMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class TenantController extends Controller
+class TenantController extends BaseController implements HasMiddleware
 {
     use HasDeleteMethods, HasToggleActiveMethods;
 
     public function __construct()
     {
+        parent::__construct();
         $this->model = Tenant::class;
     }
 
@@ -59,6 +61,8 @@ class TenantController extends Controller
     {
         $tenant = Tenant::create($request->validated());
 
+        SetupTenantJob::dispatch($tenant);
+
         return successResponse(new TenantResource($tenant), __('api.created_success'));
     }
 
@@ -68,8 +72,6 @@ class TenantController extends Controller
      */
     public function show(Tenant $tenant): JsonResponse
     {
-        Gate::authorize('view', $tenant);
-
         return successResponse(new TenantResource($tenant->load('creator')));
     }
 
@@ -80,8 +82,6 @@ class TenantController extends Controller
      */
     public function update(TenantRequest $request, Tenant $tenant): JsonResponse
     {
-        Gate::authorize('update', $tenant);
-
         $tenant->update($request->validated());
 
         return successResponse(new TenantResource($tenant), __('api.updated_success'));

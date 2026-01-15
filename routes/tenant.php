@@ -1,24 +1,27 @@
 <?php
 
-use App\Http\Controllers\API\Tenant\Auth\ForgetPasswordController;
-use App\Http\Controllers\API\Tenant\Auth\LoginController;
-use App\Http\Controllers\API\Tenant\Auth\ResetPasswordController;
-use App\Http\Controllers\API\Tenant\DataEntry\CountryController;
-use App\Http\Controllers\API\Tenant\Global\Chunk\ChunkFileController;
-use App\Http\Controllers\API\Tenant\Global\Export\ExportController;
-use App\Http\Controllers\API\Tenant\Global\Help\HelpController;
-use App\Http\Controllers\API\Tenant\Global\Notification\NotificationController;
-use App\Http\Controllers\API\Tenant\Global\Report\ReportController;
-use App\Http\Controllers\API\Tenant\Global\Setting\ActivityLogController;
-use App\Http\Controllers\API\Tenant\Global\Setting\CaptchaController;
-use App\Http\Controllers\API\Tenant\Global\Setting\SettingController;
-use App\Http\Controllers\API\Tenant\User\PermissionController;
-use App\Http\Controllers\API\Tenant\User\ProfileController;
-use App\Http\Controllers\API\Tenant\User\RoleController;
+use App\Http\Controllers\API\Central\Admin\PermissionController;
+use App\Http\Controllers\API\Central\Admin\RoleController;
+use App\Http\Controllers\API\Central\Auth\LoginController;
+use App\Http\Controllers\API\Central\Auth\LogoutController;
+use App\Http\Controllers\API\Central\Auth\OTPController;
+use App\Http\Controllers\API\Central\Auth\ResetPasswordController;
+use App\Http\Controllers\API\Central\DataEntry\CountryController;
+use App\Http\Controllers\API\Central\Global\Captcha\CaptchaController;
+use App\Http\Controllers\API\Central\Global\Chunk\ChunkFileController;
+use App\Http\Controllers\API\Central\Global\Export\ExportController;
+use App\Http\Controllers\API\Central\Global\Help\HelpController;
+use App\Http\Controllers\API\Central\Global\Log\ActivityLogController;
+use App\Http\Controllers\API\Central\Global\Notification\NotificationController;
+use App\Http\Controllers\API\Central\Global\Report\ReportController;
+use App\Http\Controllers\API\Central\Global\Setting\SettingController;
+use App\Http\Controllers\API\Central\Global\Setting\TestCredentialsController;
+use App\Http\Controllers\API\Tenant\Auth\ProfileController;
 use App\Http\Controllers\API\Tenant\User\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('tenant')->group(function () {
+Route::middleware('tenant')->group(function() {
+
     /*
     |--------------------------------------------------------------------------
     | Captcha Routes
@@ -34,48 +37,46 @@ Route::middleware('tenant')->group(function () {
     | Auth Routes
     |--------------------------------------------------------------------------
     */
-    Route::post('login', [LoginController::class, 'login']);
-    Route::post('forget', [ForgetPasswordController::class, 'forget'])->name('forget');
-    Route::post('verify-otp', [ForgetPasswordController::class, 'verify'])->name('verify');
-    Route::post('reset', [ResetPasswordController::class, 'reset'])->name('reset');
-    Route::apiResource('countries', CountryController::class)->only(['index', 'show']);
+    Route::post('login', LoginController::class);
+    Route::post('reset-password', ResetPasswordController::class);
+
+    // OTP Routes
+    Route::post('send-otp', [OTPController::class, 'send']);
+    Route::post('check-otp', [OTPController::class, 'check']);
+    Route::post('verify-otp', [OTPController::class, 'verify']);
 
     Route::middleware(['auth:sanctum'])->group(function () {
+        /*
+       |--------------------------------------------------------------------------
+       | Auth Routes
+       |--------------------------------------------------------------------------
+       */
+        Route::get('me', [ProfileController::class, 'user']);
+        Route::post('update-profile', [ProfileController::class, 'updateProfile']);
+        Route::post('destroy-avatar', [ProfileController::class, 'destroyAvatar']);
+        Route::post('logout', LogoutController::class);
+
         /*
         |--------------------------------------------------------------------------
         | activity log Routes
         |--------------------------------------------------------------------------
         */
-        Route::prefix('get-activity-logs')->group(function () {
+        Route::prefix('activity-logs')->group(function () {
             Route::get('/', [ActivityLogController::class, 'index']);
             Route::get('/{activity}', [ActivityLogController::class, 'show']);
         });
 
         /*
         |--------------------------------------------------------------------------
-        | User Routes
+        | Roles && Permissions Routes
         |--------------------------------------------------------------------------
         */
-        Route::prefix('users')->name('users.')->group(function () {
-            Route::delete('delete-all', [UserController::class, 'destroyAll'])->name('destroyAll');
-            Route::post('{id}/restore', [UserController::class, 'restore'])->name('restore');
-            Route::post('{user}/change-status', [UserController::class, 'changeStatus'])->name('changeStatus');
-            Route::delete('{id}/force-delete', [UserController::class, 'forceDelete'])->name('forceDelete');
+        Route::get('permissions', [PermissionController::class, 'index']);
 
-            Route::apiResource('/', UserController::class)->parameters(['' => 'user']);
+        Route::prefix('roles')->group(function () {
+            Route::delete('delete', [RoleController::class, 'destroy']);
+            Route::apiResource('/', RoleController::class)->parameters(['' => 'role'])->except(['destroy']);
         });
-
-        //Role Routes
-        Route::apiResource('roles', RoleController::class);
-
-        Route::delete('permissions/delete-all', [PermissionController::class, 'destroyAll']);
-        Route::apiResource('permissions', PermissionController::class);
-
-        //Profile Routes
-        Route::get('me', [ProfileController::class, 'user']);
-        Route::post('update-profile', [ProfileController::class, 'updateProfile']);
-        Route::post('destroy-avatar', [ProfileController::class, 'destroyAvatar']);
-        Route::post('logout', [LoginController::class, 'logout']);
 
         /*
         |--------------------------------------------------------------------------
@@ -98,10 +99,8 @@ Route::middleware('tenant')->group(function () {
         | Setting Routes
         |--------------------------------------------------------------------------
         */
-        Route::get('settings', [SettingController::class, 'index']);
-        Route::get('settings', [SettingController::class, 'publicSetting']);
-        Route::post('set-settings', [SettingController::class, 'setConfigForUser']);
-        Route::post('send-test-mail', [SettingController::class, 'testMailCredentials']);
+        Route::apiResource('settings', SettingController::class)->only(['index', 'update']);
+        Route::post('send-test-mail', [TestCredentialsController::class, 'testEmail']);
 
         /*
         |--------------------------------------------------------------------------
@@ -112,5 +111,19 @@ Route::middleware('tenant')->group(function () {
         Route::delete('countries/delete', [CountryController::class, 'destroy']);
         Route::delete('countries/force-delete', [CountryController::class, 'forceDelete']);
         Route::apiResource('countries', CountryController::class);
+
+        /*
+         |--------------------------------------------------------------------------
+         | User Routes
+         |--------------------------------------------------------------------------
+         */
+        Route::prefix('users')->group(function () {
+            Route::delete('force-delete', [UserController::class, 'forceDelete']);
+            Route::delete('delete', [UserController::class, 'destroy']);
+            Route::post('restore', [UserController::class, 'restore']);
+            Route::put('toggle-active', [UserController::class, 'toggleActive']);
+            Route::apiResource('/', UserController::class)->parameters(['' => 'user'])->except(['destroy']);
+        });
     });
+
 });

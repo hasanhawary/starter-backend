@@ -68,7 +68,7 @@ trait HasToggleActiveMethods
         $models = $query->get();
 
         // Ensure Is Support IsActive action
-        if (!Schema::hasColumn($this->model::query()->getTable(), 'is_active')) {
+        if (!Schema::hasColumn((new $this->model())->getTable(), 'is_active')) {
             return failResponse(__('api.model_not_support_toggle', ['model' => class_basename($this->model)]));
         }
 

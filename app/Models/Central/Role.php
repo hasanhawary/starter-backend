@@ -2,11 +2,11 @@
 
 namespace App\Models\Central;
 
-use App\Scopes\User\RoleScopes;
+use App\Models\SpatieRole;
+use App\Scopes\Central\User\RoleScopes;
 use App\Trait\Global\CreatedByObserver;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Spatie\Permission\Models\Role as SpatieRole;
 use Spatie\Translatable\HasTranslations;
 
 class Role extends SpatieRole
@@ -34,11 +34,13 @@ class Role extends SpatieRole
     */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(Admin::class, 'created_by');
+        return $this->belongsTo(getAuthModel(), 'created_by');
     }
 
-    public function roleAdmins(): MorphToMany
+    public function roleUsers(): MorphToMany
     {
-        return $this->morphedByMany(Admin::class, 'model', 'model_has_roles', 'role_id', 'model_id');
+        return $this->morphedByMany(getAuthModel(), 'model', 'model_has_roles', 'role_id', 'model_id');
     }
+
+
 }

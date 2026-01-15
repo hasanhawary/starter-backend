@@ -4,15 +4,12 @@ namespace App\Http\Controllers\API\Central\Admin;
 
 use App\Filters\Central\Global\JsonDisplayNameFilter;
 use App\Filters\Central\Global\OrderByFilter;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Admin\PermissionRequest;
-use App\Http\Requests\Central\Global\Other\DeleteAllRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Admin\PermissionResource;
-use App\Models\Central\Admin;
 use App\Models\Central\Permission;
 use App\Trait\Global\HasDeleteMethods;
-use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -20,12 +17,13 @@ use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use function __;
 
-class PermissionController extends Controller implements HasMiddleware
+class PermissionController extends BaseController implements HasMiddleware
 {
     use HasDeleteMethods;
 
     public function __construct()
     {
+        parent::__construct();
         $this->model = Permission::class;
     }
 

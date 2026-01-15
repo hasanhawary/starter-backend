@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\API\Central\Global\Help;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Global\Help\HelpEnumRequest;
 use App\Http\Requests\Central\Global\Help\HelpModelRequest;
 use HasanHawary\LookupManager\Facades\Lookup;
 use Illuminate\Http\JsonResponse;
 
-class HelpController extends Controller
+class HelpController extends BaseController
 {
     /**
      * Retrieves and transforms data from specified models based on the provided request.

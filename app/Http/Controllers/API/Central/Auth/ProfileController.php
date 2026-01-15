@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\API\Central\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Central\Admin\UpdateAdminProfileRequest;
+use App\Http\Controllers\API\BaseController;
+use App\Http\Requests\Central\Auth\UpdateProfileRequest;
 use App\Http\Resources\Central\Admin\AdminResource;
 use App\Http\Resources\Central\Auth\SessionResource;
 use App\Models\Central\Admin;
@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
-class ProfileController extends Controller
+class ProfileController extends BaseController
 {
     /**
      * Return current user info and all active sessions
@@ -22,7 +22,7 @@ class ProfileController extends Controller
      */
     public function user(): JsonResponse
     {
-        $user = Admin::with('roles.permissions')->find(auth('admin')->id());
+        $user = Admin::with('roles.permissions')->find(auth()->id());
 
         if (!$user) {
             return failResponse(trans('api.user_not_found'));
@@ -38,11 +38,11 @@ class ProfileController extends Controller
     }
 
     /**
-     * @param UpdateAdminProfileRequest $request
+     * @param UpdateProfileRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function updateProfile(UpdateAdminProfileRequest $request): JsonResponse
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
         $data = Arr::except(array_filter($request->validated(), fn($value) => $value !== null), 'avatar');
 

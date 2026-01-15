@@ -6,7 +6,7 @@ use App\Exceptions\EmailVerifiedException;
 use App\Exceptions\InActiveUserException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
 use App\Exceptions\InvalidOtpException;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Auth\LoginRequest;
 use App\Http\Resources\Central\Auth\LoginResource;
 use App\Models\Central\Admin;
@@ -14,12 +14,15 @@ use App\Services\Auth\LoginService;
 use App\Services\Auth\ThrottleService;
 use Illuminate\Http\JsonResponse;
 
-class LoginController extends Controller
+class LoginController extends BaseController
 {
     public function __construct(
-        protected LoginService $loginService,
+        protected LoginService    $loginService,
         protected ThrottleService $throttleService
-    ) {}
+    )
+    {
+        parent::__construct();
+    }
 
     /**
      * Handle admin login
@@ -31,8 +34,8 @@ class LoginController extends Controller
 
         try {
             $userData = $this->loginService
-                ->setModel(Admin::class)
-                ->setGuard('admin')
+                ->setModel($this->userModel)
+                ->setGuard($this->guard)
                 ->attempt($request->validated());
 
             $this->throttleService->clearRateLimit($key);

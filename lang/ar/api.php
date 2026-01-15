@@ -117,4 +117,5 @@ return [
     'record_deactivated' => 'تم تعطيل السجل بنجاح',
     'model_activated' => 'تم تفعيل :model بنجاح',
     'model_deactivated' => 'تم تعطيل :model بنجاح',
+    'tenant' => 'العميل'
 ];

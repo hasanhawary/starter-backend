@@ -6,7 +6,7 @@ use App\Filters\Central\Admin\AdminFilter;
 use App\Filters\Central\Global\ActiveFilter;
 use App\Filters\Central\Global\OrderByFilter;
 use App\Filters\Central\Global\TrashedFilter;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Admin\AdminRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Admin\AdminResource;
@@ -21,12 +21,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Throwable;
 
-class AdminController extends Controller
+class AdminController extends BaseController
 {
     use HasDeleteMethods, HasToggleActiveMethods;
 
     public function __construct()
     {
+        parent::__construct();
         $this->model = Admin::class;
         $this->beforeDelete('force', fn(Admin $admin) => Media::delete($admin->avatar));
     }

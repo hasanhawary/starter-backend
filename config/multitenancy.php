@@ -21,7 +21,7 @@ return [
      * This class should extend `Spatie\Multitenancy\TenantFinder\TenantFinder`
      *
      */
-    'tenant_finder' => null,
+    'tenant_finder' => Spatie\Multitenancy\TenantFinder\DomainTenantFinder::class,
 
     /*
      * These fields are used by tenant:artisan command to match one or more tenant.
@@ -61,12 +61,12 @@ return [
      *
      * Set to `null` to use the default connection.
      */
-    'tenant_database_connection_name' => null,
+    'tenant_database_connection_name' => 'tenant',
 
     /*
      * The connection name to reach the landlord database.
      */
-    'landlord_database_connection_name' => null,
+    'landlord_database_connection_name' => "mysql",
 
     /*
      * This key will be used to associate the current tenant in the context

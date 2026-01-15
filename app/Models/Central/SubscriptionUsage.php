@@ -2,14 +2,13 @@
 
 namespace App\Models\Central;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 use App\Trait\Global\CreatedByObserver;
 use App\Trait\Global\LogsActivityOptions;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
+use App\Models\BaseModel;
 
-class SubscriptionUsage extends Model
+class SubscriptionUsage extends BaseModel
 {
     use CreatedByObserver, LogsActivityOptions;
 

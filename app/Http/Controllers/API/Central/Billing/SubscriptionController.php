@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\Central\Billing;
 
 use App\Enum\Billing\SubscriptionStatusEnum;
 use App\Filters\Central\Global\OrderByFilter;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Billing\ChangeSubscriptionStatusRequest;
 use App\Http\Requests\Central\Billing\RenewSubscriptionRequest;
 use App\Http\Requests\Central\Billing\SubscriptionRequest;
@@ -20,12 +20,13 @@ use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use function __;
 
-class SubscriptionController extends Controller implements HasMiddleware
+class SubscriptionController extends BaseController implements HasMiddleware
 {
     use HasDeleteMethods;
 
     public function __construct(protected SubscriptionService $subscriptionService)
     {
+        parent::__construct();
         $this->setDeleteModel(Subscription::class);
     }
 

@@ -1,21 +1,25 @@
 <?php
 
-use App\Http\Controllers\API\Central\Admin\AdminController;
 use App\Http\Controllers\API\Central\Admin\PermissionController;
 use App\Http\Controllers\API\Central\Admin\RoleController;
+use App\Http\Controllers\API\Central\Admin\AdminController;
 use App\Http\Controllers\API\Central\Auth\LoginController;
 use App\Http\Controllers\API\Central\Auth\LogoutController;
 use App\Http\Controllers\API\Central\Auth\OTPController;
 use App\Http\Controllers\API\Central\Auth\ProfileController;
 use App\Http\Controllers\API\Central\Auth\ResetPasswordController;
+use App\Http\Controllers\API\Central\Billing\PlanController;
+use App\Http\Controllers\API\Central\Billing\PlanFeatureController;
+use App\Http\Controllers\API\Central\Billing\SubscriptionController;
+use App\Http\Controllers\API\Central\Billing\SubscriptionUsageController;
 use App\Http\Controllers\API\Central\DataEntry\CountryController;
+use App\Http\Controllers\API\Central\Global\Captcha\CaptchaController;
 use App\Http\Controllers\API\Central\Global\Chunk\ChunkFileController;
 use App\Http\Controllers\API\Central\Global\Export\ExportController;
 use App\Http\Controllers\API\Central\Global\Help\HelpController;
+use App\Http\Controllers\API\Central\Global\Log\ActivityLogController;
 use App\Http\Controllers\API\Central\Global\Notification\NotificationController;
 use App\Http\Controllers\API\Central\Global\Report\ReportController;
-use App\Http\Controllers\API\Central\Global\Setting\ActivityLogController;
-use App\Http\Controllers\API\Central\Global\Setting\CaptchaController;
 use App\Http\Controllers\API\Central\Global\Setting\SettingController;
 use App\Http\Controllers\API\Central\Global\Setting\TestCredentialsController;
 use App\Http\Controllers\API\Central\Tenant\TenantController;
@@ -55,32 +59,6 @@ Route::prefix('central')->group(function () {
         Route::post('update-profile', [ProfileController::class, 'updateProfile']);
         Route::post('destroy-avatar', [ProfileController::class, 'destroyAvatar']);
         Route::post('logout', LogoutController::class);
-
-        /*
-        |--------------------------------------------------------------------------
-        | User Routes
-        |--------------------------------------------------------------------------
-        */
-        Route::prefix('admins')->group(function () {
-            Route::delete('force-delete', [AdminController::class, 'forceDelete']);
-            Route::delete('delete', [AdminController::class, 'destroy']);
-            Route::post('restore', [AdminController::class, 'restore']);
-            Route::put('toggle-active', [AdminController::class, 'toggleActive']);
-            Route::apiResource('/', AdminController::class)->parameters(['' => 'admin'])->except(['destroy']);
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Tenant Routes
-        |--------------------------------------------------------------------------
-        */
-        Route::prefix('tenants')->group(function () {
-            Route::delete('force-delete', [TenantController::class, 'forceDelete']);
-            Route::delete('delete', [TenantController::class, 'destroy']);
-            Route::post('restore', [TenantController::class, 'restore']);
-            Route::put('toggle-active', [TenantController::class, 'toggleActive']);
-            Route::apiResource('/', TenantController::class)->parameters(['' => 'admin'])->except(['destroy']);
-        });
 
         /*
         |--------------------------------------------------------------------------
@@ -137,36 +115,57 @@ Route::prefix('central')->group(function () {
         Route::delete('countries/delete', [CountryController::class, 'destroy']);
         Route::delete('countries/force-delete', [CountryController::class, 'forceDelete']);
         Route::apiResource('countries', CountryController::class);
-    });
 
-    Route::prefix('billing')
-        ->middleware(['auth:sanctum', 'central'])
-        ->group(function () {
-
-            // Plans
-            Route::apiResource('plans', PlanController::class);
-
-            // Plan Features
-            Route::apiResource('plan-features', PlanFeatureController::class);
-
-            // Subscriptions
-            Route::apiResource('subscriptions', SubscriptionController::class);
-
-            // Subscription usage (read-only in most cases)
-            Route::apiResource('subscription-usage', SubscriptionUsageController::class)
-                ->only(['index', 'show']);
-
-            // Subscription management actions
-            Route::prefix('subscriptions')->group(function () {
-                Route::post('{subscription}/change-status', [SubscriptionController::class, 'changeStatus'])
-                    ->name('billing.subscriptions.change-status');
-
-                Route::post('{subscription}/cancel', [SubscriptionController::class, 'cancel'])
-                    ->name('billing.subscriptions.cancel');
-
-                Route::post('{subscription}/renew', [SubscriptionController::class, 'renew'])
-                    ->name('billing.subscriptions.renew');
-            });
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Routes
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('admins')->group(function () {
+            Route::delete('force-delete', [AdminController::class, 'forceDelete']);
+            Route::delete('delete', [AdminController::class, 'destroy']);
+            Route::post('restore', [AdminController::class, 'restore']);
+            Route::put('toggle-active', [AdminController::class, 'toggleActive']);
+            Route::apiResource('/', AdminController::class)->parameters(['' => 'admin'])->except(['destroy']);
         });
 
+        /*
+        |--------------------------------------------------------------------------
+        | Tenant Routes
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('tenants')->group(function () {
+            Route::delete('force-delete', [TenantController::class, 'forceDelete']);
+            Route::delete('delete', [TenantController::class, 'destroy']);
+            Route::post('restore', [TenantController::class, 'restore']);
+            Route::put('toggle-active', [TenantController::class, 'toggleActive']);
+            Route::apiResource('/', TenantController::class)->parameters(['' => 'tenant'])->except(['destroy']);
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Billing Routes
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('billing')
+            ->middleware(['auth:sanctum', 'central'])
+            ->group(function () {
+
+                // Plans
+                Route::apiResource('plans', PlanController::class);
+                Route::apiResource('plan-features', PlanFeatureController::class);
+                Route::apiResource('subscriptions', SubscriptionController::class);
+                Route::apiResource('subscription-usage', SubscriptionUsageController::class)->only(['index', 'show']);
+
+                // Subscription management actions
+                Route::prefix('subscriptions')->group(function () {
+                    Route::post('{subscription}/change-status', [SubscriptionController::class, 'changeStatus'])
+                        ->name('billing.subscriptions.change-status');
+                    Route::post('{subscription}/cancel', [SubscriptionController::class, 'cancel'])
+                        ->name('billing.subscriptions.cancel');
+                    Route::post('{subscription}/renew', [SubscriptionController::class, 'renew'])
+                        ->name('billing.subscriptions.renew');
+                });
+            });
+    });
 });

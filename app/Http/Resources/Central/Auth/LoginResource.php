@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\Central\Auth;
 
-use App\Models\Central\Admin;
 use App\Services\Global\EncryptionService;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Random\RandomException;
@@ -15,7 +15,7 @@ class LoginResource extends JsonResource
      */
     private ?string $token;
 
-    public function __construct(Admin $resource, ?string $token)
+    public function __construct(User $resource, ?string $token)
     {
         parent::__construct($resource);
         $this->token = $token;

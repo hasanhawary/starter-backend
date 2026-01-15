@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\API\Central\Global\Report;
 
 use App\Enum\Global\ReportChartTypeEnum;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Global\Report\ReportRequest;
 use HasanHawary\ReportBuilder\ReportBuilder;
 use Illuminate\Http\JsonResponse;
 
-class ReportController extends Controller
+class ReportController extends BaseController
 {
     /**
      * @param ReportRequest $request

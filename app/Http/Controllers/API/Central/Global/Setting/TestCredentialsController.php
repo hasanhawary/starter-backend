@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API\Central\Global\Setting;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Global\Setting\TestCredentialsRequest;
 use App\Mail\BasicMailWithoutQueue;
 use Illuminate\Http\JsonResponse;
@@ -11,7 +11,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class TestCredentialsController extends Controller implements HasMiddleware
+class TestCredentialsController extends BaseController implements HasMiddleware
 {
     public static function middleware(): array
     {

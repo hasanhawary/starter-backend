@@ -27,6 +27,7 @@ class TenantTableSeeder extends Seeder
 
         foreach ($tenants as $tenant) {
             $tenant =  Tenant::firstOrCreate($tenant);
+            DB::statement("DROP DATABASE IF EXISTS `{$tenant->database}`");
             DB::statement("CREATE DATABASE IF NOT EXISTS `{$tenant->database}`");
         }
     }

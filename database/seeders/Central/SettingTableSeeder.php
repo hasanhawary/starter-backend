@@ -16,12 +16,12 @@ class SettingTableSeeder extends Seeder
     public function run(): void
     {
         $currentBrand = config('brands.default_brand');
-        $this->command->info("🔹 Seeder started for brand: $currentBrand");
+        $this->command->info("Seeder started for brand: $currentBrand");
 
         $brandsConfig = config('brands.brands');
 
         if (!isset($brandsConfig[$currentBrand])) {
-            $this->command->warn("⚠️ Brand '$currentBrand' not found in config. Seeder skipped.");
+            $this->command->warn("Brand '$currentBrand' not found in config. Seeder skipped.");
             return;
         }
 
@@ -33,7 +33,7 @@ class SettingTableSeeder extends Seeder
 
         app(SettingService::class)->clearCache();
 
-        $this->command->info("✅ Seeder finished for brand: $currentBrand");
+        $this->command->info("Seeder finished for brand: $currentBrand");
     }
 
     /**
@@ -67,15 +67,15 @@ class SettingTableSeeder extends Seeder
                         );
 
                         if ($setting->wasRecentlyCreated) {
-                            $this->command->info("➕ Created: [$group] {$item['key']}");
+                            $this->command->info("Created: [$group] {$item['key']}");
                         } else {
-                            $this->command->comment("🔄 Updated: [$group] {$item['key']}");
+                            $this->command->comment("Updated: [$group] {$item['key']}");
                         }
                     }
                 } else {
                     // Associative array = nested group
                     $newGroupPrefix = $groupPrefix ? $groupPrefix . '.' . $key : $key;
-                    $this->command->line("📂 Processing group: $newGroupPrefix");
+                    $this->command->line("Processing group: $newGroupPrefix");
                     $this->storeSettings($value, $newGroupPrefix);
                 }
             }

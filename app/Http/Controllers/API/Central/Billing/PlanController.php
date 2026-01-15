@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API\Central\Billing;
 
 use App\Filters\Central\Global\OrderByFilter;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Billing\PlanRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Billing\PlanResource;
@@ -16,12 +16,13 @@ use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use function __;
 
-class PlanController extends Controller implements HasMiddleware
+class PlanController extends BaseController implements HasMiddleware
 {
     use HasDeleteMethods;
 
     public function __construct()
     {
+        parent::__construct();
         $this->setDeleteModel(Plan::class);
     }
     public static function middleware(): array

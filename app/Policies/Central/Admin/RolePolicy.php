@@ -2,9 +2,9 @@
 
 namespace App\Policies\Central\Admin;
 
-use App\Models\Central\Admin;
 use App\Models\Central\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User;
 
 class RolePolicy
 {
@@ -12,7 +12,7 @@ class RolePolicy
 
     const string ROOT = 'root';
 
-    public function view(Admin $user, ?Role $role = null): bool
+    public function view(User $user, ?Role $role = null): bool
     {
         return $this->canAct($user, $role, [
             'view-all-role',
@@ -20,26 +20,26 @@ class RolePolicy
         ]);
     }
 
-    public function create(Admin $user, ?Role $role = null): bool
+    public function create(User $user, ?Role $role = null): bool
     {
         return $user->can('create-role') && $this->ownsOrAll($user, $role);
     }
 
-    public function update(Admin $user, Role $role): bool
+    public function update(User $user, Role $role): bool
     {
         return $user->can('update-role')
             && ! $this->isProtectedRole($role)
             && $this->ownsOrAll($user, $role);
     }
 
-    public function delete(Admin $user, Role $role): bool
+    public function delete(User $user, Role $role): bool
     {
         return $user->can('delete-role')
             && ! $this->isProtectedRole($role)
             && $this->ownsOrAll($user, $role);
     }
 
-    public function toggleActive(Admin $user, Role $role): bool
+    public function toggleActive(User $user, Role $role): bool
     {
         return $user->can('toggle-active-role')
             && ! $this->isProtectedRole($role)
@@ -51,7 +51,7 @@ class RolePolicy
     | Helper Methods
     |--------------------------------------------------------------------------
     */
-    protected function ownsOrAll(Admin $user, ?Role $role): bool
+    protected function ownsOrAll(User $user, ?Role $role): bool
     {
         return !$role
             || $user->can('view-all-role')
@@ -69,7 +69,7 @@ class RolePolicy
     /**
      * Check permissions + ownership
      */
-    protected function canAct(Admin $user, ?Role $role, array $permissions): bool
+    protected function canAct(User $user, ?Role $role, array $permissions): bool
     {
         foreach ($permissions as $permission) {
             if ($user->can($permission)) {

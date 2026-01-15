@@ -5,7 +5,10 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
+    protected $connection = 'tenant';
+
     /**
      * Run the migrations.
      */
@@ -18,8 +21,8 @@ return new class extends Migration {
             $table->text('group')->nullable();
             $table->json('placeholder')->nullable();
             $table->json('label')->nullable();
-            $table->boolean('is_env')->default(false);
             $table->boolean('is_multi_lang')->default(false);
+            $table->boolean('is_env')->default(false);
             $table->string('type')->default(SettingTypeEnum::Text->value);
             $table->timestamps();
         });

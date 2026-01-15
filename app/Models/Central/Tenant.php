@@ -2,26 +2,28 @@
 
 namespace App\Models\Central;
 
-use App\Models\Admin;
+use App\Enum\Tenant\TenantStatusEnum;
 use App\Trait\Global\CreatedByObserver;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
 
 class Tenant extends \Spatie\Multitenancy\Models\Tenant
 {
-    use HasUuids, SoftDeletes, CreatedByObserver;
+    use HasUuids, SoftDeletes, CreatedByObserver, UsesLandlordConnection;
 
     protected $keyType = 'string';
     public $incrementing = false;
 
     public bool $inPermission = true;
-    public array $specialOperations = ['toggle-active'];
+    public array $specialOperations = ['force-delete', 'restore', 'toggle-active'];
 
     protected $fillable = [
         'name',
         'domain',
         'database',
+        'status',
         'is_active',
         'settings',
         'created_by',
@@ -29,6 +31,7 @@ class Tenant extends \Spatie\Multitenancy\Models\Tenant
 
     protected $casts = [
         'is_active' => 'boolean',
+        'status' => TenantStatusEnum::class,
         'settings' => 'array',
     ];
 

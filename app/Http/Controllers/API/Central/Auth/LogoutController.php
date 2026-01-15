@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\API\Central\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Models\Central\Admin;
+use App\Http\Controllers\API\BaseController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class LogoutController extends Controller
+class LogoutController extends BaseController
 {
     /**
      * Logout user from current device, all devices, or a specific session
@@ -17,7 +16,7 @@ class LogoutController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        $user = auth('admin')->user();
+        $user = auth()->user();
 
         if (!$user) {
             return failResponse(trans('api.user_not_found'));

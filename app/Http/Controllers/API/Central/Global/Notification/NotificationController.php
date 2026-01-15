@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\API\Central\Global\Notification;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Global\Notification\NotificationRequest;
 use App\Http\Resources\Central\Global\Notification\NotificationResource;
 use App\Models\Central\Notification;
 use Illuminate\Http\JsonResponse;
 
-class NotificationController extends Controller
+class NotificationController extends BaseController
 {
     /**
      * @return JsonResponse

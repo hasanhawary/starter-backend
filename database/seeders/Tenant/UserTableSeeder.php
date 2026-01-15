@@ -9,6 +9,8 @@ use HasanHawary\PermissionManager\Facades\Access;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Spatie\Multitenancy\Models\Tenant;
 
 class UserTableSeeder extends Seeder
 {
@@ -19,6 +21,8 @@ class UserTableSeeder extends Seeder
      */
     public function run(): void
     {
+        $guardName = 'sanctum';
+
         // Remove the relationships from pivot tables
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('model_has_roles')->truncate();
@@ -27,30 +31,33 @@ class UserTableSeeder extends Seeder
         DB::table('permissions')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        Access::handle();
+        // Generate Default Role And Permission and assign
+        Access::setGuard($guardName)->handle();
+
+        $tenant = Tenant::current();
+        $domain = Str::before($tenant->domain,'.');
 
         $countryId = Country::first()->id;
-
         User::query()->firstOrCreate([
-            'email' => 'root@wakeb.com'
+            'email' => "root@{$domain}.com"
         ], [
             'name' => 'root',
             'password' => '123456',
-            'phone' => '5412545214',
+            'phone' => '01005164154',
             'phone_code_id' => $countryId,
-            'nationality_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
+            'is_active' => true
         ])->assignRole('root');
 
         User::query()->firstOrCreate([
-            'email' => 'admin@wakeb.com'
+            'email' => "admin@{$domain}.com"
         ], [
             'name' => 'admin',
             'password' => '123456',
-            'phone' => '5412545215',
+            'phone' => '01005164154',
             'phone_code_id' => $countryId,
-            'nationality_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
+            'is_active' => true
         ])->assignRole('admin');
     }
 }

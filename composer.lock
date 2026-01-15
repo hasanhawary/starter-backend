@@ -1891,16 +1891,16 @@
         },
         {
             "name": "hasanhawary/permission-manager",
-            "version": "v1.0.1",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hasanhawary/permission-manager.git",
-                "reference": "70ecd9197d931ab13f288982f65e9d88369540fd"
+                "reference": "5933216f17837748aa0755f66d597f577b59a72b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hasanhawary/permission-manager/zipball/70ecd9197d931ab13f288982f65e9d88369540fd",
-                "reference": "70ecd9197d931ab13f288982f65e9d88369540fd",
+                "url": "https://api.github.com/repos/hasanhawary/permission-manager/zipball/5933216f17837748aa0755f66d597f577b59a72b",
+                "reference": "5933216f17837748aa0755f66d597f577b59a72b",
                 "shasum": ""
             },
             "require": {
@@ -1949,7 +1949,7 @@
                 "issues": "https://github.com/hasanhawary/permission-manager/issues",
                 "source": "https://github.com/hasanhawary/permission-manager"
             },
-            "time": "2025-09-21T01:29:12+00:00"
+            "time": "2026-01-15T15:04:10+00:00"
         },
         {
             "name": "hasanhawary/report-builder",

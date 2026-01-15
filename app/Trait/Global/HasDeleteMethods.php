@@ -2,6 +2,7 @@
 
 namespace App\Trait\Global;
 
+use App\Models\Central\Role;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\JsonResponse;
@@ -163,7 +164,7 @@ trait HasDeleteMethods
             'force' => method_exists($model, 'forceDelete')
                 ? $model->forceDelete()
                 : $model->delete(),
-            default => $model->delete(),
+            default => $model instanceof Role ? $model->deleteQuietly() : $model->delete()
         };
     }
 

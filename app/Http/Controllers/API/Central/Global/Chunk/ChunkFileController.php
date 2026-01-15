@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\API\Central\Global\Chunk;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Global\Chunk\ChunkFileRequest;
 use HasanHawary\MediaManager\Support\ChunkResolver;
 use Illuminate\Http\JsonResponse;
 
-class ChunkFileController extends Controller
+class ChunkFileController extends BaseController
 {
     /**
      * @param ChunkFileRequest $request

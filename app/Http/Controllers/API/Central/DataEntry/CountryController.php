@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\Central\DataEntry;
 
 use App\Filters\Central\Global\JsonDisplayNameFilter;
 use App\Filters\Central\Global\OrderByFilter;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\DataEntry\CountryRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\DataEntry\CountryResource;
@@ -17,12 +17,13 @@ use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use function __;
 
-class CountryController extends Controller implements HasMiddleware
+class CountryController extends BaseController implements HasMiddleware
 {
     use HasDeleteMethods;
 
     public function __construct()
     {
+        parent::__construct();
         $this->model = Country::class;
     }
 

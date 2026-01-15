@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Central\Admin;
 use App\Filters\Central\Global\ActiveFilter;
 use App\Filters\Central\Global\JsonDisplayNameFilter;
 use App\Filters\Central\Global\OrderByFilter;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Admin\RoleRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\Admin\RoleResource;
@@ -19,15 +19,16 @@ use Illuminate\Support\Facades\Gate;
 use Throwable;
 use function __;
 
-class RoleController extends Controller
+class RoleController extends BaseController
 {
     use HasDeleteMethods, HasToggleActiveMethods;
 
     public function __construct()
     {
+        parent::__construct();
         $this->model = Role::class;
 
-        $this->setDeleteGuards('delete', fn(Role $role) => !$role->roleAdmins()->exists())
+        $this->setDeleteGuards('delete', fn(Role $role) => !$role->roleUsers()->exists())
             ->beforeDelete('delete', fn(Role $role) => $role->permissions()->detach());
     }
 

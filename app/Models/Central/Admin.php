@@ -3,16 +3,16 @@
 namespace App\Models\Central;
 
 use App\Enum\User\UserGenderEnum;
-use App\Scopes\User\AdminScopes;
+use App\Models\BaseAuthenticatable;
+use App\Scopes\Central\User\AdminScopes;
 use App\Trait\Global\ApplyNotification;
-use App\Trait\Global\CreatedByAdminObserver;
+use App\Trait\Global\CreatedByObserver;
 use App\Trait\Global\LogsActivityOptions;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
@@ -20,12 +20,11 @@ use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
-class Admin extends Authenticatable implements LdapAuthenticatable
+class Admin extends BaseAuthenticatable implements LdapAuthenticatable
 {
-    use SoftDeletes, AuthenticatesWithLdap, AdminScopes, ApplyNotification, CreatedByAdminObserver, Notifiable, HasApiTokens, HasRoles, InteractsWithSockets, LogsActivityOptions;
+    use SoftDeletes, AuthenticatesWithLdap, AdminScopes, ApplyNotification, CreatedByObserver, Notifiable, HasApiTokens, HasRoles, InteractsWithSockets, LogsActivityOptions;
 
     protected string $guard_name = 'admin';
-
     public bool $inPermission = true;
     public array $basicOperations = ['create', 'update', 'delete'];
     public array $specialOperations = ['view-all', 'view-own', 'restore', 'force-delete', 'toggle-active'];

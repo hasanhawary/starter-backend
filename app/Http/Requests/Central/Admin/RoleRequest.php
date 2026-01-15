@@ -3,12 +3,8 @@
 namespace App\Http\Requests\Central\Admin;
 
 use App\Http\Requests\BaseFormRequest;
-use App\Http\Resources\Central\Admin\AdminResource;
 use App\Http\Resources\Central\Admin\RoleResource;
-use App\Http\Resources\Central\DataEntry\CountryResource;
-use App\Models\Central\Admin;
-use App\Models\Central\Country;
-use App\Models\Tenant\Role;
+use App\Models\Central\Role;
 use App\Rules\TranslatableRequired;
 use App\Rules\UniqueCheck;
 use Illuminate\Validation\Rule;
@@ -58,7 +54,7 @@ class RoleRequest extends BaseFormRequest
         parent::prepareForValidation();
 
         $this->merge([
-            'guard_name' => $this->guard_name ?? 'admin',
+            'guard_name' => detectPermissionGuard(),
             'permissions' => array_values(array_unique(array_merge($this->permissions ?? [], config('roles.default.permissions'))))
         ]);
     }

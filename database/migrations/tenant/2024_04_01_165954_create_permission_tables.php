@@ -6,6 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
+    protected $connection = 'tenant';
+
     /**
      * Run the migrations.
      */

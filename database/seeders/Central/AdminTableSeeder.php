@@ -21,6 +21,8 @@ class AdminTableSeeder extends Seeder
      */
     public function run(): void
     {
+        $guardName = 'admin';
+
         // Remove the relationships from pivot tables
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('model_has_roles')->truncate();
@@ -29,7 +31,8 @@ class AdminTableSeeder extends Seeder
         DB::table('permissions')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        Access::handle();
+        // Generate Default Role And Permission and assign
+        Access::setGuard($guardName)->handle();
 
         $countryId = Country::first()->id;
         $domain = Str::snake(config('brands.default_brand'));
@@ -38,7 +41,7 @@ class AdminTableSeeder extends Seeder
         ], [
             'name' => 'root',
             'password' => '123456',
-            'phone' => '5412545214',
+            'phone' => '01005164154',
             'phone_code_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
             'is_active' => true
@@ -49,7 +52,7 @@ class AdminTableSeeder extends Seeder
         ], [
             'name' => 'admin',
             'password' => '123456',
-            'phone' => '5412545215',
+            'phone' => '01005164154',
             'phone_code_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
             'is_active' => true

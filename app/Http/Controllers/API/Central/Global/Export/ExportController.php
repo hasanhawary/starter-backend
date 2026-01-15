@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\API\Central\Global\Export;
 
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Central\Global\Export\ExportRequest;
 use HasanHawary\ExportBuilder\ExportBuilder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class ExportController extends Controller
+class ExportController extends BaseController
 {
     /**
      * @param ExportRequest $request

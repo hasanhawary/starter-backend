@@ -1,29 +1,37 @@
 <?php
+
 namespace App\Http\Controllers\API\Tenant\User;
 
+use App\Filters\Tenant\User\UserFilter;
 use App\Filters\Central\Global\ActiveFilter;
 use App\Filters\Central\Global\OrderByFilter;
 use App\Filters\Central\Global\TrashedFilter;
-use App\Filters\Central\Admin\AdminFilter;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Central\Admin\AdminRequest;
-use App\Http\Requests\Central\Global\Other\DeleteAllRequest;
+use App\Http\Controllers\API\BaseController;
+use App\Http\Requests\Tenant\User\UserRequest;
 use App\Http\Requests\Central\Global\Other\PageRequest;
-use App\Http\Resources\Central\Admin\AdminResource;
-use App\Mail\BasicMail;
+use App\Http\Resources\Tenant\User\UserResource;
 use App\Models\Central\Role;
 use App\Models\Tenant\User;
+use App\Trait\Global\HasDeleteMethods;
+use App\Trait\Global\HasToggleActiveMethods;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
 use Throwable;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
+    use HasDeleteMethods, HasToggleActiveMethods;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->model = User::class;
+        $this->beforeDelete('force', fn(User $user) => Media::delete($user->avatar));
+    }
+
     /**
      * @param PageRequest $request
      * @return JsonResponse
@@ -34,33 +42,48 @@ class UserController extends Controller
 
         $query = app(Pipeline::class)
             ->send(User::with('roles')->related())
-            ->through([AdminFilter::class, ActiveFilter::class, TrashedFilter::class, OrderByFilter::class])
+            ->through([UserFilter::class, ActiveFilter::class, TrashedFilter::class, OrderByFilter::class])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->pageSize, AdminResource::class));
+        return successResponse(fetchData($query, $request->pageSize, UserResource::class));
     }
 
     /**
-     * @param AdminRequest $request
+     * @param UserRequest $request
      * @return JsonResponse
      * @throws Throwable
      */
-    public function store(AdminRequest $request): JsonResponse
+    public function store(UserRequest $request): JsonResponse
     {
         Gate::authorize('create', User::class);
 
         return DB::transaction(function () use ($request) {
-            $user = User::create($this->prepareData($request));
+            $user = User::create($request->validated());
             $this->syncRelations($user, $request);
 
-            DB::afterCommit(function () use ($user, $request) {
-                $this->sendUserCredentialsEmail($user, $request);
-            });
+            DB::afterCommit(fn() => $this->sendCredentials($user, $request));
 
-            return successResponse(
-                new AdminResource($user->load('roles')),
-                __('api.created_success')
-            );
+            return successResponse(new UserResource($user->refresh()), __('api.created_success'));
+        });
+    }
+
+    /**
+     * @param UserRequest $request
+     * @param User $user
+     * @return JsonResponse
+     * @throws Throwable
+     */
+    public function update(UserRequest $request, User $user): JsonResponse
+    {
+        Gate::authorize('update', $user);
+
+        return DB::transaction(function () use ($user, $request) {
+            $user->update($request->validated());
+            $this->syncRelations($user, $request);
+
+            DB::afterCommit(fn() => $this->sendCredentials($user->refresh(), $request));
+
+            return successResponse(new UserResource($user->refresh()), __('api.updated_success'));
         });
     }
 
@@ -72,95 +95,7 @@ class UserController extends Controller
     {
         Gate::authorize('view', $user);
 
-        return successResponse(new AdminResource($user->load('roles')));
-    }
-
-    /**
-     * @param AdminRequest $request
-     * @param User $user
-     * @return JsonResponse
-     * @throws Throwable
-     */
-    public function update(AdminRequest $request, User $user): JsonResponse
-    {
-        Gate::authorize('update', $user);
-
-        return DB::transaction(function () use ($user, $request) {
-            $user->update($this->prepareData($request));
-            $this->syncRelations($user, $request);
-
-            DB::afterCommit(function () use ($user, $request) {
-                $this->sendUserCredentialsEmail($user->refresh(), $request);
-            });
-
-            return successResponse(new AdminResource($user->refresh()->load('roles')), __('api.updated_success'));
-        });
-    }
-
-    /**
-     * @param User $user
-     * @return JsonResponse
-     */
-    public function destroy(User $user): JsonResponse
-    {
-        Gate::authorize('delete', $user);
-
-        Media::delete($user->avatar);
-        $user->delete();
-
-        return successResponse(msg: __('api.deleted_success'));
-    }
-
-    /**
-     * @param DeleteAllRequest $request
-     * @return JsonResponse
-     */
-    public function destroyAll(DeleteAllRequest $request): JsonResponse
-    {
-        Gate::authorize('delete', User::class);
-
-        User::whereIn('id', $request->ids)->delete();
-
-        return successResponse(msg: __('api.deleted_success'));
-    }
-
-    /**
-     * @param int $id
-     * @return JsonResponse
-     */
-
-    public function restore(int $id): JsonResponse
-    {
-        Gate::authorize('restore', User::class);
-
-        User::onlyTrashed()->findOrFail($id)->restore();
-
-        return successResponse(msg: __('api.restored_success'));
-    }
-
-    /**
-     * @param int $id
-     * @return JsonResponse
-     */
-    public function forceDelete(int $id): JsonResponse
-    {
-        Gate::authorize('delete', User::class);
-
-        User::onlyTrashed()->findOrFail($id)->forceDelete();
-
-        return successResponse(msg: __('api.deleted_success'));
-    }
-
-    /**
-     * @param User $user
-     * @return JsonResponse
-     */
-    public function changeStatus(User $user): JsonResponse
-    {
-        $user->is_active = ! $user->is_active;
-        $user->save();
-
-        return successResponse(msg: __('api.updated_success'));
+        return successResponse(new UserResource($user->load('roles')));
     }
 
     /*
@@ -168,35 +103,37 @@ class UserController extends Controller
     | Helper Methods
     |--------------------------------------------------------------------------
     */
-    private function syncRelations(User $user, AdminRequest $request): void
+    private function syncRelations(User $user, UserRequest $request): void
     {
         when($request->filled('roles'), static fn() => $user->syncRoles(Role::whereId($request->roles)->pluck('name')));
         when($request->filled('permissions'), static fn() => $user->syncPermissions($request->permissions));
     }
 
-    private function prepareData(AdminRequest $request): array
+    /**
+     * @param User $user
+     * @param UserRequest $request
+     * @param bool $isCreate
+     * @return void
+     */
+    private function sendCredentials(User $user, UserRequest $request, bool $isCreate = true): void
     {
-        return Arr::except($request->validated(), ['permissions', 'roles']);
-    }
+        // Skip update if nothing changed
+        if (!$isCreate && !($user->isDirty('email') || $user->isDirty('password'))) {
+            return;
+        }
 
-    private function sendUserCredentialsEmail(User $user, $request): void
-    {
-        $plainPassword = (string) $request->input('password');
-        $code          = \App\Models\Country::whereKey($request->input('phone_code_id'))->value('phone_code');
-        $number        = $request->input('phone');
-
-        $fullPhone = trim(($code ?? '') . ($number ?? ''));
-        $fullPhone = preg_replace('/\s+/', '', $fullPhone) ?: '---';
-
-        $data = [
-            'title'          => 'user_data',
-            'name'           => $request->input('name'),
-            'email'          => $request->input('email'),
-            'phone'          => $fullPhone,
-            'plain_password' => $plainPassword,
-            'created_at'     => now()->format('Y-m-d H:i'),
-        ];
-
-        Mail::to($user->email)->send(new BasicMail($user, $data));
+        $user->sendNotification([
+            'title' => $isCreate ? 'user_data_title' : 'update_user_data_title',
+            'msg' => sprintf(
+                $isCreate
+                    ? 'user_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|created_at=>%s'
+                    : 'update_user_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|updated_at=>%s',
+                $request->name,
+                $request->email,
+                $user->getFullPhone(),
+                (string)$request->password,
+                now()->format('Y-m-d H:i')
+            )
+        ], ['email']);
     }
 }
