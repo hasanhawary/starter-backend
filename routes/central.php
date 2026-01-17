@@ -8,10 +8,10 @@ use App\Http\Controllers\API\Central\Auth\LogoutController;
 use App\Http\Controllers\API\Central\Auth\OTPController;
 use App\Http\Controllers\API\Central\Auth\ProfileController;
 use App\Http\Controllers\API\Central\Auth\ResetPasswordController;
-use App\Http\Controllers\API\Central\Billing\PlanController;
-use App\Http\Controllers\API\Central\Billing\PlanFeatureController;
-use App\Http\Controllers\API\Central\Billing\SubscriptionController;
-use App\Http\Controllers\API\Central\Billing\SubscriptionUsageController;
+use App\Http\Controllers\API\Central\Subscription\PlanController;
+use App\Http\Controllers\API\Central\Subscription\PlanFeatureController;
+use App\Http\Controllers\API\Central\Subscription\SubscriptionController;
+use App\Http\Controllers\API\Central\Subscription\SubscriptionUsageController;
 use App\Http\Controllers\API\Central\DataEntry\CountryController;
 use App\Http\Controllers\API\Central\Global\Captcha\CaptchaController;
 use App\Http\Controllers\API\Central\Global\Chunk\ChunkFileController;
@@ -144,28 +144,34 @@ Route::prefix('central')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | Billing Routes
+        | Subscription Routes
         |--------------------------------------------------------------------------
         */
-        Route::prefix('billing')
-            ->middleware(['auth:sanctum', 'central'])
-            ->group(function () {
+        // Plans
+        Route::prefix('plans')->group(function () {
+            Route::post('delete', [PlanController::class, 'destroy']);
+            Route::post('restore', [PlanController::class, 'restore']);
+            Route::delete('force-delete', [PlanController::class, 'forceDelete']);
+            Route::put('toggle-active', [PlanController::class, 'toggleActive']);
+            Route::apiResource('/', TenantController::class)->parameters(['' => 'plan'])->except(['destroy']);
+        });
 
-                // Plans
-                Route::apiResource('plans', PlanController::class);
-                Route::apiResource('plan-features', PlanFeatureController::class);
-                Route::apiResource('subscriptions', SubscriptionController::class);
-                Route::apiResource('subscription-usage', SubscriptionUsageController::class)->only(['index', 'show']);
+        Route::prefix('plan-features')->group(function () {
+            Route::post('delete', [PlanFeatureController::class, 'destroy']);
+            Route::put('toggle-active', [PlanFeatureController::class, 'toggleActive']);
+            Route::apiResource('/', PlanFeatureController::class)->parameters(['' => 'planFeature'])->except(['destroy']);
+        });
 
-                // Subscription management actions
-                Route::prefix('subscriptions')->group(function () {
-                    Route::post('{subscription}/change-status', [SubscriptionController::class, 'changeStatus'])
-                        ->name('billing.subscriptions.change-status');
-                    Route::post('{subscription}/cancel', [SubscriptionController::class, 'cancel'])
-                        ->name('billing.subscriptions.cancel');
-                    Route::post('{subscription}/renew', [SubscriptionController::class, 'renew'])
-                        ->name('billing.subscriptions.renew');
-                });
-            });
+        // Subscriptions
+        Route::prefix('subscriptions')->group(function () {
+            Route::post('delete', [SubscriptionController::class, 'destroy']);
+            Route::post('{subscription}/change-status', [SubscriptionController::class, 'changeStatus']);
+            Route::post('{subscription}/cancel', [SubscriptionController::class, 'cancel']);
+            Route::post('{subscription}/renew', [SubscriptionController::class, 'renew']);
+            Route::apiResource('subscriptions', SubscriptionController::class)->parameters(['' => 'subscription'])->except(['destroy']);
+        });
+
+        Route::post('delete', [SubscriptionUsageController::class, 'destroy']);
+        Route::apiResource('subscription-usage', SubscriptionUsageController::class)->except(['destroy']);
     });
 });

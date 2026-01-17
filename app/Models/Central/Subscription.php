@@ -2,17 +2,18 @@
 
 namespace App\Models\Central;
 
-use App\Trait\Global\CreatedByObserver;
-use App\Trait\Global\LogsActivityOptions;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\LogOptions;
 use App\Models\BaseModel;
+use App\Tools\Subscription\Scopes\SubscriptionScopes;
+use App\Tools\Subscription\Traits\HasSubscriptionMethods;
+use App\Trait\Global\CreatedByObserver;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Subscription extends BaseModel
 {
-    use CreatedByObserver, LogsActivityOptions;
-
-    public bool $inPermission = true;
+    use CreatedByObserver, HasSubscriptionMethods, SubscriptionScopes, LogsActivity;
 
     protected $fillable = [
         'tenant_id',
@@ -26,12 +27,6 @@ class Subscription extends BaseModel
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
     ];
-
-    /*
-     |--------------------------------------------------------------------------
-     | Casts && Set Custom Attributes
-     |--------------------------------------------------------------------------
-     */
 
     /*
     |--------------------------------------------------------------------------
@@ -52,7 +47,7 @@ class Subscription extends BaseModel
     */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(__CLASS__, 'created_by');
+        return $this->belongsTo(Admin::class, 'created_by');
     }
 
     public function plan(): BelongsTo
@@ -62,6 +57,11 @@ class Subscription extends BaseModel
 
     public function tenant(): BelongsTo
     {
-        return $this->belongsTo(tenant::class, 'tenant_id');
+        return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
+    public function usages(): HasMany
+    {
+        return $this->hasMany(SubscriptionUsage::class, 'tenant_id', 'tenant_id');
     }
 }

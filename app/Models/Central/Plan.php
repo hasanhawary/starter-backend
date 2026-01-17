@@ -2,33 +2,34 @@
 
 namespace App\Models\Central;
 
+use App\Models\BaseModel;
+use App\Tools\Subscription\Scopes\PlanScopes;
+use App\Tools\Subscription\Traits\HasPlanMethods;
 use App\Trait\Global\CreatedByObserver;
 use App\Trait\Global\LogsActivityOptions;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
-use App\Models\BaseModel;
+use Spatie\Translatable\HasTranslations;
 
 class Plan extends BaseModel
 {
-    use CreatedByObserver, LogsActivityOptions;
+    use CreatedByObserver, HasTranslations, HasPlanMethods, PlanScopes, LogsActivityOptions, SoftDeletes;
 
     public bool $inPermission = true;
 
     protected $fillable = [
         'code',
         'name',
-        'price',
-        'billing_cycle',
-        'max_users',
-        'max_storage_mb',
+        'is_active',
     ];
 
-    /*
-     |--------------------------------------------------------------------------
-     | Casts && Set Custom Attributes
-     |--------------------------------------------------------------------------
-     */
+    protected $casts = [
+        'is_active' => 'boolean'
+    ];
+
+    public array $translatable = ['name'];
 
     /*
     |--------------------------------------------------------------------------
@@ -49,7 +50,7 @@ class Plan extends BaseModel
     */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(__CLASS__, 'created_by');
+        return $this->belongsTo(Admin::class, 'created_by');
     }
 
     public function features(): HasMany
@@ -61,4 +62,10 @@ class Plan extends BaseModel
     {
         return $this->hasMany(Subscription::class);
     }
+
+    public function prices(): HasMany
+    {
+        return $this->hasMany(PlanPrice::class);
+    }
+
 }

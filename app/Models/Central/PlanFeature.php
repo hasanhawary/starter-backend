@@ -7,24 +7,25 @@ use App\Trait\Global\LogsActivityOptions;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
 use App\Models\BaseModel;
+use Spatie\Translatable\HasTranslations;
 
 class PlanFeature extends BaseModel
 {
-    use CreatedByObserver, LogsActivityOptions;
+    use CreatedByObserver, LogsActivityOptions, HasTranslations;
 
-    public bool $inPermission = true;
+    public array $translatable = ['name'];
 
     protected $fillable = [
         'plan_id',
-        'feature_key',
+        'name',
+        'key',
         'value',
+        'is_active',
     ];
 
-    /*
-     |--------------------------------------------------------------------------
-     | Casts && Set Custom Attributes
-     |--------------------------------------------------------------------------
-     */
+    protected $casts = [
+        'is_active' => 'boolean'
+    ];
 
     /*
     |--------------------------------------------------------------------------
@@ -45,7 +46,7 @@ class PlanFeature extends BaseModel
     */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(__CLASS__, 'created_by');
+        return $this->belongsTo(Admin::class, 'created_by');
     }
 
     public function plan(): BelongsTo

@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             AdminTableSeeder::class,
             SettingTableSeeder::class,
+            PlanTableSeeder::class,
             TenantTableSeeder::class,
         ]);
     }

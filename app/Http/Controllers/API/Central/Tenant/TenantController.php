@@ -12,6 +12,7 @@ use App\Http\Requests\Central\Tenant\TenantRequest;
 use App\Http\Resources\Central\Tenant\TenantResource;
 use App\Jobs\Central\SetupTenantJob;
 use App\Models\Central\Tenant;
+use App\Services\Tenant\TenantService;
 use App\Trait\Global\HasDeleteMethods;
 use App\Trait\Global\HasToggleActiveMethods;
 use Illuminate\Http\JsonResponse;
@@ -24,10 +25,13 @@ class TenantController extends BaseController implements HasMiddleware
 {
     use HasDeleteMethods, HasToggleActiveMethods;
 
-    public function __construct()
+    protected TenantService $service;
+
+    public function __construct(TenantService $service)
     {
         parent::__construct();
         $this->model = Tenant::class;
+        $this->service = $service;
     }
 
     public static function middleware(): array
@@ -54,12 +58,18 @@ class TenantController extends BaseController implements HasMiddleware
     }
 
     /**
+     *
+     *
      * @param TenantRequest $request
      * @return JsonResponse
+     * @throws \Throwable
      */
     public function store(TenantRequest $request): JsonResponse
     {
-        $tenant = Tenant::create($request->validated());
+        $tenant = $this->service->createTenant(
+            $request->validated(),
+            $request->input('plan_id')
+        );
 
         SetupTenantJob::dispatch($tenant);
 
@@ -79,10 +89,15 @@ class TenantController extends BaseController implements HasMiddleware
      * @param TenantRequest $request
      * @param Tenant $tenant
      * @return JsonResponse
+     * @throws \Throwable
      */
     public function update(TenantRequest $request, Tenant $tenant): JsonResponse
     {
-        $tenant->update($request->validated());
+        $tenant = $this->service->updateTenant(
+            $tenant,
+            $request->validated(),
+            $request->input('plan_id')
+        );
 
         return successResponse(new TenantResource($tenant), __('api.updated_success'));
     }

@@ -2,23 +2,22 @@
 
 namespace App\Models\Central;
 
+use App\Models\BaseModel;
+use App\Tools\Subscription\Traits\HasSubscriptionUsageMethods;
 use App\Trait\Global\CreatedByObserver;
 use App\Trait\Global\LogsActivityOptions;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
-use App\Models\BaseModel;
 
 class SubscriptionUsage extends BaseModel
 {
-    use CreatedByObserver, LogsActivityOptions;
-
-    public bool $inPermission = true;
+    use CreatedByObserver, LogsActivityOptions, HasSubscriptionUsageMethods;
 
     protected $table = 'subscription_usage';
 
     protected $fillable = [
         'tenant_id',
-        'feature_key',
+        'key',
         'used_value',
         'period_start',
         'period_end',
@@ -27,13 +26,8 @@ class SubscriptionUsage extends BaseModel
     protected $casts = [
         'period_start' => 'datetime',
         'period_end' => 'datetime',
+        'used_value' => 'integer',
     ];
-
-    /*
-     |--------------------------------------------------------------------------
-     | Casts && Set Custom Attributes
-     |--------------------------------------------------------------------------
-     */
 
     /*
     |--------------------------------------------------------------------------
@@ -54,11 +48,11 @@ class SubscriptionUsage extends BaseModel
     */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(__CLASS__, 'created_by');
+        return $this->belongsTo(Admin::class, 'created_by');
     }
 
     public function tenant(): BelongsTo
     {
-        return $this->belongsTo(tenant::class, 'tenant_id');
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 }
