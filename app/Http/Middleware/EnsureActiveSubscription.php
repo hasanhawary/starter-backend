@@ -2,37 +2,28 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Central\Tenant;
 use App\Tools\Subscription\Facades\Subscription;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Spatie\Multitenancy\Models\Tenant;
 
 class EnsureActiveSubscription
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next): mixed
     {
-        $tenantId = Tenant::current()?->id;
+        $tenant = Tenant::current();
 
-        if (!$tenantId) {
-            return response()->json([
-                'message' => 'Tenant not found or not provided.'
-            ], 400);
+        if (!$tenant) {
+            return failResponse(trans('api.tenant_not_found'));
         }
 
-        $subscription = Subscription::getActiveSubscription($tenantId);
+        $tenantModel = \App\Models\Central\Tenant::where('domain', $tenant->domain)->first();
+
+        Tenant::forgetCurrent();
+        $subscription = Subscription::getActiveSubscription($tenantModel->id);
 
         if (!$subscription) {
-            return response()->json([
-                'message' => 'No active subscription found for this tenant.'
-            ], 403);
+            return failResponse(trans('api.no_active_subscription'), code: 403);
         }
 
         // Expire if needed automatically
@@ -40,12 +31,11 @@ class EnsureActiveSubscription
 
         // Check again after expiration
         if (!Subscription::isActive($subscription)) {
-            return response()->json([
-                'message' => 'Tenant subscription has expired or cancelled.'
-            ], 403);
+            return failResponse(trans('api.subscription_expired'), code: 403);
         }
 
-        // Subscription is active, allow request
+        $tenant->makeCurrent();
+
         return $next($request);
     }
 }

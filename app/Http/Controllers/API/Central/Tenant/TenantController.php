@@ -58,8 +58,6 @@ class TenantController extends BaseController implements HasMiddleware
     }
 
     /**
-     *
-     *
      * @param TenantRequest $request
      * @return JsonResponse
      * @throws \Throwable
@@ -68,9 +66,12 @@ class TenantController extends BaseController implements HasMiddleware
     {
         $tenant = $this->service->createTenant(
             $request->validated(),
-            $request->input('plan_id')
+            $request->input('plan_price_id'),
+            $request->input('subscription_starts_at')
         );
 
+        // Dispatch setup job (subscription creation handled in TenantService)
+        \Spatie\Multitenancy\Models\Tenant::forgetCurrent();
         SetupTenantJob::dispatch($tenant);
 
         return successResponse(new TenantResource($tenant), __('api.created_success'));

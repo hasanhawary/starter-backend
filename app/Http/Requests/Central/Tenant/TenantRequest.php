@@ -22,31 +22,29 @@ class TenantRequest extends BaseFormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('tenants', 'domain')
-                    ->ignore($tenantId)
-                    ->withoutTrashed(),
-                new UniqueCheck(
-                    Tenant::class,
-                    TenantResource::class,
-                    $tenantId,
-                ),
+//                new UniqueCheck(
+//                    Tenant::class,
+//                    TenantResource::class,
+//                    $tenantId,
+//                ),
             ],
 
             'database' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('tenants', 'database')
-                    ->ignore($tenantId)
-                    ->withoutTrashed(),
-                new UniqueCheck(
-                    Tenant::class,
-                    TenantResource::class,
-                    $tenantId,
-                ),
+//                new UniqueCheck(
+//                    Tenant::class,
+//                    TenantResource::class,
+//                    $tenantId,
+//                ),
             ],
 
             'settings' => ['nullable', 'array'],
+
+            // Subscription fields
+            'plan_price_id' => ['nullable', 'exists:plan_prices,id'],
+            'subscription_starts_at' => ['nullable', 'date'],
         ];
     }
 

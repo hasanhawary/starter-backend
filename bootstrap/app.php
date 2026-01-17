@@ -7,6 +7,7 @@ use App\Exceptions\InvalidOtpException;
 use App\Exceptions\InvalidPasswordResetTokenException;
 use App\Exceptions\ModelAlreadyExistsException;
 use App\Http\Middleware\DetectTenant;
+use App\Http\Middleware\EnsureActiveSubscription;
 use App\Http\Middleware\LanguageMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -33,6 +34,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             StartSession::class,  // ensure session exists
             NeedsTenant::class,
             EnsureValidTenantSession::class,
+            EnsureActiveSubscription::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

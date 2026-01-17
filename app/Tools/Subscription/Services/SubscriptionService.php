@@ -45,15 +45,35 @@ class SubscriptionService
 
     public function createSubscription(array $data): Subscription
     {
+        $tenantId = $data['tenant_id'];
+
+        // Cancel any active subscription for this tenant
+        Subscription::where('tenant_id', $tenantId)
+            ->where('status', SubscriptionStatusEnum::Active->value)
+            ->update([
+                'status' => SubscriptionStatusEnum::Cancelled->value,
+                'ends_at' => now(),
+            ]);
+
         $plan = Plan::findOrFail($data['plan_id']);
 
+        // Get the plan price (use provided plan_price_id or get the first available price)
+        $planPrice = isset($data['plan_price_id'])
+            ? $plan->prices()->findOrFail($data['plan_price_id'])
+            : $plan->prices()->first();
+
+        if (!$planPrice) {
+            throw new RuntimeException('No pricing available for this plan.');
+        }
+
         $startsAt = $data['starts_at'] ?? now();
-        $endsAt = $data['ends_at']
-            ?? $this->calculateEndDate($startsAt, $plan->billing_cycle);
+        // Calculate end date based on the plan price cycle
+        $endsAt = $data['ends_at'] ?? $this->calculateEndDate($startsAt, $planPrice->cycle->value);
 
         return Subscription::create([
-            'tenant_id' => $data['tenant_id'],
+            'tenant_id' => $tenantId,
             'plan_id' => $plan->id,
+            'plan_price_id' => $planPrice->id,
             'starts_at' => $startsAt,
             'ends_at' => $endsAt,
             'status' => SubscriptionStatusEnum::Active->value,
@@ -63,24 +83,36 @@ class SubscriptionService
     public function updateSubscription(Subscription $subscription, array $data): Subscription
     {
         return DB::transaction(function () use ($subscription, $data) {
+            $planId = $data['plan_id'] ?? $subscription->plan_id;
+            $planPriceId = $data['plan_price_id'] ?? $subscription->plan_price_id;
+
+            // If plan changed, validate the plan price belongs to the new plan
+            if (isset($data['plan_id']) && $planPriceId) {
+                $plan = Plan::findOrFail($planId);
+                $plan->prices()->findOrFail($planPriceId);
+            }
 
             $subscription->fill([
                 'tenant_id' => $data['tenant_id'] ?? $subscription->tenant_id,
-                'plan_id' => $data['plan_id'] ?? $subscription->plan_id,
+                'plan_id' => $planId,
+                'plan_price_id' => $planPriceId,
                 'starts_at' => $data['starts_at'] ?? $subscription->starts_at,
-                'ends_at' => $data['ends_at'] ?? $subscription->ends_at,
-                'status' => isset($data['status'])
-                    ? SubscriptionStatusEnum::from($data['status'])->value
-                    : $subscription->status,
+                'ends_at' => $data['ends_at'] ?? $subscription->ends_at
             ]);
 
             // Recalculate end date if plan or start changed and end not sent
-            if (
-                isset($data['plan_id'], $data['starts_at']) &&
-                !isset($data['ends_at'])
-            ) {
-                $plan = Plan::findOrFail($data['plan_id']);
-                $subscription->ends_at = $this->calculateEndDate($data['starts_at'], $plan->billing_cycle);
+            if ((isset($data['plan_id']) || isset($data['plan_price_id'])) && !isset($data['ends_at'])) {
+                $plan = Plan::findOrFail($planId);
+                $planPrice = $planPriceId
+                    ? $plan->prices()->findOrFail($planPriceId)
+                    : $plan->prices()->first();
+
+                if ($planPrice) {
+                    $subscription->ends_at = $this->calculateEndDate(
+                        $subscription->starts_at,
+                        $planPrice->cycle->value
+                    );
+                }
             }
 
             $subscription->save();
@@ -88,7 +120,6 @@ class SubscriptionService
             return $subscription->refresh();
         });
     }
-
 
     public function calculateEndDate(Carbon $startDate, string $billingCycle): Carbon
     {
@@ -135,7 +166,10 @@ class SubscriptionService
     {
         $start = now()->startOfDay();
 
-        $end = match ($subscription->plan->billing_cycle) {
+        // Get cycle from plan price instead of plan
+        $cycle = $subscription->planPrice?->cycle->value ?? 'monthly';
+
+        $end = match ($cycle) {
             'weekly' => $start->copy()->endOfWeek(),
             'monthly' => $start->copy()->endOfMonth(),
             'quarterly' => $start->copy()->addMonths(3)->subSecond(),

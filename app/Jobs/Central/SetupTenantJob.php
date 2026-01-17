@@ -14,16 +14,24 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 use Database\Seeders\Tenant\DatabaseSeeder;
 
-class SetupTenantJob implements ShouldQueue
+class SetupTenantJob
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public Tenant $tenant) {}
+    public function __construct(public Tenant $tenant)
+    {
+    }
 
     public function handle(): void
     {
         // Set status to PROVISIONING
         $this->tenant->update(['status' => TenantStatusEnum::Provisioning->value]);
+
+        // Drop database
+        DB::statement(sprintf(
+            'DROP DATABASE IF EXISTS `%s`',
+            $this->tenant->database
+        ));
 
         // Create database
         DB::statement(sprintf(
@@ -38,12 +46,14 @@ class SetupTenantJob implements ShouldQueue
             // Run migrations
             Artisan::call('migrate', [
                 '--path' => 'database/migrations/tenant',
+                '--database' => 'tenant',
                 '--force' => true,
             ]);
 
             // Run seeders
             Artisan::call('db:seed', [
                 '--class' => DatabaseSeeder::class,
+                '--database' => 'tenant',
                 '--force' => true,
             ]);
 
@@ -60,10 +70,11 @@ class SetupTenantJob implements ShouldQueue
     {
         \Log::critical('Tenant setup permanently failed', [
             'tenant_id' => $this->tenant->id,
-            'error'     => $exception->getMessage(),
+            'error' => $exception->getMessage(),
         ]);
 
         // Update status to FAILED
         $this->tenant->update(['status' => TenantStatusEnum::Failed->value]);
     }
 }
+

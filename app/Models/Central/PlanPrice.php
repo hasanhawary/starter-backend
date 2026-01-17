@@ -68,7 +68,6 @@ class PlanPrice extends BaseModel
         return $this->cycle->label();
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Relations methods

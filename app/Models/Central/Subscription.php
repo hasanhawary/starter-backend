@@ -18,6 +18,7 @@ class Subscription extends BaseModel
     protected $fillable = [
         'tenant_id',
         'plan_id',
+        'plan_price_id',
         'starts_at',
         'ends_at',
         'status',
@@ -53,6 +54,11 @@ class Subscription extends BaseModel
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    public function planPrice(): BelongsTo
+    {
+        return $this->belongsTo(PlanPrice::class);
     }
 
     public function tenant(): BelongsTo
