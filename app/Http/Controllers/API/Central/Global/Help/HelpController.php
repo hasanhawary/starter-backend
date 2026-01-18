@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Central\Global\Help;
 
 use App\Http\Controllers\API\BaseController;
+use App\Http\Requests\Central\Global\Help\HelpConfigRequest;
 use App\Http\Requests\Central\Global\Help\HelpEnumRequest;
 use App\Http\Requests\Central\Global\Help\HelpModelRequest;
 use HasanHawary\LookupManager\Facades\Lookup;
@@ -35,4 +36,15 @@ class HelpController extends BaseController
 
         return successResponse($result);
     }
+
+    /**
+     * Retrieves whitelisted config data based on the request parameters.
+     */
+    public function configs(HelpConfigRequest $request): JsonResponse
+    {
+        $result = Lookup::getConfigs($request->all());
+
+        return successResponse($result);
+    }
+
 }

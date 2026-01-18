@@ -89,6 +89,7 @@ Route::prefix('central')->group(function () {
         */
         Route::post('chunk-file', ChunkFileController::class);
 
+        Route::get('help-configs', [HelpController::class, 'configs']);
         Route::get('help-models', [HelpController::class, 'models']);
         Route::get('help-enums', [HelpController::class, 'enums']);
 
