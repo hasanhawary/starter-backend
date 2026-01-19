@@ -3,10 +3,10 @@
 namespace App\Services\Global;
 
 use App\Events\NotificationEvent;
-use App\Jobs\Central\SendSmsJob;
+use App\Jobs\SendSmsJob;
 use App\Mail\BasicMail;
-use App\Models\Central\Admin;
-use App\Models\Tenant\User;
+use App\Models\Admin;
+use App\Models\User;
 use App\Notifications\UserNotify;
 use Illuminate\Support\Facades\Mail;
 

@@ -4,9 +4,8 @@ namespace App\Services\Auth;
 
 use App\Enum\Global\OtpTypeEnum;
 use App\Exceptions\InvalidOtpException;
-use App\Http\Requests\Central\Auth\ResetPasswordRequest;
-use App\Http\Requests\Central\Auth\VerifyOtpRequest;
-use App\Models\Central\Admin;
+use App\Http\Requests\Global\Auth\ResetPasswordRequest;
+use App\Http\Requests\Global\Auth\VerifyOtpRequest;
 
 class ResetPasswordService extends BaseAuthService
 {

@@ -2,7 +2,7 @@
 
 return [
 
-    'default_brand' => env('DEFAULT_BRAND', 'wakeb'),
+    'default_brand' => env('DEFAULT_BRAND', 'jervis'),
 
     'brands' => [
 

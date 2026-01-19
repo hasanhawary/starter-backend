@@ -6,16 +6,11 @@ use App\Exceptions\InvalidEmailAndPasswordCombinationException;
 use App\Exceptions\InvalidOtpException;
 use App\Exceptions\InvalidPasswordResetTokenException;
 use App\Exceptions\ModelAlreadyExistsException;
-use App\Http\Middleware\DetectTenant;
-use App\Http\Middleware\EnsureActiveSubscription;
 use App\Http\Middleware\LanguageMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Illuminate\Session\Middleware\StartSession;
-use Spatie\Multitenancy\Http\Middleware\EnsureValidTenantSession;
-use Spatie\Multitenancy\Http\Middleware\NeedsTenant;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -29,13 +24,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->api(prepend: [LanguageMiddleware::class]);
-        $middleware->group('tenant', [
-            DetectTenant::class,
-            StartSession::class,  // ensure session exists
-            NeedsTenant::class,
-            EnsureValidTenantSession::class,
-            EnsureActiveSubscription::class
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {

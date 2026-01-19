@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
-use App\Models\Central\Admin;
-use App\Models\Tenant\User;
+use App\Models\Admin;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;

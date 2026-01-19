@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Support\Facades\Auth;
-use Spatie\Multitenancy\Models\Tenant;
 
 abstract class BaseController
 {

@@ -70,11 +70,11 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', \App\Models\Tenant\User::class),
+            'model' => \App\Models\User::class,
         ],
         'admins' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', \App\Models\Central\Admin::class),
+            'model' => \App\Models\Admin::class,
         ],
         // 'users' => [
         //     'driver' => 'database',

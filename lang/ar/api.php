@@ -117,9 +117,4 @@ return [
     'record_deactivated' => 'تم تعطيل السجل بنجاح',
     'model_activated' => 'تم تفعيل :model بنجاح',
     'model_deactivated' => 'تم تعطيل :model بنجاح',
-    'tenant' => 'العميل',
-    'tenant_not_found' => 'عذرًا، لم نتمكن من العثور على العميل المطلوب أو لم يتم تحديده.',
-    'no_active_subscription' => 'لا يوجد اشتراك نشط مرتبط بهذا العميل حاليًا.',
-    'subscription_expired' => 'انتهت صلاحية الاشتراك لهذا العميل أو تم إلغاؤه.',
-
 ];

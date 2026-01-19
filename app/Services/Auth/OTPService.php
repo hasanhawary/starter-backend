@@ -3,8 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Exceptions\InvalidOtpException;
-use App\Http\Requests\Central\Auth\SendOtpRequest;
-use App\Http\Requests\Central\Auth\VerifyOtpRequest;
+use App\Http\Requests\Global\Auth\SendOtpRequest;
 use Carbon\Carbon;
 use Random\RandomException;
 
@@ -64,13 +63,15 @@ class OTPService extends BaseAuthService
      * - Clears OTP data
      * - Marks email as verified when type is "verify_email"
      *
-     * @param VerifyOtpRequest $request
+     * @param 
+     *  $request
      * @param string $type
      * @return mixed
      *
      * @throws InvalidOtpException
      */
-    public function verify(VerifyOtpRequest $request, string $type = 'login'): mixed
+    public function verify(
+         $request, string $type = 'login'): mixed
     {
         $user = $this->validateOtp($request, $type);
 
@@ -88,13 +89,15 @@ class OTPService extends BaseAuthService
      *
      * Useful for multistep verification flows.
      *
-     * @param VerifyOtpRequest $request
+     * @param 
+     *  $request
      * @param string $type
      * @return mixed
      *
      * @throws InvalidOtpException
      */
-    public function check(VerifyOtpRequest $request, string $type = 'login'): mixed
+    public function check(
+         $request, string $type = 'login'): mixed
     {
         return $this->validateOtp($request, $type);
     }
@@ -106,13 +109,15 @@ class OTPService extends BaseAuthService
      * - Checks expiration
      * - Increments attempts on failure
      *
-     * @param VerifyOtpRequest $request
+     * @param 
+     *  $request
      * @param string $type
      * @return mixed
      *
      * @throws InvalidOtpException
      */
-    private function validateOtp(VerifyOtpRequest $request, string $type): mixed
+    private function validateOtp(
+         $request, string $type): mixed
     {
         $user = $this->resolveUser($request->email);
         $otpData = $user->otp_data[$type] ?? null;

@@ -1,5 +1,5 @@
 <?php
 
-
-require __DIR__ . '/central.php';
-require __DIR__ . '/tenant.php';
+require __DIR__ . '/admin.php';
+require __DIR__ . '/global.php';
+require __DIR__ . '/landing.php';

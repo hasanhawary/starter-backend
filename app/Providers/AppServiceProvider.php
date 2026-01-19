@@ -2,13 +2,13 @@
 
 namespace App\Providers;
 
-use App\Models\Central\Admin;
-use App\Models\Central\PersonalAccessToken;
-use App\Models\Central\Role;
-use App\Models\Tenant\User;
-use App\Policies\Central\Admin\RolePolicy;
-use App\Policies\Central\Admin\AdminPolicy;
-use App\Policies\Tenant\User\UserPolicy;
+use App\Models\Admin;
+use App\Models\PersonalAccessToken;
+use App\Models\Role;
+use App\Models\User;
+use App\Policies\Admin\User\RolePolicy;
+use App\Policies\Admin\User\AdminPolicy;
+use App\Policies\Admin\User\UserPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;

@@ -2,7 +2,7 @@
 
 namespace App\Services\Global;
 
-use App\Models\Central\Setting;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 
 class SettingService

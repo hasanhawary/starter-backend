@@ -1,7 +1,6 @@
 <?php
 
-use App\Models\Central\Admin;
-use App\Models\Tenant\User;
+use App\Models\Admin;
 use App\Services\Global\SettingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +14,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Spatie\Multitenancy\Models\Tenant;
 
 /*
 |--------------------------------------------------------------------------
@@ -438,14 +436,6 @@ if (!function_exists('rootAdmins')) {
     }
 }
 
-if (!function_exists('rootUsers')) {
-    function rootUsers(): array
-    {
-        return User::whereHas('roles', static fn($q) => $q->where('name', 'root'))
-            ->pluck('id')
-            ->toArray();
-    }
-}
 
 if (!function_exists('utf8StrRev')) {
     function utf8StrRev($str = null): ?string
@@ -670,15 +660,14 @@ if (!function_exists('detectGuard')) {
      */
     function detectGuard(): string
     {
-        // Central API routes
-        if (request()->is('api/central/*')) {
-            Tenant::forgetCurrent(); // forget tenant for central routes
+        // Admin API routes
+        if (request()->is('api/admin/*')) {
             return 'admin';
         }
 
-        // Tenant API routes
-        if (Tenant::checkCurrent()) {
-            return 'api';
+        // Landing API routes - use api guard for users
+        if (request()->is('api/*')) {
+            return 'api'; // Landing routes use api guard for users
         }
 
         // Fallback
@@ -695,7 +684,7 @@ if (!function_exists('detectPermissionGuard')) {
     function detectPermissionGuard(): string
     {
         return match (detectGuard()) {
-            'api' => 'sanctum', // tenant API uses sanctum
+            'api' => 'sanctum', // API uses sanctum
             default => detectGuard(), // fallback to same as guard
         };
     }
@@ -713,6 +702,6 @@ if (!function_exists('getAuthModel')) {
         $guard = $guard ?? detectGuard();
         $provider = config("auth.guards.$guard.provider", 'users');
 
-        return config("auth.providers.$provider.model", User::class);
+        return config("auth.providers.$provider.model", Admin::class);
     }
 }

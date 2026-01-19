@@ -2,7 +2,7 @@
 
 namespace App\Trait\Global;
 
-use App\Models\Central\Role;
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\JsonResponse;

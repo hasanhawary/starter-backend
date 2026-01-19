@@ -73,7 +73,7 @@ return [
     | request. You may change the middleware listed below as required.
     |
     */
-    'personal_access_token_model' => App\Models\Central\PersonalAccessToken::class,
+    'personal_access_token_model' => App\Models\PersonalAccessToken::class,
 
 
     'middleware' => [
