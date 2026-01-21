@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\Admin\Global\Setting\SettingController;
 use App\Http\Controllers\API\Global\Captcha\CaptchaController;
 use App\Http\Controllers\API\Global\Chunk\ChunkFileController;
 use App\Http\Controllers\API\Global\DataEntry\CountryController;
@@ -39,10 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('notifications', [NotificationController::class, 'update']);
     Route::get('notifications', [NotificationController::class, 'index']);
 
-    /*
-    |--------------------------------------------------------------------
     Route::get('settings', [SettingController::class, 'index']);
-    Route::post('send-test-mail', [TestCredentialsController::class, 'testEmail']);
 
     /*
     |--------------------------------------------------------------------------
