@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Admin;
+use App\Models\User;
 use App\Services\Global\SettingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -427,15 +428,14 @@ if (!function_exists('emailTrans')) {
 }
 
 
-if (!function_exists('rootAdmins')) {
-    function rootAdmins(): array
+if (!function_exists('rootUsers')) {
+    function rootUsers(): array
     {
-        return Admin::whereHas('roles', static fn($q) => $q->where('name', 'root'))
+        return User::whereHas('roles', static fn($q) => $q->where('name', 'root'))
             ->pluck('id')
             ->toArray();
     }
 }
-
 
 if (!function_exists('utf8StrRev')) {
     function utf8StrRev($str = null): ?string

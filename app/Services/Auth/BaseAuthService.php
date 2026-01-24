@@ -3,7 +3,6 @@
 namespace App\Services\Auth;
 
 use App\Exceptions\InvalidOtpException;
-use App\Models\Admin;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseAuthService
