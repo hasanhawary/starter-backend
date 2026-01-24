@@ -4,12 +4,13 @@ namespace App\Policies\User;
 
 use App\Models\Admin;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User;
 
 class AdminPolicy
 {
     use HandlesAuthorization;
 
-    public function view(Admin $user, ?Admin $model = null): bool
+    public function view(User $user, ?Admin $model = null): bool
     {
         return $this->canAct($user, $model, [
             'view-all-admin',
@@ -17,12 +18,12 @@ class AdminPolicy
         ]);
     }
 
-    public function create(Admin $user, ?Admin $model = null): bool
+    public function create(User $user, ?Admin $model = null): bool
     {
         return $user->can('create-admin') && $this->ownsOrAll($user, $model);
     }
 
-    public function update(Admin $user, Admin $model): bool
+    public function update(User $user, Admin $model): bool
     {
         if (! $user->can('update-admin')) {
             return false;
@@ -35,7 +36,7 @@ class AdminPolicy
         return $this->ownsOrAll($user, $model);
     }
 
-    public function delete(Admin $user, ?Admin $model = null): bool
+    public function delete(User $user, ?Admin $model = null): bool
     {
         if (! $user->can('delete-admin')) {
             return false;
@@ -48,12 +49,12 @@ class AdminPolicy
         return $this->ownsOrAll($user, $model);
     }
 
-    public function restore(Admin $user, ?Admin $model = null): bool
+    public function restore(User $user, ?Admin $model = null): bool
     {
         return $user->can('restore-admin') && $this->ownsOrAll($user, $model);
     }
 
-    public function forceDelete(Admin $user, Admin $model): bool
+    public function forceDelete(User $user, Admin $model): bool
     {
         if (! $user->can('force-delete-admin')) {
             return false;
@@ -62,7 +63,7 @@ class AdminPolicy
         return ! $this->isProtectedAdmin($model, $user) && $this->ownsOrAll($user, $model);
     }
 
-    public function toggleActive(Admin $user, Admin $model): bool
+    public function toggleActive(User $user, Admin $model): bool
     {
         if (! $user->can('toggle-active-admin')) {
             return false;
@@ -76,19 +77,19 @@ class AdminPolicy
     | Helper Methods
     |--------------------------------------------------------------------------
     */
-    protected function ownsOrAll(Admin $user, ?Admin $model): bool
+    protected function ownsOrAll(User $user, ?Admin $model): bool
     {
         return !$model
             || $user->can('view-all-admin')
             || $model->created_by === $user->id;
     }
 
-    protected function isProtectedAdmin(Admin $model, Admin $user): bool
+    protected function isProtectedAdmin(Admin $model, User $user): bool
     {
         return in_array($model->id, [...rootAdmins(), $user->id], true);
     }
 
-    protected function canAct(Admin $user, ?Admin $model, array $permissions): bool {
+    protected function canAct(User $user, ?Admin $model, array $permissions): bool {
         foreach ($permissions as $permission) {
             if ($user->can($permission)) {
                 return $this->ownsOrAll($user, $model);
