@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\API\Admin\Global\Setting\SettingController;
 use App\Http\Controllers\API\Global\Captcha\CaptchaController;
 use App\Http\Controllers\API\Global\Chunk\ChunkFileController;
 use App\Http\Controllers\API\Global\DataEntry\CountryController;
 use App\Http\Controllers\API\Global\Help\HelpController;
 use App\Http\Controllers\API\Global\Notification\NotificationController;
+use App\Http\Controllers\API\Global\Setting\SettingController;
 use Illuminate\Support\Facades\Route;
 
 /*

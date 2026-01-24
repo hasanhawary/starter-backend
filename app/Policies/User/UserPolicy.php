@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Policies\Admin\User;
+namespace App\Policies\User;
 
-use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -10,58 +9,49 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
-    public function view(Admin $admin, ?User $model = null): bool
+    const string ROOT = 'root';
+
+    public function view(User $user, ?User $model = null): bool
     {
-        return $this->canAct($admin, $model, [
+        return $this->canAct($user, $model, [
             'view-all-user',
             'view-own-user',
         ]);
     }
 
-    public function create(Admin $admin, ?User $model = null): bool
+    public function create(User $user, ?User $model = null): bool
     {
-        return $admin->can('create-user') && $this->ownsOrAll($admin, $model);
+        return $user->can('create-user') && $this->ownsOrAll($user, $model);
     }
 
-    public function update(Admin $admin, User $model): bool
+    public function update(User $user, User $model): bool
     {
-        if (! $admin->can('update-user')) {
-            return false;
-        }
-
-        if ($this->isProtectedUser($model, $admin)) {
-            return false;
-        }
-
-        return $this->ownsOrAll($admin, $model);
+        return $user->can('update-user')
+            && ! $this->isProtectedUser($model)
+            && $this->ownsOrAll($user, $model);
     }
 
-    public function delete(Admin $admin, ?User $model = null): bool
+    public function delete(User $user, ?User $model = null): bool
     {
-        if (! $admin->can('delete-user')) {
-            return false;
-        }
-
-        if ($model && $this->isProtectedUser($model, $admin)) {
-            return false;
-        }
-
-        return $this->ownsOrAll($admin, $model);
+        return $user->can('delete-user')
+            && (! $model || ! $this->isProtectedUser($model))
+            && $this->ownsOrAll($user, $model);
     }
 
-    public function restore(Admin $admin, ?User $model = null): bool
+    public function restore(User $user, ?User $model = null): bool
     {
-        return $admin->can('restore-user') && $this->ownsOrAll($admin, $model);
+        return $user->can('restore-user') && $this->ownsOrAll($user, $model);
     }
 
-    public function forceDelete(Admin $admin, ?User $model = null): bool
+    public function forceDelete(User $user, ?User $model = null): bool
     {
-        return $admin->can('force-delete-user') && $this->ownsOrAll($admin, $model);
+        return $user->can('force-delete-user') && $this->ownsOrAll($user, $model);
     }
 
-    public function toggleActive(Admin $admin, ?User $model = null): bool
+    public function toggleActive(User $user, ?User $model = null): bool
     {
-        return $admin->can('toggle-active-user') && $this->ownsOrAll($admin, $model);
+        return $user->can('toggle-active-user')
+            && (! $model || ! $this->isProtectedUser($model)) && $this->ownsOrAll($user, $model);
     }
 
     /*
@@ -69,36 +59,27 @@ class UserPolicy
     | Helper Methods
     |--------------------------------------------------------------------------
     */
-    private function canAct(Admin $admin, ?User $model, array $permissions): bool
+    protected function ownsOrAll(User $user, ?User $model): bool
+    {
+        return !$model
+            || $user->can('view-all-user')
+            || $model->created_by === $user->id;
+    }
+
+    protected function isProtectedUser(User $model): bool
+    {
+        // Prevent actions on root users
+        return $model->hasRole(self::ROOT);
+    }
+
+    protected function canAct(User $user, ?User $model, array $permissions): bool
     {
         foreach ($permissions as $permission) {
-            if ($admin->can($permission)) {
-                if ($permission === 'view-own-user' && $model && $model->created_by !== $admin->id) {
-                    continue;
-                }
-                return true;
+            if ($user->can($permission)) {
+                return $this->ownsOrAll($user, $model);
             }
         }
 
         return false;
-    }
-
-    private function ownsOrAll(Admin $admin, ?User $model = null): bool
-    {
-        if (!$model) {
-            return true;
-        }
-
-        if ($admin->can('view-all-user') || $admin->can('create-user') || $admin->can('update-user') || $admin->can('delete-user')) {
-            return true;
-        }
-
-        return $model->created_by === $admin->id;
-    }
-
-    private function isProtectedUser(User $user, Admin $admin): bool
-    {
-        // Prevent admin from modifying root users
-        return $user->hasRole('root') && !$admin->hasRole('root');
     }
 }

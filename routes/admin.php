@@ -1,21 +1,21 @@
 <?php
 
-use App\Http\Controllers\API\Admin\User\AdminController;
-use App\Http\Controllers\API\Admin\User\PermissionController;
-use App\Http\Controllers\API\Admin\User\RoleController;
-use App\Http\Controllers\API\Admin\DataEntry\CountryController;
-use App\Http\Controllers\API\Admin\Profile\ProfileController;
-use App\Http\Controllers\API\Admin\User\UserController;
-use App\Http\Controllers\API\Admin\Global\ActivityLog\ActivityLogController;
-use App\Http\Controllers\API\Admin\Global\Export\ExportController;
-use App\Http\Controllers\API\Admin\Global\Report\ReportController;
-use App\Http\Controllers\API\Admin\Global\Setting\SettingController;
-use App\Http\Controllers\API\Admin\Global\Setting\TestCredentialsController;
-use App\Http\Controllers\API\Global\Auth\LoginController;
-use App\Http\Controllers\API\Global\Auth\OTPController;
-use App\Http\Controllers\API\Global\Auth\ResetPasswordController;
+use App\Http\Controllers\API\Auth\LoginController;
+use App\Http\Controllers\API\Auth\LogoutController;
+use App\Http\Controllers\API\Auth\OTPController;
+use App\Http\Controllers\API\Auth\ResetPasswordController;
+use App\Http\Controllers\API\DataEntry\CountryController;
+use App\Http\Controllers\API\Global\ActivityLog\ActivityLogController;
+use App\Http\Controllers\API\Global\Export\ExportController;
+use App\Http\Controllers\API\Global\Report\ReportController;
+use App\Http\Controllers\API\Global\Setting\SettingController;
+use App\Http\Controllers\API\Global\Setting\TestCredentialsController;
+use App\Http\Controllers\API\Profile\ProfileController;
+use App\Http\Controllers\API\User\AdminController;
+use App\Http\Controllers\API\User\PermissionController;
+use App\Http\Controllers\API\User\RoleController;
+use App\Http\Controllers\API\User\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\Global\Auth\LogoutController;
 
 Route::prefix('admin')->group(function () {
     /*
@@ -25,7 +25,7 @@ Route::prefix('admin')->group(function () {
     */
     Route::post('login', LoginController::class);
     Route::post('reset-password', ResetPasswordController::class);
-    
+
     // OTP Routes (Public for login/registration)
     Route::post('send-otp', [OTPController::class, 'send']);
     Route::post('check-otp', [OTPController::class, 'check']);

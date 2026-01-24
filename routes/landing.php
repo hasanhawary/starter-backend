@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\API\Auth\LoginController;
+use App\Http\Controllers\API\Auth\LogoutController;
+use App\Http\Controllers\API\Auth\OTPController;
+use App\Http\Controllers\API\Auth\ResetPasswordController;
 use App\Http\Controllers\API\Landing\Profile\ProfileController;
-use App\Http\Controllers\API\Global\Auth\LoginController;
-use App\Http\Controllers\API\Global\Auth\LogoutController;
-use App\Http\Controllers\API\Global\Auth\OTPController;
-use App\Http\Controllers\API\Global\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,7 +27,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::post('logout', LogoutController::class);
-    
+
     /*
     |--------------------------------------------------------------------------
     | Profile Routes

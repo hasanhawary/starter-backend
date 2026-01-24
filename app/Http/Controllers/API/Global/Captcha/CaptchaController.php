@@ -16,7 +16,7 @@ class CaptchaController extends BaseController
     public function generateCaptcha(): JsonResponse
     {
         $captchaText = Str::random(5);
-        $captchaCode = uniqid();
+        $captchaCode = Str::uuid7()->toString();
         $cacheKey = 'captcha_' . $captchaCode;
 
         Cache::put($cacheKey, $captchaText, now()->addMinutes(10));
