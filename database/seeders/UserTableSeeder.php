@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class UserTableSeeder extends Seeder
 {
@@ -17,7 +18,7 @@ class UserTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $domain = 'user';
+        $domain = Str::snake(config('brands.default_brand'));
 
         $countryId = Country::first()->id;
         User::query()->firstOrCreate([

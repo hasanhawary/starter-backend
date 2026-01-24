@@ -5,40 +5,53 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Http\UploadedFile;
-use function PHPUnit\Framework\isEmpty;
 
 class TotalFileSize implements ValidationRule
 {
     protected int $maxBytes;
-//    protected mixed $existingAttachments = [];
+    protected array $existingAttachments;
 
-    public function __construct(int $maxMB, $existingAttachments = [])
+    /**
+     * @param int $maxMB Maximum allowed total size in MB
+     * @param array $existingAttachments Optional array of existing attachments
+     */
+    public function __construct(int $maxMB, array $existingAttachments = [])
     {
-        $this->maxBytes = $maxMB * pow(1024, 2);
-//        $this->existingAttachments = $existingAttachments;
+        $this->maxBytes = $maxMB * 1024 * 1024; // Convert MB to bytes
+        $this->existingAttachments = $existingAttachments;
     }
 
+    /**
+     * Validate the total size of uploaded files
+     *
+     * @param string $attribute
+     * @param mixed $value
+     * @param Closure $fail
+     * @return void
+     */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $totalSize = 0;
 
+        // Sum the size of new uploaded files
         foreach ((array)$value as $file) {
             if ($file instanceof UploadedFile) {
                 $totalSize += $file->getSize();
             }
         }
 
-//        foreach ($this->existingAttachments as $attachment) {
-//            $path = $attachment->getRawOriginal('path') ?? null;
-//            if ($path && \Storage::exists($path)) {
-//                $totalSize += \Storage::size($path);
-//            }
-//        }
+        // Sum the size of existing attachments (optional)
+        foreach ($this->existingAttachments as $attachment) {
+            $path = $attachment->getRawOriginal('path') ?? null;
+            if ($path && \Storage::exists($path)) {
+                $totalSize += \Storage::size($path);
+            }
+        }
 
-
+        // Fail validation if total size exceeds maxBytes
         if ($totalSize > $this->maxBytes) {
             $fail(__('validation.max_total_file_size', [
-                'max' => $this->maxBytes / pow(1024, 2),
+                'max' => $this->maxBytes / 1024 / 1024,
             ]));
         }
     }

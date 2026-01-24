@@ -24,7 +24,7 @@ class LoginController extends BaseController
     }
 
     /**
-     * Handle admin login
+     * Handle login
      */
     public function __invoke(LoginRequest $request): JsonResponse
     {

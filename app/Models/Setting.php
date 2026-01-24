@@ -6,7 +6,6 @@ use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\Translatable\HasTranslations;
-use App\Models\BaseModel;
 
 class Setting extends BaseModel
 {

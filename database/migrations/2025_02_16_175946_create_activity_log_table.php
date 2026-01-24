@@ -11,7 +11,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('activity_log', function (Blueprint $table) {
+        Schema::create(config('activitylog.table_name'), function (Blueprint $table) {
             $table->id();
             $table->string('log_name')->nullable();
             $table->text('description');
@@ -30,6 +30,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('activity_log');
+        Schema::dropIfExists(config('activitylog.table_name'));
     }
 };

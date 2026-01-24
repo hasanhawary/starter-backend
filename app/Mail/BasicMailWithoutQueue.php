@@ -2,10 +2,8 @@
 
 namespace App\Mail;
 
-use App\Models\Admin;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Psr\Container\ContainerExceptionInterface;
@@ -15,7 +13,7 @@ class BasicMailWithoutQueue extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public User|Admin|null $user, public array $data)
+    public function __construct(public Authenticatable|null $user, public array $data)
     {
     }
 

@@ -5,19 +5,19 @@ namespace App\Services\Global;
 use App\Events\NotificationEvent;
 use App\Jobs\SendSmsJob;
 use App\Mail\BasicMail;
-use App\Models\User;
 use App\Notifications\UserNotify;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
     /**
-     * @param User $user
+     * @param Authenticatable $user
      * @param array $data
      * @param array|null $types
      * @return void
      */
-    public static function resolve(User $user, array $data, ?array $types = ['notify', 'realtime']): void
+    public static function resolve(Authenticatable $user, array $data, ?array $types = ['notify', 'realtime']): void
     {
         foreach ($types as $type) {
             try {
@@ -36,21 +36,21 @@ class NotificationService
     }
 
     /**
-     * @param User $user
+     * @param Authenticatable $user
      * @param array $data
      * @return void
      */
-    private static function sendNotify(User $user, array $data): void
+    private static function sendNotify(Authenticatable $user, array $data): void
     {
         $user->notify(new UserNotify($data));
     }
 
     /**
-     * @param User $user
+     * @param Authenticatable $user
      * @param array $data
      * @return void
      */
-    private static function sendSMS(User $user, array $data): void
+    private static function sendSMS(Authenticatable $user, array $data): void
     {
         $message = self::resolveMessageContent($data);
 
@@ -60,23 +60,23 @@ class NotificationService
     }
 
     /**
-     * @param User $user
+     * @param Authenticatable $user
      * @param array $data
      * @return void
      */
-    public static function sendEmail(User $user, array $data): void
+    public static function sendEmail(Authenticatable $user, array $data): void
     {
         Mail::to($user->email)->send(new BasicMail($user, $data));
     }
 
     /**
-     * @param User $user
+     * @param Authenticatable $user
      * @param array $data
      * @return void
      */
-    private static function sendRealtimeNotification(User $user, array $data): void
+    private static function sendRealtimeNotification(Authenticatable $user, array $data): void
     {
-        if (config('services.realtime.enable')) {
+        if (config('project.realtime.enable')) {
             event(new NotificationEvent($user->id, $data));
         }
     }

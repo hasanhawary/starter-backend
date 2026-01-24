@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use App\Models\SpatieRole;
 use App\Scopes\User\RoleScopes;
 use App\Trait\Global\CreatedByObserver;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Spatie\Permission\Models\Role as SaptieRole;
+use Spatie\Permission\Models\Role as SpatieRole;
 use Spatie\Translatable\HasTranslations;
 
-class Role extends SaptieRole
+class Role extends SpatieRole
 {
     use RoleScopes, CreatedByObserver, HasTranslations;
 

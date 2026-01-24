@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enum\User\UserGenderEnum;
-use App\Models\BaseAuthenticatable;
 use App\Scopes\User\UserScopes;
 use App\Trait\Global\ApplyNotification;
 use App\Trait\Global\CreatedByObserver;

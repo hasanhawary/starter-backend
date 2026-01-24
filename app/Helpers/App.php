@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Admin;
 use App\Models\User;
 use App\Services\Global\SettingService;
 use Illuminate\Database\Eloquent\Builder;

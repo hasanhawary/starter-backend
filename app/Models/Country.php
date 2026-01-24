@@ -1,7 +1,6 @@
 <?php
 namespace App\Models;
 
-use App\Models\BaseModel;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\SoftDeletes;

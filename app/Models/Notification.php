@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\BaseModel;
 
 class Notification extends BaseModel
 {
@@ -22,7 +21,7 @@ class Notification extends BaseModel
     public function scopeForCurrentUser(Builder $query): Builder
     {
         return $query->where([
-            'notifiable_type' => Admin::class,
+            'notifiable_type' => User::class,
             'notifiable_id' => auth()->id(),
         ]);
     }

@@ -12,7 +12,7 @@ class LoginRequest extends BaseFormRequest
         return [
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-            'otp' => [shouldVerifyOtp('admin') ? 'required' : 'nullable', 'string'],
+            'otp' => [shouldVerifyOtp('user') ? 'required' : 'nullable', 'string'],
         ];
     }
 
