@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Policies\Admin\User;
+namespace App\Policies\User;
 
 use App\Models\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
