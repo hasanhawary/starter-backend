@@ -6,6 +6,7 @@ use App\Http\Controllers\API\Auth\OTPController;
 use App\Http\Controllers\API\Auth\ResetPasswordController;
 use App\Http\Controllers\API\DataEntry\CountryController;
 use App\Http\Controllers\API\Global\ActivityLog\ActivityLogController;
+use App\Http\Controllers\API\Global\Captcha\CaptchaController;
 use App\Http\Controllers\API\Global\Chunk\ChunkFileController;
 use App\Http\Controllers\API\Global\Export\ExportController;
 use App\Http\Controllers\API\Global\Help\HelpController;
@@ -18,6 +19,16 @@ use App\Http\Controllers\API\User\PermissionController;
 use App\Http\Controllers\API\User\RoleController;
 use App\Http\Controllers\API\User\UserController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Public Routes (Guest Accessible)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('captcha')->group(function () {
+    Route::get('/', [CaptchaController::class, 'generateCaptcha']);
+    Route::post('/verify', [CaptchaController::class, 'verifyCaptcha']);
+});
 
 /*
 |--------------------------------------------------------------------------
