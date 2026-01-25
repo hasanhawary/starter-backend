@@ -6,7 +6,10 @@ use App\Http\Controllers\API\Auth\OTPController;
 use App\Http\Controllers\API\Auth\ResetPasswordController;
 use App\Http\Controllers\API\DataEntry\CountryController;
 use App\Http\Controllers\API\Global\ActivityLog\ActivityLogController;
+use App\Http\Controllers\API\Global\Chunk\ChunkFileController;
 use App\Http\Controllers\API\Global\Export\ExportController;
+use App\Http\Controllers\API\Global\Help\HelpController;
+use App\Http\Controllers\API\Global\Notification\NotificationController;
 use App\Http\Controllers\API\Global\Report\ReportController;
 use App\Http\Controllers\API\Global\Setting\SettingController;
 use App\Http\Controllers\API\Global\Setting\TestCredentialsController;
@@ -75,6 +78,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('activity-logs', [ActivityLogController::class, 'index']);
     Route::get('activity-logs/{activity}', [ActivityLogController::class, 'show']);
+
+    Route::get('help-configs', [HelpController::class, 'configs']);
+    Route::get('help-models', [HelpController::class, 'models']);
+    Route::get('help-enums', [HelpController::class, 'enums']);
+
+    Route::put('notifications', [NotificationController::class, 'update']);
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::post('chunk-file', ChunkFileController::class);
 
     /*
     |--------------------------------------------------------------------------
