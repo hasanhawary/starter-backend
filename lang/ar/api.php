@@ -19,6 +19,11 @@ return [
     'fail_data_form' => 'حدث خطأ فى البيانات',
     'error_in_path_file' => 'خطأ فى رفع الملف حاول مره اخرى',
     'unauthorized' => 'ليس لديك الصلاحيات المطلوبة لتنفيذ هذا الإجراء',
+    'something_error' => 'حدث خطأ ما',
+    'profile_updated' => 'تم تحديث الملف الشخصي بنجاح',
+    'test_credentials_success' => 'تم اختبار بيانات الاعتماد بنجاح',
+    'not_allowed_to_delete' => 'غير مسموح بحذف هذا السجل',
+    'not_allowed_to_restore' => 'غير مسموح باستعادة هذا السجل',
 
     'click_here' => 'اضغط هنا',
     'yes' => 'نعم',
