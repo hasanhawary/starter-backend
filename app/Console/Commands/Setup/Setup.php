@@ -138,12 +138,6 @@ class Setup extends Command
             // Purge the old database connection
             DB::purge($this->defaultConnection);
 
-            DB::purge('tenant');
-            config(['database.connections.tenant.database' => $tenant->database]);
-            config(['database.default' => 'tenant']);
-            DB::reconnect('tenant');
-
-
             // Reconnect to the new database
             DB::reconnect($this->defaultConnection);
 
