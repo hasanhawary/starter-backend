@@ -30,6 +30,31 @@ return [
     إذا لم تطلب هذا التحديث، يرجى تجاهل هذه الرسالة.<br><br>
     مع تحيات فريق :platform_name.',
 
+    // Create user
+    'create_user_data_title' => 'بيانات المستخدم الجديد',
+    'create_user_data_msg' => 'مرحبًا :name،<br><br>
+    تم إنشاء حسابك على منصة :platform_name بنجاح.<br><br>
+    <strong>تفاصيل الحساب:</strong><br>
+    البريد الإلكتروني: :email<br>
+    الهاتف: :phone<br>
+    كلمة المرور: :password<br>
+    تاريخ الإنشاء: :created_at<br><br>
+    إذا لم تطلب إنشاء هذا الحساب، يرجى تجاهل هذه الرسالة.<br><br>
+    مع تحيات فريق :platform_name.',
+
+    // Update user
+        'update_user_data_title' => 'تحديث بيانات المستخدم',
+        'update_user_data_msg' => 'مرحبًا :name،<br><br>
+    تم تحديث بيانات حسابك على منصة :platform_name بنجاح.<br><br>
+    <strong>تفاصيل الحساب المحدثة:</strong><br>
+    البريد الإلكتروني: :email<br>
+    الهاتف: :phone<br>
+    كلمة المرور: :password<br>
+    تاريخ التحديث: :updated_at<br><br>
+    إذا لم تطلب هذا التحديث، يرجى تجاهل هذه الرسالة.<br><br>
+    مع تحيات فريق :platform_name.',
+
+
     /*
     |--------------------------------------------------------------------------
     | OTP Notifications

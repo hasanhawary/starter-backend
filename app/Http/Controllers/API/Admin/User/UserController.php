@@ -123,10 +123,10 @@ class UserController extends BaseController
         }
 
         $user->sendNotification([
-            'title' => $isCreate ? 'user_data_title' : 'update_user_data_title',
+            'title' => $isCreate ? 'create_user_data_title' : 'update_user_data_title',
             'msg' => sprintf(
                 $isCreate
-                    ? 'user_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|created_at=>%s'
+                    ? 'create_user_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|created_at=>%s'
                     : 'update_user_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|updated_at=>%s',
                 $request->name,
                 $request->email,
