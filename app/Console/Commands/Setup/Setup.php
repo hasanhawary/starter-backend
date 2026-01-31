@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use JsonException as JsonExceptionAlias;
+use Nwidart\Modules\Facades\Module;
 
 class Setup extends Command
 {
@@ -64,7 +65,7 @@ class Setup extends Command
 
         //Setup modules if Laravel Modules package is being used
         if ($this->isUsingLaravelModules()) {
-            $this->activateAndSetupModules();
+            $this->setupModules();
         }
 
         //Link storage
@@ -107,40 +108,13 @@ class Setup extends Command
         ]);
     }
 
-    /**
-     * Setup modules.
-     *
-     * @return void
-     */
-    private function activateAndSetupModules(): void
-    {
-        //Activate and setup modules
-        $this->activateUserModule();
-        $this->setupModules();
-    }
-
-    /**
-     * Activate User module.
-     *
-     * @return void
-     */
-    private function activateUserModule(): void
-    {
-        Artisan::call('module:enable User');
-        Artisan::call('module:seed User');
-
-        updateDotEnv(['MODULE_USER_ENABLE' => true]);
-
-        $this->info('User module activated.');
-    }
-
     /***
      * @return void
      */
     private function createDatabase(): void
     {
         // Get database connection configuration
-        $config = config("database.connections.$this->defaultConnection");
+        $config = config("database.connections.{$this->defaultConnection}");
 
         try {
             // Create a new PDO instance
@@ -156,13 +130,19 @@ class Setup extends Command
 
             // Update the configuration to use the new database
             $config['database'] = $this->db;
-            config(["database.connections.$this->defaultConnection" => $config]);
+            config(["database.connections.{$this->defaultConnection}" => $config]);
 
             // Clear the configuration cache
             Artisan::call('config:clear');
 
             // Purge the old database connection
             DB::purge($this->defaultConnection);
+
+            DB::purge('tenant');
+            config(['database.connections.tenant.database' => $tenant->database]);
+            config(['database.default' => 'tenant']);
+            DB::reconnect('tenant');
+
 
             // Reconnect to the new database
             DB::reconnect($this->defaultConnection);
@@ -227,9 +207,6 @@ class Setup extends Command
      */
     private function setupModules(): void
     {
-        $modules = collect(Module::all())->filter(fn($items, $module) => $module !== 'User');
-        collect($modules)->each(function ($module) {
-            $this->setupModule($module);
-        });
+        collect(Module::all())->each(fn($mod) => $this->setupModule($mod->getName()));
     }
 }

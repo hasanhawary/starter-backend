@@ -12,7 +12,7 @@ class UserPolicy
 
     public function view(Authenticatable $user, ?User $model = null): bool
     {
-        return $this->canAct($user, $model, [
+        return $this->canAny($user, $model, [
             'view-all-user',
             'view-own-user',
         ]);
@@ -89,7 +89,7 @@ class UserPolicy
         return in_array($model->id, [...rootUsers(), $user->id], true);
     }
 
-    protected function canAct(Authenticatable $user, ?User $model, array $permissions): bool {
+    protected function canAny(Authenticatable $user, ?User $model, array $permissions): bool {
         foreach ($permissions as $permission) {
             if ($user->can($permission)) {
                 return $this->ownsOrAll($user, $model);

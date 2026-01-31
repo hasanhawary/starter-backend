@@ -10,7 +10,7 @@ class HelpModelRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'tables' => ['required', 'array'],
+            'tables' => ['sometimes','required', 'array'],
             'tables.*.name' => ['required', 'string'],
             'tables.*.extra' => ['sometimes', 'nullable'],
             'tables.*.scopes.*' => ['sometimes', 'nullable'],

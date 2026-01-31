@@ -40,7 +40,7 @@ class ActivityLogResource extends JsonResource
         $causerName = $this->causer ? ($this->causer->name ?? $this->causer->full_name) : resolveTrans('automatic_causer', 'attributes');
 
         return resolveTrans('done', 'attributes')
-            . ' ActivityLogResource.php' . trans('attributes.' . $this->description)
+            . ' ActivityLogResource.php' . resolve('validation.attributes.' . $this->description)
             . ' ' . resolveTrans(getModelKey($this->subject_type), 'api')
             . ' ' . resolveTrans('id', 'attributes') . ' ' . $this->subject?->id
             . ' ' . resolveTrans('causer', 'attributes') . ' ' . $causerName;

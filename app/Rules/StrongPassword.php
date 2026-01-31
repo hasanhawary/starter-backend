@@ -53,7 +53,7 @@ class StrongPassword implements InvokableRule
 
         foreach ($checks as $key => $passed) {
             if (!$passed) {
-                $fail(__("validation.password_$key", ['attribute' => __("attributes.{$attribute}")]));
+                $fail(__("validation.password_$key", ['attribute' => __("validation.attributes.{$attribute}")]));
             }
         }
     }

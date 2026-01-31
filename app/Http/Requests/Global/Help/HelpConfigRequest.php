@@ -15,13 +15,4 @@ class HelpConfigRequest extends FormRequest
             'configs.*.keys.*' => ['string'],
         ];
     }
-
-    public function attributes(): array
-    {
-        return [
-            'configs.*.name' => __('attributes.configs_name'),
-            'configs.*.keys' => __('attributes.configs_keys'),
-            'configs.*.keys.*' => __('attributes.configs_keys_item'),
-        ];
-    }
 }

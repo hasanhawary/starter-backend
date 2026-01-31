@@ -12,7 +12,7 @@ trait SetupModuleTrait
      */
     public function setupModule(string $module): void
     {
-        $action = $this->choice("Choose action for the $module module", ['disable', 'active']);
+        $action = $this->choice("Choose action for the $module module", ['disable', 'active', 'refresh']);
 
         match ($action) {
             'active' => $this->enableModule($module),
