@@ -19,6 +19,11 @@ return [
     'fail_data_form' => 'An error occurred in the data',
     'error_in_path_file' => 'Error uploading file, please try again',
     'unauthorized' => 'You do not have the required permissions to perform this action',
+    'something_error' => 'An error occurred',
+    'profile_updated' => 'Profile updated successfully',
+    'test_credentials_success' => 'Credentials tested successfully',
+    'not_allowed_to_delete' => 'Not allowed to delete this record',
+    'not_allowed_to_restore' => 'Not allowed to restore this record',
 
     'click_here' => 'Click here',
     'yes' => 'Yes',
@@ -135,5 +140,6 @@ return [
     'email' => 'Email',
     'phone' => 'Phone',
     'type' => 'Type',
+
 
 ];
