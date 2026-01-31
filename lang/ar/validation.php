@@ -147,6 +147,7 @@ return [
     'password_no_personal_info' => 'يجب ألا تحتوي :attribute على أجزاء من اسمك.',
     'password_no_dictionary' => 'يجب ألا تحتوي :attribute على كلمات شائعة أو متوقعة.',
     'at_least_one_language' => 'يجب تقديم لغة واحدة على الأقل (العربية أو الإنجليزية)',
+    'already_exists' => 'هذا العنصر موجود بالفعل',
 
     'custom' => [
         'attribute-name' => [
@@ -172,39 +173,82 @@ return [
     | of "email". This simply helps us make messages a little cleaner.
     |
     */
-
     'attributes' => [
+
+        /* ========= Identity & Basic Info ========= */
+        'id' => 'المعرف',
         'name' => 'الاسم',
-        'username' => 'اسم المُستخدم',
-        'email' => 'البريد الالكتروني',
         'first_name' => 'الاسم الأول',
         'last_name' => 'اسم العائلة',
+        'username' => 'اسم المُستخدم',
+        'display_name' => 'الاسم الظاهر',
+        'display_name.ar' => 'اسم العرض بالعربية',
+        'display_name.en' => 'اسم العرض بالإنجليزية',
+        'name.ar' => 'الاسم بالعربية',
+        'name.en' => 'الاسم بالإنجليزية',
+        'gender' => 'النوع',
+        'nationality' => 'الجنسية',
+        'title' => 'العنوان',
+
+        /* ========= Account & Authentication ========= */
+        'email' => 'البريد الالكتروني',
+        'email_verified_at' => 'تاريخ التحقق من البريد الإلكتروني',
         'password' => 'كلمة المرور',
         'password_confirmation' => 'تأكيد كلمة المرور',
-        'address' => 'العنوان',
-        'mobile' => 'الجوال',
-        'gender' => 'النوع',
-        'title' => 'العنوان',
-        'description' => 'الوصف',
-        'date' => 'التاريخ',
-        'time' => 'الوقت',
-        'status' => 'الحالة',
-        'avatar' => 'الصورة',
-        'img' => 'الصورة',
-        'photo' => 'الصورة',
-        'telephone' => 'التليفون',
-        'attachment' => 'المرفق',
-        'expert_ids' => 'الخبراء',
-        'answers' => 'الاجابات ',
         'otp' => 'رمز التحقق',
+        'last_login' => 'آخر تسجيل دخول',
+        'is_active' => 'نشط',
+
+        /* ========= Contact & Communication ========= */
         'phone' => 'الهاتف',
+        'mobile' => 'الجوال',
+        'telephone' => 'التليفون',
+        'phone_code' => 'كود الهاتف',
+        'phone_code_id' => 'كود الهاتف',
+        'phone_length' => 'طول رقم الهاتف',
+        'address' => 'العنوان',
+
+        /* ========= Content & Text ========= */
+        'description' => 'الوصف',
+        'content' => 'المحتوى',
+        'answers' => 'الاجابات',
+        'event' => 'الحدث',
+        'group' => 'المجموعة',
+        'type' => 'النوع',
+        'status' => 'الحالة',
+        'order' => 'الترتيب',
+
+        /* ========= Roles & Permissions ========= */
+        'roles' => 'الادوار',
         'permissions' => 'الصلاحيات',
         'permissions.*' => 'للصلاحية',
-        'display_name.en' => 'اسم العرض بالإنجليزية',
-        'display_name.ar' => 'اسم العرض بالعربية',
-        'roles' => 'الادوار',
-        'type' => 'النوع',
-        'phone_code_id' => 'كود الدولة'
-    ],
-    'already_exists' => 'هذا العنصر موجود بالفعل'
+        'permission' => 'الإذن',
+        'can_delete' => 'يمكن الحذف',
+
+        /* ========= Files & Media ========= */
+        'avatar' => 'الصورة',
+        'photo' => 'الصورة',
+        'img' => 'الصورة',
+        'attachment' => 'المرفق',
+        'file_name' => 'اسم الملف',
+        'chunk_number' => 'رقم الجزء',
+        'chunk_file' => 'الملف الجزئي',
+
+        /* ========= Dates & Time ========= */
+        'date' => 'التاريخ',
+        'time' => 'الوقت',
+        'created_by' => 'تم الإنشاء بواسطة',
+        'read_at' => 'تمت القراءة في',
+        'open_at' => 'تم الفتح في',
+
+        /* ========= System & Settings ========= */
+        'key' => 'المفتاح',
+        'code' => 'الرمز',
+        'length' => 'الطول',
+        'department_id' => 'القسم',
+        'country' => 'الدولة',
+        'notifiable' => 'يمكن الإشعار',
+        'data' => 'البيانات',
+        'token' => 'التوكن',
+    ]
 ];

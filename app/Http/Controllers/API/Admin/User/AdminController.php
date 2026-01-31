@@ -123,10 +123,10 @@ class AdminController extends BaseController
         }
 
         $admin->sendNotification([
-            'title' => $isCreate ? 'admin_data_title' : 'update_admin_data_title',
+            'title' => $isCreate ? 'create_admin_data_title' : 'update_admin_data_title',
             'msg' => sprintf(
                 $isCreate
-                    ? 'admin_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|created_at=>%s'
+                    ? 'create_admin_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|created_at=>%s'
                     : 'update_admin_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|updated_at=>%s',
                 $request->name,
                 $request->email,

@@ -14,10 +14,24 @@ use App\Http\Controllers\API\Admin\Global\Setting\TestCredentialsController;
 use App\Http\Controllers\API\Global\Auth\LoginController;
 use App\Http\Controllers\API\Global\Auth\OTPController;
 use App\Http\Controllers\API\Global\Auth\ResetPasswordController;
+use App\Http\Controllers\API\Global\Captcha\CaptchaController;
+use App\Http\Controllers\API\Global\Chunk\ChunkFileController;
+use App\Http\Controllers\API\Global\Help\HelpController;
+use App\Http\Controllers\API\Global\Notification\NotificationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\Global\Auth\LogoutController;
 
 Route::prefix('admin')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Public Routes (Guest Accessible)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('captcha')->group(function () {
+        Route::get('/', [CaptchaController::class, 'generateCaptcha']);
+        Route::post('/verify', [CaptchaController::class, 'verifyCaptcha']);
+    });
+
     /*
     |--------------------------------------------------------------------------
     | Auth Routes (Public)
@@ -25,13 +39,13 @@ Route::prefix('admin')->group(function () {
     */
     Route::post('login', LoginController::class);
     Route::post('reset-password', ResetPasswordController::class);
-    
+
     // OTP Routes (Public for login/registration)
     Route::post('send-otp', [OTPController::class, 'send']);
     Route::post('check-otp', [OTPController::class, 'check']);
     Route::post('verify-otp', [OTPController::class, 'verify']);
 
-    Route::middleware(['auth:admin'])->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
         /*
        |--------------------------------------------------------------------------
        | Profile Routes
@@ -77,6 +91,14 @@ Route::prefix('admin')->group(function () {
 
         Route::get('activity-logs', [ActivityLogController::class, 'index']);
         Route::get('activity-logs/{activity}', [ActivityLogController::class, 'show']);
+
+        Route::get('help-configs', [HelpController::class, 'configs']);
+        Route::get('help-models', [HelpController::class, 'models']);
+        Route::get('help-enums', [HelpController::class, 'enums']);
+
+        Route::put('notifications', [NotificationController::class, 'update']);
+        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::post('chunk-file', ChunkFileController::class);
 
         /*
         |--------------------------------------------------------------------------

@@ -17,9 +17,5 @@ return [
     'sent' => 'We have emailed your password reset link.',
     'throttled' => 'Please wait before retrying.',
     'token' => 'This password reset token is invalid.',
-    'user' => "We can't find a user with that email address.",
-    'reset_pw_otp' => 'To reset your password, please enter the One-Time Password (OTP): :otp. This code is valid for 2 minutes. If you did not request this, please ignore this message.',
-    'reset_pw_title' => 'Reset Password',
-    'otp_verified' => 'OTP Verified Successfully',
-    'invalid_otp' => 'Invalid OTP'
+    'user' => 'We can\'t find a user with that email address.',
 ];

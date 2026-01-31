@@ -36,7 +36,7 @@ class ValidLength implements ValidationRule
             if (strlen($value) !== (int)$this->length) {
                 $fail(__('validation.exact_length', [
                     'length' => $this->length,
-                    'attribute' => __('attributes.phone')
+                    'attribute' => __('validation.attributes.phone')
                 ]));
             }
         }

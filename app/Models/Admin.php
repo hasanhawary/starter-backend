@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enum\User\UserGenderEnum;
-use App\Models\BaseAuthenticatable;
 use App\Scopes\User\AdminScopes;
 use App\Trait\Global\ApplyNotification;
 use App\Trait\Global\CreatedByObserver;
@@ -78,7 +77,7 @@ class Admin extends Authenticatable implements LdapAuthenticatable
 
     public function getFullPhone(): string
     {
-        $code = $this->phone_code_id ? Country::find($this->phone_code_id)?->phone_code : '';
+        $code = $this->phoneCode?->phone_code ?? '';
         $number = $this->phone ?? '';
 
         $fullPhone = trim(($code ?? '') . $number);

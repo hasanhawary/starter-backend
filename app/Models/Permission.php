@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\SpatiePermission;
-use Spatie\Permission\Models\Permission as SpaitePermission;
+use Spatie\Permission\Models\Permission as SpatiePermission;
 use Spatie\Translatable\HasTranslations;
 
-class Permission extends SpaitePermission
+class Permission extends SpatiePermission
 {
     use HasTranslations;
 
