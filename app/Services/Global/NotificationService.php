@@ -76,7 +76,7 @@ class NotificationService
      */
     private static function sendRealtimeNotification(Authenticatable $user, array $data): void
     {
-        if (config('services.realtime.enable')) {
+        if (config('project.realtime.enable')) {
             event(new NotificationEvent($user->id, $data));
         }
     }

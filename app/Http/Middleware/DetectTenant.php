@@ -22,7 +22,7 @@ class DetectTenant
     public function handle(Request $request, Closure $next)
     {
         // Try to detect tenant by domain/subdomain
-        $host = $request->getHost(); // e.g., acme.example.com
+        $host = $request->getHost(); // tenant1.crm.com
         $tenant = Tenant::where('domain', $host)->first();
 
         // If not found, try X-Tenant-Id header
@@ -39,7 +39,6 @@ class DetectTenant
         if (!$tenant->is_active) {
             throw new InActiveUserException(__('api.account_not_active'));
         }
-
 
         // Make tenant current
         $tenant->makeCurrent();
