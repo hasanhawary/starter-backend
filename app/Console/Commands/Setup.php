@@ -11,9 +11,7 @@ use Illuminate\Support\Str;
 use JsonException;
 use Nwidart\Modules\Facades\Module;
 use PDO;
-use Random\RandomException;
 use Throwable;
-use Database\Seeders\Tenant\DatabaseSeeder;
 
 class Setup extends Command
 {
