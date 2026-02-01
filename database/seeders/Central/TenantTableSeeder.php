@@ -13,14 +13,14 @@ class TenantTableSeeder extends Seeder
         $tenants = [
             [
                 'name' => 'Tenant One',
-                'domain' => 'tenant1.crm.test',
-                'database' => 'crm_tenant1',
+                'domain' => 'tenant1.test',
+                'database' => 'tenant_1',
                 'created_by' => 1,
             ],
             [
                 'name' => 'Tenant Two',
-                'domain' => 'tenant2.crm.test',
-                'database' => 'crm_tenant2',
+                'domain' => 'tenant2.test',
+                'database' => 'tenant_2',
                 'created_by' => 1,
             ],
         ];
