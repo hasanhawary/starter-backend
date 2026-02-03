@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\Auth;
 
 use App\Exceptions\InvalidOtpException;
 use App\Http\Controllers\API\BaseController;
-use App\Http\Requests\Global\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Services\Auth\ResetPasswordService;
 use Illuminate\Http\JsonResponse;
 

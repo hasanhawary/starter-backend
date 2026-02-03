@@ -7,7 +7,7 @@ use App\Filters\Global\OrderByFilter;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\DataEntry\CountryRequest;
 use App\Http\Requests\Global\Other\PageRequest;
-use App\Http\Resources\Global\DataEntry\CountryResource;
+use App\Http\Resources\DataEntry\CountryResource;
 use App\Models\Country;
 use App\Trait\Global\HasDeleteMethods;
 use App\Trait\Global\HasToggleActiveMethods;

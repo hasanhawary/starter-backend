@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\API\Profile;
 
 use App\Http\Controllers\API\BaseController;
-use App\Http\Requests\Global\Profile\UpdateProfileRequest;
+use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Http\Resources\Auth\SessionResource;
 use App\Http\Resources\User\UserResource;
-use App\Http\Resources\Global\Auth\SessionResource;
 use App\Models\User;
 use Exception;
 use HasanHawary\MediaManager\Facades\Media;

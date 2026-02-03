@@ -3,7 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Exceptions\InvalidOtpException;
-use App\Http\Requests\Global\Auth\SendOtpRequest;
+use App\Http\Requests\Auth\SendOtpRequest;
 use Carbon\Carbon;
 use Random\RandomException;
 
@@ -63,7 +63,7 @@ class OTPService extends BaseAuthService
      * - Clears OTP data
      * - Marks email as verified when type is "verify_email"
      *
-     * @param 
+     * @param
      *  $request
      * @param string $type
      * @return mixed
@@ -89,7 +89,7 @@ class OTPService extends BaseAuthService
      *
      * Useful for multistep verification flows.
      *
-     * @param 
+     * @param
      *  $request
      * @param string $type
      * @return mixed
@@ -109,7 +109,7 @@ class OTPService extends BaseAuthService
      * - Checks expiration
      * - Increments attempts on failure
      *
-     * @param 
+     * @param
      *  $request
      * @param string $type
      * @return mixed

@@ -7,7 +7,7 @@ use App\Exceptions\EmailVerifiedException;
 use App\Exceptions\InActiveUserException;
 use App\Exceptions\InvalidEmailAndPasswordCombinationException;
 use App\Exceptions\InvalidOtpException;
-use App\Http\Requests\Global\Auth\VerifyOtpRequest;
+use App\Http\Requests\Auth\VerifyOtpRequest;
 use Illuminate\Support\Facades\Hash;
 use LdapRecord\Auth\PasswordRequiredException;
 use LdapRecord\Auth\UsernameRequiredException;

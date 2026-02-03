@@ -4,8 +4,8 @@ namespace App\Http\Controllers\API\Auth;
 
 use App\Exceptions\InvalidOtpException;
 use App\Http\Controllers\API\BaseController;
-use App\Http\Requests\Global\Auth\SendOtpRequest;
-use App\Http\Requests\Global\Auth\VerifyOtpRequest;
+use App\Http\Requests\Auth\SendOtpRequest;
+use App\Http\Requests\Auth\VerifyOtpRequest;
 use App\Services\Auth\OTPService;
 use Illuminate\Http\JsonResponse;
 use Random\RandomException;

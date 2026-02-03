@@ -16,7 +16,7 @@ class Setting extends BaseModel
 
     public array $basicOperations = ['read', 'update'];
 
-    protected $fillable = ['key', 'value', 'group', 'type' ,'label', 'placeholder', 'is_multi_lang','is_env'];
+    protected $fillable = ['key', 'value', 'group', 'type', 'label', 'placeholder', 'is_multi_lang', 'is_env'];
 
     /*
      |--------------------------------------------------------------------------

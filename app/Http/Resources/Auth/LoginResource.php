@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Global\Auth;
+namespace App\Http\Resources\Auth;
 
 use App\Services\Global\EncryptionService;
 use Illuminate\Foundation\Auth\User;

@@ -1,18 +1,22 @@
 <?php
 
-namespace App\Http\Requests\Global\Auth;
+namespace App\Http\Requests\Auth;
 
 use App\Http\Requests\BaseFormRequest;
 use Illuminate\Support\Str;
 
-class LoginRequest extends BaseFormRequest
+class ResetPasswordRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
+            'otp' => ['required', 'digits:4'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-            'otp' => [shouldVerifyOtp('user') ? 'required' : 'nullable', 'string'],
+            'password' => [
+                'required',
+                'confirmed',
+                'min:8',
+            ],
         ];
     }
 
@@ -33,6 +37,7 @@ class LoginRequest extends BaseFormRequest
             if ($decoded !== false) {
                 $this->merge([
                     'password' => $decoded,
+                    'password_confirmation' => $decoded,
                 ]);
             }
         }

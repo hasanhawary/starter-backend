@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Global\Profile;
+namespace App\Http\Requests\Profile;
 
 use App\Http\Requests\BaseFormRequest;
 use App\Models\Country;

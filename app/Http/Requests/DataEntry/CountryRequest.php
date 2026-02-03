@@ -3,7 +3,7 @@
 namespace App\Http\Requests\DataEntry;
 
 use App\Http\Requests\BaseFormRequest;
-use App\Http\Resources\Global\DataEntry\CountryResource;
+use App\Http\Resources\DataEntry\CountryResource;
 use App\Models\Country;
 use App\Rules\TranslatableRequired;
 use App\Rules\UniqueCheck;
