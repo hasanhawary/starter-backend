@@ -190,7 +190,7 @@ php artisan reverb:start
 Included at:
 
 ```
-public/Starter BackEnd.postman_collection.json
+The project's directory "postman.json"
 ```
 
 ### How to Use
