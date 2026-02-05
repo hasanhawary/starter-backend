@@ -28,7 +28,7 @@ return [
     'auth' => [
         'login_methods' => [
             'password' => true,
-            'otp' => env('AUTH_LOGIN_OTP', true),
+            'otp' => env('AUTH_LOGIN_OTP', false),
         ],
 
         'encryption' => [
