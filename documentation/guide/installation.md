@@ -207,8 +207,8 @@ Expected response:
 
 ### Postman Collection
 
-Import the <a href="/Starter_Backend.postman_collection.json" download>Postman collection</a> to easily test all API endpoints.
-<!-- Import the <a href="/Starter_Backend.postman_collection.json" download>Postman collection</a> to easily test all API endpoints. -->
+Import the <a href="/postman.json" download>Postman collection</a> to easily test all API endpoints.
+<!-- Import the <a href="/postman.json" download>Postman collection</a> to easily test all API endpoints. -->
 
 ## Next Steps
 
