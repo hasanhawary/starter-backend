@@ -18,3 +18,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/documentation/.vitepress/dist
+/documentation/.vitepress/cache
