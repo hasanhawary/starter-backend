@@ -9,7 +9,6 @@ class HelpEnumRequest extends BaseFormRequest
 
     public function rules(): array
     {
-        dd(lang_path());
         return [
             'enums' => ['sometimes', 'required', 'array'],
             'enums.*.name' => ['sometimes', 'required', 'string'],

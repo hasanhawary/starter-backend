@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 use JsonException;
 use Nwidart\Modules\Facades\Module;
 use PDO;
-use Random\RandomException;
+use RuntimeException;
 use Throwable;
 
 class Setup extends Command
@@ -46,6 +46,10 @@ class Setup extends Command
         $this->warn('🚀  Application installation started...');
 
         $this->copyEnvExampleToEnv();
+
+        $this->db = $this->option('db-database')
+            ?: Str::snake(config('app.name')) . '_' . random_int(999, 9999) . '_db';
+
         $this->updateEnvVariablesFromOptions();
 
         Artisan::call('key:generate', ['--force' => true]);
@@ -73,13 +77,9 @@ class Setup extends Command
     }
 
     /**
-     * @throws RandomException
      */
     private function updateEnvVariablesFromOptions(): void
     {
-        $this->db = $this->option('db-database')
-            ?: Str::snake(config('app.name')) . '_' . random_int(999,9999) . '_db';
-
         updateDotEnv([
             'DB_HOST' => $this->option('db-host'),
             'DB_PORT' => $this->option('db-port'),
@@ -88,6 +88,17 @@ class Setup extends Command
             'DB_PASSWORD' => $this->option('db-password'),
             'FILESYSTEM_DISK' => 'public',
         ]);
+
+        // Update runtime config from env
+        config([
+            "database.connections.{$this->defaultConnection}.host" => $this->option('db-host'),
+            "database.connections.{$this->defaultConnection}.port" => $this->option('db-host'),
+            "database.connections.{$this->defaultConnection}.database" => $this->db,
+            "database.connections.{$this->defaultConnection}.username" => $this->option('db-username'),
+            "database.connections.{$this->defaultConnection}.password" => $this->option('db-password'),
+        ]);
+
+        Artisan::call('config:clear');
 
         $this->info('✔ Environment variables updated.');
     }
@@ -101,14 +112,24 @@ class Setup extends Command
         $config = config("database.connections.$connection");
 
         try {
-            // Create database via PDO
-            $dsn = "{$config['driver']}:host={$config['host']};port={$config['port']}";
+            // Create database via PDO (MySQL only)
+            if ($config['driver'] !== 'mysql') {
+                throw new RuntimeException('Database creation is supported only for MySQL');
+            }
+
+            $dsn = sprintf(
+                'mysql:host=%s;port=%s',
+                $config['host'],
+                $config['port']
+            );
 
             $pdo = new PDO(
                 $dsn,
                 $config['username'],
                 $config['password'],
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                ]
             );
 
             $pdo->exec(
@@ -130,7 +151,7 @@ class Setup extends Command
 
             //Migrate
             $this->warn('Running migrate...');
-            Artisan::call('migrate', ['--force' => true]);
+            Artisan::call('migrate:fresh', ['--force' => true]);
 
             $this->info('✔ Migrations executed.');
 
@@ -143,19 +164,31 @@ class Setup extends Command
 
         } catch (Throwable $e) {
             $this->error('❌ Database setup failed: ' . $e->getMessage());
-            // remove database via PDO
-            $dsn = "{$config['driver']}:host={$config['host']};port={$config['port']}";
 
-            $pdo = new PDO(
-                $dsn,
-                $config['username'],
-                $config['password'],
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-            );
+            // Only attempt DROP DATABASE for MySQL
+            if ($config['driver'] === 'mysql') {
 
-            $pdo->exec("DROP DATABASE IF EXISTS `{$this->db}`");
+                $dsn = sprintf(
+                    'mysql:host=%s;port=%s',
+                    $config['host'],
+                    $config['port']
+                );
+
+                $pdo = new PDO(
+                    $dsn,
+                    $config['username'],
+                    $config['password'],
+                    [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    ]
+                );
+
+                $pdo->exec("DROP DATABASE IF EXISTS `{$this->db}`");
+            }
+
             throw $e;
         }
+
     }
 
     /**
@@ -182,7 +215,7 @@ class Setup extends Command
             $name = $module->getName();
 
             Artisan::call("module:enable {$name}");
-            Artisan::call("module:migrate {$name}", ['--force' => true]);
+            Artisan::call("module:migrate:fresh {$name}", ['--force' => true]);
 
             if (!$this->option('no-seed')) {
                 Artisan::call("module:seed {$name}", ['--force' => true]);
