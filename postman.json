@@ -231,7 +231,8 @@
                       "key": "otp",
                       "value": "1111",
                       "type": "text",
-                      "uuid": "c07b4bfa-5ad1-4a61-bfb7-46f560ae4fb2"
+                      "uuid": "c07b4bfa-5ad1-4a61-bfb7-46f560ae4fb2",
+                      "disabled": true
                     }
                   ]
                 },
@@ -4507,7 +4508,7 @@
                       "formdata": []
                     },
                     "url": {
-                      "raw": "{{url-admin}}/help-enums",
+                      "raw": "{{url-admin}}/help-enums?enums[0][name]=global.active_type",
                       "host": [
                         "{{url-admin}}"
                       ],
@@ -4517,8 +4518,7 @@
                       "query": [
                         {
                           "key": "enums[0][name]",
-                          "value": "global.active_type",
-                          "disabled": true
+                          "value": "global.active_type"
                         },
                         {
                           "key": "enums[1][name]",
@@ -5806,7 +5806,7 @@
                       "formdata": []
                     },
                     "url": {
-                      "raw": "{{url}}/help-enums",
+                      "raw": "{{url}}/help-enums?enums[0][name]=global.active_type",
                       "host": [
                         "{{url}}"
                       ],
@@ -5816,8 +5816,7 @@
                       "query": [
                         {
                           "key": "enums[0][name]",
-                          "value": "global.active_type",
-                          "disabled": true
+                          "value": "global.active_type"
                         },
                         {
                           "key": "enums[1][name]",
