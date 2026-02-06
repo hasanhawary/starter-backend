@@ -11,6 +11,179 @@
       "name": "Auth",
       "item": [
         {
+          "name": "OTP",
+          "item": [
+            {
+              "name": "OTP / Send",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "email",
+                      "value": "admin@wakeb.com",
+                      "description": "required",
+                      "type": "text"
+                    },
+                    {
+                      "key": "type",
+                      "value": "reset_password",
+                      "description": "enum => global.otp_type [login,reset_password,verify_email]",
+                      "type": "text",
+                      "uuid": "9705820a-737d-4ef3-b2ac-8a0523dc5fd1"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{url}}/send-otp",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "send-otp"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "OTP / Check (Just Check)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "email",
+                      "value": "admin@wakeb.com",
+                      "description": "required",
+                      "type": "text"
+                    },
+                    {
+                      "key": "type",
+                      "value": "login",
+                      "description": "enum => global.otp_type [login,reset_password,verify_email]",
+                      "type": "text",
+                      "uuid": "9705820a-737d-4ef3-b2ac-8a0523dc5fd1"
+                    },
+                    {
+                      "key": "otp",
+                      "value": "1111",
+                      "description": "required",
+                      "type": "text",
+                      "uuid": "895b7d7d-0851-43de-8322-fc5cc4496240"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{url}}/check-otp",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "check-otp"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "OTP / Verify (Check And Reset Code)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "email",
+                      "value": "admin@wakeb.com",
+                      "description": "required",
+                      "type": "text"
+                    },
+                    {
+                      "key": "type",
+                      "value": "login",
+                      "description": "enum => global.otp_type [login,reset_password,verify_email]",
+                      "type": "text",
+                      "uuid": "9705820a-737d-4ef3-b2ac-8a0523dc5fd1"
+                    },
+                    {
+                      "key": "otp",
+                      "value": "2278",
+                      "description": "required",
+                      "type": "text",
+                      "uuid": "895b7d7d-0851-43de-8322-fc5cc4496240"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{url}}/verify-otp",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "verify-otp"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Auth / Login",
           "event": [
             {
@@ -2709,179 +2882,6 @@
           ]
         },
         {
-          "name": "OTP",
-          "item": [
-            {
-              "name": "OTP / Send",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "formdata",
-                  "formdata": [
-                    {
-                      "key": "email",
-                      "value": "admin@wakeb.com",
-                      "description": "required",
-                      "type": "text"
-                    },
-                    {
-                      "key": "type",
-                      "value": "login",
-                      "description": "enum => global.otp_type [login,reset_password,verify_email]",
-                      "type": "text",
-                      "uuid": "9705820a-737d-4ef3-b2ac-8a0523dc5fd1"
-                    }
-                  ]
-                },
-                "url": {
-                  "raw": "{{url}}/send-otp",
-                  "host": [
-                    "{{url}}"
-                  ],
-                  "path": [
-                    "send-otp"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "OTP / Check (Just Check)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "formdata",
-                  "formdata": [
-                    {
-                      "key": "email",
-                      "value": "admin@wakeb.com",
-                      "description": "required",
-                      "type": "text"
-                    },
-                    {
-                      "key": "type",
-                      "value": "login",
-                      "description": "enum => global.otp_type [login,reset_password,verify_email]",
-                      "type": "text",
-                      "uuid": "9705820a-737d-4ef3-b2ac-8a0523dc5fd1"
-                    },
-                    {
-                      "key": "otp",
-                      "value": "1111",
-                      "description": "required",
-                      "type": "text",
-                      "uuid": "895b7d7d-0851-43de-8322-fc5cc4496240"
-                    }
-                  ]
-                },
-                "url": {
-                  "raw": "{{url}}/check-otp",
-                  "host": [
-                    "{{url}}"
-                  ],
-                  "path": [
-                    "check-otp"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "OTP / Verify (Check And Reset Code)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "formdata",
-                  "formdata": [
-                    {
-                      "key": "email",
-                      "value": "admin@wakeb.com",
-                      "description": "required",
-                      "type": "text"
-                    },
-                    {
-                      "key": "type",
-                      "value": "login",
-                      "description": "enum => global.otp_type [login,reset_password,verify_email]",
-                      "type": "text",
-                      "uuid": "9705820a-737d-4ef3-b2ac-8a0523dc5fd1"
-                    },
-                    {
-                      "key": "otp",
-                      "value": "2278",
-                      "description": "required",
-                      "type": "text",
-                      "uuid": "895b7d7d-0851-43de-8322-fc5cc4496240"
-                    }
-                  ]
-                },
-                "url": {
-                  "raw": "{{url}}/verify-otp",
-                  "host": [
-                    "{{url}}"
-                  ],
-                  "path": [
-                    "verify-otp"
-                  ]
-                }
-              },
-              "response": []
-            }
-          ],
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "requests": {},
-                "exec": [
-                  ""
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "requests": {},
-                "exec": [
-                  ""
-                ]
-              }
-            }
-          ]
-        },
-        {
           "name": "Report",
           "item": [
             {
@@ -3148,7 +3148,7 @@
                   "formdata": []
                 },
                 "url": {
-                  "raw": "{{url}}/help-enums",
+                  "raw": "{{url}}/help-enums?enums[1][name]=global.otp_type",
                   "host": [
                     "{{url}}"
                   ],
@@ -3164,8 +3164,7 @@
                     {
                       "key": "enums[1][name]",
                       "value": "global.otp_type",
-                      "type": "text",
-                      "disabled": true
+                      "type": "text"
                     }
                   ]
                 }
@@ -3201,12 +3200,12 @@
                   "formdata": []
                 },
                 "url": {
-                  "raw": "{{url}}/help-config?configs[0][name]=app",
+                  "raw": "{{url}}/help-configs?configs[0][name]=app",
                   "host": [
                     "{{url}}"
                   ],
                   "path": [
-                    "help-config"
+                    "help-configs"
                   ],
                   "query": [
                     {
