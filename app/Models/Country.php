@@ -13,7 +13,7 @@ class Country extends BaseModel
 
     public array $translatable = ['name', 'nationality'];
     public bool $inPermission = true;
-    public array $specialOperations = ['force-delete', 'restore'];
+    public array $specialOperations = ['force-delete', 'restore','toggle-active'];
     protected $fillable = [
         'name',
         'nationality',
