@@ -136,4 +136,5 @@ class UserController extends BaseController
             )
         ], ['email']);
     }
+
 }

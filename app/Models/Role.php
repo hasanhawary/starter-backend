@@ -34,12 +34,12 @@ class Role extends SpatieRole
     */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(getAuthModel(), 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function roleUsers(): MorphToMany
     {
-        return $this->morphedByMany(getAuthModel(), 'model', 'model_has_roles', 'role_id', 'model_id');
+        return $this->morphedByMany(User::class, 'model', 'model_has_roles', 'role_id', 'model_id');
     }
 
 

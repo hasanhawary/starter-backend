@@ -74,9 +74,10 @@ return [
 	 */
 	'roles' => [
 		'default_role' => [
-			'home' => ['report'],
 			'type' => null,
-			'permissions' => []
+			'permissions' => [
+                'home' => ['report']
+            ]
 		]
 	],
 	/*
