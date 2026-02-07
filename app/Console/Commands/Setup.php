@@ -92,7 +92,7 @@ class Setup extends Command
         // Update runtime config from env
         config([
             "database.connections.{$this->defaultConnection}.host" => $this->option('db-host'),
-            "database.connections.{$this->defaultConnection}.port" => $this->option('db-host'),
+            "database.connections.{$this->defaultConnection}.port" => $this->option('db-port'),
             "database.connections.{$this->defaultConnection}.database" => $this->db,
             "database.connections.{$this->defaultConnection}.username" => $this->option('db-username'),
             "database.connections.{$this->defaultConnection}.password" => $this->option('db-password'),
