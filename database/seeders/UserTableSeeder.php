@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enum\User\UserGenderEnum;
+use App\Models\Admin;
 use App\Models\User;
 use App\Models\Country;
 use HasanHawary\PermissionManager\Facades\Access;
@@ -56,5 +57,20 @@ class UserTableSeeder extends Seeder
             'gender' => UserGenderEnum::Male->value,
             'is_active' => true
         ])->assignRole('admin');
+
+        //Factory
+        $users = User::factory()
+            ->count(30)
+            ->create([
+                'created_at' => fn () => fake()->dateTimeBetween('-30 days', 'now'),
+                'updated_at' => fn () => fake()->dateTimeBetween('-30 days', 'now'),
+            ]);
+
+        $users->each(function ($user) {
+            // safer to use assignRole, so you don't remove existing roles
+            if (! $user->hasRole('admin')) {
+                $user->assignRole('admin');
+            }
+        });
     }
 }

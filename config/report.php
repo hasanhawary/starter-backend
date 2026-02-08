@@ -18,7 +18,7 @@ return [
                     ],
                 ],
                 'registered_users_by_date' => [
-                    'type' => 'spline',
+                    'type' => 'table',
                     'size' => [
                         'cols' => '12',
                         'md' => '12',
