@@ -14,6 +14,7 @@ return [
         'high_chart' => 'High Chart',
     ],
     'report_page_type' => [
+        'admin' => 'Admins',
         'user' => 'Users',
     ],
     'setting_type' => [

@@ -56,5 +56,20 @@ class AdminTableSeeder extends Seeder
             'gender' => UserGenderEnum::Male->value,
             'is_active' => true
         ])->assignRole('admin');
+
+        //Factory
+        $admins = Admin::factory()
+            ->count(30)
+            ->create([
+                'created_at' => fn () => fake()->dateTimeBetween('-30 days', 'now'),
+                'updated_at' => fn () => fake()->dateTimeBetween('-30 days', 'now'),
+            ]);
+
+        $admins->each(function ($admin) {
+            // safer to use assignRole, so you don't remove existing roles
+            if (! $admin->hasRole('admin')) {
+                $admin->assignRole('admin');
+            }
+        });
     }
 }

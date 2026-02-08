@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enum\User\UserGenderEnum;
-use App\Models\BaseAuthenticatable;
 use App\Scopes\User\UserScopes;
 use App\Trait\Global\ApplyNotification;
 use App\Trait\Global\CreatedByObserver;
@@ -11,6 +10,7 @@ use App\Trait\Global\LogsActivityOptions;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -23,7 +23,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements LdapAuthenticatable
 {
-    use SoftDeletes, AuthenticatesWithLdap, UserScopes, ApplyNotification, CreatedByObserver, Notifiable, HasApiTokens, HasRoles, InteractsWithSockets, LogsActivityOptions;
+    use HasFactory, SoftDeletes, AuthenticatesWithLdap, UserScopes, ApplyNotification, CreatedByObserver, Notifiable, HasApiTokens, HasRoles, InteractsWithSockets, LogsActivityOptions;
 
     protected string $guard_name = 'api';
     public bool $inPermission = true;

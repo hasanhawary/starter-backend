@@ -6,7 +6,7 @@ return [
     // Example pages
     'pages' => [
         // Example pages
-        'user' => [
+        'admin' => [
             'type' => 'page',
             'report' => [
                 'cards' => [
@@ -19,6 +19,35 @@ return [
                 ],
                 'registered_users_by_date' => [
                     'type' => 'spline',
+                    'size' => [
+                        'cols' => '12',
+                        'md' => '12',
+                        'lg' => '12',
+                    ],
+                ],
+                'user_by_gender' => [
+                    'type' => 'spline',
+                    'size' => [
+                        'cols' => '12',
+                        'md' => '12',
+                        'lg' => '12',
+                    ],
+                ],
+            ],
+        ],
+        'user' => [
+            'type' => 'page',
+            'report' => [
+                'cards' => [
+                    'type' => 'card',
+                    'size' => [
+                        'cols' => '6',
+                        'md' => '3',
+                        'lg' => '3',
+                    ],
+                ],
+                'registered_users_by_date' => [
+                    'type' => 'table',
                     'size' => [
                         'cols' => '12',
                         'md' => '12',

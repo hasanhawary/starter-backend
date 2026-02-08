@@ -8,5 +8,6 @@ enum ReportPageTypeEnum: string
 {
     use EnumMethods;
 
+    case Admin = 'admin';
     case User = 'user';
 }

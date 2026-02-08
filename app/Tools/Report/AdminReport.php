@@ -3,20 +3,21 @@
 namespace App\Tools\Report;
 
 use App\Enum\User\UserGenderEnum;
+use App\Models\Admin;
 use App\Models\User;
 use HasanHawary\ReportBuilder\BaseReport;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
 
-class UserReport extends BaseReport
+class AdminReport extends BaseReport
 {
     public string $table;
 
     public function __construct(array $filter)
     {
         parent::__construct($filter);
-        $this->table = 'users';
+        $this->table = 'admins';
     }
 
     /*
@@ -26,9 +27,15 @@ class UserReport extends BaseReport
     */
     public function getCards(): array
     {
-        $cards['users'] = (array)DB::table($this->table)
+        $cards = (array)DB::table($this->table)
+            ->join("model_has_roles", "$this->table.id", '=', 'model_has_roles.model_id')
+            ->join("roles", "model_has_roles.role_id", '=', 'roles.id')
+            ->where("model_type", '=', Admin::class)
             ->where(fn($q) => $this->applyFilters($q))
-            ->count();
+            ->select([
+                $this->getUserRoleRaw('root'),
+                $this->getUserRoleRaw('admin')
+            ])->first();
 
         return $this->cardResponse($cards);
     }
@@ -86,4 +93,10 @@ class UserReport extends BaseReport
             });
         }
     }
+
+    private function getUserRoleRaw(string $role): Expression
+    {
+        return DB::raw("COUNT(DISTINCT CASE WHEN roles.name = '" . $role . "' THEN 1 END) AS " . $role . "_users_count");
+    }
+
 }

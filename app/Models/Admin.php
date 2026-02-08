@@ -10,6 +10,7 @@ use App\Trait\Global\LogsActivityOptions;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -22,7 +23,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Admin extends Authenticatable implements LdapAuthenticatable
 {
-    use SoftDeletes, AuthenticatesWithLdap, AdminScopes, ApplyNotification, CreatedByObserver, Notifiable, HasApiTokens, HasRoles, InteractsWithSockets, LogsActivityOptions;
+    use HasFactory, SoftDeletes, AuthenticatesWithLdap, AdminScopes, ApplyNotification, CreatedByObserver, Notifiable, HasApiTokens, HasRoles, InteractsWithSockets, LogsActivityOptions;
 
     protected string $guard_name = 'admin';
     public bool $inPermission = true;

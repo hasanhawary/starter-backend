@@ -14,6 +14,7 @@ return [
         'high_chart' => 'مخطط عالي',
     ],
     'report_page_type' => [
+        'admin' => 'المشرفين',
         'user' => 'المستخدمين',
     ],
     'setting_type' => [

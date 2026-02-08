@@ -31,5 +31,14 @@ class UserTableSeeder extends Seeder
             'gender' => UserGenderEnum::Male->value,
             'is_active' => true
         ]);
+
+        //Factory
+        User::factory()
+            ->count(30)
+            ->create([
+                'created_at' => fn () => fake()->dateTimeBetween('-30 days', 'now'),
+                'updated_at' => fn () => fake()->dateTimeBetween('-30 days', 'now'),
+            ]);
+
     }
 }
