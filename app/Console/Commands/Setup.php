@@ -26,6 +26,7 @@ class Setup extends Command
         {--db-host=localhost : Database host}
         {--db-port=3306 : Database port}
         {--db-database= : Database name}
+        {--db-driver=mysql : Database driver}
         {--db-username=root : Database username}
         {--db-password=root : Database password}
         {--no-seed : Do not run database seeders}';
@@ -93,6 +94,7 @@ class Setup extends Command
         config([
             "database.connections.{$this->defaultConnection}.host" => $this->option('db-host'),
             "database.connections.{$this->defaultConnection}.port" => $this->option('db-port'),
+            "database.connections.{$this->defaultConnection}.driver" => $this->option('db-driver'),
             "database.connections.{$this->defaultConnection}.database" => $this->db,
             "database.connections.{$this->defaultConnection}.username" => $this->option('db-username'),
             "database.connections.{$this->defaultConnection}.password" => $this->option('db-password'),
