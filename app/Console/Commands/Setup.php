@@ -23,6 +23,7 @@ class Setup extends Command
      * The name and signature of the console command.
      */
     protected $signature = 'app:install
+        {--brand= : Brand Name}
         {--db-host=localhost : Database host}
         {--db-port=3306 : Database port}
         {--db-database= : Database name}
@@ -82,6 +83,8 @@ class Setup extends Command
     private function updateEnvVariablesFromOptions(): void
     {
         updateDotEnv([
+            'DEFAULT_BRAND' => $this->option('brand') ?? config('brands.default_brand'),
+            'DB_CONNECTION' => $this->option('db-driver'),
             'DB_HOST' => $this->option('db-host'),
             'DB_PORT' => $this->option('db-port'),
             'DB_DATABASE' => $this->db,
@@ -98,6 +101,8 @@ class Setup extends Command
             "database.connections.{$this->defaultConnection}.database" => $this->db,
             "database.connections.{$this->defaultConnection}.username" => $this->option('db-username'),
             "database.connections.{$this->defaultConnection}.password" => $this->option('db-password'),
+
+            'brands.default_brand' => $this->option('brand') ?? config('brands.default_brand'),
         ]);
 
         Artisan::call('config:clear');
