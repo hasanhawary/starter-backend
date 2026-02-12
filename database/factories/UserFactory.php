@@ -17,7 +17,7 @@ class UserFactory extends Factory
     {
         $firstName = $this->faker->firstName;
         $lastName = $this->faker->lastName;
-        $domain = Str::snake(config('brands.default_brand'));
+        $domain = Str::snake(brandName());
         $countryId = Country::first()->id;
 
         return [

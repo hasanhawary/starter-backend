@@ -35,7 +35,7 @@ class UserTableSeeder extends Seeder
         Access::setGuard($guardName)->handle();
 
         $countryId = Country::first()->id;
-        $domain = Str::snake(config('brands.default_brand'));
+        $domain = Str::snake(brandName());
         User::query()->firstOrCreate([
             'email' => "root@$domain.com"
         ], [

@@ -70,4 +70,6 @@ return [
     مع تحيات فريق :platform_name.',
 
 
+    'test_email_credentials' => 'اختبار إعدادات البريد الإلكتروني',
+
 ];

@@ -633,20 +633,10 @@ if (!function_exists('brandSettings')) {
 
 if (!function_exists('brandName')) {
     /**
-     * Get the brand name from settings or fallback to default.
-     *
-     * @param bool $display Whether to return the localized display name
      * @return string
      */
-    function brandName(bool $display = true): string
+    function brandName(): string
     {
-        try {
-            return $display
-                ? setting('general.info.name', App::getLocale())
-                : config('brands.default_brand', 'Default Brand');
-        } catch (\Throwable $e) {
-            // Catch everything (Error + Exception)
-            return config('brands.default_brand', 'Default Brand');
-        }
+        return config('brands.default_brand', 'Default');
     }
 }

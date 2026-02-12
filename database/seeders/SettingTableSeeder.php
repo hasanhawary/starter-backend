@@ -3,91 +3,128 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
-use App\Services\Global\SettingService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class SettingTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $currentBrand = config('brands.default_brand');
-        $this->command->info("Seeder started for brand: $currentBrand");
+        $this->command->info('🔄 Starting brand settings seeder...');
 
-        $brandsConfig = config('brands.brands');
+        $template = config('brands.template');
+        $brand = brandName();
 
-        if (!isset($brandsConfig[$currentBrand])) {
-            $this->command->warn("Brand '$currentBrand' not found in config. Seeder skipped.");
+        if (empty($template)) {
+            $this->command->error('❌ No template found.');
             return;
         }
 
-        $brandSettings = $brandsConfig[$currentBrand];
+        $brandValues = $this->loadBrandValues($brand);
 
-        DB::table('settings')->truncate();
+        foreach ($template as $key => $value) {
+            if (is_array($value)) {
+                $this->storeSettings($value, $key, $brandValues);
+            }
+        }
 
-        $this->storeSettings($brandSettings);
-
-        app(SettingService::class)->clearCache();
-
-        $this->command->info("Seeder finished for brand: $currentBrand");
+        $this->command->info('✅ Brand settings seeded successfully!');
     }
 
     /**
-     * Recursively store settings
-     *
-     * @param array $settings
-     * @param string|null $groupPrefix
+     * Load brand values file
      */
-    protected function storeSettings(array $settings, ?string $groupPrefix = null): void
+    private function loadBrandValues(string $brand): array
     {
-        foreach ($settings as $key => $value) {
+        $path = database_path("seeders/brands/{$brand}.php");
 
-            if (is_array($value)) {
-                // Check if this is a numeric array of settings items
-                if (!$this->isAssoc($value)) {
-                    foreach ($value as $item) {
-                        $group = $groupPrefix ? $groupPrefix . '.' . $key : $key;
+        return file_exists($path) ? require $path : [];
+    }
 
-                        $setting = Setting::updateOrCreate(
-                            ['key' => $item['key'], 'group' => $group],
-                            [
-                                'value' => in_array($item['type'], ['imageUploader', 'file'])
-                                    ? asset(@$item['value'])
-                                    : @$item['value'],
-                                'type' => $item['type'] ?? 'text',
-                                'is_env' => $item['is_env'] ?? false,
-                                'placeholder' => $item['placeholder'] ?? null,
-                                'label' => $item['label'] ?? null,
-                                'is_multi_lang' => $item['is_multi_lang'] ?? false
-                            ]
-                        );
+    /**
+     * Recursive storage (parent + nested groups ONLY)
+     * SAME BEHAVIOR AS OLD SEEDER
+     */
+    private function storeSettings(
+        array   $settings,
+        string  $key,
+        array   $brandValues,
+        ?string $groupPrefix = null
+    ): void
+    {
+        // Build group EXACTLY like old seeder
+        $group = $groupPrefix
+            ? $groupPrefix . '.' . $key
+            : $key;
 
-                        if ($setting->wasRecentlyCreated) {
-                            $this->command->info("Created: [$group] {$item['key']}");
-                        } else {
-                            $this->command->comment("Updated: [$group] {$item['key']}");
-                        }
-                    }
-                } else {
-                    // Associative array = nested group
-                    $newGroupPrefix = $groupPrefix ? $groupPrefix . '.' . $key : $key;
-                    $this->command->line("Processing group: $newGroupPrefix");
-                    $this->storeSettings($value, $newGroupPrefix);
+        // Numeric array = settings list
+        if (!$this->isAssoc($settings)) {
+            foreach ($settings as $item) {
+                if (!isset($item['key'])) {
+                    continue;
                 }
+
+                Setting::updateOrCreate(
+                    [
+                        'key' => $item['key'],
+                        'group' => $group,
+                    ],
+                    [
+                        'value' => $this->getBrandValue($group, $item['key'], $brandValues),
+                        'type' => $item['type'] ?? 'text',
+                        'label' => $item['label'] ?? null,
+                        'placeholder' => $item['placeholder'] ?? null,
+                        'is_multi_lang' => $item['is_multi_lang'] ?? false,
+                    ]
+                );
+            }
+
+            return;
+        }
+
+        // Assoc array = nested groups
+        foreach ($settings as $childKey => $childValue) {
+            if (is_array($childValue)) {
+                $this->storeSettings(
+                    $childValue,
+                    $childKey,
+                    $brandValues,
+                    $group
+                );
             }
         }
     }
 
     /**
-     * Check if array is associative
-     *
-     * @param array $arr
-     * @return bool
+     * Get value from brand file (if exists)
      */
-    protected function isAssoc(array $arr): bool
+    private function getBrandValue(
+        string $group,
+        string $key,
+        array  $brandValues
+    ): mixed
+    {
+        $parts = explode('.', $group);
+
+        $section = $parts[0] ?? null;
+        $groupKey = $parts[1] ?? null;
+
+        if (!$section || !$groupKey) {
+            return null;
+        }
+
+        foreach ($brandValues[$section][$groupKey] ?? [] as $item) {
+            if (($item['key'] ?? null) === $key) {
+                return $item['value'] ?? null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Check associative array
+     */
+    private function isAssoc(array $arr): bool
     {
         if ([] === $arr) return false;
         return array_keys($arr) !== range(0, count($arr) - 1);

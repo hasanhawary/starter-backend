@@ -26,32 +26,12 @@ class Setting extends BaseModel
     public function value(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                // Try to decode JSON
-                if (is_string($value)) {
-                    try {
-                        $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-                        if (is_array($decoded)) {
-                            return $decoded;
-                        }
-                    } catch (\JsonException) {
-                        // Ignore invalid JSON, keep original value
-                    }
-                }
-
-                // Handle media URLs
-                if (in_array($this->type, ['imageUploader', 'file'])) {
-                    return Media::url($value);
-                }
-
-                return $value;
-            },
-            set: static function ($value) {
-                return is_array($value) ? json_encode($value, JSON_THROW_ON_ERROR) : $value;
-            }
+            get: fn($value) => $this->castValue($value),
+            set: static fn($value) => is_array($value)
+                ? json_encode($value, JSON_THROW_ON_ERROR)
+                : $value
         );
     }
-
 
     /**
      * Scope a query to only include public settings.
@@ -61,5 +41,29 @@ class Setting extends BaseModel
     public function scopePublic(): Builder
     {
         return $this->where('is_env', false);
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    protected function castValue(mixed $value): mixed
+    {
+        if (in_array($this->type, ['checkbox', 'radio'])) {
+            return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        if (in_array($this->type, ['imageUploader', 'file']) && $value) {
+            return Media::url($value);
+        }
+
+        if (is_string($value)) {
+            try {
+                return json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException $e) {
+                return $value; // Not valid JSON → ignore and continue
+            }
+        }
+
+        return $value;
     }
 }

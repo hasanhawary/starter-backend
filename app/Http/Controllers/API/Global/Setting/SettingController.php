@@ -6,20 +6,24 @@ use App\Filters\Setting\GroupFilter;
 use App\Filters\Setting\KeyFilter;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Global\Setting\SettingRequest;
-use App\Http\Requests\Global\Setting\TestCredentialsRequest;
-use App\Http\Resources\Global\Setting\SettingResource;
-use App\Mail\BasicMail;
+use App\Http\Resources\Global\Setting\SettingGroupResource;
 use App\Models\Setting;
+use App\Services\Global\SettingService;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\Mail;
+use JsonException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class SettingController extends BaseController implements HasMiddleware
 {
+    public function __construct(public SettingService $service)
+    {
+        parent::__construct();
+    }
+
     public static function middleware(): array
     {
         return [
@@ -32,66 +36,71 @@ class SettingController extends BaseController implements HasMiddleware
      */
     public function index(): JsonResponse
     {
-        $baseQuery = Setting::query();
-
-        if (auth()->check()) {
-            $baseQuery = $baseQuery->public();
-        }
-
-        $query = app(Pipeline::class)
-            ->send($baseQuery)
+        $settings = app(Pipeline::class)
+            ->send(Setting::query()->when(auth()->check(), fn($q) => $q->public()))
             ->through([KeyFilter::class, GroupFilter::class])
-            ->thenReturn();
+            ->thenReturn()
+            ->get();
 
-        $settings = $query->get()->groupBy('group');
-
-        // Transform each setting into a resource
-        $settingsResource = $settings->map(function ($group) {
-            return SettingResource::collection($group);
-        });
-
-        return successResponse($settingsResource);
+        return successResponse(SettingGroupResource::organizeNested($settings));
     }
 
     /**
      * @param SettingRequest $request
      * @return JsonResponse
+     * @throws JsonException
      */
     public function update(SettingRequest $request): JsonResponse
     {
-        foreach ($request->settings as $item) {
-            $value = !empty($item['value']) ? $item['value'] : null;
+        foreach ($request->validated()['settings'] as $item) {
+            // Find the existing setting by key and group
+            $setting = Setting::where('key', $item['key'])
+                ->where('group', $item['group'])
+                ->first();
 
-            if ($value && is_file($value)) {
-                $value = Media::upload($item['value'], 'settings');
+            if (!$setting) {
+                continue;
             }
 
-            $setting = Setting::updateOrCreate([
-                'key' => $item['key'],
-                'group' => $item['group'],
-            ], [
-                'value' => $value,
-            ]);
+            // Normalize the value (handles media uploads or special types)
+            $value = $this->normalizeValue($item['value'], $setting->type);
 
+            $setting->update(['value' => $value]);
+
+            // If this setting should be synced with the .env file, do it
             if ($setting->is_env) {
-                updateDotEnv([strtoupper($item['key']) => $value]);
+                $this->syncEnv($value);
             }
         }
+
+        $this->service->clearCache();
 
         return successResponse(msg: __('api.updated_success'));
     }
 
-    /**
-     * @param TestCredentialsRequest $request
-     * @return JsonResponse
-     */
-    public function testMailCredentials(TestCredentialsRequest $request): JsonResponse
+    /*
+    |--------------------------------------------------------------------------
+    | Helper Methods
+    |--------------------------------------------------------------------------
+    */
+    protected function normalizeValue(mixed $value, $type): mixed
     {
-        Mail::to($request->email)->send(new BasicMail(null, [
-            'title' => 'test_credentials',
-            'msg' => $request->body,
-        ]));
+        if ($value && in_array($type, ['imageUploader', 'file'])) {
+            return Media::replace($value)->upload($value, 'settings');
+        }
 
-        return successResponse(msg: __('api.test_credentials_success'));
+        return $value;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    protected function syncEnv(mixed $value): void
+    {
+        updateDotEnv([
+            strtoupper($value['key']) => is_array($value)
+                ? json_encode($value, JSON_THROW_ON_ERROR)
+                : $value
+        ]);
     }
 }
