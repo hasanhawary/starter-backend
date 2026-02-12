@@ -20,7 +20,7 @@ use function __;
 
 class CountryController extends BaseController implements HasMiddleware
 {
-    use HasDeleteMethods,HasToggleActiveMethods;
+    use HasDeleteMethods, HasToggleActiveMethods;
 
     public function __construct()
     {
