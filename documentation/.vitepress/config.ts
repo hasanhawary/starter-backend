@@ -45,7 +45,7 @@ export default defineConfig({
       {
         text: "Resources",
         items: [
-          { text: "GitHub", link: "https://git.wakeb.tech/WEB-A/starter-backend" },
+          { text: "GitHub", link: "https://github.com/hasanhawary/starter-backend" },
         ],
       },
     ],
@@ -112,7 +112,7 @@ export default defineConfig({
       provider: "local",
     },
     socialLinks: [
-      { icon: "github", link: "https://git.wakeb.tech/WEB-A/starter-backend" },
+      { icon: "github", link: "https://github.com/hasanhawary/starter-backend" },
     ],
 
     footer: {
