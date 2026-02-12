@@ -112,10 +112,13 @@ Route::prefix('central')->group(function () {
         | Data Entry Routes
         |--------------------------------------------------------------------------
         */
-        Route::post('countries/restore', [CountryController::class, 'restore']);
-        Route::delete('countries/delete', [CountryController::class, 'destroy']);
-        Route::delete('countries/force-delete', [CountryController::class, 'forceDelete']);
-        Route::apiResource('countries', CountryController::class);
+        Route::prefix('countries')->group(function () {
+            Route::delete('force-delete', [CountryController::class, 'forceDelete']);
+            Route::delete('delete', [CountryController::class, 'destroy']);
+            Route::post('restore', [CountryController::class, 'restore']);
+            Route::put('toggle-active', [CountryController::class, 'toggleActive']);
+            Route::apiResource('/', CountryController::class)->parameters(['' => 'country'])->except(['destroy']);
+        });
 
         /*
         |--------------------------------------------------------------------------

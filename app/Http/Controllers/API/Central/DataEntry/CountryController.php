@@ -10,6 +10,7 @@ use App\Http\Requests\Central\Global\Other\PageRequest;
 use App\Http\Resources\Central\DataEntry\CountryResource;
 use App\Models\Central\Country;
 use App\Trait\Global\HasDeleteMethods;
+use App\Trait\Global\HasToggleActiveMethods;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -19,7 +20,7 @@ use function __;
 
 class CountryController extends BaseController implements HasMiddleware
 {
-    use HasDeleteMethods;
+    use HasDeleteMethods, HasToggleActiveMethods;
 
     public function __construct()
     {
