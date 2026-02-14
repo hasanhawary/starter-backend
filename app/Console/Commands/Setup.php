@@ -105,8 +105,6 @@ class Setup extends Command
             'brands.default_brand' => $this->option('brand') ?? brandName(),
         ]);
 
-        Artisan::call('config:clear');
-
         $this->info('✔ Environment variables updated.');
     }
 
