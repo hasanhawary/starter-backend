@@ -31,7 +31,7 @@
                     <td style="padding:40px 32px;text-align:center;color:{{ $brand['theme']['text'] }}">
 
                         <h2>{{ emailTrans($data['title']) }}</h2>
-                        <p>{!! emailTrans($data['msg']) !!}</p>
+                        <p>{!! $data['body'] ?? emailTrans($data['msg']) !!}</p>
 
                         @if(!empty($data['otp']))
                             <table width="100%" cellpadding="0" cellspacing="0">

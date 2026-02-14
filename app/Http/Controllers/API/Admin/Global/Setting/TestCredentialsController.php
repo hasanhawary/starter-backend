@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API\Admin\Global\Setting;
 
 use App\Http\Controllers\API\BaseController;
-use App\Http\Requests\Admin\Global\Setting\TestCredentialsRequest;
+use App\Http\Requests\Global\Setting\TestCredentialsRequest;
 use App\Mail\BasicMailWithoutQueue;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -28,7 +28,7 @@ class TestCredentialsController extends BaseController implements HasMiddleware
     {
         Mail::to($request->email)->send(new BasicMailWithoutQueue(null, [
             'title' => 'test_email_credentials',
-            'msg' => $request->body,
+            'body' => $request->body,
         ]));
 
         return successResponse(msg: __('api.email_sent_successfully'));

@@ -2,40 +2,43 @@
 
 namespace App\Http\Resources\Global\Setting;
 
+use App\Enum\Global\SettingTypeEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 
 class SettingResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $value = $this->value;
-        $lang = app()->getLocale();
-
-        if (is_array($value)) {
-            $displayValue = $value[$lang] ?? $value;
-        }
+        $value  = $this->value;
+        $group = Str::afterLast($this->group,'.');
 
         return [
             'id' => $this->id,
             'key' => $this->key,
-            'translation_value' => $displayValue ?? $value,
-            'value' => $this->value,
 
-            'translation_label' => $this->label,
+            'value' => $value,
+            'translated_value' => is_array($value)
+                ? ($value[app()->getLocale()] ?? $value)
+                : $value,
+
             'label' => $this->getTranslations('label'),
+            'translated_label' => $this->label,
 
-            'translation_placeholder' => $this->placeholder,
             'placeholder' => $this->getTranslations('placeholder'),
+            'translated_placeholder' => $this->placeholder,
 
-            'display_group' => resolveTrans($this->group),
             'group' => $this->group,
+            'display_group' => resolveTrans("settings_trans.$group"),
 
-            'is_env' => $this->is_env,
-            'is_multi_lang' => $this->is_multi_lang,
             'type' => $this->type,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            'display_type' => SettingTypeEnum::resolve($this->type),
+
+            'is_env' => (int)$this->is_env,
+            'is_multi_lang' => (int)$this->is_multi_lang,
+
+            'last_updated_at' => $this->updated_at,
         ];
     }
 }

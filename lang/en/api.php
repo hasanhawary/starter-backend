@@ -141,4 +141,31 @@ return [
     'phone' => 'Phone',
     'type' => 'Type',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Settings
+    |--------------------------------------------------------------------------
+    */
+    'settings_trans' => [
+        "general" => "General",
+        "properties" => "Properties",
+        "notifications" => "Notifications",
+        "theme" => "Themes",
+        "mail_templates" => "Mail Templates",
+        "config" => "Configuration",
+        "info" => "General Information",
+        "contact" => "Contact Information",
+        "social" => "Social Media",
+        "logos" => "Logos",
+        "icons" => "Icons",
+        "title" => "Notifications",
+        "colors" => "Colors",
+        "font" => "Font",
+        "otp" => "OTP Code",
+        "generate" => "Properties",
+        "mail" => "Mail",
+        "sms" => "SMS",
+        "ldap" => "LDAP",
+        "reverb" => "Instant Notifications"
+    ]
 ];

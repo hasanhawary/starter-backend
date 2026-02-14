@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\API\Admin\DataEntry\CountryController;
-use App\Http\Controllers\API\Admin\Global\Setting\SettingController;
+use App\Http\Controllers\API\Global\DataEntry\CountryController;
+use App\Http\Controllers\API\Global\Setting\SettingController;
 use App\Http\Controllers\API\Global\Captcha\CaptchaController;
 use App\Http\Controllers\API\Global\Chunk\ChunkFileController;
 use App\Http\Controllers\API\Global\Help\HelpController;

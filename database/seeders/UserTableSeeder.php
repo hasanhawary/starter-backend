@@ -18,7 +18,7 @@ class UserTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $domain = Str::snake(config('brands.default_brand'));
+        $domain = Str::snake(brandName());
 
         $countryId = Country::first()->id;
         User::query()->firstOrCreate([
