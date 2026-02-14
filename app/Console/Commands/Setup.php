@@ -232,7 +232,7 @@ class Setup extends Command
 
     private function displaySampleUserCredentials(): void
     {
-        $domain = Str::snake(config('brands.default_brand', config('app.name')));
+        $domain = Str::snake(brandName());
 
         $this->table(
             ['Name', 'Email', 'Password'],
