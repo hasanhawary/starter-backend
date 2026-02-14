@@ -14,7 +14,7 @@ class SettingService
      */
     public function all(): array
     {
-        $brand = config('brands.default_brand');
+        $brand = brandName();
 
         return Cache::rememberForever($this->cacheKeyPrefix . $brand, function () {
             $settings = Setting::all();
@@ -77,25 +77,11 @@ class SettingService
     }
 
     /**
-     * Get a multi-lang setting value
-     */
-    public function getLang(string $path, ?string $lang = null, $default = null)
-    {
-        $lang ??= app()->getLocale(); // default language
-
-        $setting = $this->get($path, []);
-        if (!is_array($setting)) return $setting;
-
-        // If it's multi-lang stored as array ['en' => '...', 'ar' => '...']
-        return $setting[$lang] ?? $default ?? $setting['value'] ?? null;
-    }
-
-    /**
      * Clear settings cache
      */
-    public function clearCache()
+    public function clearCache(): void
     {
-        $brand = config('brands.default_brand');
+        $brand = brandName();
         Cache::forget($this->cacheKeyPrefix . $brand);
     }
 }

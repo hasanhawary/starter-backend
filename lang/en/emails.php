@@ -69,4 +69,6 @@ return [
     If you did not request this action, please ignore this message safely.<br><br>
     Best regards, :platform_name team.',
 
+    'test_email_credentials' => 'Test Email Settings',
+
 ];

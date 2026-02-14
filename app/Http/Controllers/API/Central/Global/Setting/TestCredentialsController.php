@@ -28,7 +28,7 @@ class TestCredentialsController extends BaseController implements HasMiddleware
     {
         Mail::to($request->email)->send(new BasicMailWithoutQueue(null, [
             'title' => 'test_email_credentials',
-            'msg' => $request->body,
+            'body' => $request->body,
         ]));
 
         return successResponse(msg: __('api.email_sent_successfully'));

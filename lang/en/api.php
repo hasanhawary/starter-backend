@@ -140,9 +140,32 @@ return [
     'email' => 'Email',
     'phone' => 'Phone',
     'type' => 'Type',
-    'tenant' => 'Tenant',
-    'tenant_not_found' => 'Sorry, we could not find the requested tenant or it was not specified.',
-    'no_active_subscription' => 'There is currently no active subscription associated with this tenant.',
-    'subscription_expired' => 'The subscription for this tenant has expired or has been canceled.',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Settings
+    |--------------------------------------------------------------------------
+    */
+    'settings_trans' => [
+        "general" => "General",
+        "properties" => "Properties",
+        "notifications" => "Notifications",
+        "theme" => "Themes",
+        "mail_templates" => "Mail Templates",
+        "config" => "Configuration",
+        "info" => "General Information",
+        "contact" => "Contact Information",
+        "social" => "Social Media",
+        "logos" => "Logos",
+        "icons" => "Icons",
+        "title" => "Notifications",
+        "colors" => "Colors",
+        "font" => "Font",
+        "otp" => "OTP Code",
+        "generate" => "Properties",
+        "mail" => "Mail",
+        "sms" => "SMS",
+        "ldap" => "LDAP",
+        "reverb" => "Instant Notifications"
+    ]
 ];

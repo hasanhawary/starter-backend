@@ -104,7 +104,9 @@ Route::prefix('central')->group(function () {
         | Setting Routes
         |--------------------------------------------------------------------------
         */
-        Route::apiResource('settings', SettingController::class)->only(['index', 'update']);
+        Route::get('settings', [SettingController::class, 'index']);
+        Route::put('settings', [SettingController::class, 'update']);
+
         Route::post('send-test-mail', [TestCredentialsController::class, 'testEmail']);
 
         /*

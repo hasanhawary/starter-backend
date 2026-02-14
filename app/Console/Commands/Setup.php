@@ -87,7 +87,7 @@ class Setup extends Command
     private function updateEnvVariablesFromOptions(): void
     {
         updateDotEnv([
-            'DEFAULT_BRAND' => $this->option('brand') ?? config('brands.default_brand'),
+            'DEFAULT_BRAND' => $this->option('brand') ?? brandName(),
             'DB_CONNECTION' => $this->option('db-driver'),
             'DB_HOST' => $this->option('db-host'),
             'DB_PORT' => $this->option('db-port'),
@@ -107,7 +107,7 @@ class Setup extends Command
             "database.connections.{$this->defaultConnection}.username" => $this->option('db-username'),
             "database.connections.{$this->defaultConnection}.password" => $this->option('db-password'),
 
-            'brands.default_brand' => $this->option('brand') ?? config('brands.default_brand'),
+            'brands.default_brand' => $this->option('brand') ?? brandName(),
 
             "database.connections.{$this->tenantConnection}.host" => $this->option('db-host'),
             "database.connections.{$this->defaultConnection}.driver" => $this->option('db-driver'),
@@ -115,8 +115,6 @@ class Setup extends Command
             "database.connections.{$this->tenantConnection}.username" => $this->option('db-username'),
             "database.connections.{$this->tenantConnection}.password" => $this->option('db-password'),
         ]);
-
-        Artisan::call('config:clear');
 
         $this->info('✔ Environment variables updated.');
     }
@@ -230,7 +228,7 @@ class Setup extends Command
 
     private function displaySampleUserCredentials(): void
     {
-        $domain = Str::snake(config('brands.default_brand', config('app.name')));
+        $domain = Str::snake(brandName());
 
         $this->table(
             ['Name', 'Email', 'Password'],

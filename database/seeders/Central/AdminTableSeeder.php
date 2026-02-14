@@ -35,7 +35,7 @@ class AdminTableSeeder extends Seeder
         Access::setGuard($guardName)->handle();
 
         $countryId = Country::first()->id;
-        $domain = Str::snake(config('brands.default_brand'));
+        $domain = Str::snake(brandName());
         Admin::query()->firstOrCreate([
             'email' => "root@$domain.com"
         ], [
