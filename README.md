@@ -1,36 +1,71 @@
-# 🚀 Laravel Starter Project
+    # 🚀 Laravel Admin Dashboard Backend
 
-A **production-ready, fully-featured Laravel backend** with enterprise-grade architecture, built on a modular package ecosystem. This starter provides everything you need to build scalable APIs with authentication, authorization, real-time features, and advanced data management.
+> 📊 **Admin Dashboard Backend** - Production-ready backend exclusively for admin dashboards and internal management systems.
+
+A **production-ready, fully-featured Laravel backend** designed exclusively for building admin dashboards and internal management systems. This starter provides everything you need to build scalable admin APIs with authentication, authorization, real-time features, and advanced data management.
+
+**Project Type:** Single-Instance | **Architecture:** Monolithic | **User Type:** Admin Only | **Use Case:** Admin Dashboards, Management Systems, Internal Tools
 
 ---
 
 ## ✨ Key Highlights
 
-- **Complete RBAC System** - Role-based access control with granular permissions
-- **Multi-Auth Support** - Email/password, LDAP, and OTP authentication
-- **Real-Time Features** - WebSocket support via Laravel Reverb
-- **Dynamic Settings** - Multi-brand, template-based configuration system
-- **Advanced Filtering** - Built-in query filters for search, sort, and pagination
-- **Activity Auditing** - Complete audit trail for all model changes
-- **File Management** - Chunked uploads with media manager integration
-- **Background Jobs** - Queue-based email and SMS notifications
-- **Multi-Language** - Full i18n support (English/Arabic)
-- **API-Ready** - RESTful API with Sanctum token authentication
+- **🔐 Complete RBAC System** - Role-based access control with granular permissions for admin users
+- **🔑 Multi-Auth Support** - Email/password, LDAP, and OTP authentication for admins
+- **⚡ Real-Time Features** - WebSocket support via Laravel Reverb for live updates
+- **⚙️ Dynamic Settings** - Multi-brand, template-based configuration system
+- **🔍 Advanced Filtering** - Built-in query filters for search, sort, and pagination
+- **📝 Activity Auditing** - Complete audit trail for all admin actions and model changes
+- **📁 File Management** - Chunked uploads with media manager integration
+- **🔔 Background Jobs** - Queue-based email and SMS notifications
+- **🌍 Multi-Language** - Full i18n support (English/Arabic)
+- **🔌 API-Ready** - RESTful API with Sanctum token authentication
+
+---
+
+## 🏗️ Architecture Overview
+
+### Single Admin-Only System
+
+This backend is designed **exclusively for admin users** with a unified, flat API structure:
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    Single Database                               │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │              Admin Dashboard Backend                       │  │
+│  │  • User Management                                         │  │
+│  │  • Role & Permission Management                            │  │
+│  │  • Settings & Configuration                                │  │
+│  │  • Reports & Analytics                                     │  │
+│  │  • Activity Logs & Audit Trail                             │  │
+│  │  • Data Entry Management                                   │  │
+│  │  • Notifications & Real-Time Updates                       │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### API Organization (Flat Structure)
+
+All endpoints are at the root `/api` level with no namespace separation.
 
 ---
 
 ## 🧩 Powered by Custom Packages
 
-This starter is built on a suite of **production-grade custom packages** designed for enterprise Laravel applications:
+This starter is built on a suite of **production-grade custom packages**:
 
 | Package | Purpose | Link |
 |---------|---------|------|
-| **Dynamic CLI** | Auto-generate CRUD modules with unified standards | [View Package](https://packagist.org/packages/hasanhawary/dynamic-cli) |
-| **Export Builder** | Queued, chunked exports (Excel/CSV) with signed URLs | [View Package](https://packagist.org/packages/hasanhawary/export-builder) |
-| **Lookup Manager** | Centralized enum and metadata retrieval with caching | [View Package](https://packagist.org/packages/hasanhawary/lookup-manager) |
-| **Media Manager** | File uploads, chunked transfers, signed URLs, versioning | [View Package](https://packagist.org/packages/hasanhawary/media-manager) |
-| **Permission Manager** | Complete RBAC with role/permission syncing & middleware | [View Package](https://packagist.org/packages/hasanhawary/permission-manager) |
-| **Report Builder** | Dynamic, filterable reports with export integration | [View Package](https://packagist.org/packages/hasanhawary/report-builder) |
+| **Dynamic CLI** | Auto-generate CRUD modules with unified standards | [View](https://packagist.org/packages/hasanhawary/dynamic-cli) |
+| **Export Builder** | Queued, chunked exports (Excel/CSV) with signed URLs | [View](https://packagist.org/packages/hasanhawary/export-builder) |
+| **Lookup Manager** | Centralized enum and metadata retrieval with caching | [View](https://packagist.org/packages/hasanhawary/lookup-manager) |
+| **Media Manager** | File uploads, chunked transfers, signed URLs, versioning | [View](https://packagist.org/packages/hasanhawary/media-manager) |
+| **Permission Manager** | Complete RBAC with role/permission syncing & middleware | [View](https://packagist.org/packages/hasanhawary/permission-manager) |
+| **Report Builder** | Dynamic, filterable reports with export integration | [View](https://packagist.org/packages/hasanhawary/report-builder) |
 
 **All packages by Hassan Elhawary:** [View All Packages](https://packagist.org/users/hasanhawary/packages/)
 
@@ -91,7 +126,6 @@ This starter is built on a suite of **production-grade custom packages** designe
 - Track who changed what, when, and what changed
 - Filterable activity history with date range support
 - Permission-based access control (read-log permission)
-- Detailed change tracking with before/after values
 - Activity log export capabilities
 
 ### 📁 File Management
@@ -113,7 +147,7 @@ This starter is built on a suite of **production-grade custom packages** designe
 - Country filtering and sorting
 
 ### 💡 Help & Metadata
-- Enum lookup for all system enums (ActiveType, OtpType, ReportChartType, UserGender, etc.)
+- Enum lookup for all system enums
 - Model metadata for form generation
 - Config lookup for whitelisted values
 - Multi-table fetch in single request
@@ -158,7 +192,7 @@ Full internationalization with English (en) and Arabic (ar):
 
 ## 🚀 Quick Start
 
-### ⚡ One-Command Installation (Recommended)
+### ⚡ One-Command Installation
 
 ```bash
 php artisan app:install
@@ -177,7 +211,6 @@ This command automatically handles everything:
 **With custom options:**
 
 ```bash
-# Specify brand, database credentials
 php artisan app:install \
   --brand=jervis \
   --db-host=localhost \
@@ -186,35 +219,28 @@ php artisan app:install \
   --db-driver=mysql \
   --db-username=root \
   --db-password=secret
-
-# Skip seeding
-php artisan app:install --no-seed
 ```
 
 **Sample credentials after installation:**
 ```
-Email: root@{brand_name}.com
-Password: 123456
+Admin Email: root@{brand_name}.com
+Admin Password: 123456
 ```
 
 ### Manual Installation
 
 ```bash
-# Clone and setup
 git clone <repository-url>
 cd <project-directory>
 composer install
 npm install
 
-# Environment setup
 cp .env.example .env
 php artisan key:generate
 
-# Database
 php artisan migrate
 php artisan db:seed
 
-# Start services
 php artisan serve
 php artisan queue:work
 php artisan reverb:start
@@ -223,10 +249,7 @@ php artisan reverb:start
 ### Switch Brands
 
 ```bash
-# Update .env
 DEFAULT_BRAND=wakeb
-
-# Re-seed settings
 php artisan db:seed --class=SettingTableSeeder
 ```
 
@@ -234,29 +257,13 @@ php artisan db:seed --class=SettingTableSeeder
 
 ## 📮 Postman Collection
 
-A complete **Postman collection** is included in the project for easy API testing:
-
 **File:** `postman.json` (in project root)
 
-### How to Use
-
-1. **Import into Postman:**
-   - Open Postman
-   - Click `Import` → Select `postman.json`
-   - Collection will be imported with all endpoints
-
-2. **Setup Environment:**
-   - Create a new environment in Postman
-   - Add variable: `url` = `http://localhost:8000/api`
-   - Add variable: `token` = (your API token after login)
-
-3. **Test Endpoints:**
-   - All endpoints are organized by feature
-   - Pre-configured request bodies
-   - Ready-to-use examples
+### Setup Environment
+- `url` = `http://localhost:8000/api`
+- `token` = (your API token after login)
 
 ### Collection Structure
-
 - **Auth** - Login, OTP, Password Reset, Logout
 - **Users** - User CRUD operations
 - **Roles & Permissions** - Role and permission management
@@ -271,85 +278,113 @@ A complete **Postman collection** is included in the project for easy API testin
 
 ## 📚 API Overview
 
-### Authentication
+### Public Routes (Guest Accessible)
+
 ```http
-POST   /login                    # User login
+GET    /captcha                  # Generate captcha
+POST   /captcha/verify           # Verify captcha
+
+POST   /login                    # Admin login
 POST   /reset-password           # Password reset
 POST   /send-otp                 # Send OTP
+POST   /check-otp                # Check OTP
 POST   /verify-otp               # Verify OTP
+```
+
+### Protected Routes (Authenticated)
+
+#### Profile Management
+```http
+GET    /me                       # Get user profile
+POST   /update-profile           # Update profile
+POST   /destroy-avatar           # Remove avatar
 POST   /logout                   # Logout
 ```
 
-### User Management
+#### Permissions & Roles
+```http
+GET    /permissions              # List permissions
+
+GET    /roles                    # List roles
+POST   /roles                    # Create role
+GET    /roles/{id}               # Get role
+PUT    /roles/{id}               # Update role
+DELETE /roles/delete             # Soft delete role
+```
+
+#### User Management
 ```http
 GET    /users                    # List users
 POST   /users                    # Create user
 GET    /users/{id}               # Get user
 PUT    /users/{id}               # Update user
-PUT    /users/toggle-active      # Toggle status
-DELETE /users/delete             # Soft delete
-POST   /users/restore            # Restore
-DELETE /users/force-delete       # Permanent delete
+PUT    /users/toggle-active      # Toggle user status
+DELETE /users/delete             # Soft delete user
+POST   /users/restore            # Restore user
+DELETE /users/force-delete       # Permanent delete user
 ```
 
-### Roles & Permissions
+#### Data Entry
 ```http
-GET    /roles                    # List roles
-POST   /roles                    # Create role
-PUT    /roles/{id}               # Update role
-DELETE /roles/{id}               # Delete role
-GET    /permissions              # List permissions
+GET    /countries                # List countries
+POST   /countries                # Create country
+GET    /countries/{id}           # Get country
+PUT    /countries/{id}           # Update country
+PUT    /countries/toggle-active  # Toggle country status
+DELETE /countries/delete         # Soft delete country
+POST   /countries/restore        # Restore country
+DELETE /countries/force-delete   # Permanent delete country
 ```
 
-### Settings
+#### Settings & Configuration
 ```http
 GET    /settings                 # Get all settings
 PUT    /settings                 # Update settings
+POST   /send-test-mail           # Test email configuration
 ```
 
-### Notifications
-```http
-GET    /notifications            # List notifications
-PUT    /notifications            # Mark as read/open
-```
-
-### Reports & Exports
+#### Reports & Exports
 ```http
 GET    /report                   # Generate report
 GET    /export                   # Export data
 ```
 
-### Activity Logs
+#### Activity & Notifications
 ```http
-GET    /activity-logs            # List activity
+GET    /activity-logs            # List activity logs
 GET    /activity-logs/{id}       # Get activity detail
+
+GET    /notifications            # List notifications
+PUT    /notifications            # Mark notifications as read/open
 ```
 
-### Help & Metadata
+#### Help & Metadata
 ```http
 GET    /help-enums               # Get enum values
 GET    /help-models              # Get model metadata
 GET    /help-configs             # Get config values
 ```
 
+#### File Management
+```http
+POST   /chunk-file               # Upload chunked file
+```
+
 ---
 
 ## 🌐 Real-Time Features
 
-This starter includes native **Laravel Reverb** support for:
+```bash
+php artisan reverb:start
+php artisan queue:work
+```
+
+Supports:
 - Live dashboards
 - Real-time notifications
 - Export progress updates
 - Live activity feeds
 - WebSocket-based UI components
-
-```bash
-# Start Reverb server
-php artisan reverb:start
-
-# Run queue worker (required)
-php artisan queue:work
-```
 
 ---
 
@@ -368,6 +403,7 @@ php artisan queue:work
 - **model_has_roles** - User-role relationships
 - **model_has_permissions** - User-permission relationships
 - **role_has_permissions** - Role-permission relationships
+
 ---
 
 ## 📦 Project Structure
@@ -407,32 +443,24 @@ starter-backend-dashboard/
 
 ---
 
-
 ## 📖 Documentation
-
-To view the documentation locally, run:
 
 ```bash
 npm run docs
 ```
 
-This will start a local server (usually at `http://localhost:5173`) where you can explore the docs.
+Starts local server at `http://localhost:5173` with:
+- Complete API reference
+- Feature deep-dives
+- Configuration guides
+- Code examples
+- Best practices
+- Troubleshooting
 
-### 📚 **Features Covered**
-
-The documentation includes:
-
-* Complete API reference
-* Feature deep-dives
-* Configuration guides
-* Code examples
-* Best practices
-* Troubleshooting
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these guidelines:
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
