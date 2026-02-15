@@ -1,7 +1,7 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
-  title: "Starter Backend",
+  title: "Admin Dashboard Kit",
   description:
     "Production-ready Laravel starter project with complete CRUD generation, file management, permissions, and real-time features",
   appearance: true,
@@ -13,7 +13,7 @@ export default defineConfig({
   head: [
     ["link", { rel: "icon", href: "/logo.svg" }],
     ["meta", { property: "og:type", content: "website" }],
-    ["meta", { property: "og:title", content: "Starter Backend Documentation" }],
+    ["meta", { property: "og:title", content: "Admin Dashboard Kit Documentation" }],
     [
       "meta",
       {
@@ -26,7 +26,7 @@ export default defineConfig({
 
   themeConfig: {
     logo: "/logo.svg",
-    siteTitle: "Starter Backend",
+    siteTitle: "Admin Dashboard Kit",
     nav: [
       { text: "Home", link: "/" },
       { text: "Installation", link: "/guide/installation" },
@@ -62,14 +62,43 @@ export default defineConfig({
           ],
         },
         {
-          text: "Architecture Overview",
+          text: "Core Concepts",
           collapsed: true,
           items: [
             { text: "Architecture", link: "/guide/architecture" },
-            { text: "Configuration", link: "/guide/configuration" },
-            { text: "Helper Functions", link: "/guide/helpers" },
             { text: "Authentication", link: "/guide/authentication" },
             { text: "Authorization & Policies", link: "/guide/authorization" },
+          ],
+        },
+        {
+          text: "Configuration & Setup",
+          collapsed: true,
+          items: [
+            { text: "Configuration", link: "/guide/configuration" },
+            { text: "Helper Functions", link: "/guide/helpers" },
+            { text: "Brand Configuration", link: "/guide/features/brand-configuration" },
+          ],
+        },
+        {
+          text: "Core Features",
+          collapsed: true,
+          items: [
+            { text: "Real-time with Reverb", link: "/guide/features/reverb" },
+            { text: "Notification System", link: "/guide/features/notifications" },
+            { text: "Activity Logging", link: "/guide/features/activity-logging" },
+            { text: "Settings Management", link: "/guide/features/settings" },
+          ],
+        },
+        {
+          text: "Development & Code",
+          collapsed: true,
+          items: [
+            { text: "Services & Business Logic", link: "/guide/features/services" },
+            { text: "Filters & Query Scopes", link: "/guide/features/filters-scopes" },
+            { text: "Custom Validation Rules", link: "/guide/features/custom-rules" },
+            { text: "Useful Traits", link: "/guide/features/useful-traits" },
+            { text: "Enums & Constants", link: "/guide/features/enums" },
+            { text: "Mail Classes", link: "/guide/features/mail-classes" },
           ],
         },
         {
@@ -86,20 +115,20 @@ export default defineConfig({
           ],
         },
         {
-          text: "Features & Services",
+          text: "Database & Models",
           collapsed: true,
           items: [
-            { text: "Real-time with Reverb", link: "/guide/features/reverb" },
-            { text: "Background Jobs", link: "/guide/features/jobs" },
-            { text: "Events System", link: "/guide/features/events" },
-
-            { text: "Notification System", link: "/guide/features/notifications" },
-            { text: "Activity Logging", link: "/guide/features/activity-logging" },
-            { text: "Settings Management", link: "/guide/features/settings" },
-            { text: "Filters & Scopes", link: "/guide/features/filters-scopes" },
-            { text: "Role Service", link: "/guide/features/role-service" },
-            { text: "Custom Rules", link: "/guide/features/custom-rules" },
-            { text: "Useful Traits", link: "/guide/features/useful-traits" },
+            { text: "Database Models", link: "/guide/database-models" },
+            { text: "Middleware", link: "/guide/middleware" },
+            { text: "Error Handling", link: "/guide/error-handling" },
+          ],
+        },
+        {
+          text: "Deployment & Operations",
+          collapsed: true,
+          items: [
+            { text: "Deployment", link: "/guide/deployment" },
+            { text: "Troubleshooting", link: "/guide/troubleshooting" },
           ],
         },
         {
@@ -117,7 +146,7 @@ export default defineConfig({
 
     footer: {
       message: "Released under the MIT License.",
-      copyright: "Copyright © 2025 Starter Backend",
+      copyright: "Copyright © 2025 Admin Dashboard Kit",
     },
   },
 

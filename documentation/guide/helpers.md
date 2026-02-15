@@ -5,7 +5,7 @@ description: Global helper functions available throughout the application
 
 # Helper Functions
 
-The Starter Backend provides numerous helper functions in `app/Helpers/App.php` that are auto-loaded and available globally throughout the application.
+The Admin Dashboard Kit provides numerous helper functions in `app/Helpers/App.php` that are auto-loaded and available globally throughout the application.
 
 ## Response Helpers
 

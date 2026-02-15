@@ -2,9 +2,9 @@
 title: Guide Overview
 ---
 
-# Starter Backend Guide
+# Admin Dashboard Kit Guide
 
-Welcome to the complete documentation for **Starter Backend** — a production-ready Laravel starter project with unified architecture, powerful development tools, and complete package ecosystem.
+Welcome to the complete documentation for **Admin Dashboard Kit** — a production-ready Laravel starter project with unified architecture, powerful development tools, and complete package ecosystem.
 
 ## What This Is
 

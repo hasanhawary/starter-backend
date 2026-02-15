@@ -5,7 +5,7 @@ description: Application configuration files and settings
 
 # Configuration Guide
 
-This page documents all configuration files and their options in the Starter Backend project.
+This page documents all configuration files and their options in the Admin Dashboard Kit project.
 
 ## Project Configuration (`config/project.php`)
 
@@ -233,7 +233,7 @@ return [
 ### Application
 
 ```env
-APP_NAME="Starter Backend"
+APP_NAME="Admin Dashboard Kit"
 APP_ENV=local
 APP_DEBUG=true
 APP_TIMEZONE=Africa/Cairo

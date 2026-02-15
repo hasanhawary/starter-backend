@@ -58,7 +58,7 @@ class CountryController extends BaseController implements HasMiddleware
     {
         $country = Country::create($request->validated());
 
-        return successResponse(new CountryResource($country), __('api.created_success'));
+        return successResponse(new CountryResource($country->refresh()), __('api.created_success'));
     }
 
     /**

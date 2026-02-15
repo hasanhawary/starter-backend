@@ -1,117 +1,15 @@
 ---
 title: Custom Validation Rules
-description: Built-in validation rules in app/Rules and how to use them
+description: Custom validation rules for complex validation scenarios
 ---
 
 # Custom Validation Rules
 
-This page documents the custom validation rules in `app/Rules/` and how to use them in Form Requests.
-
-## Overview
-
-All custom rules implement Laravel's `ValidationRule` interface with a `validate` method:
-
-```php
-use Illuminate\Contracts\Validation\ValidationRule;
-
-class CustomRule implements ValidationRule
-{
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (/* condition fails */) {
-            $fail(__('validation.custom_error'));
-        }
-    }
-}
-```
-
-## UniqueCheck
-
-Validates uniqueness across all records including soft-deleted ones. Throws `ModelAlreadyExistsException` with the existing record data when a duplicate is found.
-
-**Location:** `app/Rules/UniqueCheck.php`
-
-**Constructor:**
-```php
-new UniqueCheck(
-    string $modelClass,      // Model to check against
-    string $resourceClass,   // Resource class for error response
-    ?string $ignoreId = null // ID to ignore (for updates)
-)
-```
-
-**Usage:**
-```php
-use App\Rules\UniqueCheck;
-
-public function rules(): array
-{
-    $userId = $this->route('user')?->getKey();
-
-    return [
-        'email' => [
-            'required',
-            'email',
-            Rule::unique('users', 'email')->ignore($userId)->withoutTrashed(),
-            new UniqueCheck(
-                User::class,
-                UserResource::class,
-                $userId
-            ),
-        ],
-    ];
-}
-```
-
-**Behavior:**
-- Checks `withTrashed()` to include soft-deleted records
-- Throws `ModelAlreadyExistsException` with HTTP 433 status
-- Exception includes the existing record as a resource for conflict resolution
-
-## ValidLength
-
-Validates that a field's length matches a value from a reference model (e.g., phone number length by country).
-
-**Location:** `app/Rules/ValidLength.php`
-
-**Constructor:**
-```php
-new ValidLength(
-    mixed $referenceId,     // ID of the reference model
-    string $modelClass,     // Reference model class
-    string $lengthColumn    // Column containing expected length
-)
-```
-
-**Usage:**
-```php
-use App\Rules\ValidLength;
-
-public function rules(): array
-{
-    return [
-        'phone' => [
-            'nullable',
-            'regex:/^[0-9]+$/',
-            new ValidLength(
-                $this->input('phone_code_id'),
-                Country::class,
-                'phone_length'
-            ),
-        ],
-    ];
-}
-```
-
-**Behavior:**
-- Looks up the reference model by ID
-- Compares input length against the `lengthColumn` value
-- Fails if lengths don't match
-
+Your project includes 7 custom validation rules for specific validation scenarios.
 
 ## StrongPassword
 
-Enforces comprehensive password strength requirements.
+Validates passwords meet strong security requirements including uppercase, lowercase, numbers, special characters, and checks against dictionary words and personal information.
 
 **Location:** `app/Rules/StrongPassword.php`
 
@@ -124,289 +22,199 @@ new StrongPassword(
 )
 ```
 
-**Usage:**
-```php
-use App\Rules\StrongPassword;
-
-public function rules(): array
-{
-    return [
-        'password' => [
-            'required',
-            'confirmed',
-            new StrongPassword(
-                $this->first_name,
-                $this->middle_name,
-                $this->last_name
-            ),
-        ],
-    ];
-}
-```
-
 **Validation Checks:**
 - Minimum 8 characters
-- Contains uppercase and lowercase letters
-- Contains digits
+- Contains uppercase letters (A-Z)
+- Contains lowercase letters (a-z)
+- Contains numbers (0-9)
 - Contains special characters
-- No more than 3 repeated consecutive characters
-- Not a common dictionary word
-- No sequential characters (abc, 123)
-- Doesn't contain user's name
+- No repeating characters (3+ times)
+- No sequential characters (abc, 123, etc.)
+- No personal information from names
+- No dictionary words (password, admin, welcome, etc.)
 
+**Usage:**
+```php
+$validated = $request->validate([
+    'password' => [
+        'required',
+        new StrongPassword(
+            $request->first_name,
+            $request->middle_name,
+            $request->last_name
+        )
+    ]
+]);
+```
 
 ## CheckSamePassword
 
-Validates that a new password differs from the current password.
+Ensures the new password is different from the currently authenticated user's password using hash comparison.
 
 **Location:** `app/Rules/CheckSamePassword.php`
 
 **Usage:**
 ```php
-use App\Rules\CheckSamePassword;
-
-public function rules(): array
-{
-    return [
-        'new_password' => [
-            'required',
-            'confirmed',
-            new CheckSamePassword(),
-        ],
-    ];
-}
+$validated = $request->validate([
+    'new_password' => [
+        'required',
+        new CheckSamePassword()
+    ]
+]);
 ```
 
-**Behavior:**
-- Uses `Hash::check()` to compare against `auth()->user()->password`
-- Fails if the new password matches the current one
+**Error Message:** "Your new password must be different from your current password"
 
-## TranslatableRequired
+## UniqueCheck
 
-Validates that translatable fields have required language values.
+Validates uniqueness in database with support for soft deletes, JSON columns, and model-based exceptions.
 
-**Location:** `app/Rules/TranslatableRequired.php`
+**Location:** `app/Rules/UniqueCheck.php`
 
 **Constructor:**
 ```php
-new TranslatableRequired(
-    array $requiredLocales = ['en', 'ar']
+new UniqueCheck(
+    string $modelClass,      // Full model class name
+    string $resourceClass,   // Resource class for response
+    ?string $ignoreId = null // ID to exclude from check
 )
 ```
 
-**Usage:**
-```php
-use App\Rules\TranslatableRequired;
-
-public function rules(): array
-{
-    return [
-        'name' => [
-            'required',
-            'array',
-            new TranslatableRequired(['en', 'ar']),
-        ],
-    ];
-}
-```
-
-**Expected Input:**
-```json
-{
-    "name": {
-        "en": "English Name",
-        "ar": "الاسم العربي"
-    }
-}
-```
-
-
-## TranslatableNullable
-
-Allows translatable fields to be null or have partial translations.
-
-**Location:** `app/Rules/TranslatableNullable.php`
+**Features:**
+- Supports soft-deleted models
+- Handles JSON column searches
+- Throws `ModelAlreadyExistsException` with resource data
+- Automatically excludes specified ID on updates
 
 **Usage:**
 ```php
-use App\Rules\TranslatableNullable;
-
-public function rules(): array
-{
-    return [
-        'description' => [
-            'nullable',
-            'array',
-            new TranslatableNullable(),
-        ],
-    ];
-}
+$validated = $request->validate([
+    'email' => [
+        'required',
+        new UniqueCheck(User::class, UserResource::class, $userId)
+    ]
+]);
 ```
-
 
 ## TotalFileSize
 
-Validates that the total size of uploaded files doesn't exceed a limit.
+Validates the combined size of uploaded files doesn't exceed a maximum.
 
 **Location:** `app/Rules/TotalFileSize.php`
 
 **Constructor:**
 ```php
 new TotalFileSize(
-    int $maxSizeInKB = 10240  // Default 10MB
+    int $maxMB,                          // Maximum size in MB
+    array $existingAttachments = []      // Existing files to include in total
 )
 ```
 
+**Features:**
+- Converts MB to bytes internally
+- Includes existing attachment sizes
+- Checks storage file sizes for existing attachments
+
 **Usage:**
 ```php
-use App\Rules\TotalFileSize;
-
-public function rules(): array
-{
-    return [
-        'attachments' => [
-            'nullable',
-            'array',
-            new TotalFileSize(20480),  // 20MB max total
-        ],
-        'attachments.*' => [
-            'file',
-            'max:5120',  // 5MB per file
-        ],
-    ];
-}
+$validated = $request->validate([
+    'attachments' => [
+        'array',
+        new TotalFileSize(10, $existingAttachments)
+    ]
+]);
 ```
-
-
-## Using Rules in Form Requests
-
-All Form Requests should extend `BaseFormRequest`:
-
-```php
-<?php
-
-namespace App\Http\Requests\User;
-
-use App\Http\Requests\BaseFormRequest;
-use App\Rules\UniqueCheck;
-use App\Rules\ValidLength;
-
-class UserRequest extends BaseFormRequest
-{
-    public function rules(): array
-    {
-        $userId = $this->route('user')?->getKey();
-
-        return [
-            'name' => ['required', 'string', 'max:50'],
-
-            'phone_code_id' => [
-                'nullable',
-                'numeric',
-                Rule::exists('countries', 'id')->withoutTrashed(),
-            ],
-
-            'phone' => [
-                'nullable',
-                'regex:/^[0-9]+$/',
-                new ValidLength($this->input('phone_code_id'), Country::class, 'phone_length'),
-            ],
-
-            'email' => [
-                'required',
-                'email',
-                Rule::unique('users', 'email')->ignore($userId)->withoutTrashed(),
-                new UniqueCheck(User::class, UserResource::class, $userId),
-            ],
-
-            'password' => ['required', 'confirmed', 'min:8'],
-        ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        parent::prepareForValidation();
-
-        // Handle phone object format
-        $phone = $this->input('phone');
-        if (is_array($phone)) {
-            $this->merge([
-                'phone' => $phone['phone'] ?? null,
-                'phone_code_id' => $phone['phone_code_id'] ?? null,
-            ]);
-        }
-    }
-}
-```
-
-
-## Creating Custom Rules
-
-1. Generate a new rule:
-```bash
-php artisan make:rule CustomRule
-```
-
-2. Implement the rule:
-```php
-<?php
-
-namespace App\Rules;
-
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-
-class CustomRule implements ValidationRule
-{
-    public function __construct(
-        protected string $param
-    ) {}
-
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (/* validation fails */) {
-            $fail(__('validation.custom_message', ['attribute' => $attribute]));
-        }
-    }
-}
-```
-
-3. Add translation in `lang/en/validation.php`:
-```php
-'custom_message' => 'The :attribute is invalid.',
-```
-
-## See Also
-
-- [Architecture](/guide/architecture) — BaseFormRequest pattern
-- [Helper Functions](/guide/helpers) — resolveEmptyToNull helper
-- [API Reference](/guide/api-reference) — Endpoint validation
 
 ## TranslatableRequired
 
-- **What it does:** Validates translatable (JSON) attributes across languages using `config('lang.languages_validation')` and supports rules like `unique` that are injected per language.
+Validates translatable fields with language-specific requirements from config.
 
-- **Usage (Form Request):**
+**Location:** `app/Rules/TranslatableRequired.php`
 
+**Constructor:**
 ```php
-use App\Rules\TranslatableRequired;
-
-public function rules(): array
-{
-    // Validate `title` for each language configured in `lang.languages_validation`
-    return [
-        'title' => [new TranslatableRequired('pages', ['required', 'unique'], 'page')],
-    ];
-}
+new TranslatableRequired(
+    string $table,           // Database table name
+    array $rules = [],       // Validation rules per language
+    ?string $route = null    // Route parameter for update ignore
+)
 ```
 
-- **Notes:** When using `unique` in the rules array, the rule will convert it to a `Rule::unique` check against the JSON path (e.g., `title->en`) and will respect `request()->route($route)` to ignore the current resource on updates.
+**Features:**
+- Reads language requirements from `config('lang.languages_validation')`
+- Supports unique validation per language with JSON paths
+- Handles update scenarios with route parameter
 
-### Notes
+**Usage:**
+```php
+$validated = $request->validate([
+    'name' => [
+        new TranslatableRequired(
+            'users',
+            ['required', 'max:191'],
+            'user'  // route parameter to ignore on update
+        )
+    ]
+]);
+```
 
-- Rules throw typed exceptions or call `$fail()` with localized messages — Form Requests will convert these to JSON errors automatically.
-- Add translations under `resources/lang` for custom validation messages (e.g., `validation.password_min_length`).
+## TranslatableNullable
 
-## See also
+Validates translatable fields that can be nullable per language.
 
-- [API Reference](/guide/api-reference) — see endpoints list
+**Location:** `app/Rules/TranslatableNullable.php`
+
+**Constructor:**
+```php
+new TranslatableNullable(
+    string $table,           // Database table name
+    array $rules = [],       // Validation rules
+    ?string $route = null    // Route parameter for update
+)
+```
+
+**Features:**
+- Marks all languages as `sometimes` and `nullable`
+- Validates each language separately
+- Flattens nested attribute labels for error messages
+
+**Usage:**
+```php
+$validated = $request->validate([
+    'description' => [
+        new TranslatableNullable('users')
+    ]
+]);
+```
+
+## ValidLength
+
+Validates a value has exact length based on a model's length column.
+
+**Location:** `app/Rules/ValidLength.php`
+
+**Constructor:**
+```php
+new ValidLength(
+    ?int $referenceId,                    // ID of reference model
+    string $modelClass,                   // Model class to fetch length from
+    string $lengthColumn = 'length'       // Column name containing length
+)
+```
+
+**Features:**
+- Validates model class exists and extends Eloquent
+- Fetches length requirement from reference model
+- Compares exact string length
+
+**Usage:**
+```php
+$validated = $request->validate([
+    'phone' => [
+        'required',
+        new ValidLength($countryId, Country::class, 'phone_length')
+    ]
+]);
+```
+
+**Error Message:** "The phone must be exactly {length} characters."

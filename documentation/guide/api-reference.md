@@ -1,173 +1,37 @@
 ---
 title: API Reference
-description: Complete list of all API endpoints
+description: Complete API endpoint reference and response formats
 ---
 
 # API Reference
 
-Complete reference of all API endpoints in the Starter Backend system.
+Complete reference for all API endpoints, request/response formats, and error handling.
 
 ## Base URL
 
-All endpoints are prefixed with `/api/`:
 ```
-http://starter-backend.test/api/
+http://localhost:8000/api
 ```
 
 ## Authentication
 
-All endpoints except public routes require a Bearer token:
+All endpoints (except auth) require Bearer token authentication:
 
-```http
+```bash
 Authorization: Bearer {token}
 ```
 
-## Public Endpoints
+## Response Format
 
-### Captcha
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/captcha` | Generate captcha image |
-| POST | `/captcha/verify` | Verify captcha response |
-
-### Authentication
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/login` | User login |
-| POST | `/reset-password` | Reset password with token |
-
-### OTP (One-Time Password)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/send-otp` | Send OTP to email/phone |
-| POST | `/check-otp` | Check if OTP is valid |
-| POST | `/verify-otp` | Verify OTP and get token |
-
-## Authenticated Endpoints
-
-### Profile
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/me` | Get current user profile |
-| POST | `/update-profile` | Update profile information |
-| POST | `/destroy-avatar` | Remove user avatar |
-| POST | `/logout` | Logout current session |
-
-### Users
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/users` | List all users (paginated) |
-| GET | `/users/{user}` | Get user details |
-| POST | `/users` | Create new user |
-| PUT | `/users/{user}` | Update user |
-| DELETE | `/users/delete` | Soft delete users (batch) |
-| DELETE | `/users/force-delete` | Permanently delete users (batch) |
-| POST | `/users/restore` | Restore soft-deleted users |
-| PUT | `/users/toggle-active` | Toggle user active status |
-
-### Roles
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/roles` | List all roles |
-| GET | `/roles/{role}` | Get role details |
-| POST | `/roles` | Create new role |
-| PUT | `/roles/{role}` | Update role |
-| DELETE | `/roles/delete` | Delete roles (batch) |
-
-### Permissions
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/permissions` | List all permissions |
-
-### Countries (Data Entry)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/countries` | List all countries |
-| GET | `/countries/{country}` | Get country details |
-| POST | `/countries` | Create new country |
-| PUT | `/countries/{country}` | Update country |
-| DELETE | `/countries/delete` | Soft delete countries (batch) |
-| DELETE | `/countries/force-delete` | Permanently delete countries |
-| POST | `/countries/restore` | Restore soft-deleted countries |
-
-## Global Features
-
-### Settings
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/settings` | Get all settings |
-| PUT | `/settings/{setting}` | Update a setting |
-| POST | `/send-test-mail` | Test email credentials |
-
-### Notifications
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/notifications` | List user notifications |
-| PUT | `/notifications` | Mark notifications as read |
-
-### Help (Lookup Manager)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/help-configs` | Get configuration values |
-| GET | `/help-models` | Get model lookups for dropdowns |
-| GET | `/help-enums` | Get enum values for selects |
-
-### Reports & Exports
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/report` | Generate report (PDF/Excel) |
-| GET | `/export` | Export data to file |
-
-### Activity Logs
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/activity-logs` | List activity logs |
-| GET | `/activity-logs/{activity}` | Get activity log details |
-
-### File Uploads
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/chunk-file` | Upload file in chunks |
-
-## Request/Response Format
-
-### Standard Success Response
+### Success Response
 
 ```json
 {
   "success": true,
-  "message": "Operation completed successfully",
-  "data": { ... }
-}
-```
-
-### Paginated Response
-
-```json
-{
-  "success": true,
+  "message": "Operation successful",
+  "code": 200,
   "data": {
-    "data": [ ... ],
-    "meta": {
-      "current_page": 1,
-      "last_page": 10,
-      "per_page": 15,
-      "total": 150
-    }
+    // Response data
   }
 }
 ```
@@ -177,53 +41,40 @@ Authorization: Bearer {token}
 ```json
 {
   "success": false,
-  "message": "Validation failed",
+  "message": "Error message",
+  "code": 400,
   "errors": {
-    "email": ["The email field is required."]
+    "field": ["Error message"]
   }
 }
 ```
 
-## Query Parameters
+## Status Codes
 
-### Pagination
+| Code | Meaning |
+|------|---------|
+| 200 | OK - Request successful |
+| 201 | Created - Resource created |
+| 204 | No Content - Successful, no content |
+| 400 | Bad Request - Invalid parameters |
+| 401 | Unauthorized - Missing/invalid token |
+| 403 | Forbidden - Insufficient permissions |
+| 404 | Not Found - Resource not found |
+| 422 | Unprocessable Entity - Validation error |
+| 429 | Too Many Requests - Rate limited |
+| 500 | Server Error - Internal error |
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | integer | 1 | Page number |
-| `pageSize` | integer | 15 | Items per page (0 = all) |
-
-### Filtering
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `search` | string | Search term |
-| `is_active` | boolean | Filter by active status |
-| `trashed` | string | `only`, `with`, or omit for no trashed |
-| `order_by` | string | Column to sort by |
-| `order_dir` | string | `asc` or `desc` |
-| `from_date` | date | Filter from date |
-| `to_date` | date | Filter to date |
-
-### Example Request
-
-```http
-GET /api/users?page=1&pageSize=20&search=john&is_active=true&order_by=created_at&order_dir=desc
-Authorization: Bearer {token}
-```
-
-## Authentication Flow
+## Authentication Endpoints
 
 ### Login
 
 ```http
-POST /api/login
+POST /login
 Content-Type: application/json
 
 {
   "email": "user@example.com",
-  "password": "password123",
-  "captcha_key": "abc123"  // if captcha enabled
+  "password": "password123"
 }
 ```
 
@@ -231,50 +82,365 @@ Content-Type: application/json
 ```json
 {
   "success": true,
+  "message": "Login successful",
   "data": {
-    "token": "1|abc123...",
     "user": {
       "id": 1,
       "name": "John Doe",
-      "email": "user@example.com"
+      "email": "user@example.com",
+      "roles": ["admin"]
+    },
+    "token": "1|abc123xyz..."
+  }
+}
+```
+
+### Logout
+
+```http
+POST /logout
+Authorization: Bearer {token}
+```
+
+### Refresh Token
+
+```http
+POST /refresh-token
+Authorization: Bearer {token}
+```
+
+## User Endpoints
+
+### List Users
+
+```http
+GET /users?page=1&per_page=15&is_active=true&sortColumn=name&sortDirection=asc
+Authorization: Bearer {token}
+```
+
+**Query Parameters:**
+- `page` - Page number (default: 1)
+- `per_page` - Items per page (default: 15)
+- `is_active` - Filter by active status (true/false)
+- `name` - Filter by name
+- `email` - Filter by email
+- `sortColumn` - Sort column (default: id)
+- `sortDirection` - Sort direction (asc/desc, default: desc)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "data": [
+      {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "is_active": true,
+        "created_at": "2024-01-01T00:00:00Z"
+      }
+    ],
+    "pagination": {
+      "total": 100,
+      "per_page": 15,
+      "current_page": 1,
+      "last_page": 7
     }
   }
 }
 ```
 
-### OTP Flow (Password Reset)
+### Get User
 
-1. **Send OTP:**
 ```http
-POST /api/send-otp
-{ "email": "user@example.com", "type": "password_reset" }
+GET /users/{id}
+Authorization: Bearer {token}
 ```
 
-2. **Verify OTP:**
+### Create User
+
 ```http
-POST /api/verify-otp
-{ "email": "user@example.com", "otp": "123456" }
+POST /users
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "password": "SecurePass123!",
+  "password_confirmation": "SecurePass123!",
+  "is_active": true
+}
 ```
 
-3. **Reset Password:**
+### Update User
+
 ```http
-POST /api/reset-password
-{ "email": "user@example.com", "token": "...", "password": "newpass123" }
+PUT /users/{id}
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "name": "Jane Smith",
+  "email": "jane.smith@example.com",
+  "is_active": true
+}
 ```
 
-## Postman Collection
+### Delete User
 
-For detailed API testing with pre-configured requests and examples:
+```http
+DELETE /users/{id}
+Authorization: Bearer {token}
+```
 
-`file path`: ~\postman.json
+### Toggle User Active Status
 
-Import into Postman and configure your environment variables:
-- `base_url`: Your API base URL
-- `token`: Your authentication token
+```http
+POST /users/{id}/toggle-active
+Authorization: Bearer {token}
+```
 
+## Role Endpoints
+
+### List Roles
+
+```http
+GET /roles?page=1&per_page=15
+Authorization: Bearer {token}
+```
+
+### Get Role
+
+```http
+GET /roles/{id}
+Authorization: Bearer {token}
+```
+
+### Create Role
+
+```http
+POST /roles
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "name": "editor",
+  "display_name": {
+    "en": "Editor",
+    "ar": "محرر"
+  },
+  "permissions": [1, 2, 3]
+}
+```
+
+### Update Role
+
+```http
+PUT /roles/{id}
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "display_name": {
+    "en": "Senior Editor",
+    "ar": "محرر أول"
+  },
+  "permissions": [1, 2, 3, 4]
+}
+```
+
+### Delete Role
+
+```http
+DELETE /roles/{id}
+Authorization: Bearer {token}
+```
+
+## Permission Endpoints
+
+### List Permissions
+
+```http
+GET /permissions?page=1&per_page=50
+Authorization: Bearer {token}
+```
+
+### Get Permission
+
+```http
+GET /permissions/{id}
+Authorization: Bearer {token}
+```
+
+## Settings Endpoints
+
+### Get All Settings
+
+```http
+GET /settings
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "general": {
+      "site_name": "My App",
+      "site_url": "https://example.com"
+    },
+    "email": {
+      "from_address": "noreply@example.com",
+      "from_name": "My App"
+    }
+  }
+}
+```
+
+### Get Setting
+
+```http
+GET /settings/{key}
+Authorization: Bearer {token}
+```
+
+### Update Setting
+
+```http
+PUT /settings/{key}
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "value": "New Value"
+}
+```
+
+## Error Handling
+
+### Validation Error
+
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "code": 422,
+  "errors": {
+    "email": ["The email field is required"],
+    "password": ["The password must be at least 8 characters"]
+  }
+}
+```
+
+### Authentication Error
+
+```json
+{
+  "success": false,
+  "message": "Unauthenticated",
+  "code": 401
+}
+```
+
+### Authorization Error
+
+```json
+{
+  "success": false,
+  "message": "This action is unauthorized",
+  "code": 403
+}
+```
+
+### Not Found Error
+
+```json
+{
+  "success": false,
+  "message": "Resource not found",
+  "code": 404
+}
+```
+
+## Rate Limiting
+
+API requests are rate limited to prevent abuse:
+
+- **Default:** 60 requests per minute per IP
+- **Auth Endpoints:** 5 attempts per minute
+
+**Rate Limit Headers:**
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1640000000
+```
+
+## Pagination
+
+List endpoints support pagination:
+
+```http
+GET /users?page=2&per_page=20
+```
+
+**Response:**
+```json
+{
+  "data": [...],
+  "pagination": {
+    "total": 100,
+    "per_page": 20,
+    "current_page": 2,
+    "last_page": 5,
+    "from": 21,
+    "to": 40
+  }
+}
+```
+
+## Filtering
+
+Most list endpoints support filtering:
+
+```http
+GET /users?is_active=true&name=John&email=john
+```
+
+## Sorting
+
+Sort results using `sortColumn` and `sortDirection`:
+
+```http
+GET /users?sortColumn=created_at&sortDirection=desc
+```
+
+## Localization
+
+Set language using `Accept-Language` header:
+
+```bash
+Accept-Language: en
+# or
+Accept-Language: ar
+```
+
+## Best Practices
+
+1. **Always Include Token** - Include Bearer token in Authorization header
+2. **Handle Errors** - Check response status and error messages
+3. **Respect Rate Limits** - Implement exponential backoff
+4. **Use Pagination** - Don't fetch all records at once
+5. **Validate Input** - Validate data before sending
+6. **Use Appropriate Methods** - GET for retrieval, POST for creation, PUT for updates, DELETE for deletion
+7. **Include Content-Type** - Always include `Content-Type: application/json` for JSON requests
 
 ## See Also
 
-- [Authentication](/guide/features/authentication) — Auth flow details
-- [Configuration](/guide/configuration) — API configuration options
-- [Filters & Scopes](/guide/features/filters-scopes) — Query filtering
+- [Authentication](/guide/authentication) — Authentication guide
+- [Error Handling](/guide/error-handling) — Error handling
+- [Services](/guide/features/services) — Business logic
+
