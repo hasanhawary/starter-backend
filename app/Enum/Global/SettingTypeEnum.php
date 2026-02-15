@@ -15,5 +15,6 @@ enum SettingTypeEnum: string
     case File = 'file';
     case CheckBox = 'checkBox';
     case Radio = 'radio';
+    case SwitchBox = 'switchbox';
 
 }
