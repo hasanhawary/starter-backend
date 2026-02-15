@@ -8,6 +8,7 @@ use App\Models\Country;
 use App\Rules\TranslatableRequired;
 use App\Rules\UniqueCheck;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\File;
 
 class CountryRequest extends BaseFormRequest
 {
@@ -37,6 +38,7 @@ class CountryRequest extends BaseFormRequest
                     ->withoutTrashed()
                     ->ignore($this->route('country'))
             ],
+            'flag' => ['sometimes', 'nullable', File::image()->max(20048)], // 20MB max
             'phone_code' => ['required'],
             'phone_length' => ['required', 'numeric'],
         ];

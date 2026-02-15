@@ -1,11 +1,11 @@
 ---
 title: Architecture
-description: Understanding the Starter Backend architecture and project structure
+description: Understanding the Landing Dashboard Kit architecture and project structure
 ---
 
 # Architecture Overview
 
-The Starter Backend is built on a **modular, service-oriented architecture** designed for scalability, maintainability, and rapid development.
+The Landing Dashboard Kit is built on a **modular, service-oriented architecture** designed for scalability, maintainability, and rapid development.
 
 ## Project Structure
 
@@ -312,12 +312,15 @@ class Country extends BaseModel
     ];
     
     // ─── Media Attributes ───────────────────────────
+    public function setFlagAttribute($value): void
+    {
+        $path = Media::replace($this->flag ?? null)->upload($value, 'flags');
+        $this->attributes['flag'] = $path;
+    }
+    
     public function flag(): Attribute
     {
-        return Attribute::make(
-            get: fn($value) => Media::url($value),
-            set: fn($value) => Media::replace($this->flag ?? null)->upload($value, 'flags')
-        );
+        return Attribute::make(get: fn($value) => Media::url($value));
     }
     
     // ─── Scopes ─────────────────────────────────────

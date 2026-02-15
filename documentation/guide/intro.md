@@ -2,9 +2,9 @@
 title: Guide Overview
 ---
 
-# Starter Backend Guide
+# Landing Dashboard Kit Guide
 
-Welcome to the complete documentation for **Starter Backend** — a production-ready Laravel starter project with unified architecture, powerful development tools, and complete package ecosystem.
+Welcome to the complete documentation for **Landing Dashboard Kit** — a production-ready Laravel starter project with unified architecture, powerful development tools, and complete package ecosystem.
 
 ## What This Is
 

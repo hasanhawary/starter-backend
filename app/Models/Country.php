@@ -29,12 +29,15 @@ class Country extends BaseModel
     | Scopes && Casts methods
     |--------------------------------------------------------------------------
     */
+    public function setFlagAttribute($value): void
+    {
+        $path = Media::replace($this->flag ?? null)->upload($value, 'flags');
+        $this->attributes['flag'] = $path;
+    }
+
     public function flag(): Attribute
     {
-        return Attribute::make(
-            get: fn($value) => Media::url($value),
-            set: fn($value) => Media::replace($this->flag ?? null)->upload($value, 'flags')
-        );
+        return Attribute::make(get: fn($value) => Media::url($value));
     }
 
     public function scopeActive($query)

@@ -29,14 +29,16 @@ Controller snippets:
 
 ```php
 // in any Model class add it as attribute
-public function flag(): Attribute
+public function setFlagAttribute($value): void
 {
-	return Attribute::make(
-		get: fn($value) => Media::url($value),
-		set: fn($value) => Media::replace($this->flag ?? null)->upload($value, 'flags')
-	);
+    $path = Media::replace($this->flag ?? null)->upload($value, 'flags');
+    $this->attributes['flag'] = $path;
 }
 
+public function flag(): Attribute
+{
+    return Attribute::make(get: fn($value) => Media::url($value));
+}
 // app/Http/Controllers/API/User/ProfileController.php
 public function destroyAvatar(Request $request): JsonResponse
 {

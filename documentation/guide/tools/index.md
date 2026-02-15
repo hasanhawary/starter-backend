@@ -1,11 +1,11 @@
 ---
 title: Tools & Packages Overview
-description: Complete guide to the Starter Backend package ecosystem
+description: Complete guide to the Landing Dashboard Kit package ecosystem
 ---
 
 # Tools & Packages Overview
 
-The Starter Backend is powered by six custom-built packages that handle common development tasks. Learn how to use each tool to accelerate your development.
+The Landing Dashboard Kit is powered by six custom-built packages that handle common development tasks. Learn how to use each tool to accelerate your development.
 
 ## Quick Reference
 

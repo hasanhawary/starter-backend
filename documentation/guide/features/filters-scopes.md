@@ -1,251 +1,157 @@
 ---
-title: Filters & Scopes
-description: Pipeline-based query filters and Eloquent scopes
+title: Filters & Query Scopes
+description: Your project's query filters
 ---
 
-# Filters & Scopes
+# Filters & Query Scopes
 
-This page documents the request filters used throughout the API. Filters use Laravel's Pipeline pattern to transform Eloquent queries based on request parameters.
+Your project includes query filters in `app/Filters/Global/`.
 
-## How Filters Work
+## ActiveFilter
 
-Controllers pipe queries through filter classes:
+**File:** `app/Filters/Global/ActiveFilter.php`
 
-```php
-$query = app(Pipeline::class)
-    ->send(User::query())
-    ->through([
-        UserFilter::class,
-        ActiveFilter::class,
-        TrashedFilter::class,
-        OrderByFilter::class
-    ])
-    ->thenReturn();
+Filters by `is_active` status.
 
-return successResponse(fetchData($query, $request->pageSize, UserResource::class));
-```
-
-Each filter has a `handle($request, Closure $next)` method that modifies the query.
-
----
-
-## Global Filters (`app/Filters/Global/`)
-
-### ActiveFilter
-
-Filters by `is_active` boolean.
+**Your Code:**
 
 ```php
-// Query: ?is_active=1 or ?is_active=0
-$query->when(request()->has('is_active'), fn($q) => 
-    $q->where('is_active', (bool)request('is_active'))
-);
-```
-
-### DateFilter
-
-Filters by `created_at` date range.
-
-```php
-// Query: ?start=2024-01-01&end=2024-12-31
-if (!empty(request('start'))) {
-    $query->whereDate('created_at', '>=', request('start'));
-}
-if (!empty(request('end'))) {
-    $query->whereDate('created_at', '<=', request('end'));
-}
-```
-
-### TrashedFilter
-
-Shows only soft-deleted records.
-
-```php
-// Query: ?is_trashed=1
-$query->when(request('is_trashed'), fn($q) => $q->onlyTrashed());
-```
-
-### OrderByFilter
-
-Smart ordering with JSON field support and fallbacks.
-
-```php
-// Query: ?sortColumn=name.en&sortDirection=asc
-// Converts name.en to name->en for JSON columns
-// Falls back to 'id' desc if column doesn't exist
-```
-
-**Supports:**
-- Regular columns: `?sortColumn=email`
-- JSON paths: `?sortColumn=name.en` → `ORDER BY name->en`
-- Fallback to `first_name` if `name` requested but doesn't exist
-
-### JsonNameFilter
-
-Searches inside JSON `name` column across all languages.
-
-```php
-// Query: ?search=مصر
-// Searches name->ar, name->en, etc.
-QueryHelper::applyJsonSearch($query, 'name', $search);
-```
-
-### JsonDisplayNameFilter
-
-Same as JsonNameFilter but for `display_name` column.
-
-### NameFilter / EmailFilter / PhoneFilter
-
-Simple LIKE searches on respective columns.
-
-```php
-// NameFilter
-$query->where('name', 'like', '%' . request('search') . '%');
-```
-
----
-
-## Admin Filters (`app/Filters/Admin/`)
-
-### UserFilter
-
-Combined search across multiple fields:
-
-```php
-$query->where(function ($q) {
-    $q->where('name', 'like', '%' . request('search') . '%')
-      ->orWhere('email', 'like', '%' . request('search') . '%')
-      ->orWhere('phone', 'like', '%' . request('search') . '%');
-});
-```
-
----
-
-## Setting Filters (`app/Filters/Setting/`)
-
-### GroupFilter
-
-Filter settings by group.
-
-### KeyFilter
-
-Filter settings by key.
-
----
-
-## Creating Custom Filters
-
-1. Create class in `app/Filters/`:
-
-```php
-<?php
-
-namespace App\Filters\Custom;
-
-use Closure;
-
-class MyFilter
+public function handle($request, Closure $next)
 {
-    public function handle($request, Closure $next)
-    {
-        $query = $next($request);
+    $query = $next($request);
 
-        $query->when(request('my_param'), function ($q) {
-            $q->where('column', request('my_param'));
-        });
+    $query->when(
+        request()->has('is_active'),
+        fn($query) => $query->where('is_active', (bool)request('is_active')),
+    );
 
-        return $query;
-    }
+    return $query;
 }
 ```
 
-2. Add to controller pipeline:
-
-```php
-->through([MyFilter::class, OrderByFilter::class])
-```
-
----
-
-## Common Query Parameters
-
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| `search` | Free-text search | `?search=john` |
-| `is_active` | Filter by active status | `?is_active=1` |
-| `is_trashed` | Show soft-deleted only | `?is_trashed=1` |
-| `sortColumn` | Column to sort by | `?sortColumn=name` |
-| `sortDirection` | Sort order (asc/desc) | `?sortDirection=desc` |
-| `start` | Date range start | `?start=2024-01-01` |
-| `end` | Date range end | `?end=2024-12-31` |
-| `pageSize` | Items per page | `?pageSize=20` |
-
-## Examples
+**Usage:**
 
 ```bash
-# Active users named "john", sorted by name
-GET /api/admin/users?is_active=1&search=john&sortColumn=name&sortDirection=asc
-
-# Deleted users
-GET /api/admin/users?is_trashed=1
-
-# Users created in January 2024
-GET /api/admin/users?start=2024-01-01&end=2024-01-31
-
-# Countries sorted by Arabic name
-GET /api/admin/countries?sortColumn=name.ar&sortDirection=asc
+GET /api/users?is_active=true
+GET /api/users?is_active=false
 ```
 
-## See Also
+---
 
-- [API Reference](/guide/api-reference) — All endpoints
-- [Architecture](/guide/architecture) — Pipeline pattern
+## NameFilter
 
-### Common query params
+**File:** `app/Filters/Global/NameFilter.php`
 
-- `search` — free-text search used by many filters
-- `is_active` — filter active/inactive records
-- `trashed` — include soft-deleted records
-- `sortColumn` / `sortDirection` — ordering
-- date range params like `start` / `end`
+Filters by name field.
 
-### Built-in filters
+**Your Code:**
 
-| Filter | Query param(s) | Description |
-|--------|----------------|-------------|
-| `ActiveFilter` | `is_active` | Filters by `is_active` boolean (1/0) |
-| `DateFilter` | `start`, `end` | Filter by `created_at` date range |
-| `NameFilter` | `search` | `where name like %search%` |
-| `EmailFilter` | `search` | `where email like %search%` |
-| `PhoneFilter` | `search` | `where phone like %search%` |
-| `JsonNameFilter` | `search` | Search inside JSON `name` column (`name->en`, etc.) |
-| `JsonDisplayNameFilter` | `search` | Search inside JSON `display_name` column |
-| `OrderByFilter` | `sortColumn`, `sortDirection` | Handles smart ordering (JSON keys, fallbacks) |
-| `TrashedFilter` | `trashed` | Use `onlyTrashed()` when truthy |
-| `UserFilter` | `search` | Searches `name`, `email`, and `phone` in one filter |
-| `ActivityLogFilter` | `search`, `model`, `user_id`, `operation`, `date_from`, `date_to` | Filters activity logs |
-| `GroupFilter` / `KeyFilter` (Setting) | `group`, `key` | Filter settings by group or key |
+```php
+public function handle($request, Closure $next)
+{
+    $query = $next($request);
 
-## Examples
+    when(request('search'), static fn() => $query->where('name', 'like', '%' . request('search') . '%'));
 
-- List active users with search and ordering:
-
-```
-GET /api/users?is_active=1&search=john&sortColumn=name&sortDirection=asc
+    return $query;
+}
 ```
 
-- Get trashed items:
+**Usage:**
 
+```bash
+GET /api/users?search=John
 ```
-GET /api/users?trashed=1
+
+---
+
+## OrderByFilter
+
+**File:** `app/Filters/Global/OrderByFilter.php`
+
+Sorts results by column and direction.
+
+**Your Code:**
+
+```php
+public function handle($request, Closure $next)
+{
+    $query = $next($request);
+
+    try {
+        $model = $query->getModel();
+        $table = $model->getTable();
+
+        $sortColumn = $this->resolveSortColumn($table, request('sortColumn', 'id'));
+        $sortDirection = $this->resolveSortDirection(request('sortDirection'));
+
+        return $query->orderBy($sortColumn, $sortDirection);
+
+    } catch (QueryException|\Exception $e) {
+        Log::error('OrderByFilter unexpected error: ' . $e->getMessage());
+        return $query->orderBy('id', 'desc');
+    }
+}
+
+protected function resolveSortColumn(string $table, ?string $requested): string
+{
+    try {
+        if (!$requested) {
+            return 'id';
+        }
+
+        // Handle JSON dot notation like name.en => name->en
+        if (str_starts_with($requested, 'name') && Schema::hasColumn($table, 'name')) {
+            $jsonKey = explode('.', $requested)[1] ?? null;
+            if ($jsonKey) {
+                return "name->$jsonKey";
+            }
+        }
+
+        // Check if the column exists
+        if (Schema::hasColumn($table, $requested)) {
+            return $requested;
+        }
+
+        // Fallback for "name" — if "first_name" exists
+        if ($requested === 'name' && Schema::hasColumn($table, 'first_name')) {
+            return 'first_name';
+        }
+
+        return 'id';
+    } catch (\Exception $e) {
+        Log::warning('Failed to resolve sort column: ' . $e->getMessage());
+        return 'id';
+    }
+}
+
+protected function resolveSortDirection(?string $direction = null): string
+{
+    return $direction && in_array(strtolower($direction), ['asc', 'desc'])
+        ? strtolower($direction)
+        : 'desc';
+}
 ```
 
-### Notes & Tips
+**Usage:**
 
-- `OrderByFilter` contains logic for JSON `name` fields and falls back to sensible defaults.
-- Filters rely on request helper functions; ensure parameters are present and correctly named.
-- To add a new filter: create a class under `app/Filters` with a `handle($request, Closure $next)` method and include it in controller pipelines.
+```bash
+GET /api/users?sortColumn=name&sortDirection=asc
+GET /api/users?sortColumn=created_at&sortDirection=desc
+GET /api/users?sortColumn=name.en&sortDirection=asc
+```
 
-## See also
+---
 
-- [API Reference](/guide/api-reference) — see endpoints list
+## Using Filters
+
+In your controllers:
+
+```php
+$users = User::query()
+    ->pipe(new ActiveFilter())
+    ->pipe(new NameFilter())
+    ->pipe(new OrderByFilter())
+    ->paginate();
+```
+

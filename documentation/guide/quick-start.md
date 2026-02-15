@@ -1,11 +1,11 @@
 ---
 title: Quick Start
-description: Get started with the Starter Backend API in 5 minutes
+description: Get started with the Landing Dashboard Kit API in 5 minutes
 ---
 
 # Quick Start
 
-Learn the fundamentals of the Starter Backend API with real, practical examples.
+Learn the fundamentals of the Landing Dashboard Kit API with real, practical examples.
 
 ## 1. Authentication
 

@@ -30,7 +30,7 @@ Response:
   "data": {
     "general": {
       "app_name": {
-        "value": "Starter Backend",
+        "value": "Landing Dashboard Kit",
         "type": "text",
         "is_multi_lang": true,
         "placeholder": "Application Name",
