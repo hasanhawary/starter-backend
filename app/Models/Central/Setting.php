@@ -2,6 +2,7 @@
 
 namespace App\Models\Central;
 
+use App\Enum\Global\SettingTypeEnum;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -18,6 +19,12 @@ class Setting extends BaseModel
     public array $basicOperations = ['read', 'update'];
 
     protected $fillable = ['key', 'value', 'group', 'type', 'label', 'placeholder', 'is_multi_lang', 'is_env'];
+
+    protected $casts = [
+        'type' => SettingTypeEnum::class,
+        'is_multi_lang' => 'boolean',
+        'is_env' => 'boolean',
+    ];
 
     /*
      |--------------------------------------------------------------------------

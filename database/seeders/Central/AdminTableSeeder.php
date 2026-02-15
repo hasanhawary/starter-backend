@@ -39,7 +39,7 @@ class AdminTableSeeder extends Seeder
         Admin::query()->firstOrCreate([
             'email' => "root@$domain.com"
         ], [
-            'name' => 'root',
+            'name' => __('api.root'),
             'password' => '123456',
             'phone' => '01005164154',
             'phone_code_id' => $countryId,
@@ -50,7 +50,7 @@ class AdminTableSeeder extends Seeder
         Admin::query()->firstOrCreate([
             'email' => "admin@$domain.com"
         ], [
-            'name' => 'admin',
+            'name' => __('api.admin'),
             'password' => '123456',
             'phone' => '01005164154',
             'phone_code_id' => $countryId,
