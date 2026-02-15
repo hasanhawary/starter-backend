@@ -45,7 +45,7 @@ class AdminController extends BaseController
             ->through([AdminFilter::class, ActiveFilter::class, TrashedFilter::class, OrderByFilter::class])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->pageSize, AdminResource::class));
+        return successResponse(wrapPaginate($query, AdminResource::class));
     }
 
     /**

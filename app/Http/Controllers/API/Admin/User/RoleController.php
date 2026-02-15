@@ -45,7 +45,7 @@ class RoleController extends BaseController
             ->through([JsonDisplayNameFilter::class, ActiveFilter::class, OrderByFilter::class])
             ->thenReturn();
 
-        return successResponse(fetchData($roles, $request->pageSize, RoleResource::class));
+        return successResponse(wrapPaginate($roles, RoleResource::class));
     }
 
     /**

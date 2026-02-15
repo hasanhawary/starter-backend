@@ -45,7 +45,7 @@ class UserController extends BaseController
             ->through([UserFilter::class, ActiveFilter::class, TrashedFilter::class, OrderByFilter::class])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->pageSize, UserResource::class));
+        return successResponse(wrapPaginate($query, UserResource::class));
     }
 
     /**

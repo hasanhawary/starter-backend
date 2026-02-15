@@ -37,7 +37,7 @@ class ActivityLogController extends BaseController implements HasMiddleware
             ])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->input('pageSize'), ActivityLogResource::class));
+        return successResponse(wrapPaginate($query, ActivityLogResource::class));
     }
 
     /**

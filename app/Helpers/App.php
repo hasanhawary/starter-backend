@@ -280,11 +280,13 @@ if (!function_exists('detectModelPath')) {
     }
 }
 
-if (!function_exists('fetchData')) {
-    function fetchData(Builder $query, string|int|null $pageSize = null, $resource = null, $meta = [])
+if (!function_exists('wrapPaginate')) {
+    function wrapPaginate(Builder $query, $resource = null, $meta = [])
     {
-        if ($pageSize && (int)$pageSize !== -1) {
-            $data = $query->paginate($pageSize);
+        $perPage = request('per_page', config('project.pagination.per_page'));
+
+        if ($perPage && (int)$perPage !== -1) {
+            $data = $query->paginate($perPage);
 
             if ($resource) {
                 $data->data = $resource::collection($data);

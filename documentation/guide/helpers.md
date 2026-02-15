@@ -71,21 +71,21 @@ return unKnownError($exception->getMessage());
 
 ## Data Helpers
 
-### fetchData
+### wrapPaginate
 
 Paginates query results and transforms with a resource class.
 
 ```php
-function fetchData(Builder $query, string|int|null $pageSize = null, $resource = null, $meta = [])
+function wrapPaginate(Builder $query, $resource = null, $meta = [])
 
-// Usage - Paginated
-return successResponse(fetchData($query, $request->pageSize, UserResource::class));
+// Usage - Paginated request('per_page') = 10
+return successResponse(wrapPaginate($query, UserResource::class));
 
-// Usage - All records (pageSize = -1 or null)
-return successResponse(fetchData($query, -1, UserResource::class));
+// Usage - All records ( request('per_page') = -1 or null)
+return successResponse(wrapPaginate($query, UserResource::class));
 
 // With meta data
-return successResponse(fetchData($query, 15, UserResource::class, ['total_active' => 100]));
+return successResponse(wrapPaginate($query, UserResource::class, ['total_active' => 100]));
 ```
 
 ### resolveEmptyToNull

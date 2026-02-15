@@ -114,7 +114,7 @@ Authorization: Bearer {token}
 ### List Users
 
 ```http
-GET /users?page=1&per_page=15&is_active=true&sortColumn=name&sortDirection=asc
+GET /users?page=1&per_page=15&is_active=true&sort_column=name&sort_direction=asc
 Authorization: Bearer {token}
 ```
 
@@ -124,8 +124,8 @@ Authorization: Bearer {token}
 - `is_active` - Filter by active status (true/false)
 - `name` - Filter by name
 - `email` - Filter by email
-- `sortColumn` - Sort column (default: id)
-- `sortDirection` - Sort direction (asc/desc, default: desc)
+- `sort_column` - Sort column (default: id)
+- `sort_direction` - Sort direction (asc/desc, default: desc)
 
 **Response:**
 ```json
@@ -412,10 +412,10 @@ GET /users?is_active=true&name=John&email=john
 
 ## Sorting
 
-Sort results using `sortColumn` and `sortDirection`:
+Sort results using `sort_column` and `sort_direction`:
 
 ```http
-GET /users?sortColumn=created_at&sortDirection=desc
+GET /users?sort_column=created_at&sort_direction=desc
 ```
 
 ## Localization
