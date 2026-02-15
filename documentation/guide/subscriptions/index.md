@@ -1,353 +1,488 @@
 ---
 title: Subscription System
-description: Plans, pricing, and subscription management for tenants
+description: Complete subscription and billing management for multi-tenant applications
 ---
 
 # Subscription System
 
-The subscription system manages plans, pricing tiers, features, and tenant subscriptions.
+This guide documents the complete subscription and billing system for managing tenant subscriptions, plans, and usage tracking.
 
 ## Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Subscription System                       │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐  │
-│  │    Plan     │───▶│ PlanPrice   │    │  PlanFeature    │  │
-│  │             │    │             │    │                 │  │
-│  │ • name      │    │ • price     │    │ • name          │  │
-│  │ • desc      │    │ • interval  │    │ • value         │  │
-│  │ • is_active │    │ • currency  │    │ • is_enabled    │  │
-│  └──────┬──────┘    └─────────────┘    └─────────────────┘  │
-│         │                                                    │
-│         ▼                                                    │
-│  ┌─────────────────┐    ┌─────────────────────────────────┐ │
-│  │  Subscription   │───▶│     SubscriptionUsage           │ │
-│  │                 │    │                                 │ │
-│  │ • tenant_id     │    │ • feature_id                    │ │
-│  │ • plan_id       │    │ • used                          │ │
-│  │ • starts_at     │    │ • limit                         │ │
-│  │ • ends_at       │    │                                 │ │
-│  └─────────────────┘    └─────────────────────────────────┘ │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
+The subscription system provides:
+- Plan management with features and pricing
+- Subscription lifecycle management (active, expired, cancelled)
+- Usage tracking and limits
+- Billing cycle management (monthly, yearly, quarterly, weekly)
+- Subscription pricing with discounts
 
-## Models
+**Key Components:**
+- Plans: Define features and pricing tiers
+- Subscriptions: Tenant subscriptions to plans
+- Usage Tracking: Track feature usage against limits
+- Billing: Manage pricing and billing cycles
+
+---
+
+## Core Models
 
 ### Plan
 
-Subscription plans available to tenants.
+**Location:** `app/Models/Central/Plan.php`
+
+Represents a subscription plan with features and pricing.
+
+**Attributes:**
+- `id` - Plan ID
+- `code` - Unique plan code
+- `name` - Translatable plan name
+- `is_active` - Active status
+- `created_by` - Creator user ID
+
+**Relationships:**
+- `features()` - Plan features
+- `prices()` - Plan pricing options
+- `subscriptions()` - Active subscriptions
+
+**Usage:**
 
 ```php
-// app/Models/Central/Plan.php
-class Plan extends BaseModel
-{
-    protected $fillable = [
-        'name',
-        'description',
-        'is_active',
-        'sort_order',
-    ];
+use App\Models\Central\Plan;
 
-    // Relationships
-    public function prices(): HasMany;
-    public function features(): HasMany;
-    public function subscriptions(): HasMany;
-}
+// Get plan
+$plan = Plan::where('code', 'professional')->first();
+
+// Get plan features
+$features = $plan->features;
+
+// Get plan prices
+$prices = $plan->prices;
+
+// Get active subscriptions
+$subscriptions = $plan->subscriptions()->where('status', 'active')->get();
 ```
 
-### PlanPrice
-
-Pricing tiers for each plan (monthly, yearly, etc.).
-
-```php
-// app/Models/Central/PlanPrice.php
-class PlanPrice extends BaseModel
-{
-    protected $fillable = [
-        'plan_id',
-        'price',
-        'currency',
-        'interval',          // monthly, yearly, etc.
-        'interval_count',    // 1, 3, 6, 12
-        'is_active',
-    ];
-
-    public function plan(): BelongsTo;
-}
-```
+---
 
 ### PlanFeature
 
-Features included in a plan.
+**Location:** `app/Models/Central/PlanFeature.php`
+
+Represents a feature included in a plan.
+
+**Attributes:**
+- `id` - Feature ID
+- `plan_id` - Plan ID
+- `name` - Translatable feature name
+- `key` - Feature key (for tracking usage)
+- `value` - Feature limit/value
+- `is_active` - Active status
+
+**Usage:**
 
 ```php
-// app/Models/Central/PlanFeature.php
-class PlanFeature extends BaseModel
-{
-    protected $fillable = [
-        'plan_id',
-        'name',
-        'code',
-        'value',            // Limit value or null for unlimited
-        'is_enabled',
-    ];
+use App\Models\Central\PlanFeature;
 
-    public function plan(): BelongsTo;
+// Get feature
+$feature = PlanFeature::where('key', 'api_calls')->first();
+
+// Get feature value
+$limit = $feature->value;  // e.g., 10000
+
+// Check if feature is active
+if ($feature->is_active) {
+    // Feature is available
 }
 ```
+
+---
+
+### PlanPrice
+
+**Location:** `app/Models/Central/PlanPrice.php`
+
+Represents pricing for a plan with billing cycle.
+
+**Attributes:**
+- `id` - Price ID
+- `plan_id` - Plan ID
+- `cycle` - Billing cycle (monthly, yearly, quarterly, weekly)
+- `price` - Price amount
+- `currency` - Currency code
+- `discount_percent` - Discount percentage
+
+**Methods:**
+- `getDiscountedPrice()` - Get price after discount
+- `getFormattedPrice()` - Get formatted price string
+- `getFormattedDiscountedPrice()` - Get formatted discounted price
+- `getCycleLabel()` - Get cycle label
+
+**Usage:**
+
+```php
+use App\Models\Central\PlanPrice;
+
+// Get price
+$price = PlanPrice::find(1);
+
+// Get pricing info
+$basePrice = $price->price;              // 99.99
+$discounted = $price->getDiscountedPrice();  // 79.99
+$formatted = $price->getFormattedPrice();    // "USD 99.99"
+$cycle = $price->getCycleLabel();        // "Monthly"
+```
+
+---
 
 ### Subscription
 
-Tenant subscription to a plan.
+**Location:** `app/Models/Central/Subscription.php`
+
+Represents a tenant's subscription to a plan.
+
+**Attributes:**
+- `id` - Subscription ID
+- `tenant_id` - Tenant ID
+- `plan_id` - Plan ID
+- `plan_price_id` - Plan price ID
+- `starts_at` - Subscription start date
+- `ends_at` - Subscription end date
+- `status` - Status (active, expired, cancelled)
+
+**Methods:**
+- `isActive()` - Check if subscription is active
+- `isExpired()` - Check if subscription is expired
+- `isCancelled()` - Check if subscription is cancelled
+- `daysRemaining()` - Get remaining days
+- `hasFeature($key)` - Check if plan has feature
+- `getFeatureValue($key)` - Get feature limit
+- `getBillingCycle()` - Get billing cycle
+- `getPrice()` - Get base price
+- `getDiscountedPrice()` - Get discounted price
+
+**Usage:**
 
 ```php
-// app/Models/Central/Subscription.php
-class Subscription extends BaseModel
-{
-    protected $fillable = [
-        'tenant_id',
-        'plan_id',
-        'plan_price_id',
-        'starts_at',
-        'ends_at',
-        'canceled_at',
-        'status',
-    ];
+use App\Models\Central\Subscription;
 
-    protected $casts = [
-        'starts_at' => 'datetime',
-        'ends_at' => 'datetime',
-        'canceled_at' => 'datetime',
-    ];
+// Get subscription
+$subscription = Subscription::where('tenant_id', $tenantId)->first();
 
-    public function tenant(): BelongsTo;
-    public function plan(): BelongsTo;
-    public function planPrice(): BelongsTo;
-    public function usages(): HasMany;
+// Check status
+if ($subscription->isActive()) {
+    // Subscription is active
 }
+
+// Get feature limit
+$apiCallLimit = $subscription->getFeatureValue('api_calls');
+
+// Get remaining days
+$daysLeft = $subscription->daysRemaining();
+
+// Get pricing
+$price = $subscription->getPrice();
+$discounted = $subscription->getDiscountedPrice();
 ```
+
+---
 
 ### SubscriptionUsage
 
-Track feature usage within a subscription.
+**Location:** `app/Models/Central/SubscriptionUsage.php`
+
+Tracks feature usage for a subscription.
+
+**Attributes:**
+- `id` - Usage ID
+- `tenant_id` - Tenant ID
+- `key` - Feature key
+- `used_value` - Amount used
+- `period_start` - Period start date
+- `period_end` - Period end date
+
+**Usage:**
 
 ```php
-// app/Models/Central/SubscriptionUsage.php
-class SubscriptionUsage extends BaseModel
-{
-    protected $fillable = [
-        'subscription_id',
-        'feature_id',
-        'used',
-        'reset_at',
-    ];
+use App\Models\Central\SubscriptionUsage;
 
-    public function subscription(): BelongsTo;
-    public function feature(): BelongsTo;
-}
+// Get usage
+$usage = SubscriptionUsage::where('tenant_id', $tenantId)
+    ->where('key', 'api_calls')
+    ->currentPeriod()
+    ->first();
+
+// Get used amount
+$used = $usage->used_value;  // e.g., 5000
 ```
 
-## API Endpoints
+---
 
-### Plans
+## Subscription Service
 
-```bash
-# List plans
-GET /api/central/plans
+**Location:** `app/Tools/Subscription/Services/SubscriptionService.php`
 
-# Create plan
-POST /api/central/plans
-{
-  "name": "Professional",
-  "description": "For growing businesses",
-  "is_active": true
-}
+Manages subscription operations.
 
-# Update plan
-PUT /api/central/plans/{plan}
+### Methods
 
-# Delete plan
-DELETE /api/central/plans
-```
+#### createSubscription()
 
-### Plan Prices
-
-```bash
-# List prices for a plan
-GET /api/central/plans/{plan}/prices
-
-# Create price
-POST /api/central/plans/{plan}/prices
-{
-  "price": 29.99,
-  "currency": "USD",
-  "interval": "monthly",
-  "interval_count": 1
-}
-```
-
-### Plan Features
-
-```bash
-# List features for a plan
-GET /api/central/plans/{plan}/features
-
-# Create feature
-POST /api/central/plans/{plan}/features
-{
-  "name": "API Calls",
-  "code": "api_calls",
-  "value": 10000,
-  "is_enabled": true
-}
-```
-
-### Subscriptions
-
-```bash
-# List subscriptions
-GET /api/central/subscriptions
-
-# Create subscription
-POST /api/central/subscriptions
-{
-  "tenant_id": "uuid",
-  "plan_id": 1,
-  "plan_price_id": 1,
-  "starts_at": "2026-02-01"
-}
-
-# Update subscription
-PUT /api/central/subscriptions/{subscription}
-
-# Cancel subscription
-POST /api/central/subscriptions/{subscription}/cancel
-```
-
-## Controllers
-
-### PlanController
-
-```php
-// app/Http/Controllers/API/Central/Subscription/PlanController.php
-class PlanController extends BaseController
-{
-    use HasDeleteMethods, HasToggleActiveMethods;
-
-    public function index(PageRequest $request): JsonResponse
-    {
-        Gate::authorize('view', Plan::class);
-
-        $query = app(Pipeline::class)
-            ->send(Plan::with(['prices', 'features']))
-            ->through([PlanFilter::class, ActiveFilter::class, OrderByFilter::class])
-            ->thenReturn();
-
-        return successResponse(fetchData($query, $request->pageSize, PlanResource::class));
-    }
-
-    public function store(PlanRequest $request): JsonResponse
-    {
-        Gate::authorize('create', Plan::class);
-
-        $plan = Plan::create($request->validated());
-
-        return successResponse(new PlanResource($plan), __('api.created_success'));
-    }
-}
-```
-
-### SubscriptionController
-
-```php
-// app/Http/Controllers/API/Central/Subscription/SubscriptionController.php
-class SubscriptionController extends BaseController
-{
-    public function index(PageRequest $request): JsonResponse
-    {
-        Gate::authorize('view', Subscription::class);
-
-        $query = app(Pipeline::class)
-            ->send(Subscription::with(['tenant', 'plan', 'planPrice']))
-            ->through([SubscriptionFilter::class, ActiveFilter::class, OrderByFilter::class])
-            ->thenReturn();
-
-        return successResponse(fetchData($query, $request->pageSize, SubscriptionResource::class));
-    }
-}
-```
-
-## Subscription Facade
+Creates a new subscription for a tenant.
 
 ```php
 use App\Tools\Subscription\Facades\Subscription;
 
-// Create subscription
-Subscription::createSubscription([
-    'tenant_id' => $tenant->id,
-    'plan_id' => $plan->id,
-    'plan_price_id' => $planPrice->id,
+$subscription = Subscription::createSubscription([
+    'tenant_id' => $tenantId,
+    'plan_id' => $planId,
+    'plan_price_id' => $planPriceId,
     'starts_at' => now(),
+    'ends_at' => now()->addMonth(),
 ]);
-
-// Get active subscription
-$subscription = Subscription::getActiveSubscription($tenantId);
-
-// Update subscription
-Subscription::updateSubscription($subscription, [
-    'plan_price_id' => $newPlanPriceId,
-]);
-
-// Cancel subscription
-Subscription::cancelSubscription($subscription);
-
-// Check feature usage
-$canUse = Subscription::canUseFeature($subscription, 'api_calls');
-
-// Increment usage
-Subscription::incrementUsage($subscription, 'api_calls', 1);
 ```
 
-## Creating Tenant with Subscription
+#### updateSubscription()
+
+Updates an existing subscription.
+
+```php
+$subscription = Subscription::updateSubscription($subscription, [
+    'plan_id' => $newPlanId,
+    'plan_price_id' => $newPlanPriceId,
+]);
+```
+
+#### changeStatus()
+
+Changes subscription status.
+
+```php
+use App\Enum\Subscription\SubscriptionStatusEnum;
+
+$subscription = Subscription::changeStatus(
+    $subscription,
+    SubscriptionStatusEnum::Active
+);
+```
+
+#### cancel()
+
+Cancels a subscription.
+
+```php
+$subscription = Subscription::cancel($subscription);
+```
+
+#### renew()
+
+Renews a subscription.
+
+```php
+$subscription = Subscription::renew(
+    $subscription,
+    startsAt: now(),
+    endsAt: now()->addMonth()
+);
+```
+
+#### getActiveSubscription()
+
+Gets active subscription for a tenant.
+
+```php
+$subscription = Subscription::getActiveSubscription($tenantId);
+```
+
+#### trackUsage()
+
+Tracks feature usage.
+
+```php
+$usage = Subscription::trackUsage(
+    tenantId: $tenantId,
+    featureKey: 'api_calls',
+    amount: 100
+);
+```
+
+#### canUseFeature()
+
+Checks if feature can be used.
+
+```php
+$canUse = Subscription::canUseFeature(
+    tenantId: $tenantId,
+    featureKey: 'api_calls',
+    limit: 10000
+);
+```
+
+#### consumeFeature()
+
+Consumes a feature (throws exception if limit exceeded).
+
+```php
+try {
+    Subscription::consumeFeature(
+        tenantId: $tenantId,
+        featureKey: 'api_calls',
+        amount: 100
+    );
+} catch (DomainException $e) {
+    // Feature limit exceeded
+}
+```
+
+#### getUsageStats()
+
+Gets usage statistics for a tenant.
+
+```php
+$stats = Subscription::getUsageStats($tenantId);
+// Returns:
+// [
+//     'api_calls' => [
+//         'used' => 5000,
+//         'limit' => 10000,
+//         'percentage' => 50.0
+//     ],
+//     ...
+// ]
+```
+
+---
+
+## Subscription Enums
+
+### SubscriptionStatusEnum
+
+**Location:** `app/Enum/Subscription/SubscriptionStatusEnum.php`
+
+**Values:**
+```php
+case Active = 'active';
+case Expired = 'expired';
+case Cancelled = 'cancelled';
+```
+
+### PlanCycleEnum
+
+**Location:** `app/Enum/Subscription/PlanCycleEnum.php`
+
+**Values:**
+```php
+case Weekly = 'weekly';
+case Monthly = 'monthly';
+case Quarterly = 'quarterly';
+case Yearly = 'yearly';
+```
+
+---
+
+## Usage Examples
+
+### Create Tenant with Subscription
 
 ```php
 use App\Services\Tenant\TenantService;
 
-$service = new TenantService();
+$tenantService = app(TenantService::class);
 
-$tenant = $service->createTenant(
+$tenant = $tenantService->createTenant(
     data: [
         'name' => 'Acme Corp',
-        'domain' => 'acme.example.com',
-        'database' => 'tenant_acme',
+        'domain' => 'acme.app.com',
+        'database' => 'acme_db',
     ],
-    planPriceId: 1,
-    subscriptionStartsAt: '2026-02-01'
+    planPriceId: 1,  // Professional plan, monthly
+    subscriptionStartsAt: now()->toDateString()
 );
 ```
 
-## Checking Subscription Status
+### Check Feature Limit
 
 ```php
-// Check if tenant has active subscription
-$subscription = Subscription::getActiveSubscription($tenant->id);
+use App\Tools\Subscription\Facades\Subscription;
 
-if (!$subscription) {
-    return failResponse('No active subscription', [], 402);
-}
+$subscription = Subscription::getActiveSubscription($tenantId);
 
-// Check specific feature
-if (!Subscription::canUseFeature($subscription, 'exports')) {
-    return failResponse('Feature not available in your plan', [], 403);
+if ($subscription) {
+    $apiCallLimit = $subscription->getFeatureValue('api_calls');
+    $daysRemaining = $subscription->daysRemaining();
+    
+    echo "API Calls Limit: $apiCallLimit";
+    echo "Days Remaining: $daysRemaining";
 }
 ```
 
+### Track API Usage
+
+```php
+use App\Tools\Subscription\Facades\Subscription;
+
+// In API endpoint
+try {
+    Subscription::consumeFeature(
+        tenantId: $tenantId,
+        featureKey: 'api_calls',
+        amount: 1
+    );
+    
+    // Process API request
+} catch (DomainException $e) {
+    return response()->json([
+        'error' => 'API call limit exceeded'
+    ], 429);
+}
+```
+
+### Get Usage Statistics
+
+```php
+use App\Tools\Subscription\Facades\Subscription;
+
+$stats = Subscription::getUsageStats($tenantId);
+
+foreach ($stats as $feature => $usage) {
+    echo "$feature: {$usage['used']}/{$usage['limit']} ({$usage['percentage']}%)";
+}
+```
+
+---
+
+## Middleware
+
+### EnsureActiveSubscription
+
+**Location:** `app/Http/Middleware/EnsureActiveSubscription.php`
+
+Ensures tenant has active subscription before accessing routes.
+
+**Usage:**
+
+```php
+Route::middleware('ensure.active.subscription')->group(function () {
+    Route::get('/api/data', [DataController::class, 'index']);
+});
+```
+
+---
+
+## Best Practices
+
+1. **Always Check Subscription** - Verify subscription before processing requests
+2. **Track Usage** - Track feature usage for billing accuracy
+3. **Handle Expiration** - Automatically expire subscriptions when end date passes
+4. **Notify Users** - Notify tenants before subscription expires
+5. **Graceful Degradation** - Provide limited functionality for expired subscriptions
+6. **Log Changes** - Log all subscription changes for audit trail
+7. **Test Scenarios** - Test subscription lifecycle thoroughly
+
+---
+
 ## See Also
 
-- [Tenant Management](/guide/multitenancy/tenants)
-- [Tenant Services](/guide/services/tenant-services)
-- [API Reference](/guide/api-reference)
+- [Multi-Tenancy](/guide/multitenancy/) — Multi-tenant architecture
+- [Tenant Management](/guide/multitenancy/tenants) — Tenant operations
+- [Configuration](/guide/configuration/) — Configuration options
+

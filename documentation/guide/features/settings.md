@@ -28,7 +28,7 @@ Response:
 {
   "success": true,
   "data": {
-    "app_name": "Starter Backend",
+    "app_name": "Multi-Tenant Dashboard Kit",
     "app_email": "support@example.com",
     "maintenance_mode": false,
     "theme": "dark",

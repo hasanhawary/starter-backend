@@ -4,7 +4,7 @@ title: Overview
 
 # What this system is
 
-**Starter Backend** is a Laravel 12 multi-tenant API backend designed for building medium-to-large web APIs and admin systems. It uses **Spatie Multitenancy** with database-per-tenant isolation, separating Central (landlord) and Tenant data. It combines Laravel's conventions with a clean architecture, local packages, and tooling to speed development, enforce consistency, and make features pluggable and testable.
+**Multi-Tenant Dashboard Kit** is a Laravel 12 multi-tenant API backend designed for building medium-to-large web APIs and admin systems. It uses **Spatie Multitenancy** with database-per-tenant isolation, separating Central (landlord) and Tenant data. It combines Laravel's conventions with a clean architecture, local packages, and tooling to speed development, enforce consistency, and make features pluggable and testable.
 
 ## High-level architecture
 
@@ -16,8 +16,8 @@ title: Overview
 
 ## Key workflows & developer tools
 
-- **Installation**: Standard Laravel installation with multi-tenant database setup using shell scripts (`migrate_seed_central.sh` and `migrate_seed_tenant.sh`).
-- **Development**: Run `composer dev` to start server, queue, logs, and vite concurrently.
+- **Installation**: Standard Laravel installation with multi-tenant database setup using `php artisan app:install` which handles central and tenant database creation, migrations, and seeding.
+- **Tenant management**: Create new tenants with `php artisan tenant:create` and run tenant-specific migrations with `php artisan migrate --tenants`.
 - **Scaffolding & CLI**: Use the Dynamic CLI (`php artisan dynamic:crud Name`) to auto-generate CRUD modules with consistent architecture.
 
 ## Integrations & services

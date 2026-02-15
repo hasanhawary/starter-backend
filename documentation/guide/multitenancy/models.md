@@ -5,7 +5,7 @@ description: How models automatically detect and use the correct database connec
 
 # Tenant-Aware Models
 
-Models in the Laravel Starter Backend automatically detect whether they're in a tenant context and use the appropriate database connection.
+Models in the Laravel Multi-Tenant Dashboard Kit automatically detect whether they're in a tenant context and use the appropriate database connection.
 
 ## Base Classes
 

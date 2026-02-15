@@ -5,33 +5,44 @@ description: Understanding the multi-tenant architecture with separate databases
 
 # Multi-Tenancy Overview
 
-The Laravel Starter Backend uses **Spatie Multitenancy** to implement a database-per-tenant architecture. This provides complete data isolation between tenants while sharing the application codebase.
+The Laravel Multi-Tenant Dashboard Kit uses **Spatie Multitenancy** to implement a database-per-tenant architecture. This provides complete data isolation between tenants while sharing the application codebase.
 
 ## Architecture
 
+
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      Application                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌─────────────────────┐    ┌─────────────────────────────┐ │
-│  │   Central (Landlord) │    │         Tenant              │ │
-│  ├─────────────────────┤    ├─────────────────────────────┤ │
-│  │ • Admin users        │    │ • Tenant users              │ │
-│  │ • Tenants            │    │ • Tenant-specific data      │ │
-│  │ • Plans              │    │ • Isolated per database     │ │
-│  │ • Subscriptions      │    │                             │ │
-│  │ • Global settings    │    │                             │ │
-│  └──────────┬──────────┘    └──────────────┬──────────────┘ │
-│             │                               │                │
-│             ▼                               ▼                │
-│  ┌─────────────────────┐    ┌─────────────────────────────┐ │
-│  │   mysql connection   │    │     tenant connection       │ │
-│  │   (central database) │    │   (per-tenant database)     │ │
-│  └─────────────────────┘    └─────────────────────────────┘ │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                    Central Database                              │
+├──────────────────────────────────────────────────────────────────┤
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │              Central Admin Management                      │  │
+│  │  • Manage Tenants  • Manage Plans  • Track Subscriptions   │  │
+│  │  • Global Settings  • Central Activity Logs                │  │
+│  └────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
+                              ↓
+        ┌─────────────────────────────────────────┐
+        │   Automatic Tenant Detection            │
+        │   (Domain/Subdomain/X-Tenant-Id)        │
+        └─────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────┐
+│              Tenant Database (Per Tenant)                        │
+├──────────────────────────────────────────────────────────────────┤
+│  ┌──────────────────────┐      ┌──────────────────────┐          │
+│  │  Tenant Admin Users  │      │   Tenant Users       │          │
+│  │ • Manage Users       │      │ • Limited Access     │          │
+│  │ • Manage Roles       │      │ • Manage Profile     │          │
+│  │ • Manage Settings    │      │ • View Data          │          │
+│  │ • View Reports       │      │ • Manage Own Data    │          │
+│  └──────────────────────┘      └──────────────────────┘          │
+│  ┌──────────────────────────────────────────────────────────┐    │
+│  │    Tenant-Scoped Resources (Users, Roles, Permissions,   │    │
+│  │    Countries, Settings, Notifications, Activity Logs)    │    │
+│  └──────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────┘
 ```
+
 
 ## Central vs Tenant
 

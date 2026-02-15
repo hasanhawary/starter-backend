@@ -1,7 +1,7 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
-  title: "Starter Backend for Tenant",
+  title: "Multi-Tenant Dashboard Kit",
   description:
     "Production-ready Laravel starter project with complete CRUD generation, file management, permissions, and real-time features",
   appearance: true,
@@ -13,7 +13,7 @@ export default defineConfig({
   head: [
     ["link", { rel: "icon", href: "/logo.svg" }],
     ["meta", { property: "og:type", content: "website" }],
-    ["meta", { property: "og:title", content: "Starter Backend Documentation" }],
+    ["meta", { property: "og:title", content: "Multi-Tenant Dashboard Kit Documentation" }],
     [
       "meta",
       {
@@ -26,7 +26,7 @@ export default defineConfig({
 
   themeConfig: {
     logo: "/logo.svg",
-    siteTitle: "Starter Backend for Tenant",
+    siteTitle: "Multi-Tenant Dashboard Kit",
     nav: [
       { text: "Home", link: "/" },
       { text: "Installation", link: "/guide/installation" },
@@ -62,22 +62,12 @@ export default defineConfig({
           ],
         },
         {
-          text: "Architecture Overview",
+          text: "Core Concepts",
           collapsed: true,
           items: [
             { text: "Architecture", link: "/guide/architecture" },
             { text: "Authentication", link: "/guide/authentication" },
             { text: "Authorization & Policies", link: "/guide/authorization" },
-          ],
-        },
-        {
-          text: "Configuration",
-          collapsed: true,
-          items: [
-            { text: "Configuration Overview", link: "/guide/configuration/" },
-            { text: "Multi-Tenancy Config", link: "/guide/configuration/multitenancy" },
-            { text: "Project Settings", link: "/guide/configuration/project" },
-            { text: "Roles Configuration", link: "/guide/configuration/roles" },
           ],
         },
         {
@@ -91,20 +81,43 @@ export default defineConfig({
           ],
         },
         {
-          text: "Services",
+          text: "Configuration & Setup",
           collapsed: true,
           items: [
-            { text: "Services Overview", link: "/guide/services/" },
-            { text: "Auth Services", link: "/guide/services/auth-services" },
-            { text: "Global Services", link: "/guide/services/global-services" },
-            { text: "Tenant Services", link: "/guide/services/tenant-services" },
+            { text: "Configuration Overview", link: "/guide/configuration/" },
+            { text: "Multi-Tenancy Config", link: "/guide/configuration/multitenancy" },
+            { text: "Project Settings", link: "/guide/configuration/project" },
+            { text: "Roles Configuration", link: "/guide/configuration/roles" },
+            { text: "Brand Configuration", link: "/guide/features/brand-configuration" },
           ],
         },
         {
-          text: "Subscriptions",
+          text: "Subscriptions & Billing",
           collapsed: true,
           items: [
             { text: "Subscription System", link: "/guide/subscriptions/" },
+          ],
+        },
+        {
+          text: "Core Features",
+          collapsed: true,
+          items: [
+            { text: "Real-time with Reverb", link: "/guide/features/reverb" },
+            { text: "Notification System", link: "/guide/features/notifications" },
+            { text: "Activity Logging", link: "/guide/features/activity-logging" },
+            { text: "Settings Management", link: "/guide/features/settings" },
+          ],
+        },
+        {
+          text: "Development & Code",
+          collapsed: true,
+          items: [
+            { text: "Services & Business Logic", link: "/guide/features/services" },
+            { text: "Filters & Query Scopes", link: "/guide/features/filters-scopes" },
+            { text: "Custom Validation Rules", link: "/guide/features/custom-rules" },
+            { text: "Useful Traits", link: "/guide/features/useful-traits" },
+            { text: "Enums & Constants", link: "/guide/features/enums" },
+            { text: "Mail Classes", link: "/guide/features/mail-classes" },
           ],
         },
         {
@@ -121,19 +134,20 @@ export default defineConfig({
           ],
         },
         {
-          text: "Features & Services",
+          text: "Database & Models",
           collapsed: true,
           items: [
-            { text: "Real-time with Reverb", link: "/guide/features/reverb" },
-            { text: "Background Jobs", link: "/guide/features/jobs" },
-            { text: "Events System", link: "/guide/features/events" },
-            { text: "Notification System", link: "/guide/features/notifications" },
-            { text: "Activity Logging", link: "/guide/features/activity-logging" },
-            { text: "Settings Management", link: "/guide/features/settings" },
-            { text: "Filters & Scopes", link: "/guide/features/filters-scopes" },
-            { text: "Role Service", link: "/guide/features/role-service" },
-            { text: "Custom Rules", link: "/guide/features/custom-rules" },
-            { text: "Useful Traits", link: "/guide/features/useful-traits" },
+            { text: "Database Models", link: "/guide/database-models" },
+            { text: "Middleware", link: "/guide/middleware" },
+            { text: "Error Handling", link: "/guide/error-handling" },
+          ],
+        },
+        {
+          text: "Deployment & Operations",
+          collapsed: true,
+          items: [
+            { text: "Deployment", link: "/guide/deployment" },
+            { text: "Troubleshooting", link: "/guide/troubleshooting" },
           ],
         },
         {
@@ -151,7 +165,7 @@ export default defineConfig({
 
     footer: {
       message: "Released under the MIT License.",
-      copyright: "Copyright © 2025 Starter Backend",
+      copyright: "Copyright © 2025 Multi-Tenant Dashboard Kit",
     },
   },
 

@@ -1,11 +1,11 @@
 ---
 title: Configuration Overview
-description: Complete guide to all configuration files in the Laravel Starter Backend
+description: Complete guide to all configuration files in the Laravel Multi-Tenant Dashboard Kit
 ---
 
 # Configuration Overview
 
-This guide covers all configuration files in the Laravel Starter Backend project. Configuration files are located in the `config/` directory.
+This guide covers all configuration files in the Laravel Multi-Tenant Dashboard Kit project. Configuration files are located in the `config/` directory.
 
 ## Configuration Files
 

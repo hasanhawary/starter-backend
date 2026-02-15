@@ -5,7 +5,7 @@ description: Complete authentication system including login, LDAP, password rese
 
 # Authentication
 
-The Starter Backend uses **Laravel Sanctum** for stateless, token-based API authentication with support for traditional login, LDAP, and OTP-based password recovery.
+The Multi-Tenant Dashboard Kit uses **Laravel Sanctum** for stateless, token-based API authentication with support for traditional login, LDAP, and OTP-based password recovery.
 
 ## Login
 

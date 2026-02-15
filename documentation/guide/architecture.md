@@ -1,11 +1,11 @@
 ---
 title: Architecture
-description: Understanding the Starter Backend architecture and project structure
+description: Understanding the Multi-Tenant Dashboard Kit architecture and project structure
 ---
 
 # Architecture Overview
 
-The Starter Backend is built on a **modular, service-oriented architecture** designed for scalability, maintainability, and rapid development.
+The Multi-Tenant Dashboard Kit is built on a **modular, service-oriented architecture** designed for scalability, maintainability, and rapid development.
 
 ## Project Structure
 
