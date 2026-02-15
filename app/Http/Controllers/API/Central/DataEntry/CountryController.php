@@ -47,7 +47,7 @@ class CountryController extends BaseController implements HasMiddleware
             ->through([JsonDisplayNameFilter::class, OrderByFilter::class])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->pageSize, CountryResource::class));
+        return successResponse(wrapPaginate($query, CountryResource::class));
     }
 
     /**

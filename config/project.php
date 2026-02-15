@@ -65,17 +65,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | LDAP Configuration
-    |--------------------------------------------------------------------------
-    */
-    'ldap' => [
-        'active' => env('LDAP_ACTIVE', false), // enable or disable LDAP login
-        'type' => env('LDAP_TYPE', 'ad'),    // ad or openldap
-        'local' => env('LDAP_LOCAL', true),   // true = OpenLDAP, false = AD
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | OTP Configuration
     |--------------------------------------------------------------------------
     */
@@ -85,7 +74,7 @@ return [
         'type' => 'alpha',      // numeric | alpha | alphanumeric
         'delay' => '30',          // seconds between sends
         'expires_in' => 10,       // minutes
-        'max_attempts' => 1,
+        'max_attempts' => 5,
         'lock_time' => 120        //seconds
     ],
 
@@ -95,8 +84,8 @@ return [
     |--------------------------------------------------------------------------
     */
     'pagination' => [
-        'per_page' => 15,
-        'max' => 100,
+        'per_page' => 10,
+        'max' => 1000,
     ],
 
     /*
@@ -107,27 +96,7 @@ return [
     'uploads' => [
         'disk' => env('FILESYSTEM_DISK', 'public'),
         'max_size' => 2048, // KB
-        'allowed_types' => ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'docx'],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Caching
-    |--------------------------------------------------------------------------
-    */
-    'cache' => [
-        'default' => env('CACHE_DRIVER', 'file'),
-        'ttl' => 60, // minutes
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Logging
-    |--------------------------------------------------------------------------
-    */
-    'logging' => [
-        'channel' => env('LOG_CHANNEL', 'stack'),
-        'level' => env('LOG_LEVEL', 'debug'),
+        'allowed_images' => ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'docx'],
     ],
 
     /*
@@ -138,15 +107,4 @@ return [
     'realtime' => [
         'enabled' => env('REALTIME_ENABLED', false),
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Notifications / Email / SMS
-    |--------------------------------------------------------------------------
-    */
-    'notifications' => [
-        'from_email' => env('MAIL_FROM_ADDRESS', 'no-reply@myproject.com'),
-        'from_name' => env('MAIL_FROM_NAME', 'MyProject'),
-        'sms_provider' => env('SMS_PROVIDER', 'twilio'),
-    ]
 ];

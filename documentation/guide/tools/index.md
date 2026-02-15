@@ -496,7 +496,7 @@ Schema::create('users', function (Blueprint $table) {
 Always paginate list endpoints:
 
 ```
-GET /api/users?page=1&page_size=50
+GET /api/users?page=1&per_page=50
 ```
 
 ---

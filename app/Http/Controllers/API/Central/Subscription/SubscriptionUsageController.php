@@ -36,7 +36,7 @@ class SubscriptionUsageController extends BaseController
             ->through([OrderByFilter::class])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->pageSize, SubscriptionUsageResource::class));
+        return successResponse(wrapPaginate($query, SubscriptionUsageResource::class));
     }
 
     /**

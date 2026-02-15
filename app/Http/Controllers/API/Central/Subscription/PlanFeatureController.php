@@ -40,7 +40,7 @@ class PlanFeatureController extends BaseController
             ->thenReturn();
 
         return successResponse(
-            fetchData($query, $request->pageSize, PlanFeatureResource::class)
+            wrapPaginate($query, PlanFeatureResource::class)
         );
     }
 

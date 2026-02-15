@@ -17,8 +17,8 @@ class OrderByFilter
             $model = $query->getModel();
             $table = $model->getTable();
 
-            $sortColumn = $this->resolveSortColumn($table, request('sortColumn', 'id'));
-            $sortDirection = $this->resolveSortDirection(request('sortDirection'));
+            $sortColumn = $this->resolveSortColumn($table, request('sort_column', 'id'));
+            $sortDirection = $this->resolveSortDirection(request('sort_direction'));
 
             return $query->orderBy($sortColumn, $sortDirection);
 

@@ -41,7 +41,7 @@ Generated controllers mirror the hand-written ones in this codebase (see `UserCo
 
 - Authorize with policies (`Gate::authorize`).
 - Build queries through Laravel pipelines to layer filters.
-- Return `successResponse(fetchData(...))` for list endpoints and resources for single records.
+- Return `successResponse(wrapPaginate(...))` for list endpoints and resources for single records.
 - Support soft deletes when `--soft-delete` is passed (adds scopes in controllers and `SoftDeletes` in models).
 
 ## Useful flags

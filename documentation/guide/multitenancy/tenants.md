@@ -183,7 +183,7 @@ public function restore(): JsonResponse;
 ### List Tenants
 
 ```bash
-GET /api/central/tenants?pageSize=20&search=acme
+GET /api/central/tenants?per_page=20&search=acme
 
 Authorization: Bearer {admin_token}
 ```

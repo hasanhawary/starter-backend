@@ -11,7 +11,7 @@ class PageRequest extends BaseFormRequest
     {
         return [
             'page' => 'nullable|numeric|min:1',
-            'pageSize' => 'nullable|min:1',
+            'per_page' => 'nullable|min:1',
         ];
     }
 }

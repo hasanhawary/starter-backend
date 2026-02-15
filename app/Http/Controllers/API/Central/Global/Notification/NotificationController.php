@@ -20,7 +20,7 @@ class NotificationController extends BaseController
 
         $notifications = [
             'count' => $countQuery->whereNull('open_at')->count(),
-            'notifications' => fetchData($baseQuery->orderBy('created_at', 'desc'), request()->pageSize, NotificationResource::class)
+            'notifications' => wrapPaginate($baseQuery->orderBy('created_at', 'desc'),NotificationResource::class)
         ];
 
         return successResponse($notifications);

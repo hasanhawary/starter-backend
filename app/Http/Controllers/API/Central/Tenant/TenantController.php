@@ -54,7 +54,7 @@ class TenantController extends BaseController implements HasMiddleware
             ->through([TenantFilter::class, ActiveFilter::class, TrashedFilter::class, OrderByFilter::class])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->pageSize, TenantResource::class));
+        return successResponse(wrapPaginate($query, TenantResource::class));
     }
 
     /**

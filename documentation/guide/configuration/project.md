@@ -166,11 +166,11 @@ Set to `null` in production to generate random OTPs.
 ],
 ```
 
-Used by the `fetchData()` helper:
+Used by the `wrapPaginate()` helper:
 
 ```php
 // In controllers
-return successResponse(fetchData($query, $request->pageSize, UserResource::class));
+return successResponse(wrapPaginate($query, UserResource::class));
 ```
 
 ## Real-time Configuration
