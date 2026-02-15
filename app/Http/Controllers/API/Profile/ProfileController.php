@@ -7,6 +7,7 @@ use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\Auth\SessionResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
+use App\Services\Global\UserSettingService;
 use Exception;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
@@ -31,9 +32,14 @@ class ProfileController extends BaseController
         // Include all active tokens/sessions
         $sessions = $user->tokens()->get(['id', 'name', 'last_used_at', 'created_at']);
 
+        // Include user settings
+        $settingService = new UserSettingService($user);
+        $settings = $settingService->all();
+
         return successResponse([
             'user' => new UserResource($user),
             'sessions' => SessionResource::collection($sessions),
+            'settings' => $settings,
         ]);
     }
 

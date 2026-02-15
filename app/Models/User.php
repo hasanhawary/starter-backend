@@ -99,4 +99,9 @@ class User extends Authenticatable implements LdapAuthenticatable
     {
         return $this->belongsTo(Country::class, 'phone_code_id');
     }
+
+    public function userSettings()
+    {
+        return $this->hasMany(UserSetting::class);
+    }
 }

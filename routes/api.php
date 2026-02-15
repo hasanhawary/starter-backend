@@ -15,6 +15,7 @@ use App\Http\Controllers\API\Global\Report\ReportController;
 use App\Http\Controllers\API\Global\Setting\SettingController;
 use App\Http\Controllers\API\Global\Setting\TestCredentialsController;
 use App\Http\Controllers\API\Profile\ProfileController;
+use App\Http\Controllers\API\Profile\SettingController as ProfileSettingController;
 use App\Http\Controllers\API\User\PermissionController;
 use App\Http\Controllers\API\User\RoleController;
 use App\Http\Controllers\API\User\UserController;

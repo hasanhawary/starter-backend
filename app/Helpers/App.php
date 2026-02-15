@@ -260,6 +260,31 @@ if (!function_exists('detectModelPath')) {
     }
 }
 
+//Old Way
+if (!function_exists('fetchData')) {
+    function fetchData(Builder $query, string|int|null $pageSize = null, $resource = null, $meta = [])
+    {
+        if ($pageSize && (int)$pageSize !== -1) {
+            $data = $query->paginate($pageSize);
+
+            if ($resource) {
+                $data->data = $resource::collection($data);
+            }
+        } else {
+            $data = $resource ? $resource::collection($query->get()) : $query->get();
+        }
+
+        if (count($meta)) {
+            $data = [
+                'data' => $data,
+                ...$meta,
+            ];
+        }
+
+        return $data;
+    }
+}
+
 if (!function_exists('wrapPaginate')) {
     function wrapPaginate(Builder $query, $resource = null, $meta = [])
     {
