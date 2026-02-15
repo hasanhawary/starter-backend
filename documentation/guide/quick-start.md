@@ -183,7 +183,7 @@ curl -X POST http://starter-backend.test/api/chunk-file \
 Fetch user notifications with pagination.
 
 ```bash
-curl "http://starter-backend.test/api/notifications?page_size=10" \
+curl "http://starter-backend.test/api/notifications?per_page=10" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 

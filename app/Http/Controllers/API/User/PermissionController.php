@@ -47,7 +47,7 @@ class PermissionController extends BaseController implements HasMiddleware
             ->through([JsonDisplayNameFilter::class, OrderByFilter::class])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->pageSize, PermissionResource::class));
+        return successResponse(wrapPaginate($query, PermissionResource::class));
     }
 
     /**

@@ -14,12 +14,11 @@ use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class ActivityLogController extends BaseController implements HasMiddleware
-{
+class ActivityLogController extends BaseController implements HasMiddleware  {
     public static function middleware(): array
     {
         return [
-            new Middleware(PermissionMiddleware::using('read-log'), only: ['index','show']),
+            new Middleware(PermissionMiddleware::using('read-log'), only: ['index', 'show']),
         ];
     }
 
@@ -37,7 +36,7 @@ class ActivityLogController extends BaseController implements HasMiddleware
             ])
             ->thenReturn();
 
-        return successResponse(fetchData($query, $request->input('pageSize'), ActivityLogResource::class));
+        return successResponse(wrapPaginate($query, ActivityLogResource::class));
     }
 
     /**

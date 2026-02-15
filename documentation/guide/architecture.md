@@ -260,7 +260,7 @@ return failResponse(__('api.error'), [], 400);
 // Returns: { "status": false, "code": 400, "message": "...", "data": [] }
 
 // Paginated data
-return successResponse(fetchData($query, $request->pageSize, UserResource::class));
+return successResponse(wrapPaginate($query, UserResource::class));
 ```
 
 ::: warning

@@ -177,7 +177,7 @@ dispatch(new SendEmailJob($users, [
 ### List Notifications
 
 ```bash
-GET /api/notifications?pageSize=20
+GET /api/notifications?per_page=20
 Authorization: Bearer {token}
 ```
 

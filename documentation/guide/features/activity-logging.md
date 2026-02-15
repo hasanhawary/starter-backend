@@ -50,5 +50,5 @@ public function getActivitylogOptions(): LogOptions
 ## Querying Activity
 
 ```bash
-GET /api/get-activity-logs?page=1&page_size=20&subject_type=User&subject_id=123
+GET /api/get-activity-logs?page=1&per_page=20&subject_type=User&subject_id=123
 ```

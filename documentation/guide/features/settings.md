@@ -227,7 +227,7 @@ public function index(Request $request)
         ])
         ->thenReturn();
 
-    return successResponse(fetchData($query, $request->pageSize, SettingResource::class));
+    return successResponse(wrapPaginate($query, SettingResource::class));
 }
 ```
 

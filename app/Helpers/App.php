@@ -239,26 +239,6 @@ if (!function_exists('resolveEmptyToNull')) {
 | App Global Methods
 |--------------------------------------------------------------------------
 */
-if (!function_exists('dateFormat')) {
-    function dateFormat($date, $format = 'j F Y'): string
-    {
-        return !is_numeric($date)
-            ? Jenssegers\Date\Date::parse("2024-01-01")
-            : '----';
-    }
-}
-
-if (!function_exists('timeFormat')) {
-    function timeFormat($time): ?string
-    {
-        if ($time === null) {
-            return null;
-        }
-
-        return Jenssegers\Date\Date::parse($time)->format('h:i a');
-    }
-}
-
 if (!function_exists('getModelKey')) {
     function getModelKey(?string $className = null, $trans = false): ?string
     {
@@ -280,11 +260,13 @@ if (!function_exists('detectModelPath')) {
     }
 }
 
-if (!function_exists('fetchData')) {
-    function fetchData(Builder $query, string|int|null $pageSize = null, $resource = null, $meta = [])
+if (!function_exists('wrapPaginate')) {
+    function wrapPaginate(Builder $query, $resource = null, $meta = [])
     {
-        if ($pageSize && (int)$pageSize !== -1) {
-            $data = $query->paginate($pageSize);
+        $perPage = request('per_page', config('project.pagination.per_page'));
+
+        if ($perPage && (int)$perPage !== -1) {
+            $data = $query->paginate($perPage);
 
             if ($resource) {
                 $data->data = $resource::collection($data);
@@ -410,10 +392,6 @@ if (!function_exists('transWithParams')) {
 }
 
 if (!function_exists('emailTrans')) {
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     function emailTrans(?string $data, array $params = []): ?string
     {
         return transWithParams(
