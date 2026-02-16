@@ -27,16 +27,6 @@ class NotificationEvent implements ShouldBroadcast
         return [new Channel("notification.user.$this->user_id")];
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return string
-     */
-    public function broadcastAs(): string
-    {
-        return 'notification.event';
-    }
-
     public function broadcastWith(): array
     {
         return [

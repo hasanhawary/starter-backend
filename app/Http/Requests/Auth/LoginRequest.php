@@ -13,6 +13,7 @@ class LoginRequest extends BaseFormRequest
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
             'otp' => [shouldVerifyOtp('user') ? 'required' : 'nullable', 'string'],
+            'meta' => ['nullable', 'array'],
         ];
     }
 

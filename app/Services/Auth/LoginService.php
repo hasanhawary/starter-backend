@@ -52,7 +52,7 @@ class LoginService extends BaseAuthService
 
         return [
             'user' => $user,
-            'token' => $user->createToken($this->getGuard())->plainTextToken,
+            'token' => $this->createUserToken($user, $data['meta'] ?? []),
         ];
     }
 
@@ -165,4 +165,33 @@ class LoginService extends BaseAuthService
             ->setModel($this->model)
             ->verify(new VerifyOtpRequest($data), OtpTypeEnum::Login->value);
     }
+
+    protected function createUserToken($user, array $meta = []): string
+    {
+        $token = $user->createToken($this->getGuard());
+
+        if (!empty($meta)) {
+            $token->accessToken->update([
+                'meta' => [
+                    'device' => [
+                        'os'      => data_get($meta, 'userAgent.os'),
+                        'browser' => data_get($meta, 'userAgent.browser'),
+                        'type'    => data_get($meta, 'userAgent.device'),
+                    ],
+                    'platform' => $meta['platform'] ?? null,
+                    'timezone' => $meta['timezone'] ?? null,
+                    'language' => $meta['language'] ?? null,
+                    'screen' => [
+                        'width'  => data_get($meta, 'screen.width'),
+                        'height' => data_get($meta, 'screen.height'),
+                    ],
+                    'ip' => request()->ip(),
+                    'ua' => request()->userAgent(),
+                ],
+            ]);
+        }
+
+        return $token->plainTextToken;
+    }
+
 }

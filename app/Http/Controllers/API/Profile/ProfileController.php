@@ -29,11 +29,11 @@ class ProfileController extends BaseController
         }
 
         // Include all active tokens/sessions
-        $sessions = $user->tokens()->get(['id', 'name', 'last_used_at', 'created_at']);
+        $sessions = $user->tokens()->select('id', 'meta')->get();
 
         return successResponse([
+            'sessions' => SessionResource::collection($sessions),
             'user' => new UserResource($user),
-            'sessions' => SessionResource::collection($sessions)
         ]);
     }
 
@@ -47,7 +47,7 @@ class ProfileController extends BaseController
     {
         $user = auth()->user();
         $data = Arr::except(array_filter($request->validated(), fn($value) => $value !== null), 'avatar');
-        $data['avatar'] = Media::replace($user->avatar)->upload($request->file('avatar'),'users');
+        $data['avatar'] = Media::replace($user->avatar)->upload($request->file('avatar'), 'users');
 
         $user->update($data);
 

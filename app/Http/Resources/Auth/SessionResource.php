@@ -15,12 +15,20 @@ class SessionResource extends JsonResource
      */
     public function toArray($request): array
     {
+        $meta = $this->meta ?? [];
+
         return [
             'id' => $this->id,
             'name' => $this->name ?? 'Unknown',
-            'ip_address' => $this->ip_address ?? null,
-            'last_used_at' => $this->last_used_at ? $this->last_used_at->format('Y-m-d H:i:s') : null,
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'ip_address' => $meta['ip'] ?? null,
+            'user_agent' => $meta['ua'] ?? null,
+            'last_used_at' => $this->last_used_at,
+            'created_at' => $this->created_at,
+            'device' => $meta['device'] ?? null,
+            'platform' => $meta['platform'] ?? null,
+            'timezone' => $meta['timezone'] ?? null,
+            'language' => $meta['language'] ?? null,
+            'screen' => $meta['screen'] ?? null,
         ];
     }
 }
