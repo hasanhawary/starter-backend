@@ -9,11 +9,12 @@ class NotificationResource extends JsonResource
     public function toArray($request): array
     {
         return [
+            'uuid' => $this->id,
             'id' => @$this->data['id'],
             'type' => @$this->data['type'],
             'url' => @$this->data['url'],
-            'title' => transWithParams(@$this->data['title']),
-            'message' => transWithParams(@$this->data['message']),
+            'title'   => strip_tags(emailTrans($this->data['title'] ?? '')),
+            'message' => strip_tags(emailTrans($this->data['message'] ?? '')),
             'read_at' => $this->read_at,
             'open_at' => $this->open_at,
             'created_at' => $this->created_at,

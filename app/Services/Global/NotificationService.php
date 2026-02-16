@@ -29,7 +29,6 @@ class NotificationService
                     default => null,
                 };
             } catch (\Exception | \Error $exception) {
-                dd($exception);
                 logError($exception);
             }
         }

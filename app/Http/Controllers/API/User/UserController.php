@@ -133,7 +133,9 @@ class UserController extends BaseController
                 $user->getFullPhone(),
                 (string)$request->password,
                 now()->format('Y-m-d H:i')
-            )
+            ),
+            'id' => $user->id,
+            'type' => 'user'
         ], ['email', 'realtime', 'notify']);
     }
 }

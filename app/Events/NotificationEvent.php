@@ -40,10 +40,10 @@ class NotificationEvent implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'id' => $this->data["id"] ?? null,
-            'type' => $this->data["type"] ?? null,
-            'title' => !empty($this->data["title"]) ? transWithParams($this->data["title"]) : '',
-            'message' => !empty($this->data["msg"]) ? transWithParams($this->data["msg"]) : '',
+            'id' => $this->data['id'] ?? null,
+            'type' => $this->data['type'] ?? null,
+            'title' => !empty($this->data['title']) ? transWithParams($this->data['title']) : '',
+            'message' => !empty($this->data['msg']) ? transWithParams($this->data['msg']) : '',
             'created_at' => now()
         ];
     }

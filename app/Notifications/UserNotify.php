@@ -35,10 +35,10 @@ class UserNotify extends Notification
     public function toDatabase(): array
     {
         return [
-            'title' => $this->data['title'] ?? '',
-            'message' => $this->data['msg'] ?? '',
             'id' => $this->data['id'] ?? '',
             'type' => $this->data['type'] ?? '',
+            'title' => $this->data['title'] ?? '',
+            'message' => $this->data['msg'] ?? '',
         ];
     }
 }

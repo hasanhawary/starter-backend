@@ -61,6 +61,7 @@ return [
         'lockout_time' => 180, // seconds
         'default_role' => 'default_role',
         'default_phone_code_id' => 1,
+        'strong_password' => config('STRONG_PASSWORD', false),
     ],
 
     /*
