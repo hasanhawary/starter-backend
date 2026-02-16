@@ -19,7 +19,6 @@ class SessionResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'name' => $this->name ?? 'Unknown',
             'ip_address' => $meta['ip'] ?? null,
             'user_agent' => $meta['ua'] ?? null,
             'last_used_at' => $this->last_used_at,
