@@ -118,9 +118,9 @@ class UserController extends BaseController
     private function sendCredentials(User $user, UserRequest $request, bool $isCreate = true): void
     {
         // Skip update if nothing changed
-        if (!$isCreate && !($user->isDirty('email') || $user->isDirty('password'))) {
-            return;
-        }
+        // if (!$isCreate && !($user->isDirty('email') || $user->isDirty('password'))) {
+        //     return;
+        // }
 
         $user->sendNotification([
             'title' => $isCreate ? 'create_admin_data_title' : 'update_admin_data_title',
@@ -134,7 +134,6 @@ class UserController extends BaseController
                 (string)$request->password,
                 now()->format('Y-m-d H:i')
             )
-        ], ['email']);
+        ], ['email', 'realtime', 'notify']);
     }
-
 }

@@ -46,6 +46,7 @@ class UserRequest extends BaseFormRequest
             ],
 
             'password' => [
+                'sometimes',
                 'required',
                 'confirmed',
                 'min:8'

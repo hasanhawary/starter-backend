@@ -28,8 +28,8 @@ class NotificationService
                     'sms' => self::sendSMS($user, $data),
                     default => null,
                 };
-
-            } catch (\Exception|\Error $exception) {
+            } catch (\Exception | \Error $exception) {
+                dd($exception);
                 logError($exception);
             }
         }
@@ -76,7 +76,7 @@ class NotificationService
      */
     private static function sendRealtimeNotification(Authenticatable $user, array $data): void
     {
-        if (config('project.realtime.enable')) {
+        if (config('project.realtime.enabled')) {
             event(new NotificationEvent($user->id, $data));
         }
     }

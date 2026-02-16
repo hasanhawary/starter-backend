@@ -105,6 +105,6 @@ return [
     |--------------------------------------------------------------------------
     */
     'realtime' => [
-        'enabled' => env('REALTIME_ENABLED', false),
+        'enabled' => env('REALTIME_ENABLED', true),
     ],
 ];
