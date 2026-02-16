@@ -5,6 +5,7 @@ namespace App\Tools\Export;
 use App\Enum\User\UserGenderEnum;
 use App\Models\User;
 use HasanHawary\ExportBuilder\BaseExport;
+use Illuminate\Support\Arr;
 
 class UserExport extends BaseExport
 {

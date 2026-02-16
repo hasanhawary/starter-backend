@@ -48,9 +48,9 @@ return [
                 ['key' => 'muted_color', 'type' => 'text', 'label' => ['ar' => 'لون النص الثانوي', 'en' => 'Muted color'], 'placeholder' => ['ar' => 'مثال: #999999', 'en' => 'Example: #999999'], 'is_multi_lang' => false],
             ],
             'font' => [
-                ['key' => 'font_family_ar', 'type' => 'select', 'label' => ['ar' => 'خط عربي', 'en' => 'Arabic font'], 'placeholder' => ['ar' => 'اختر خط عربي', 'en' => 'Select Arabic font'], 'is_multi_lang' => true],
-                ['key' => 'font_family_en', 'type' => 'select', 'label' => ['ar' => 'خط انجليزي', 'en' => 'English font'], 'placeholder' => ['ar' => 'اختر خط انجليزي', 'en' => 'Select English font'], 'is_multi_lang' => true],
-                ['key' => 'font_size', 'type' => 'select', 'label' => ['ar' => 'حجم الخط', 'en' => 'Font size'], 'placeholder' => ['ar' => 'اختر حجم الخط', 'en' => 'Select font size'], 'is_multi_lang' => false],
+                ['key' => 'font_family_ar', 'type' => 'text', 'label' => ['ar' => 'خط عربي', 'en' => 'Arabic font'], 'placeholder' => ['ar' => 'اكتب خط عربي', 'en' => 'Write Arabic font'], 'is_multi_lang' => true],
+                ['key' => 'font_family_en', 'type' => 'text', 'label' => ['ar' => 'خط انجليزي', 'en' => 'English font'], 'placeholder' => ['ar' => 'اكتب خط انجليزي', 'en' => 'Write English font'], 'is_multi_lang' => true],
+                ['key' => 'font_size', 'type' => 'text', 'label' => ['ar' => 'حجم الخط', 'en' => 'Font size'], 'placeholder' => ['ar' => 'اكتب حجم الخط', 'en' => 'Write font size'], 'is_multi_lang' => false],
             ],
         ],
 
@@ -74,24 +74,24 @@ return [
 
         'config' => [
             'mail' => [
-                ['key' => 'mailer', 'type' => 'select', 'label' => ['ar' => 'نوع البريد', 'en' => 'Mail driver'], 'placeholder' => ['ar' => 'الخيارات: smtp, sendmail, mailgun, ses, postmark, resend', 'en' => 'Options: smtp, sendmail, mailgun, ses, postmark, resend'], 'is_multi_lang' => false],
+                ['key' => 'mailer', 'type' => 'text', 'label' => ['ar' => 'نوع البريد', 'en' => 'Mail driver'], 'placeholder' => ['ar' => 'الخيارات: smtp, sendmail, mailgun, ses, postmark, resend', 'en' => 'Options: smtp, sendmail, mailgun, ses, postmark, resend'], 'is_multi_lang' => false],
                 ['key' => 'host', 'type' => 'text', 'label' => ['ar' => 'خادم البريد', 'en' => 'Mail host'], 'placeholder' => ['ar' => 'مثال: smtp.gmail.com, smtp.office365.com', 'en' => 'Example: smtp.gmail.com, smtp.office365.com'], 'is_multi_lang' => false],
-                ['key' => 'port', 'type' => 'select', 'label' => ['ar' => 'منفذ البريد', 'en' => 'Mail port'], 'placeholder' => ['ar' => 'الخيارات: 25, 465, 587, 2525', 'en' => 'Options: 25, 465, 587, 2525'], 'is_multi_lang' => false],
+                ['key' => 'port', 'type' => 'text', 'label' => ['ar' => 'منفذ البريد', 'en' => 'Mail port'], 'placeholder' => ['ar' => 'الخيارات: 25, 465, 587, 2525', 'en' => 'Options: 25, 465, 587, 2525'], 'is_multi_lang' => false],
                 ['key' => 'username', 'type' => 'text', 'label' => ['ar' => 'اسم المستخدم', 'en' => 'Mail username'], 'placeholder' => ['ar' => 'مثال: your-email@gmail.com', 'en' => 'Example: your-email@gmail.com'], 'is_multi_lang' => false],
                 ['key' => 'password', 'type' => 'text', 'label' => ['ar' => 'كلمة المرور', 'en' => 'Mail password'], 'placeholder' => ['ar' => 'مثال: your-app-password', 'en' => 'Example: your-app-password'], 'is_multi_lang' => false],
-                ['key' => 'encryption', 'type' => 'select', 'label' => ['ar' => 'نوع التشفير', 'en' => 'Mail encryption'], 'placeholder' => ['ar' => 'الخيارات: null, tls, ssl', 'en' => 'Options: null, tls, ssl'], 'is_multi_lang' => false],
+                ['key' => 'encryption', 'type' => 'text', 'label' => ['ar' => 'نوع التشفير', 'en' => 'Mail encryption'], 'placeholder' => ['ar' => 'الخيارات: null, tls, ssl', 'en' => 'Options: null, tls, ssl'], 'is_multi_lang' => false],
                 ['key' => 'from_address', 'type' => 'text', 'label' => ['ar' => 'البريد المرسل', 'en' => 'From address'], 'placeholder' => ['ar' => 'مثال: noreply@example.com', 'en' => 'Example: noreply@example.com'], 'is_multi_lang' => false],
                 ['key' => 'from_name', 'type' => 'text', 'label' => ['ar' => 'اسم المرسل', 'en' => 'From name'], 'placeholder' => ['ar' => 'مثال: اسم الشركة', 'en' => 'Example: Company name'], 'is_multi_lang' => true],
             ],
             'sms' => [
-                ['key' => 'gateway', 'type' => 'select', 'label' => ['ar' => 'بوابة الرسائل', 'en' => 'SMS gateway'], 'placeholder' => ['ar' => 'الخيارات: twilio, nexmo, aws-sns, custom', 'en' => 'Options: twilio, nexmo, aws-sns, custom'], 'is_multi_lang' => false],
+                ['key' => 'gateway', 'type' => 'text', 'label' => ['ar' => 'بوابة الرسائل', 'en' => 'SMS gateway'], 'placeholder' => ['ar' => 'الخيارات: twilio, nexmo, aws-sns, custom', 'en' => 'Options: twilio, nexmo, aws-sns, custom'], 'is_multi_lang' => false],
                 ['key' => 'username', 'type' => 'text', 'label' => ['ar' => 'اسم المستخدم', 'en' => 'Username'], 'placeholder' => ['ar' => 'مثال: your-account-sid', 'en' => 'Example: your-account-sid'], 'is_multi_lang' => false],
                 ['key' => 'password', 'type' => 'text', 'label' => ['ar' => 'كلمة المرور', 'en' => 'Password'], 'placeholder' => ['ar' => 'مثال: your-auth-token', 'en' => 'Example: your-auth-token'], 'is_multi_lang' => false],
                 ['key' => 'sender_id', 'type' => 'text', 'label' => ['ar' => 'اسم المرسل', 'en' => 'Sender ID'], 'placeholder' => ['ar' => 'مثال: YourBrand أو 1234567890', 'en' => 'Example: YourBrand or 1234567890'], 'is_multi_lang' => false],
             ],
             'ldap' => [
                 ['key' => 'host', 'type' => 'text', 'label' => ['ar' => 'خادم LDAP', 'en' => 'LDAP host'], 'placeholder' => ['ar' => 'مثال: ldap.example.com', 'en' => 'Example: ldap.example.com'], 'is_multi_lang' => false],
-                ['key' => 'port', 'type' => 'select', 'label' => ['ar' => 'منفذ LDAP', 'en' => 'LDAP port'], 'placeholder' => ['ar' => 'الخيارات: 389 (عادي), 636 (SSL)', 'en' => 'Options: 389 (standard), 636 (SSL)'], 'is_multi_lang' => false],
+                ['key' => 'port', 'type' => 'text', 'label' => ['ar' => 'منفذ LDAP', 'en' => 'LDAP port'], 'placeholder' => ['ar' => 'الخيارات: 389 (عادي), 636 (SSL)', 'en' => 'Options: 389 (standard), 636 (SSL)'], 'is_multi_lang' => false],
                 ['key' => 'base_dn', 'type' => 'text', 'label' => ['ar' => 'LDAP Base DN', 'en' => 'LDAP Base DN'], 'placeholder' => ['ar' => 'مثال: dc=example,dc=com', 'en' => 'Example: dc=example,dc=com'], 'is_multi_lang' => false],
                 ['key' => 'username', 'type' => 'text', 'label' => ['ar' => 'اسم المستخدم', 'en' => 'LDAP username'], 'placeholder' => ['ar' => 'مثال: cn=admin,dc=example,dc=com', 'en' => 'Example: cn=admin,dc=example,dc=com'], 'is_multi_lang' => false],
                 ['key' => 'password', 'type' => 'text', 'label' => ['ar' => 'كلمة المرور', 'en' => 'LDAP password'], 'placeholder' => ['ar' => 'مثال: ldap-password', 'en' => 'Example: ldap-password'], 'is_multi_lang' => false],
@@ -102,8 +102,8 @@ return [
                 ['key' => 'app_key', 'type' => 'text', 'label' => ['ar' => 'مفتاح التطبيق', 'en' => 'App Key'], 'placeholder' => ['ar' => 'مثال: bae3160ce349d284eace', 'en' => 'Example: bae3160ce349d284eace'], 'is_multi_lang' => false],
                 ['key' => 'app_secret', 'type' => 'text', 'label' => ['ar' => 'سر التطبيق', 'en' => 'App Secret'], 'placeholder' => ['ar' => 'مثال: 976e5b64127df42af8b6', 'en' => 'Example: 976e5b64127df42af8b6'], 'is_multi_lang' => false],
                 ['key' => 'host', 'type' => 'text', 'label' => ['ar' => 'المضيف', 'en' => 'Host'], 'placeholder' => ['ar' => 'مثال: reverb.example.com أو localhost', 'en' => 'Example: reverb.example.com or localhost'], 'is_multi_lang' => false],
-                ['key' => 'port', 'type' => 'select', 'label' => ['ar' => 'المنفذ', 'en' => 'Port'], 'placeholder' => ['ar' => 'الخيارات: 8080, 9000, 3000', 'en' => 'Options: 8080, 9000, 3000'], 'is_multi_lang' => false],
-                ['key' => 'scheme', 'type' => 'select', 'label' => ['ar' => 'البروتوكول', 'en' => 'Scheme'], 'placeholder' => ['ar' => 'الخيارات: http, https, ws, wss', 'en' => 'Options: http, https, ws, wss'], 'is_multi_lang' => false],
+                ['key' => 'port', 'type' => 'text', 'label' => ['ar' => 'المنفذ', 'en' => 'Port'], 'placeholder' => ['ar' => 'الخيارات: 8080, 9000, 3000', 'en' => 'Options: 8080, 9000, 3000'], 'is_multi_lang' => false],
+                ['key' => 'scheme', 'type' => 'text', 'label' => ['ar' => 'البروتوكول', 'en' => 'Scheme'], 'placeholder' => ['ar' => 'الخيارات: http, https, ws, wss', 'en' => 'Options: http, https, ws, wss'], 'is_multi_lang' => false],
             ],
         ]
     ]

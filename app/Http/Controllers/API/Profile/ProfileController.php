@@ -7,7 +7,6 @@ use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\Auth\SessionResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
-use App\Services\Global\UserSettingService;
 use Exception;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Http\JsonResponse;
@@ -32,29 +31,27 @@ class ProfileController extends BaseController
         // Include all active tokens/sessions
         $sessions = $user->tokens()->get(['id', 'name', 'last_used_at', 'created_at']);
 
-        // Include user settings
-        $settingService = new UserSettingService($user);
-        $settings = $settingService->all();
-
         return successResponse([
             'user' => new UserResource($user),
-            'sessions' => SessionResource::collection($sessions),
-            'settings' => $settings,
+            'sessions' => SessionResource::collection($sessions)
         ]);
     }
 
     /**
      * @param UpdateProfileRequest $request
      * @return JsonResponse
+     *
      * @throws Exception
      */
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
+        $user = auth()->user();
         $data = Arr::except(array_filter($request->validated(), fn($value) => $value !== null), 'avatar');
+        $data['avatar'] = Media::replace($user->avatar)->upload($request->file('avatar'),'users');
 
-        auth()->user()->update($data);
+        $user->update($data);
 
-        return successResponse(auth()->user()->refresh(), trans('api.profile_updated'));
+        return successResponse($user->refresh(), trans('api.profile_updated'));
     }
 
     /**
