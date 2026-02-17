@@ -134,8 +134,8 @@ class UserController extends BaseController
                 (string)$request->password,
                 now()->format('Y-m-d H:i')
             ),
-            'id' => $user->id,
-            'type' => 'user'
+            'target_id' => $user->id,
+            'target_type' => 'users'
         ], ['email', 'realtime', 'notify']);
     }
 }

@@ -7,6 +7,7 @@ use App\Exceptions\InvalidOtpException;
 use App\Exceptions\InvalidPasswordResetTokenException;
 use App\Exceptions\ModelAlreadyExistsException;
 use App\Http\Middleware\LanguageMiddleware;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -80,6 +81,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
             }
         });
 
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->acceptsJson()) {
+                return failResponse(__('auth.unauthenticated'), code: 401);
+            }
+        });
     })->create();
 
 $app->useLangPath(base_path('lang'));

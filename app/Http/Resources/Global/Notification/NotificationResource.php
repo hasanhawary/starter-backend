@@ -9,9 +9,9 @@ class NotificationResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'uuid' => $this->id,
-            'id' => @$this->data['id'],
-            'type' => @$this->data['type'],
+            'id' => $this->id,
+            'target_id' => @$this->data['target_id'],
+            'target_type' => @$this->data['target_type'],
             'url' => @$this->data['url'],
             'title'   => strip_tags(emailTrans($this->data['title'] ?? '')),
             'message' => strip_tags(emailTrans($this->data['message'] ?? '')),
