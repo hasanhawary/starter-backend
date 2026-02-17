@@ -31,7 +31,7 @@ Route::prefix('captcha')->group(function () {
     Route::post('/verify', [CaptchaController::class, 'verifyCaptcha']);
 });
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:user', 'ability:user'])->group(function () {
     /*
     |--------------------------------------------------------------------------
     | Global Routes

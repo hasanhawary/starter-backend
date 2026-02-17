@@ -373,7 +373,7 @@ Gets the currently authenticated guard name.
 function getCurrentGuard(): int|string|null
 
 // Usage
-$guard = getCurrentGuard();  // Returns 'api', 'web', etc.
+$guard = getCurrentGuard();  // Returns 'user', 'web', etc.
 ```
 
 ### shouldVerifyOtp

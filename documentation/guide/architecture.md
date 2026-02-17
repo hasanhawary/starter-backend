@@ -122,7 +122,7 @@ public function __construct(
 public function login(LoginRequest $request): JsonResponse
 {
     $user = $this->loginService
-        ->setGuard('api')
+        ->setGuard('user')
         ->setModel(User::class)
         ->attempt($request->validated());
     
@@ -168,7 +168,7 @@ Token-based API authentication using Laravel Sanctum:
 
 ```php
 // Login returns a token
-$token = $user->createToken('api')->plainTextToken;
+$token = $user->createToken('user')->plainTextToken;
 
 // Requests use: Authorization: Bearer <token>
 // Middleware: auth:sanctum
@@ -349,7 +349,7 @@ class User extends Authenticatable implements LdapAuthenticatable
     use SoftDeletes, AuthenticatesWithLdap, HasApiTokens, HasRoles;
     use LogsActivityOptions, CreatedByObserver, ApplyNotification;
 
-    protected string $guard_name = 'api';
+    protected string $guard_name = 'user';
     
     public bool $inPermission = true;
     public array $basicOperations = ['create', 'update', 'delete'];

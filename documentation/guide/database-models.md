@@ -114,13 +114,13 @@ The Role model represents user roles with permissions.
 
 ### Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | integer | Primary key |
-| `name` | json | Role name (translatable) |
-| `guard_name` | string | Guard name (default: 'api') |
-| `created_at` | timestamp | Creation timestamp |
-| `updated_at` | timestamp | Last update timestamp |
+| Property | Type | Description                  |
+|----------|------|------------------------------|
+| `id` | integer | Primary key                  |
+| `name` | json | Role name (translatable)     |
+| `guard_name` | string | Guard name (default: 'user') |
+| `created_at` | timestamp | Creation timestamp           |
+| `updated_at` | timestamp | Last update timestamp        |
 
 ### Relationships
 
@@ -140,7 +140,7 @@ use App\Models\Role;
 // Create a role
 $role = Role::create([
     'name' => ['en' => 'Administrator', 'ar' => 'مسؤول'],
-    'guard_name' => 'api',
+    'guard_name' => 'user',
 ]);
 
 // Find role by name
@@ -172,13 +172,13 @@ The Permission model represents system permissions.
 
 ### Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | integer | Primary key |
+| Property | Type | Description                    |
+|----------|------|--------------------------------|
+| `id` | integer | Primary key                    |
 | `name` | json | Permission name (translatable) |
-| `guard_name` | string | Guard name (default: 'api') |
-| `created_at` | timestamp | Creation timestamp |
-| `updated_at` | timestamp | Last update timestamp |
+| `guard_name` | string | Guard name (default: 'user')   |
+| `created_at` | timestamp | Creation timestamp             |
+| `updated_at` | timestamp | Last update timestamp          |
 
 ### Relationships
 
@@ -198,7 +198,7 @@ use App\Models\Permission;
 // Create a permission
 $permission = Permission::create([
     'name' => ['en' => 'Create Users', 'ar' => 'إنشاء المستخدمين'],
-    'guard_name' => 'api',
+    'guard_name' => 'user',
 ]);
 
 // Find permission by name

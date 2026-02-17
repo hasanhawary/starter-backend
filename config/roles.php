@@ -36,7 +36,7 @@ return [
 	 | permissions. This guard will be used when checking user permissions
 	 | and roles throughout your application.
 	 |
-	 | Example: 'web', 'api', 'admin'
+	 | Example: 'web', 'user', 'admin'
 	 |
 	 */
 	'default_guard' => 'sanctum',

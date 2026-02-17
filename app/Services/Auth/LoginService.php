@@ -52,7 +52,7 @@ class LoginService extends BaseAuthService
 
         return [
             'user' => $user,
-            'token' => $user->createToken($this->getGuard())->plainTextToken,
+            'token' => $user->createToken($this->getGuard(), [$this->getGuard()])->plainTextToken,
         ];
     }
 

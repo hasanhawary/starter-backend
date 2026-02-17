@@ -45,7 +45,7 @@ Route::prefix('admin')->group(function () {
     Route::post('check-otp', [OTPController::class, 'check']);
     Route::post('verify-otp', [OTPController::class, 'verify']);
 
-    Route::middleware(['auth:sanctum'])->group(function () {
+    Route::middleware(['auth:admin', 'ability:admin'])->group(function () {
         /*
        |--------------------------------------------------------------------------
        | Profile Routes

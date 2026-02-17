@@ -17,7 +17,7 @@ class ActivityLogResource extends JsonResource
             'type' => resolveTrans(prepareModelType($this->subject_type)),
             'message' => $this->resolveMessage(),
             'event_key' => $this->event,
-            'event' => resolveTrans($this->event, 'api'),
+            'event' => resolveTrans($this->event),
             'subject_type_key' => getModelKey($this->subject_type),
             'properties' => collect($this->properties)->map(function ($property) {
                 return collect($property)->map(function ($value, $key) {
@@ -41,7 +41,7 @@ class ActivityLogResource extends JsonResource
 
         return resolveTrans('done', 'attributes')
             . ' ' . trans('attributes.' . $this->description)
-            . ' ' . resolveTrans(getModelKey($this->subject_type), 'api')
+            . ' ' . resolveTrans(getModelKey($this->subject_type))
             . ' ' . resolveTrans('id', 'attributes') . ' ' . $this->subject?->id
             . ' ' . resolveTrans('causer', 'attributes') . ' ' . $causerName;
     }

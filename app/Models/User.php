@@ -25,7 +25,7 @@ class User extends Authenticatable implements LdapAuthenticatable
 {
     use HasFactory, SoftDeletes, AuthenticatesWithLdap, UserScopes, ApplyNotification, CreatedByObserver, Notifiable, HasApiTokens, HasRoles, InteractsWithSockets, LogsActivityOptions;
 
-    protected string $guard_name = 'api';
+    protected string $guard_name = 'user';
     public bool $inPermission = true;
     public array $basicOperations = ['create', 'update', 'delete'];
     public array $specialOperations = ['view-all', 'view-own', 'restore', 'force-delete', 'toggle-active'];

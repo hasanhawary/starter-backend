@@ -686,11 +686,11 @@ if (!function_exists('detectGuard')) {
 
         // Landing API routes - use api guard for users
         if (request()->is('api/*')) {
-            return 'api'; // Landing routes use api guard for users
+            return 'user'; // Landing routes use api guard for users
         }
 
         // Fallback
-        return config('auth.defaults.guard', 'web');
+        return config('auth.defaults.guard', 'user');
     }
 }
 
@@ -703,7 +703,7 @@ if (!function_exists('detectPermissionGuard')) {
     function detectPermissionGuard(): string
     {
         return match (detectGuard()) {
-            'api' => 'sanctum', // API uses sanctum
+            'user' => 'sanctum', // API uses sanctum
             default => detectGuard(), // fallback to same as guard
         };
     }
