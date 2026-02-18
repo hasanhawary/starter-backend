@@ -11,10 +11,10 @@ class CountryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'translation_name' => $this->getTranslations('name'),
-            'nationality' => $this->nationality,
-            'translation_nationality' => $this->getTranslations('nationality'),
+            'translation_name' => $this->name,
+            'name' => $this->getTranslations('name'),
+            'translation_nationality' => $this->nationality,
+            'nationality' => $this->getTranslations('nationality'),
             'flag' => $this->flag,
             'code' => $this->code,
             'phone_code' => $this->phone_code,
