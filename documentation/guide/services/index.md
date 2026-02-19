@@ -42,7 +42,7 @@ use App\Services\Auth\LoginService;
 
 $loginService = new LoginService(new OTPService());
 $result = $loginService
-    ->setGuard('api')
+    ->setGuard('user')
     ->setModel(User::class)
     ->attempt($credentials);
 

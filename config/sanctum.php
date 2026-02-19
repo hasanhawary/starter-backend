@@ -18,7 +18,8 @@ return [
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
         'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
-        Sanctum::currentApplicationUrlWithPort()
+        Sanctum::currentApplicationUrlWithPort(),
+    // Sanctum::currentRequestHost(),
     ))),
 
     /*
@@ -46,7 +47,7 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => env('SANCTUM_EXPIRATION', null),
 
     /*
     |--------------------------------------------------------------------------
@@ -73,8 +74,6 @@ return [
     | request. You may change the middleware listed below as required.
     |
     */
-    'personal_access_token_model' => App\Models\Central\PersonalAccessToken::class,
-
 
     'middleware' => [
         'authenticate_session' => Laravel\Sanctum\Http\Middleware\AuthenticateSession::class,

@@ -218,7 +218,7 @@ Represents tenant roles (automatically scoped to current tenant).
 **Properties:**
 - `id` - Primary key
 - `name` - Role name (translatable)
-- `guard_name` - Guard name (default: 'api')
+- `guard_name` - Guard name (default: 'user')
 - `created_at` - Creation timestamp
 - `updated_at` - Last update timestamp
 

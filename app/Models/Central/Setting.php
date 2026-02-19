@@ -51,9 +51,6 @@ class Setting extends BaseModel
         return $this->where('is_env', false);
     }
 
-    /**
-     * @throws \JsonException
-     */
     protected function castValue(mixed $value): mixed
     {
         if (in_array($this->type, ['checkbox', 'radio'])) {

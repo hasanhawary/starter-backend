@@ -5,6 +5,7 @@ namespace App\Http\Requests\Central\Auth;
 use App\Http\Requests\BaseFormRequest;
 use App\Models\Central\Country;
 use App\Rules\CheckSamePassword;
+use App\Rules\StrongPassword;
 use App\Rules\ValidLength;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
@@ -38,6 +39,7 @@ class UpdateProfileRequest extends BaseFormRequest
                 'nullable',
                 'confirmed',
                 new CheckSamePassword(),
+                config('project.auth.strong_password') ? new StrongPassword : ''
             ],
         ];
     }

@@ -7,6 +7,7 @@ use App\Http\Requests\BaseFormRequest;
 use App\Http\Resources\Central\Admin\AdminResource;
 use App\Models\Central\Admin;
 use App\Models\Central\Country;
+use App\Rules\StrongPassword;
 use App\Rules\UniqueCheck;
 use App\Rules\ValidLength;
 use Illuminate\Support\Arr;
@@ -47,9 +48,11 @@ class AdminRequest extends BaseFormRequest
             ],
 
             'password' => [
+                'sometimes',
                 'required',
                 'confirmed',
-                'min:8'
+                'min:8',
+                config('project.auth.strong_password') ? new StrongPassword : ''
             ],
 
             'gender' => ['required', new Enum(UserGenderEnum::class)],

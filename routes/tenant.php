@@ -16,7 +16,7 @@ use App\Http\Controllers\API\Central\Global\Notification\NotificationController;
 use App\Http\Controllers\API\Central\Global\Report\ReportController;
 use App\Http\Controllers\API\Central\Global\Setting\SettingController;
 use App\Http\Controllers\API\Central\Global\Setting\TestCredentialsController;
-use App\Http\Controllers\API\Tenant\Auth\ProfileController;
+use App\Http\Controllers\API\Tenant\Profile\ProfileController;
 use App\Http\Controllers\API\Tenant\User\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,7 +45,7 @@ Route::middleware('tenant')->group(function() {
     Route::post('check-otp', [OTPController::class, 'check']);
     Route::post('verify-otp', [OTPController::class, 'verify']);
 
-    Route::middleware(['auth:sanctum'])->group(function () {
+    Route::middleware(['auth:user', 'ability:user'])->group(function () {
         /*
        |--------------------------------------------------------------------------
        | Auth Routes

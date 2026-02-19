@@ -14,7 +14,7 @@ class NotificationEvent implements ShouldBroadcast
 
     public function __construct(public int $user_id, public array $data)
     {
-        app()->setLocale('ar');  // Set locale to Arabic
+        app()->setLocale('ar');  // Get It From user setting in future
     }
 
     /**
@@ -24,26 +24,17 @@ class NotificationEvent implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        return [new Channel("notification.user.$this->user_id")];
-    }
-
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return string
-     */
-    public function broadcastAs(): string
-    {
-        return 'notification.event';
+        return [new Channel("notification.{$this->data['user_type']}.$this->user_id")];
     }
 
     public function broadcastWith(): array
     {
         return [
-            'id' => $this->data["id"],
-            'type' => $this->data["type"],
-            'title' => !empty($this->data["title"]) ? transWithParams($this->data["title"]) : '',
-            'message' => !empty($this->data["msg"]) ? transWithParams($this->data["msg"]) : '',
+            'target_id' => $this->data['target_id'] ?? null,
+            'target_type' => $this->data['target_type'] ?? null,
+            'url' => $this->data['url'] ?? null,
+            'title' => !empty($this->data['title']) ? transWithParams($this->data['title']) : '',
+            'message' => !empty($this->data['msg']) ? transWithParams($this->data['msg']) : '',
             'created_at' => now()
         ];
     }

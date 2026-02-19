@@ -9,11 +9,13 @@ use App\Exceptions\ModelAlreadyExistsException;
 use App\Http\Middleware\DetectTenant;
 use App\Http\Middleware\EnsureActiveSubscription;
 use App\Http\Middleware\LanguageMiddleware;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Spatie\Multitenancy\Http\Middleware\EnsureValidTenantSession;
 use Spatie\Multitenancy\Http\Middleware\NeedsTenant;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -36,6 +38,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
             EnsureValidTenantSession::class,
             EnsureActiveSubscription::class
         ]);
+
+        $middleware->alias(['ability' => CheckForAnyAbility::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
@@ -89,6 +93,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (InActiveUserException $e) {
             if (request()->acceptsJson()) {
                 return failResponse($e->getMessage(), code: $e->getCode());
+            }
+        });
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->acceptsJson()) {
+                return failResponse(__('auth.unauthenticated'), code: 401);
             }
         });
 

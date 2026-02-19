@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Tenant\Auth;
+namespace App\Http\Controllers\API\Tenant\Profile;
 
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Tenant\Auth\UpdateProfileRequest;
@@ -29,7 +29,7 @@ class ProfileController extends BaseController
         }
 
         // Include all active tokens/sessions
-        $sessions = $user->tokens()->get(['id', 'name', 'last_used_at', 'created_at']);
+        $sessions = $user->tokens()->select('id', 'meta')->get();
 
         return successResponse([
             'user' => new UserResource($user),

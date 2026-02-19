@@ -97,7 +97,7 @@ Guards and providers for Central and Tenant authentication:
 
 ```php
 'guards' => [
-    'api' => [
+    'user' => [
         'driver' => 'sanctum',
         'provider' => 'users',      // Tenant users
     ],

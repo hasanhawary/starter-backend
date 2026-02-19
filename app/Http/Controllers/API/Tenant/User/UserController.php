@@ -134,6 +134,6 @@ class UserController extends BaseController
                 (string)$request->password,
                 now()->format('Y-m-d H:i')
             )
-        ], ['email']);
+        ], ['email', 'realtime', 'notify']);
     }
 }

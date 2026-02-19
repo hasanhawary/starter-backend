@@ -31,7 +31,7 @@ class LoginService extends BaseAuthService
         }
 
         // OTP verification if required
-        if (shouldVerifyOtp(getModelKey($this->model))) {
+        if (shouldVerifyOtp() {
             $this->verifyOtp($data);
         }
 
@@ -55,7 +55,7 @@ $loginService = new LoginService(new OTPService());
 
 // For tenant users
 $result = $loginService
-    ->setGuard('api')
+    ->setGuard('user')
     ->setModel(\App\Models\Tenant\User::class)
     ->attempt([
         'email' => 'user@example.com',
@@ -196,7 +196,7 @@ $resetService = new ResetPasswordService(new OTPService());
 
 // Step 1: Send OTP
 $resetService
-    ->setGuard('api')
+    ->setGuard('user')
     ->setModel(User::class)
     ->sendOtp(['email' => 'user@example.com']);
 
@@ -273,7 +273,7 @@ namespace App\Services\Auth;
 
 abstract class BaseAuthService
 {
-    protected string $guard = 'api';
+    protected string $guard = 'user';
     protected string $model;
 
     public function setGuard(string $guard): self
