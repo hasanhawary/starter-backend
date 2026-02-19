@@ -32,7 +32,7 @@ return [
         ],
 
         'encryption' => [
-            'key' => env('FRONT_SHARED_KEY', 'default_secret_key'),
+            'key' => env('FRONT_SHARED_KEY', 'base64:JdVOOP6UH8ly/dtvvNqNvtdLtFsbMpyNp0oGMXW2wA8=%'),
 
             // Incoming data from frontend
             'incoming' => [
