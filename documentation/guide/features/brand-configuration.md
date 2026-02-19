@@ -147,12 +147,12 @@ Contains system configuration.
 ```php
 'config' => [
     'mail' => [
-        ['key' => 'mail_driver', 'type' => 'select', ...],
+        ['key' => 'mail_driver', 'type' => 'text', ...],
         ['key' => 'mail_host', 'type' => 'text', ...],
         ['key' => 'mail_port', 'type' => 'text', ...],
         ['key' => 'mail_username', 'type' => 'text', ...],
         ['key' => 'mail_password', 'type' => 'text', ...],
-        ['key' => 'mail_encryption', 'type' => 'select', ...],
+        ['key' => 'mail_encryption', 'type' => 'text', ...],
         ['key' => 'mail_from_address', 'type' => 'text', ...],
     ],
 ]

@@ -3,7 +3,6 @@
 use App\Models\Admin;
 use App\Services\Global\SettingService;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -284,24 +283,7 @@ if (!function_exists('detectModelPath')) {
 if (!function_exists('fetchData')) {
     function fetchData(Builder $query, string|int|null $pageSize = null, $resource = null, $meta = [])
     {
-        if ($pageSize && (int)$pageSize !== -1) {
-            $data = $query->paginate($pageSize);
-
-            if ($resource) {
-                $data->data = $resource::collection($data);
-            }
-        } else {
-            $data = $resource ? $resource::collection($query->get()) : $query->get();
-        }
-
-        if (count($meta)) {
-            $data = [
-                'data' => $data,
-                ...$meta,
-            ];
-        }
-
-        return $data;
+        return wrapPaginate($query, $resource, $meta);
     }
 }
 
@@ -575,14 +557,12 @@ if (!function_exists('encryptCode')) {
 }
 
 if (!function_exists('shouldVerifyOtp')) {
-    function shouldVerifyOtp(Model|string $model): bool
+    function shouldVerifyOtp(): bool
     {
-        $modelKey = is_string($model)
-            ? $model
-            : getModelKey($model);
+        $guard = detectGuard();
 
         return config('project.auth.login_methods.otp')
-            && config("project.auth.otp.required_for.{$modelKey}");
+            && config("project.auth.otp.required_for.{$guard}");
     }
 }
 
@@ -691,6 +671,24 @@ if (!function_exists('detectGuard')) {
 
         // Fallback
         return config('auth.defaults.guard', 'user');
+    }
+}
+
+if (!function_exists('currentAuthGuard')) {
+    /**
+     * Determine which auth guard based on auh user
+     *
+     * @return string|null
+     */
+    function currentAuthGuard(): ?string
+    {
+        foreach (array_keys(config('auth.guards')) as $guard) {
+            if (auth()->guard($guard)->check()) {
+                return $guard;
+            }
+        }
+
+        return null;
     }
 }
 

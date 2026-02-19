@@ -3,6 +3,7 @@
 namespace App\Services\Global;
 
 use App\Models\Setting;
+use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Support\Facades\Cache;
 
 class SettingService
@@ -83,5 +84,65 @@ class SettingService
     {
         $brand = brandName();
         Cache::forget($this->cacheKeyPrefix . $brand);
+    }
+
+    /**
+     * Update multiple settings with media handling and env sync
+     */
+    public function updateSettings(array $settings): void
+    {
+        $payload = [];
+
+        foreach ($settings as $item) {
+            $setting = Setting::where('key', $item['key'])
+                ->where('group', $item['group'])
+                ->first();
+
+            if (!$setting) {
+                continue;
+            }
+
+            $payload[] = [
+                'key'   => $item['key'],
+                'group' => $item['group'],
+                'value' => $this->normalizeValue($item['value'], $setting->type),
+            ];
+
+            if ($setting->is_env) {
+                $this->syncEnv($item['value']);
+            }
+        }
+
+        Setting::upsert(
+            $payload,
+            ['key', 'group'], // unique columns
+            ['value']         // columns to update
+        );
+
+        $this->clearCache();
+    }
+
+    /**
+     * Normalize setting value based on type
+     */
+    protected function normalizeValue(mixed $value, $type): mixed
+    {
+        if ($value && \in_array($type, ['imageUploader', 'file'], true)) {
+            return Media::replace($value)->upload($value, 'settings');
+        }
+
+        return $value;
+    }
+
+    /**
+     * Sync setting value to .env file
+     */
+    protected function syncEnv(mixed $value): void
+    {
+        updateDotEnv([
+            \strtoupper($value['key']) => \is_array($value)
+                ? \json_encode($value, JSON_THROW_ON_ERROR)
+                : $value
+        ]);
     }
 }

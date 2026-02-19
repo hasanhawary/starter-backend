@@ -11,7 +11,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Illuminate\Auth\AuthenticationException;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -81,6 +81,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (InActiveUserException $e) {
             if (request()->acceptsJson()) {
                 return failResponse($e->getMessage(), code: $e->getCode());
+            }
+        });
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->acceptsJson()) {
+                return failResponse(__('auth.unauthenticated'), code: 401);
             }
         });
 

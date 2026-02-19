@@ -9,7 +9,6 @@ use App\Exceptions\InvalidOtpException;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Global\Auth\LoginRequest;
 use App\Http\Resources\Global\Auth\LoginResource;
-use App\Models\Admin;
 use App\Services\Auth\LoginService;
 use App\Services\Auth\ThrottleService;
 use Illuminate\Http\JsonResponse;

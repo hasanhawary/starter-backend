@@ -32,7 +32,7 @@ return [
         ],
 
         'encryption' => [
-            'key' => env('FRONT_SHARED_KEY', 'default_secret_key'),
+            'key' => env('FRONT_SHARED_KEY', 'base64:JdVOOP6UH8ly/dtvvNqNvtdLtFsbMpyNp0oGMXW2wA8=%'),
 
             // Incoming data from frontend
             'incoming' => [
@@ -61,6 +61,7 @@ return [
         'lockout_time' => 180, // seconds
         'default_role' => 'default_role',
         'default_phone_code_id' => 1,
+        'strong_password' => config('STRONG_PASSWORD', false),
     ],
 
     /*
@@ -105,6 +106,6 @@ return [
     |--------------------------------------------------------------------------
     */
     'realtime' => [
-        'enabled' => env('REALTIME_ENABLED', false),
+        'enabled' => env('REALTIME_ENABLED', true),
     ],
 ];

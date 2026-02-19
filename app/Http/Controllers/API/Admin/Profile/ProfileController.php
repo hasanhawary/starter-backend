@@ -29,7 +29,7 @@ class ProfileController extends BaseController
         }
 
         // Include all active tokens/sessions
-        $sessions = $user->tokens()->get(['id', 'name', 'last_used_at', 'created_at']);
+        $sessions = $user->tokens()->select('id', 'meta')->get();
 
         return successResponse([
             'user' => new AdminResource($user),
@@ -48,7 +48,7 @@ class ProfileController extends BaseController
 
         auth()->user()->update($data);
 
-        return successResponse(auth()->user()->refresh(), trans('api.profile_updated'));
+        return successResponse(auth()->user()->refresh()->load('roles'), trans('api.profile_updated'));
     }
 
     /**

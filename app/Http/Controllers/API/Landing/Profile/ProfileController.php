@@ -29,7 +29,7 @@ class ProfileController extends BaseController
         }
 
         // Include all active tokens/sessions
-        $sessions = $user->tokens()->get(['id', 'name', 'last_used_at', 'created_at']);
+        $sessions = $user->tokens()->select('id', 'meta')->get();
 
         return successResponse([
             'user' => new UserResource($user),

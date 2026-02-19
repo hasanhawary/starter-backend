@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API\Admin\DataEntry;
 
-use App\Filters\Global\JsonDisplayNameFilter;
+use App\Filters\Global\JsonNameFilter;
 use App\Filters\Global\OrderByFilter;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Admin\DataEntry\CountryRequest;
@@ -44,7 +44,7 @@ class CountryController extends BaseController implements HasMiddleware
     {
         $query = app(Pipeline::class)
             ->send(Country::query())
-            ->through([JsonDisplayNameFilter::class, OrderByFilter::class])
+            ->through([JsonNameFilter::class, OrderByFilter::class])
             ->thenReturn();
 
         return successResponse(wrapPaginate($query, CountryResource::class));
