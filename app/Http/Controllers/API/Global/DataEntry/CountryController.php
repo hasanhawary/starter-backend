@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\API\Global\DataEntry;
 
-use App\Filters\Global\JsonDisplayNameFilter;
+use App\Filters\Global\ActiveFilter;
+use App\Filters\Global\JsonNameFilter;
 use App\Filters\Global\OrderByFilter;
+use App\Filters\Global\TrashedFilter;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Global\Other\PageRequest;
 use App\Http\Resources\Global\DataEntry\CountryResource;
@@ -21,7 +23,7 @@ class CountryController extends BaseController
     {
         $query = app(Pipeline::class)
             ->send(Country::query())
-            ->through([JsonDisplayNameFilter::class, OrderByFilter::class])
+            ->through([JsonNameFilter::class, TrashedFilter::class, ActiveFilter::class, OrderByFilter::class])
             ->thenReturn();
 
         return successResponse(wrapPaginate($query, CountryResource::class));
