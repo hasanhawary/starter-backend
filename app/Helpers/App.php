@@ -533,14 +533,13 @@ if (!function_exists('encryptCode')) {
 }
 
 if (!function_exists('shouldVerifyOtp')) {
-    function shouldVerifyOtp(Model|string $model): bool
+    function shouldVerifyOtp(): bool
     {
-        $modelKey = is_string($model)
-            ? $model
-            : getModelKey($model);
+        $default = config('auth.defaults.guard');
+        $guard = $default === 'api' ? 'user' : $default;
 
         return config('project.auth.login_methods.otp')
-            && config("project.auth.otp.required_for.{$modelKey}");
+            && config("project.auth.otp.required_for.{$guard}");
     }
 }
 

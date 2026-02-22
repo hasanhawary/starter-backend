@@ -51,7 +51,7 @@ class ProfileController extends BaseController
 
         $user->update($data);
 
-        return successResponse($user->refresh(), trans('api.profile_updated'));
+        return successResponse($user->refresh()->load('roles'), trans('api.profile_updated'));
     }
 
     /**

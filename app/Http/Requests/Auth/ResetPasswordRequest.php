@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Http\Requests\BaseFormRequest;
+use App\Rules\StrongPassword;
 use Illuminate\Support\Str;
 
 class ResetPasswordRequest extends BaseFormRequest
@@ -16,6 +17,7 @@ class ResetPasswordRequest extends BaseFormRequest
                 'required',
                 'confirmed',
                 'min:8',
+                config('project.auth.strong_password') ? new StrongPassword : ''
             ],
         ];
     }

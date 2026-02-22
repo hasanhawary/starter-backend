@@ -14,7 +14,7 @@ class NotificationEvent implements ShouldBroadcast
 
     public function __construct(public int $user_id, public array $data)
     {
-        app()->setLocale('ar');  // Set locale to Arabic
+        app()->setLocale('ar');  // Get It From user setting in future
     }
 
     /**

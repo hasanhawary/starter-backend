@@ -382,10 +382,10 @@ $guard = getCurrentGuard();  // Returns 'api', 'web', etc.
 Checks if OTP verification is required for a model.
 
 ```php
-function shouldVerifyOtp(Model|string $model): bool
+function shouldVerifyOtp(): bool
 
 // Usage
-if (shouldVerifyOtp('user')) {
+if (shouldVerifyOtp()) {
     // Send OTP
 }
 ```

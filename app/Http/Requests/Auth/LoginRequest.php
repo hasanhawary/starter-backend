@@ -11,8 +11,8 @@ class LoginRequest extends BaseFormRequest
     {
         return [
             'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-            'otp' => [shouldVerifyOtp('user') ? 'required' : 'nullable', 'string'],
+            'password' => ['required'],
+            'otp' => [shouldVerifyOtp() ? 'required' : 'nullable', 'string'],
             'meta' => ['nullable', 'array'],
         ];
     }

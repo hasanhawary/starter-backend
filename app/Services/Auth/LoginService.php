@@ -44,7 +44,7 @@ class LoginService extends BaseAuthService
         }
 
         // OTP verification if enabled in config
-        if (shouldVerifyOtp(getModelKey($this->model))) {
+        if (shouldVerifyOtp()) {
             $this->verifyOtp($data);
         }
 
