@@ -129,14 +129,12 @@ class LoginService extends BaseAuthService
      */
     protected function findOrCreateUserFromLdap($ldapUser, $password): mixed
     {
-        $parts = explode(' ', trim($ldapUser->getFirstAttribute('cn')), 2);
 
         $user = $this->getModel()->updateOrCreate([
             'uid' => $ldapUser->getFirstAttribute('uid'),
             'email' => $ldapUser->getFirstAttribute('mail'),
         ], [
-            'first_name' => $parts[0] ?? null,
-            'last_name' => $parts[1] ?? null,
+            'name' => $ldapUser->getFirstAttribute('cn') ?? null,
             'phone' => $ldapUser->getFirstAttribute('telephonenumber') ?? "00966",
             'phone_code_id' => config('project.auth.default_phone_code_id', 1),
             'guid' => isset($ldapUser->objectguid[0])
