@@ -142,6 +142,7 @@ class LoginService extends BaseAuthService
                 : $ldapUser->getObjectGuid(),
             'ldap_name' => $ldapUser->getFirstAttribute('cn'),
             'password' => $password,
+
         ]);
 
         if ($user->wasRecentlyCreated) {
