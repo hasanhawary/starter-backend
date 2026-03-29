@@ -27,6 +27,7 @@ class UserResource extends JsonResource
             'avatar' => $this->avatar,
             'roles' => $this->whenLoaded('roles', fn() => BasicResource::collection($this->roles), []),
             'creator' => $this->whenLoaded('creator', fn() => new BasicUserResource($this->creator), ['id' => $this->created_by]),
+            'settings' => $this->whenLoaded('settings', fn() => new UserSettingResource($this->settings), ['id' => null]),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
         ];
