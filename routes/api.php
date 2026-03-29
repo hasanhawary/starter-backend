@@ -50,6 +50,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
    |--------------------------------------------------------------------------
    */
     Route::get('me', [ProfileController::class, 'user']);
+    Route::post('update-setting', [ProfileController::class, 'updateSetting']);
     Route::post('update-profile', [ProfileController::class, 'updateProfile']);
     Route::post('destroy-avatar', [ProfileController::class, 'destroyAvatar']);
     Route::post('logout', LogoutController::class);

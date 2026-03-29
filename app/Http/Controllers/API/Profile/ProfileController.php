@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Profile;
 
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Http\Requests\Profile\UpdateSettingRequest;
 use App\Http\Resources\Auth\SessionResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
@@ -22,7 +23,7 @@ class ProfileController extends BaseController
      */
     public function user(): JsonResponse
     {
-        $user = User::with('roles.permissions')->find(auth()->id());
+        $user = User::with(['roles.permissions', 'settings'])->find(auth()->id());
 
         if (!$user) {
             return failResponse(trans('api.user_not_found'));
@@ -52,6 +53,23 @@ class ProfileController extends BaseController
         $user->update($data);
 
         return successResponse($user->refresh()->load('roles'), trans('api.profile_updated'));
+    }
+
+    /**
+     * @param UpdateSettingRequest $request
+     * @return JsonResponse
+     *
+     * @throws Exception
+     */
+    public function updateSetting(UpdateSettingRequest $request): JsonResponse
+    {
+        $user = auth()->user();
+        $user->settings()->updateOrCreate(
+            ['user_id' => $user->id],
+            ['setting' => $request->setting]
+        );
+
+        return successResponse($user->refresh()->load('settings'), trans('api.profile_updated'));
     }
 
     /**
