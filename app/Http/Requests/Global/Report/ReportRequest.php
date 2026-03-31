@@ -19,6 +19,7 @@ class ReportRequest extends BaseFormRequest
             'page' => 'nullable|string',
             'advanced' => 'nullable|array',
             'config' => 'nullable|array',
+            'types' => 'nullable|array',
             'prefer_chart' => ['nullable', 'string', new Enum(ReportChartTypeEnum::class)],
         ];
     }
