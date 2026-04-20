@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/export",
+    "description": "",
+    "authors": [
+        {
+            "name": "Wakeb_Data",
+            "email": "wakeb@wakeb.tech.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Export\\App\\": "app/",
+            "Modules\\Export\\Database\\Factories\\": "database/factories/",
+            "Modules\\Export\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Export\\Tests\\": "tests/"
+        }
+    }
+}

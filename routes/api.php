@@ -91,7 +91,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('send-test-mail', [TestCredentialsController::class, 'testEmail']);
 
     Route::get('report', ReportController::class);
-    Route::get('export', ExportController::class);
 
     Route::get('activity-logs', [ActivityLogController::class, 'index']);
     Route::get('activity-logs/{activity}', [ActivityLogController::class, 'show']);

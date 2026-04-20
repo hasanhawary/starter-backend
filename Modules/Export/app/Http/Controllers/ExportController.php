@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\API\Global\Export;
-
+namespace Modules\Export\App\Http\Controllers;
 
 use App\Http\Controllers\API\BaseController;
-use App\Http\Requests\Global\Export\ExportRequest;
 use HasanHawary\ExportBuilder\ExportBuilder;
+use Modules\Export\App\Http\Requests\ExportRequest;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportController extends BaseController
