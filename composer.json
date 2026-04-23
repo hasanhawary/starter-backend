@@ -16,10 +16,10 @@
         "hasanhawary/media-manager": "*",
         "hasanhawary/permission-manager": "*",
         "hasanhawary/report-builder": "*",
-        "laravel/framework": "^12.0",
+        "laravel/framework": "^13.0",
         "laravel/reverb": "@beta",
         "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.10.1",
+        "laravel/tinker": "^3.0",
         "maatwebsite/excel": "^3.1",
         "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-activitylog": "^4.10",
@@ -35,7 +35,7 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^11.5.3"
+        "phpunit/phpunit": "^12.0"
     },
     "autoload": {
         "files": [
