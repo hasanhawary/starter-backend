@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\API\Global\Notification;
 
+use App\Filters\Notification\NotificationFilter;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Global\Notification\NotificationRequest;
 use App\Http\Resources\Global\Notification\NotificationResource;
 use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Pipeline\Pipeline;
 
 class NotificationController extends BaseController
 {
@@ -15,7 +17,13 @@ class NotificationController extends BaseController
      */
     public function index(): JsonResponse
     {
-        $baseQuery = Notification::forCurrentUser();
+        $baseQuery = app(Pipeline::class)
+            ->send(Notification::forCurrentUser())
+            ->through([
+                NotificationFilter::class,
+            ])
+            ->thenReturn();
+
         $countQuery = clone $baseQuery;
 
         $notifications = [

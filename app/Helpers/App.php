@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use App\Helpers\DelimiterParamValue;
 
 /*
 |--------------------------------------------------------------------------
@@ -376,8 +377,39 @@ if (!function_exists('when')) {
     }
 }
 
+if (!function_exists('buildDelimiterMessage')) {
+    /**
+     * Build the packed message string.
+     *
+     * Param values can be:
+     *  - scalar (string/int)            → name=John
+     *  - DelimiterParamValue::json(...)    → name={"en":"John","ar":"جون"}
+     *  - DelimiterParamValue::enum(...)    → enum_status=App\Enums\StatusEnum@Active
+     *
+     * Output: 'create_admin_data_msg|name=John|email=john@example.com|...'
+     */
+    function buildDelimiterMessage(string $translationKey, array $params = []): string
+    {
+        if (empty($params)) {
+            return $translationKey;
+        }
+
+        $parts = [];
+        foreach ($params as $key => $value) {
+            if ($value instanceof DelimiterParamValue) {
+                $resolvedKey = $value->type === 'enum' ? "enum_{$key}" : $key;
+                $parts[]     = "{$resolvedKey}={$value->formatted}";
+            } else {
+                $parts[] = "{$key}={$value}";
+            }
+        }
+
+        return $translationKey . '|' . implode('|', $parts);
+    }
+}
+
 if (!function_exists('transWithParams')) {
-    function transWithParams(?string $data, string $page = 'emails', array $params = []): ?string
+    function transWithParams(?string $data, string $page = 'notifications.emails', array $params = []): ?string
     {
         if (!$data) {
             return null;
@@ -392,7 +424,33 @@ if (!function_exists('transWithParams')) {
             }
 
             [$k, $v] = explode('=', $part, 2);
-            $params[trim($k)] = trim($v);
+            $k = trim($k);
+            $v = trim($v);
+
+            // Enum: enum_status => App\Enums\StatusEnum@Active
+            if (str_starts_with($k, 'enum_')) {
+                $paramKey      = substr($k, 5); // strip "enum_"
+                [$fqn, $case]  = explode('@', $v, 2);
+                $params[$paramKey] = enum_exists($fqn)
+                    ? $fqn::resolve($case)   // e.g. SettingTypeEnum::resolve('Active')
+                    : $case;                 // fallback to raw case name
+                continue;
+            }
+
+            // JSON: name => {"en":"John","ar":"جون"}
+            if (str_starts_with($v, '{') || str_starts_with($v, '[')) {
+                $decoded = json_decode($v, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    // Use the locale key if available, fallback to full array
+                    $params[$k] = $decoded[app()->getLocale()]
+                        ?? $decoded['en']
+                        ?? $v;
+                    continue;
+                }
+            }
+
+            // Plain
+            $params[$k] = $v;
         }
 
         return __("$page.$key", $params);
@@ -404,7 +462,7 @@ if (!function_exists('emailTrans')) {
     {
         return transWithParams(
             $data,
-            'emails',
+            'notifications.emails',
             array_merge([
                 'platform_name' => brandName(),
             ], $params)

@@ -86,7 +86,7 @@ class NotificationService
      */
     private static function resolveMessageContent(array $data): string
     {
-        $message = $data['msg'] . PHP_EOL;
+        $message = transWithParams($data['msg'], 'notifications.sms') . PHP_EOL;
 
         if (isset($data['urlText'])) {
             $message .= $data['urlText'] . PHP_EOL;

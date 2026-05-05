@@ -24,5 +24,8 @@ return [
     'user_gender' => [
         'male' => 'Male',
         'female' => 'Female',
-    ]
+    ],
+    'notification_group' => [
+        'global' => 'Global',
+    ],
 ];

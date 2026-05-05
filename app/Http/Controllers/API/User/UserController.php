@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\API\User;
 
+use App\Enum\Global\NotificationGroupEnum;
 use App\Filters\Global\ActiveFilter;
 use App\Filters\Global\OrderByFilter;
 use App\Filters\Global\TrashedFilter;
 use App\Filters\User\UserFilter;
+use App\Helpers\DelimiterParamValue;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Global\Other\PageRequest;
 use App\Http\Requests\User\UserRequest;
@@ -122,20 +124,19 @@ class UserController extends BaseController
              return;
          }
 
+        $params = [
+            'name' => DelimiterParamValue::plain($request->name),
+            'email' => DelimiterParamValue::plain($request->email),
+            'phone' => DelimiterParamValue::plain($user->getFullPhone()),
+            'password' => DelimiterParamValue::plain((string)$request->password),
+        ];
+        $params[$isCreate ? 'created_at' : 'updated_at'] = DelimiterParamValue::plain(now()->format('Y-m-d H:i'));
         $user->sendNotification([
             'title' => $isCreate ? 'create_admin_data_title' : 'update_admin_data_title',
-            'msg' => sprintf(
-                $isCreate
-                    ? 'create_admin_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|created_at=>%s'
-                    : 'update_admin_data_msg|name=>%s|email=>%s|phone=>%s|password=>%s|updated_at=>%s',
-                $request->name,
-                $request->email,
-                $user->getFullPhone(),
-                (string)$request->password,
-                now()->format('Y-m-d H:i')
-            ),
+            'msg' => buildDelimiterMessage($isCreate ? 'create_admin_data_msg' : 'update_admin_data_msg', $params),
             'target_id' => $user->id,
-            'target_type' => 'users'
+            'target_type' => 'users',
+            'group' => NotificationGroupEnum::Global->value
         ], ['email', 'realtime', 'notify']);
     }
 }
