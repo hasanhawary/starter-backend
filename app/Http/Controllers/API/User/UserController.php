@@ -125,10 +125,10 @@ class UserController extends BaseController
          }
 
         $params = [
-            'name' => DelimiterParamValue::plain($request->name),
-            'email' => DelimiterParamValue::plain($request->email),
-            'phone' => DelimiterParamValue::plain($user->getFullPhone()),
-            'password' => DelimiterParamValue::plain((string)$request->password),
+            'name' => $request->name,       // optional use types (plain, json, enum) DelimiterParamValue::plain($request->name)
+            'email' => $request->email,
+            'phone' => $user->getFullPhone(),
+            'password' => (string)$request->password,
         ];
         $params[$isCreate ? 'created_at' : 'updated_at'] = DelimiterParamValue::plain(now()->format('Y-m-d H:i'));
         $user->sendNotification([
