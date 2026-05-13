@@ -12,6 +12,11 @@ class UserExport extends BaseExport
     public function __construct(public array $filter)
     {
         $config = [
+            'filter_relations' => [
+                'many' => [
+                    'created_by' => ['relation' => 'creator'],
+                ],
+            ],
             'model' => User::class,
             'columns' => [
                 'id' => 'int',
