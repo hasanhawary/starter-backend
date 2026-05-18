@@ -9,25 +9,25 @@ return [
         | Users
         |--------------------------------------------------------------------------
         */
-        'users' => [
-            'advanced' => [
-                'created_by' => [
-                    'type' => 'integer',
-                    'reference' => 'users'
-                ]
-            ],
-        ],
+        // 'users' => [
+        //     'advanced' => [
+        //         'created_by' => [
+        //             'type' => 'integer',
+        //             'reference' => 'users'
+        //         ]
+        //     ],
+        // ],
 
     ],
 
     'sorting' => [
-        'users' => [
-            'id',
-            'name',
-            'email',
-            'phone',
-            'gender',
-        ],
+        // 'users' => [
+        //     'id',
+        //     'name',
+        //     'email',
+        //     'phone',
+        //     'gender',
+        // ],
     ]
 
 ];
