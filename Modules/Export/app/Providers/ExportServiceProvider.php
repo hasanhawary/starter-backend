@@ -33,6 +33,8 @@ class ExportServiceProvider extends ServiceProvider
 
         $this->registerPolicies();
 
+        $this->extendDiscoveryConfig();
+
         $this->mergeEnumTranslation();
     }
 
@@ -165,6 +167,17 @@ class ExportServiceProvider extends ServiceProvider
     protected function registerPolicies(): void
     {
         Gate::policy(ExportFile::class, ExportPolicy::class);
+    }
+
+    /**
+     * Merge filters & sorting into the shared discovery config.
+     */
+    protected function extendDiscoveryConfig(): void
+    {
+        config([
+            'discovery.filters' => array_merge(config('discovery.filters', []), config('export.discovery.filters', [])),
+            'discovery.sorting' => array_merge(config('discovery.sorting', []), config('export.discovery.sorting', [])),
+        ]);
     }
 
     /**
