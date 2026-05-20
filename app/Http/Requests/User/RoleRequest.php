@@ -54,7 +54,7 @@ class RoleRequest extends BaseFormRequest
         parent::prepareForValidation();
 
         $this->merge([
-            'guard_name' => detectPermissionGuard(),
+            'guard_name' => 'sanctum',
             'permissions' => array_values(array_unique(array_merge($this->permissions ?? [], config('roles.default.permissions'))))
         ]);
     }
