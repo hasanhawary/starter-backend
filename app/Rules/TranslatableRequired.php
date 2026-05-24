@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 class TranslatableRequired implements ValidationRule
 {
     protected array $languageRules;
+
     protected array $attributeLabels;
 
     public function __construct(
@@ -53,9 +54,9 @@ class TranslatableRequired implements ValidationRule
             }
 
             $validator = Validator::make([
-                $attribute => [$lang => $val]
+                $attribute => [$lang => $val],
             ], [
-                "$attribute.$lang" => $rulesForLang
+                "$attribute.$lang" => $rulesForLang,
             ], [], $this->attributeLabels);
 
             if ($validator->fails()) {
@@ -82,5 +83,4 @@ class TranslatableRequired implements ValidationRule
 
         return $flattened;
     }
-
 }

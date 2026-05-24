@@ -1,0 +1,56 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "mcp": {
+        "laravel-boost": {
+            "type": "local",
+            "enabled": true,
+            "command": [
+                "php",
+                "artisan",
+                "boost:mcp"
+            ]
+        },
+        "github": {
+            "type": "local",
+            "command": [
+                "docker",
+                "run",
+                "-i",
+                "--rm",
+                "-e",
+                "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",
+                "ghcr.io/github/github-mcp-server"
+            ],
+            "enabled": true,
+            "environment": {
+                "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_TOKEN"
+            }
+        },
+        "filesystem": {
+            "type": "local",
+            "command": [
+                "npx",
+                "-y",
+                "@modelcontextprotocol/server-filesystem",
+                "."
+            ]
+        },
+        "playwright": {
+            "type": "local",
+            "enabled": true,
+            "command": [
+                "npx",
+                "@playwright/mcp@latest"
+            ]
+        },
+        "terminal": {
+            "type": "local",
+            "enabled": true,
+            "command": [
+                "npx",
+                "-y",
+                "@modelcontextprotocol/server-shell"
+            ]
+        }
+    }
+}

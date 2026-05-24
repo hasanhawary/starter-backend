@@ -18,15 +18,13 @@ use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class LoginService extends BaseAuthService
 {
-    public function __construct(protected OTPService $otpService)
-    {
-    }
+    public function __construct(protected OTPService $otpService) {}
 
     /**
      * Attempt login for user or admin
      *
-     * @param array|null $data
      * @return array ['user' => Model, 'token' => string]
+     *
      * @throws InActiveUserException
      * @throws InvalidEmailAndPasswordCombinationException
      * @throws EmailVerifiedException
@@ -39,7 +37,7 @@ class LoginService extends BaseAuthService
             ? $this->attemptLdapLogin($data)
             : $this->attemptDefaultLogin($data);
 
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             throw new InActiveUserException(__('api.account_not_active'));
         }
 
@@ -68,7 +66,7 @@ class LoginService extends BaseAuthService
             ->where('email', $data['email'])
             ->first();
 
-        if (!$user || !Hash::check($data['password'] ?? '', $user->password)) {
+        if (! $user || ! Hash::check($data['password'] ?? '', $user->password)) {
             throw new InvalidEmailAndPasswordCombinationException(
                 __('api.invalid_email_and_password'),
                 ResponseAlias::HTTP_NOT_ACCEPTABLE
@@ -92,11 +90,11 @@ class LoginService extends BaseAuthService
         $ldapAttributes = ['uid', 'cn', 'samaccountname', 'userprincipalname', 'mail'];
 
         $ldapUser = collect($ldapAttributes)
-            ->map(fn($attr) => $ldapUserModel::where($attr, $username)->first())
+            ->map(fn ($attr) => $ldapUserModel::where($attr, $username)->first())
             ->filter()
             ->first();
 
-        if (!$ldapUser) {
+        if (! $ldapUser) {
             return $this->attemptDefaultLogin($data);
         }
 
@@ -135,10 +133,10 @@ class LoginService extends BaseAuthService
             'email' => $ldapUser->getFirstAttribute('mail'),
         ], [
             'name' => $ldapUser->getFirstAttribute('cn') ?? null,
-            'phone' => $ldapUser->getFirstAttribute('telephonenumber') ?? "00966",
+            'phone' => $ldapUser->getFirstAttribute('telephonenumber') ?? '00966',
             'phone_code_id' => config('project.auth.default_phone_code_id', 1),
             'guid' => isset($ldapUser->objectguid[0])
-                ? (string)new Guid($ldapUser->objectguid[0])
+                ? (string) new Guid($ldapUser->objectguid[0])
                 : $ldapUser->getObjectGuid(),
             'ldap_name' => $ldapUser->getFirstAttribute('cn'),
             'password' => $password,
@@ -169,19 +167,19 @@ class LoginService extends BaseAuthService
     {
         $token = $user->createToken($this->getGuard());
 
-        if (!empty($meta)) {
+        if (! empty($meta)) {
             $token->accessToken->update([
                 'meta' => [
                     'device' => [
-                        'os'      => data_get($meta, 'userAgent.os'),
+                        'os' => data_get($meta, 'userAgent.os'),
                         'browser' => data_get($meta, 'userAgent.browser'),
-                        'type'    => data_get($meta, 'userAgent.device'),
+                        'type' => data_get($meta, 'userAgent.device'),
                     ],
                     'platform' => $meta['platform'] ?? null,
                     'timezone' => $meta['timezone'] ?? null,
                     'language' => $meta['language'] ?? null,
                     'screen' => [
-                        'width'  => data_get($meta, 'screen.width'),
+                        'width' => data_get($meta, 'screen.width'),
                         'height' => data_get($meta, 'screen.height'),
                     ],
                     'ip' => request()->ip(),
@@ -192,5 +190,4 @@ class LoginService extends BaseAuthService
 
         return $token->plainTextToken;
     }
-
 }

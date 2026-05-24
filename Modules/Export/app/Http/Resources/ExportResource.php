@@ -12,6 +12,7 @@ class ExportResource extends BaseResource
     public function toArray(Request $request): array
     {
         $exportableType = class_basename($this->exportable_type);
+
         return [
             'id' => $this->id,
             'display_exportable_type' => ExportRegistry::getTitle($exportableType),
@@ -28,7 +29,7 @@ class ExportResource extends BaseResource
             'started_at' => $this->started_at?->format('Y-m-d H:i:s'),
             'completed_at' => $this->completed_at?->format('Y-m-d H:i:s'),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
-            'creator' => $this->whenLoaded('creator', fn() => new $this->creatorResource($this->creator), ['id' => $this->created_by]),
+            'creator' => $this->whenLoaded('creator', fn () => new $this->creatorResource($this->creator), ['id' => $this->created_by]),
         ];
     }
 }

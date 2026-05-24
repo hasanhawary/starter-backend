@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Policies\User\RolePolicy;
 use App\Policies\User\UserPolicy;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
@@ -26,10 +27,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Model::preventLazyLoading(! app()->isProduction());
+
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
-        //Policies
+        // Policies
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(User::class, UserPolicy::class);
-   }
+    }
 }

@@ -20,8 +20,6 @@ class OTPController extends BaseController
     /**
      * Send OTP
      *
-     * @param SendOtpRequest $request
-     * @return JsonResponse
      * @throws InvalidOtpException
      * @throws RandomException
      */
@@ -37,14 +35,12 @@ class OTPController extends BaseController
     /**
      * Verify OTP
      *
-     * @param VerifyOtpRequest $request
-     * @return JsonResponse
      * @throws InvalidOtpException
      */
     public function check(VerifyOtpRequest $request): JsonResponse
     {
-         $this->otpService
-             ->setModel($this->userModel)
+        $this->otpService
+            ->setModel($this->userModel)
             ->check($request, $request->type);
 
         return successResponse(msg: __('api.otp_verified'));
@@ -53,8 +49,6 @@ class OTPController extends BaseController
     /**
      * Verify OTP
      *
-     * @param VerifyOtpRequest $request
-     * @return JsonResponse
      * @throws InvalidOtpException
      */
     public function verify(VerifyOtpRequest $request): JsonResponse

@@ -10,7 +10,6 @@ enum ReportChartTypeEnum: string
 
     case HighChart = 'high_chart';
 
-
     public static function default(): string
     {
         return self::HighChart->value;

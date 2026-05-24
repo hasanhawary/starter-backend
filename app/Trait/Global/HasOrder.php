@@ -11,17 +11,13 @@ trait HasOrder
     /**
      * Change the order of a model instance.
      *
-     * @param string $orderField
-     * @param string $stepField
-     * @param $request
-     * @return void
      * @throws Exception|Throwable
      */
     public function changeOrder(string $orderField, string $stepField, $request): void
     {
         try {
             $from = $this->{$orderField};
-            $to = (int)$request->input($orderField);
+            $to = (int) $request->input($orderField);
 
             DB::beginTransaction();
 

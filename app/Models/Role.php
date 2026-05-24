@@ -11,16 +11,18 @@ use Spatie\Translatable\HasTranslations;
 
 class Role extends SpatieRole
 {
-    use RoleScopes, CreatedByObserver, HasTranslations;
+    use CreatedByObserver, HasTranslations, RoleScopes;
 
     public bool $inPermission = true;
+
     public array $basicOperations = ['create', 'update', 'delete'];
+
     public array $specialOperations = ['view-all', 'view-own', 'toggle-active'];
 
     public array $translatable = ['display_name'];
 
     protected $fillable = [
-        'name', 'guard_name', 'display_name', 'is_active', 'created_by'
+        'name', 'guard_name', 'display_name', 'is_active', 'created_by',
     ];
 
     protected $casts = [
@@ -41,6 +43,4 @@ class Role extends SpatieRole
     {
         return $this->morphedByMany(User::class, 'model', 'model_has_roles', 'role_id', 'model_id');
     }
-
-
 }

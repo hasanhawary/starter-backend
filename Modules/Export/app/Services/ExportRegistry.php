@@ -13,7 +13,7 @@ class ExportRegistry
     {
         $ns = (string) (config('export.namespace'));
 
-        return $ns . '\\' . Str::studly($type) . 'Export';
+        return $ns.'\\'.Str::studly($type).'Export';
     }
 
     /**
@@ -38,6 +38,6 @@ class ExportRegistry
             return (new $class([]))->getTitle();
         }
 
-        return __('export::pdf.' . Str::plural(Str::snake($type)) . '_title');
+        return __('export::pdf.'.Str::plural(Str::snake($type)).'_title');
     }
 }

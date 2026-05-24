@@ -16,11 +16,11 @@ return [
     'addition_type' => 'Action Type',
     'created_at' => 'Creation Date',
     'last_login' => 'Last Login',
-    'step'     => 'Step',
+    'step' => 'Step',
     'priority' => 'Priority',
-    'order'    => 'Order',
-    'details'  => 'Details',
-    'name'     => 'Name',
-    'id'       => 'ID',
+    'order' => 'Order',
+    'details' => 'Details',
+    'name' => 'Name',
+    'id' => 'ID',
 
 ];

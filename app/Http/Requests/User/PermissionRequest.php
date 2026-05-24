@@ -8,7 +8,6 @@ use Illuminate\Validation\Rule;
 
 class PermissionRequest extends BaseFormRequest
 {
-
     public function rules(): array
     {
         $permission = $this->route('permission');
@@ -22,10 +21,10 @@ class PermissionRequest extends BaseFormRequest
             'display_name' => [
                 'required',
                 'array',
-                new TranslatableRequired('permissions', ['string', 'max:191'], 'country')
+                new TranslatableRequired('permissions', ['string', 'max:191'], 'country'),
             ],
 
-            'group' => 'required'
+            'group' => 'required',
         ];
     }
 }

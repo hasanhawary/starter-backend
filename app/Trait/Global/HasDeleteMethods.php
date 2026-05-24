@@ -18,8 +18,11 @@ trait HasDeleteMethods
      * Action guards (delete|restore|force)
      */
     protected array $deleteGuards = [];
+
     protected bool $useDeletePolicy = true;
+
     protected array $beforeDeleteCallbacks = [];
+
     protected array $afterDeleteCallbacks = [];
 
     /*
@@ -30,12 +33,14 @@ trait HasDeleteMethods
     protected function setDeleteModel(string $model): self
     {
         $this->model = $model;
+
         return $this;
     }
 
     protected function enableDeletePolicy(bool $state = true): self
     {
         $this->useDeletePolicy = $state;
+
         return $this;
     }
 
@@ -46,6 +51,7 @@ trait HasDeleteMethods
     {
         $guards = is_array($guards) ? $guards : [$guards];
         $this->deleteGuards[$action] = array_merge($this->deleteGuards[$action] ?? [], $guards);
+
         return $this;
     }
 
@@ -53,6 +59,7 @@ trait HasDeleteMethods
     {
         $callback = is_array($callback) ? $callback : [$callback];
         $this->beforeDeleteCallbacks[$action] = array_merge($this->beforeDeleteCallbacks[$action] ?? [], $callback);
+
         return $this;
     }
 
@@ -60,6 +67,7 @@ trait HasDeleteMethods
     {
         $callback = is_array($callback) ? $callback : [$callback];
         $this->afterDeleteCallbacks[$action] = array_merge($this->afterDeleteCallbacks[$action] ?? [], $callback);
+
         return $this;
     }
 
@@ -105,7 +113,7 @@ trait HasDeleteMethods
             }
 
             // Custom Guards
-            if (!$this->passesDeleteGuards($action, $model)) {
+            if (! $this->passesDeleteGuards($action, $model)) {
                 abort(403, __("api.not_allowed_to_{$action}", ['id' => $model->getKey()]));
             }
 
@@ -119,7 +127,7 @@ trait HasDeleteMethods
             $this->runDeleteCallbacks($this->afterDeleteCallbacks[$action] ?? [], $model);
         }
 
-        return successResponse(msg: __("api." .
+        return successResponse(msg: __('api.'.
             match ($action) {
                 'restore' => 'restored_success',
                 default => 'deleted_success'
@@ -138,9 +146,9 @@ trait HasDeleteMethods
             Gate::authorize($ability, $model);
         } else {
             // If Gate fails, fallback to Spatie permission in case not have policy only.
-            $permission = $ability . '-' . Str::snake(class_basename($model), '-');
+            $permission = $ability.'-'.Str::snake(class_basename($model), '-');
 
-            if (!auth()->user()?->hasPermissionTo($permission)) {
+            if (! auth()->user()?->hasPermissionTo($permission)) {
                 abort(403, __("api.not_allowed_to_{$action}", ['id' => $model->getKey()]));
             }
         }
@@ -149,7 +157,7 @@ trait HasDeleteMethods
     protected function passesDeleteGuards(string $action, Model $model): bool
     {
         foreach ($this->deleteGuards[$action] ?? [] as $guard) {
-            if (is_callable($guard) && !$guard($model)) {
+            if (is_callable($guard) && ! $guard($model)) {
                 return false;
             }
         }
@@ -193,16 +201,15 @@ trait HasDeleteMethods
         $ids = request()->input('ids')
             ?? request()->input('id');
 
-        if (!$ids) {
+        if (! $ids) {
             $routeParams = request()->route()?->parameters();
-            if (!empty($routeParams)) {
+            if (! empty($routeParams)) {
                 $ids = array_values($routeParams)[0]; // take the first parameter
             }
         }
 
         return Arr::wrap($ids); // always return as array
     }
-
 
     protected function runDeleteCallbacks(array $callbacks, Model $model): void
     {

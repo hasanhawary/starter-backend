@@ -35,7 +35,7 @@ return [
                 'tls' => [
                     'local_cert' => env('REVERB_SSL_LOCAL_CERT', null),
                     'local_pk' => env('REVERB_SSL_LOCAL_PK', null),
-                    'verify_peer' => false
+                    'verify_peer' => false,
                 ],
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),

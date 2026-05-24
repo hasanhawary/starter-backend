@@ -15,7 +15,7 @@ abstract class BaseFormRequest extends FormRequest
     {
         // Convert empty values to null
         $this->replace(collect($this->all())
-            ->map(fn($value) => resolveEmptyToNull($value))
+            ->map(fn ($value) => resolveEmptyToNull($value))
             ->toArray());
     }
 

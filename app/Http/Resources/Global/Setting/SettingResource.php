@@ -11,8 +11,8 @@ class SettingResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $value  = $this->value;
-        $group = Str::afterLast($this->group,'.');
+        $value = $this->value;
+        $group = Str::afterLast($this->group, '.');
 
         return [
             'id' => $this->id,
@@ -35,8 +35,8 @@ class SettingResource extends JsonResource
             'type' => $this->type,
             'display_type' => SettingTypeEnum::resolve($this->type),
 
-            'is_env' => (int)$this->is_env,
-            'is_multi_lang' => (int)$this->is_multi_lang,
+            'is_env' => (int) $this->is_env,
+            'is_multi_lang' => (int) $this->is_multi_lang,
 
             'last_updated_at' => $this->updated_at,
         ];

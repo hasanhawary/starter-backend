@@ -10,5 +10,5 @@ enum OtpTypeEnum: string
 
     case Login = 'login';
     case ResetPassword = 'reset_password';
-        case VerifyEmail = 'verify_email';
+    case VerifyEmail = 'verify_email';
 }

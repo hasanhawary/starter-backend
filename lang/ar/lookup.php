@@ -11,13 +11,13 @@ return [
         ],
         'user' => [
             'user_gender' => 'نوع المستخدم',
-        ]
+        ],
     ],
     'models' => [
         'user' => 'المستخدمين',
         'role' => 'الأدوار',
         'permission' => 'الأذونات',
         'setting' => 'الإعدادات',
-        'notification' => 'الإخطارات'
-    ]
+        'notification' => 'الإخطارات',
+    ],
 ];

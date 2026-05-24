@@ -10,7 +10,7 @@ class ExportFilter
     {
         $type = request('exportable_type');
 
-        if (!empty($type)) {
+        if (! empty($type)) {
             $query->where('exportable_type', $type);
         }
 

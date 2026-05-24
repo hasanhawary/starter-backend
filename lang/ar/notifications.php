@@ -4,23 +4,22 @@
 
 // --- 2. Shared Short Messages (For SMS/Realtime/Notify) ---
 $createAdminTitle = 'انشاء مشرف جديد';
-$createAdminMsg    = "تم إنشاء حسابك بنجاح.";
+$createAdminMsg = 'تم إنشاء حسابك بنجاح.';
 
 $updateAdminTitle = 'تحديث بيانات المشرف';
-$updateAdminMsg    = "تم تحديث بيانات حسابك بنجاح.";
+$updateAdminMsg = 'تم تحديث بيانات حسابك بنجاح.';
 
 $loginOtpTitle = 'رمز تحقق تسجيل الدخول';
-$loginOtpMsg       = "رمز التحقق الخاص بك لتسجيل الدخول هو: :otp";
+$loginOtpMsg = 'رمز التحقق الخاص بك لتسجيل الدخول هو: :otp';
 
 $resetOtpTitle = 'رمز تحقق إعادة تعيين كلمة المرور';
-$resetOtpMsg       = "رمز التحقق لإعادة تعيين كلمة المرور هو: :otp";
+$resetOtpMsg = 'رمز التحقق لإعادة تعيين كلمة المرور هو: :otp';
 
 $verifyEmailOtpTitle = 'رمز تحقق البريد الإلكتروني';
-$verifyEmailOtpMsg = "رمز التحقق لتأكيد البريد الإلكتروني هو: :otp";
+$verifyEmailOtpMsg = 'رمز التحقق لتأكيد البريد الإلكتروني هو: :otp';
 
 $defaultOtpTitle = 'رمز التحقق';
-$defaultOtpMsg     = "رمز التحقق الخاص بك هو: :otp";
-
+$defaultOtpMsg = 'رمز التحقق الخاص بك هو: :otp';
 
 return [
 
@@ -30,48 +29,48 @@ return [
     |--------------------------------------------------------------------------
     */
     'realtime' => [
-        'create_admin_data_title'    => $createAdminTitle,
-        'create_admin_data_msg'      => $createAdminMsg,
-        'update_admin_data_title'    => $updateAdminTitle,
-        'update_admin_data_msg'      => $updateAdminMsg,
-        'login_otp_title'            => $loginOtpTitle,
-        'login_otp_msg'              => $loginOtpMsg,
-        'reset_password_otp_title'   => $resetOtpTitle,
-        'reset_password_otp_msg'     => $resetOtpMsg,
-        'verify_email_otp_title'     => $verifyEmailOtpTitle,
-        'verify_email_otp_msg'       => $verifyEmailOtpMsg,
-        'default_otp_title'          => $defaultOtpTitle,
-        'default_otp_msg'            => $defaultOtpMsg,
+        'create_admin_data_title' => $createAdminTitle,
+        'create_admin_data_msg' => $createAdminMsg,
+        'update_admin_data_title' => $updateAdminTitle,
+        'update_admin_data_msg' => $updateAdminMsg,
+        'login_otp_title' => $loginOtpTitle,
+        'login_otp_msg' => $loginOtpMsg,
+        'reset_password_otp_title' => $resetOtpTitle,
+        'reset_password_otp_msg' => $resetOtpMsg,
+        'verify_email_otp_title' => $verifyEmailOtpTitle,
+        'verify_email_otp_msg' => $verifyEmailOtpMsg,
+        'default_otp_title' => $defaultOtpTitle,
+        'default_otp_msg' => $defaultOtpMsg,
     ],
 
     'notify' => [
-        'create_admin_data_title'    => $createAdminTitle,
-        'create_admin_data_msg'      => $createAdminMsg,
-        'update_admin_data_title'    => $updateAdminTitle,
-        'update_admin_data_msg'      => $updateAdminMsg,
-        'login_otp_title'            => $loginOtpTitle,
-        'login_otp_msg'              => $loginOtpMsg,
-        'reset_password_otp_title'   => $resetOtpTitle,
-        'reset_password_otp_msg'     => $resetOtpMsg,
-        'verify_email_otp_title'     => $verifyEmailOtpTitle,
-        'verify_email_otp_msg'       => $verifyEmailOtpMsg,
-        'default_otp_title'          => $defaultOtpTitle,
-        'default_otp_msg'            => $defaultOtpMsg,
+        'create_admin_data_title' => $createAdminTitle,
+        'create_admin_data_msg' => $createAdminMsg,
+        'update_admin_data_title' => $updateAdminTitle,
+        'update_admin_data_msg' => $updateAdminMsg,
+        'login_otp_title' => $loginOtpTitle,
+        'login_otp_msg' => $loginOtpMsg,
+        'reset_password_otp_title' => $resetOtpTitle,
+        'reset_password_otp_msg' => $resetOtpMsg,
+        'verify_email_otp_title' => $verifyEmailOtpTitle,
+        'verify_email_otp_msg' => $verifyEmailOtpMsg,
+        'default_otp_title' => $defaultOtpTitle,
+        'default_otp_msg' => $defaultOtpMsg,
     ],
 
     'sms' => [
-        'create_admin_data_title'    => $createAdminTitle,
-        'create_admin_data_msg'      => $createAdminMsg,
-        'update_admin_data_title'    => $updateAdminTitle,
-        'update_admin_data_msg'      => $updateAdminMsg,
-        'login_otp_title'            => $loginOtpTitle,
-        'login_otp_msg'              => $loginOtpMsg,
-        'reset_password_otp_title'   => $resetOtpTitle,
-        'reset_password_otp_msg'     => $resetOtpMsg,
-        'verify_email_otp_title'     => $verifyEmailOtpTitle,
-        'verify_email_otp_msg'       => $verifyEmailOtpMsg,
-        'default_otp_title'          => $defaultOtpTitle,
-        'default_otp_msg'            => $defaultOtpMsg,
+        'create_admin_data_title' => $createAdminTitle,
+        'create_admin_data_msg' => $createAdminMsg,
+        'update_admin_data_title' => $updateAdminTitle,
+        'update_admin_data_msg' => $updateAdminMsg,
+        'login_otp_title' => $loginOtpTitle,
+        'login_otp_msg' => $loginOtpMsg,
+        'reset_password_otp_title' => $resetOtpTitle,
+        'reset_password_otp_msg' => $resetOtpMsg,
+        'verify_email_otp_title' => $verifyEmailOtpTitle,
+        'verify_email_otp_msg' => $verifyEmailOtpMsg,
+        'default_otp_title' => $defaultOtpTitle,
+        'default_otp_msg' => $defaultOtpMsg,
     ],
 
     'email' => [
@@ -139,10 +138,6 @@ return [
         إذا لم تطلب هذا الإجراء، يرجى تجاهل هذه الرسالة بأمان.<br><br>
         مع تحيات فريق :platform_name.',
     ],
-
-
-
-
 
     'test_email_credentials' => 'اختبار إعدادات البريد الإلكتروني',
 

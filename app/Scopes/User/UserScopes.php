@@ -8,11 +8,11 @@ trait UserScopes
 {
     public function scopeRelated(Builder $builder): void
     {
-        $builder->when(!auth()->user()->can('view-all-user'), function ($subQuery) {
+        $builder->when(! auth()->user()->can('view-all-user'), function ($subQuery) {
             $subQuery->where('created_by', auth()->id());
         });
     }
-    
+
     public function scopeExcludeLoggedInUser(Builder $query): Builder
     {
         return $query->where('id', '!=', auth()->id());

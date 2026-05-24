@@ -14,7 +14,8 @@ use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class ActivityLogController extends BaseController implements HasMiddleware  {
+class ActivityLogController extends BaseController implements HasMiddleware
+{
     public static function middleware(): array
     {
         return [
@@ -22,10 +23,6 @@ class ActivityLogController extends BaseController implements HasMiddleware  {
         ];
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function index(Request $request): JsonResponse
     {
         $query = app(Pipeline::class)
@@ -39,13 +36,8 @@ class ActivityLogController extends BaseController implements HasMiddleware  {
         return successResponse(wrapPaginate($query, ActivityLogResource::class));
     }
 
-    /**
-     * @param Activity $activity
-     * @return JsonResponse
-     */
     public function show(Activity $activity): JsonResponse
     {
         return successResponse(new ActivityLogResource($activity));
     }
-
 }

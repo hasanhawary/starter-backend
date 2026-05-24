@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use HasanHawary\MediaManager\Facades\Media;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Spatie\Translatable\HasTranslations;
 
 class Country extends BaseModel
@@ -14,8 +13,11 @@ class Country extends BaseModel
     use HasTranslations, SoftDeletes;
 
     public array $translatable = ['name', 'nationality'];
+
     public bool $inPermission = true;
-    public array $specialOperations = ['force-delete', 'restore','toggle-active'];
+
+    public array $specialOperations = ['force-delete', 'restore', 'toggle-active'];
+
     protected $fillable = [
         'name',
         'nationality',
@@ -39,10 +41,10 @@ class Country extends BaseModel
 
     public function flag(): Attribute
     {
-        return Attribute::make(get: fn($value) => Media::url($value));
+        return Attribute::make(get: fn ($value) => Media::url($value));
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', 1);
     }

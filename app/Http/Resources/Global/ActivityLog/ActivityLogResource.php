@@ -6,10 +6,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ActivityLogResource extends JsonResource
 {
-    /**
-     * @param $request
-     * @return array
-     */
     public function toArray($request): array
     {
         return [
@@ -32,17 +28,14 @@ class ActivityLogResource extends JsonResource
         ];
     }
 
-    /**
-     * @return string
-     */
     private function resolveMessage(): string
     {
         $causerName = $this->causer ? ($this->causer->name ?? $this->causer->full_name) : resolveTrans('automatic_causer', 'attributes');
 
         return resolveTrans('done', 'attributes')
-            . ' ActivityLogResource.php' . resolve('validation.attributes.' . $this->description)
-            . ' ' . resolveTrans(getModelKey($this->subject_type), 'api')
-            . ' ' . resolveTrans('id', 'attributes') . ' ' . $this->subject?->id
-            . ' ' . resolveTrans('causer', 'attributes') . ' ' . $causerName;
+            .' ActivityLogResource.php'.resolve('validation.attributes.'.$this->description)
+            .' '.resolveTrans(getModelKey($this->subject_type), 'api')
+            .' '.resolveTrans('id', 'attributes').' '.$this->subject?->id
+            .' '.resolveTrans('causer', 'attributes').' '.$causerName;
     }
 }

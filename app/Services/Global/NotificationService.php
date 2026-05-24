@@ -11,12 +11,6 @@ use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
-    /**
-     * @param Authenticatable $user
-     * @param array $data
-     * @param array|null $types
-     * @return void
-     */
     public static function resolve(Authenticatable $user, array $data, ?array $types = ['notify', 'realtime']): void
     {
         foreach ($types as $type) {
@@ -28,27 +22,17 @@ class NotificationService
                     'sms' => self::sendSMS($user, $data),
                     default => null,
                 };
-            } catch (\Exception | \Error $exception) {
+            } catch (\Exception|\Error $exception) {
                 logError($exception);
             }
         }
     }
 
-    /**
-     * @param Authenticatable $user
-     * @param array $data
-     * @return void
-     */
     private static function sendNotify(Authenticatable $user, array $data): void
     {
         $user->notify(new UserNotify($data));
     }
 
-    /**
-     * @param Authenticatable $user
-     * @param array $data
-     * @return void
-     */
     private static function sendSMS(Authenticatable $user, array $data): void
     {
         $message = self::resolveMessageContent($data);
@@ -58,21 +42,11 @@ class NotificationService
         }
     }
 
-    /**
-     * @param Authenticatable $user
-     * @param array $data
-     * @return void
-     */
     public static function sendEmail(Authenticatable $user, array $data): void
     {
         Mail::to($user->email)->send(new BasicMail($user, $data));
     }
 
-    /**
-     * @param Authenticatable $user
-     * @param array $data
-     * @return void
-     */
     private static function sendRealtimeNotification(Authenticatable $user, array $data): void
     {
         if (config('project.realtime.enabled')) {
@@ -80,16 +54,12 @@ class NotificationService
         }
     }
 
-    /**
-     * @param array $data
-     * @return string
-     */
     private static function resolveMessageContent(array $data): string
     {
-        $message = transWithParams($data['msg'], 'notifications.sms') . PHP_EOL;
+        $message = transWithParams($data['msg'], 'notifications.sms').PHP_EOL;
 
         if (isset($data['urlText'])) {
-            $message .= $data['urlText'] . PHP_EOL;
+            $message .= $data['urlText'].PHP_EOL;
         }
 
         if (isset($data['url'])) {

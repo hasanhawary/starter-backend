@@ -7,8 +7,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class BaseResource extends JsonResource
 {
     protected $basicResource;
-    protected $creatorResource;
 
+    protected $creatorResource;
 
     public function __construct($resource)
     {

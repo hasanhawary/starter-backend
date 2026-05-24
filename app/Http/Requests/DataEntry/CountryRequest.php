@@ -23,20 +23,20 @@ class CountryRequest extends BaseFormRequest
                     CountryResource::class,
                     $this->route('country')?->id
                 ),
-                new TranslatableRequired('countries', ['string', 'max:191'], 'country')
+                new TranslatableRequired('countries', ['string', 'max:191'], 'country'),
             ],
 
             'nationality' => [
                 'required',
                 'array',
-                new TranslatableRequired('countries', ['string', 'max:191'], 'country')
+                new TranslatableRequired('countries', ['string', 'max:191'], 'country'),
             ],
 
             'code' => [
                 'required',
                 Rule::unique('countries', 'code')
                     ->withoutTrashed()
-                    ->ignore($this->route('country'))
+                    ->ignore($this->route('country')),
             ],
             'flag' => ['sometimes', 'nullable', File::image()->max(20048)], // 20MB max
             'phone_code' => ['required'],

@@ -14,9 +14,7 @@ class BasicMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Authenticatable|null $user, public array $data)
-    {
-    }
+    public function __construct(public ?Authenticatable $user, public array $data) {}
 
     /**
      * @throws ContainerExceptionInterface

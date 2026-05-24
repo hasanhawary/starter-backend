@@ -20,7 +20,7 @@ class EncryptionService
 
         return [
             'iv' => base64_encode($iv),
-            'data' => $encrypted
+            'data' => $encrypted,
         ];
     }
 

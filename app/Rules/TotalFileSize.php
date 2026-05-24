@@ -9,11 +9,12 @@ use Illuminate\Http\UploadedFile;
 class TotalFileSize implements ValidationRule
 {
     protected int $maxBytes;
+
     protected array $existingAttachments;
 
     /**
-     * @param int $maxMB Maximum allowed total size in MB
-     * @param array $existingAttachments Optional array of existing attachments
+     * @param  int  $maxMB  Maximum allowed total size in MB
+     * @param  array  $existingAttachments  Optional array of existing attachments
      */
     public function __construct(int $maxMB, array $existingAttachments = [])
     {
@@ -23,18 +24,13 @@ class TotalFileSize implements ValidationRule
 
     /**
      * Validate the total size of uploaded files
-     *
-     * @param string $attribute
-     * @param mixed $value
-     * @param Closure $fail
-     * @return void
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $totalSize = 0;
 
         // Sum the size of new uploaded files
-        foreach ((array)$value as $file) {
+        foreach ((array) $value as $file) {
             if ($file instanceof UploadedFile) {
                 $totalSize += $file->getSize();
             }

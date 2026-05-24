@@ -7,7 +7,7 @@ return [
                 'type' => 'bar',
                 'style' => [
                     'fontFamily' => 'Cairo , Poppins, sans-serif',
-                ]
+                ],
             ],
             'xAxis' => [
                 'categories' => [],
@@ -49,7 +49,7 @@ return [
                 'title' => '',
                 'style' => [
                     'fontFamily' => 'Cairo , Poppins, sans-serif',
-                ]
+                ],
             ],
             'title' => [
                 'text' => '',
@@ -69,10 +69,10 @@ return [
                 'type' => 'column',
                 'style' => [
                     'fontFamily' => 'Cairo , Poppins, sans-serif',
-                ]
+                ],
             ],
             'xAxis' => [
-                'categories' => [],// Add Categories here
+                'categories' => [], // Add Categories here
             ],
             'yAxis' => [
                 'title' => [
@@ -86,9 +86,9 @@ return [
                 'column' => [
                     'borderRadius' => '50%',
                     'maxPointWidth' => '25',
-                ]
+                ],
             ],
-            'series' => [],// Add Series Here
+            'series' => [], // Add Series Here
         ],
         'area' => [
             'chart' => [
@@ -96,7 +96,7 @@ return [
                 'title' => '',
                 'style' => [
                     'fontFamily' => 'Cairo , Poppins, sans-serif',
-                ]
+                ],
             ],
             'title' => [
                 'text' => '',
@@ -116,7 +116,7 @@ return [
                 'type' => 'pie',
                 'style' => [
                     'fontFamily' => 'Cairo , Poppins, sans-serif',
-                ]
+                ],
             ],
             'title' => [
                 'text' => '',
@@ -129,7 +129,7 @@ return [
                         'pie' => [
                             'allowPointSelect' => true,
                             'cursor' => 'pointer',
-                        ]
+                        ],
                     ],
                 ],
                 'series' => [
@@ -158,7 +158,7 @@ return [
                     ],
                 ],
             ],
-            'series' => []
-        ]
-    ]
+            'series' => [],
+        ],
+    ],
 ];

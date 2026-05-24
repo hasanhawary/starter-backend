@@ -18,14 +18,12 @@ class ProfileController extends BaseController
 {
     /**
      * Return current user info and all active sessions
-     *
-     * @return JsonResponse
      */
     public function user(): JsonResponse
     {
         $user = User::with(['roles.permissions', 'settings'])->find(auth()->id());
 
-        if (!$user) {
+        if (! $user) {
             return failResponse(trans('api.user_not_found'));
         }
 
@@ -39,15 +37,12 @@ class ProfileController extends BaseController
     }
 
     /**
-     * @param UpdateProfileRequest $request
-     * @return JsonResponse
-     *
      * @throws Exception
      */
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
         $user = auth()->user();
-        $data = Arr::except(array_filter($request->validated(), fn($value) => $value !== null), 'avatar');
+        $data = Arr::except(array_filter($request->validated(), fn ($value) => $value !== null), 'avatar');
         $data['avatar'] = Media::replace($user->avatar)->upload($request->file('avatar'), 'users');
 
         $user->update($data);
@@ -56,9 +51,6 @@ class ProfileController extends BaseController
     }
 
     /**
-     * @param UpdateSettingRequest $request
-     * @return JsonResponse
-     *
      * @throws Exception
      */
     public function updateSetting(UpdateSettingRequest $request): JsonResponse
@@ -72,10 +64,6 @@ class ProfileController extends BaseController
         return successResponse($user->refresh()->load('settings'), trans('api.profile_updated'));
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function destroyAvatar(Request $request): JsonResponse
     {
         if (empty(auth()->user()->getOriginal('avatar'))) {

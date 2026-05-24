@@ -138,7 +138,7 @@ class ExportServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
 
-        Blade::componentNamespace(config('modules.namespace').'\\' . $this->name . '\\View\\Components', $this->nameLower);
+        Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 
     /**
@@ -191,7 +191,7 @@ class ExportServiceProvider extends ServiceProvider
     /**
      * Generic helper to merge module translations into the application translator.
      *
-     * @param string $fileName The name of the file (e.g., 'report' or 'enums')
+     * @param  string  $fileName  The name of the file (e.g., 'report' or 'enums')
      */
     protected function mergeTranslations(string $fileName): void
     {

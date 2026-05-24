@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API\DataEntry;
 
 use App\Filters\Global\ActiveFilter;
-use App\Filters\Global\JsonDisplayNameFilter;
 use App\Filters\Global\JsonNameFilter;
 use App\Filters\Global\OrderByFilter;
 use App\Filters\Global\TrashedFilter;
@@ -19,7 +18,6 @@ use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
-use function __;
 
 class CountryController extends BaseController implements HasMiddleware
 {
@@ -35,14 +33,10 @@ class CountryController extends BaseController implements HasMiddleware
     {
         return [
             new Middleware(PermissionMiddleware::using('create-country'), only: ['store']),
-            new Middleware(PermissionMiddleware::using('update-country'), only: ['update'])
+            new Middleware(PermissionMiddleware::using('update-country'), only: ['update']),
         ];
     }
 
-    /**
-     * @param PageRequest $request
-     * @return JsonResponse
-     */
     public function index(PageRequest $request): JsonResponse
     {
         $query = app(Pipeline::class)
@@ -53,10 +47,6 @@ class CountryController extends BaseController implements HasMiddleware
         return successResponse(wrapPaginate($query, CountryResource::class));
     }
 
-    /**
-     * @param CountryRequest $request
-     * @return JsonResponse
-     */
     public function store(CountryRequest $request): JsonResponse
     {
         $country = Country::create($request->validated());
@@ -64,20 +54,11 @@ class CountryController extends BaseController implements HasMiddleware
         return successResponse(new CountryResource($country->refresh()), __('api.created_success'));
     }
 
-    /**
-     * @param Country $country
-     * @return JsonResponse
-     */
     public function show(Country $country): JsonResponse
     {
         return successResponse(new CountryResource($country));
     }
 
-    /**
-     * @param CountryRequest $request
-     * @param Country $country
-     * @return JsonResponse
-     */
     public function update(CountryRequest $request, Country $country): JsonResponse
     {
         $country->update($request->validated());

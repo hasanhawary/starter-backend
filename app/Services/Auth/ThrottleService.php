@@ -10,7 +10,7 @@ class ThrottleService
 {
     public function ensureIsNotRateLimited(string $key, int $maxAttempts = 3): void
     {
-        if (!RateLimiter::tooManyAttempts($key, $maxAttempts)) {
+        if (! RateLimiter::tooManyAttempts($key, $maxAttempts)) {
             return;
         }
 
@@ -33,6 +33,6 @@ class ThrottleService
 
     public function generateThrottleKey(string $email, string $ip): string
     {
-        return Str::lower($email) . '|' . $ip;
+        return Str::lower($email).'|'.$ip;
     }
 }

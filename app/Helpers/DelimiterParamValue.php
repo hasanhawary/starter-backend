@@ -42,6 +42,6 @@ readonly class DelimiterParamValue
      */
     public static function enum(BackedEnum $enum): self
     {
-        return new self(get_class($enum) . '@' . $enum->name, 'enum');
+        return new self(get_class($enum).'@'.$enum->name, 'enum');
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Trait\Global;
 
-
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 
@@ -67,8 +66,7 @@ trait AdvancedFilter
      *        ],
      *   ],
      */
-
-    public function applyAdvancedFilter(Builder $query): Static
+    public function applyAdvancedFilter(Builder $query): static
     {
         $advancedFilters = $this->filter['advanced'] ?? [];
 
@@ -77,15 +75,17 @@ trait AdvancedFilter
         }
 
         $relationMap = $this->relations['many'] ?? [];
-        $allowedColumns  = $this->getAllowedColumns($query);
-        $allowedKeys     = array_merge(array_keys($relationMap), $allowedColumns);
+        $allowedColumns = $this->getAllowedColumns($query);
+        $allowedKeys = array_merge(array_keys($relationMap), $allowedColumns);
 
         collect($advancedFilters)->each(function ($item) use ($query, $relationMap, $allowedKeys) {
             $key = data_get($item, 'key');
             $value = Arr::wrap(data_get($item, 'value'));
 
             // silently skip unknown keys
-            if (!in_array($key, $allowedKeys, true)) return;
+            if (! in_array($key, $allowedKeys, true)) {
+                return;
+            }
 
             // Apply resolver if defined for this key
             if (isset($this->resolvers[$key])) {
@@ -94,33 +94,31 @@ trait AdvancedFilter
                 $value = Arr::wrap($value);
             }
 
-            if (empty($value)) return;
+            if (empty($value)) {
+                return;
+            }
 
             try {
 
                 if (array_key_exists($key, $relationMap)) {
-                    $relation   = data_get($relationMap[$key], 'relation', $key);
-                    $column     = data_get($relationMap[$key], 'column', 'id');
-                    $morph      = data_get($relationMap[$key], 'morph');
+                    $relation = data_get($relationMap[$key], 'relation', $key);
+                    $column = data_get($relationMap[$key], 'column', 'id');
+                    $morph = data_get($relationMap[$key], 'morph');
                     $morphTypes = data_get($relationMap[$key], 'morph_types', []);
 
-                    if ($morph && !empty($morphTypes)) {
-                        $query->whereHas($relation, fn($q) =>
-                            $q->whereHasMorph($morph, $morphTypes, fn($q2) =>
-                                $q2->whereIn($column, $value)
-                            )
+                    if ($morph && ! empty($morphTypes)) {
+                        $query->whereHas($relation, fn ($q) => $q->whereHasMorph($morph, $morphTypes, fn ($q2) => $q2->whereIn($column, $value)
+                        )
                         );
-                    }
-                    else {
-                        $query->whereHas($relation, fn($q) => $q->whereIn($column, $value));
+                    } else {
+                        $query->whereHas($relation, fn ($q) => $q->whereIn($column, $value));
                     }
 
-                }
-                else {
+                } else {
                     $query->whereIn($key, $value);
                 }
 
-            }catch (\Exception $e) {
+            } catch (\Exception $e) {
                 abort(400, __('api.record_not_found'));
             }
         });
@@ -134,5 +132,4 @@ trait AdvancedFilter
             ->getSchemaBuilder()
             ->getColumnListing($query->getModel()->getTable());
     }
-
 }

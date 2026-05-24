@@ -250,5 +250,5 @@ return [
         'notifiable' => 'Notifiable',
         'data' => 'Data',
         'token' => 'Token',
-    ]
+    ],
 ];

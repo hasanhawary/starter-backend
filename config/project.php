@@ -76,7 +76,7 @@ return [
         'delay' => '30',          // seconds between sends
         'expires_in' => 10,       // minutes
         'max_attempts' => 5,
-        'lock_time' => 120        //seconds
+        'lock_time' => 120,        // seconds
     ],
 
     /*

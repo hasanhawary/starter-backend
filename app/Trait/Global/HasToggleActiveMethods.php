@@ -3,19 +3,22 @@
 namespace App\Trait\Global;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 trait HasToggleActiveMethods
 {
     public string $model;
 
     protected bool $useTogglePolicy = true;
+
     protected array $toggleGuards = [];
+
     protected array $beforeToggleCallbacks = [];
+
     protected array $afterToggleCallbacks = [];
 
     /*
@@ -26,12 +29,14 @@ trait HasToggleActiveMethods
     protected function setToggleModel(string $model): self
     {
         $this->model = $model;
+
         return $this;
     }
 
     protected function enableTogglePolicy(bool $state = true): self
     {
         $this->useTogglePolicy = $state;
+
         return $this;
     }
 
@@ -39,6 +44,7 @@ trait HasToggleActiveMethods
     {
         $guards = is_array($guards) ? $guards : [$guards];
         $this->toggleGuards = array_merge($this->toggleGuards ?? [], $guards);
+
         return $this;
     }
 
@@ -46,6 +52,7 @@ trait HasToggleActiveMethods
     {
         $callback = is_array($callback) ? $callback : [$callback];
         $this->beforeToggleCallbacks = array_merge($this->beforeToggleCallbacks ?? [], $callback);
+
         return $this;
     }
 
@@ -53,6 +60,7 @@ trait HasToggleActiveMethods
     {
         $callback = is_array($callback) ? $callback : [$callback];
         $this->afterToggleCallbacks = array_merge($this->afterToggleCallbacks ?? [], $callback);
+
         return $this;
     }
 
@@ -68,7 +76,7 @@ trait HasToggleActiveMethods
         $models = $query->get();
 
         // Ensure Is Support IsActive action
-        if (!Schema::hasColumn((new $this->model())->getTable(), 'is_active')) {
+        if (! Schema::hasColumn((new $this->model)->getTable(), 'is_active')) {
             return failResponse(__('api.model_not_support_toggle', ['model' => class_basename($this->model)]));
         }
 
@@ -83,15 +91,15 @@ trait HasToggleActiveMethods
             }
 
             // Guards
-            if (!$this->passesToggleGuards($model)) {
+            if (! $this->passesToggleGuards($model)) {
                 abort(403, __('api.not_allowed_to_toggle_active', ['id' => $model->getKey()]));
             }
 
             // Before callbacks
             $this->runToggleCallbacks($this->beforeToggleCallbacks ?? [], $model);
 
-            //Execute
-            $model->update(['is_active' => !$model->is_active]);
+            // Execute
+            $model->update(['is_active' => ! $model->is_active]);
 
             // After callbacks
             $this->runToggleCallbacks($this->afterToggleCallbacks ?? [], $model);
@@ -116,9 +124,9 @@ trait HasToggleActiveMethods
         if (Gate::getPolicyFor($model)) {
             Gate::authorize($ability, $model);
         } else {
-            $permission = $ability . '-' . Str::snake(class_basename($model), '-');
-            if (!auth()->user()?->hasPermissionTo($permission)) {
-                abort(403, __("api.not_allowed_to_toggle_active", ['id' => $model->getKey()]));
+            $permission = $ability.'-'.Str::snake(class_basename($model), '-');
+            if (! auth()->user()?->hasPermissionTo($permission)) {
+                abort(403, __('api.not_allowed_to_toggle_active', ['id' => $model->getKey()]));
             }
         }
     }
@@ -126,10 +134,11 @@ trait HasToggleActiveMethods
     protected function passesToggleGuards(Model $model): bool
     {
         foreach ($this->toggleGuards ?? [] as $guard) {
-            if (is_callable($guard) && !$guard($model)) {
+            if (is_callable($guard) && ! $guard($model)) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -145,9 +154,9 @@ trait HasToggleActiveMethods
         $ids = request()->input('ids')
             ?? request()->input('id');
 
-        if (!$ids) {
+        if (! $ids) {
             $routeParams = request()->route()?->parameters();
-            if (!empty($routeParams)) {
+            if (! empty($routeParams)) {
                 $ids = array_values($routeParams)[0]; // take the first parameter
             }
         }

@@ -53,7 +53,7 @@ class RolePolicy
     */
     protected function ownsOrAll(User $user, ?Role $role): bool
     {
-        return !$role
+        return ! $role
             || $user->can('view-all-role')
             || $role->created_by === $user->id;
     }

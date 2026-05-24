@@ -1,6 +1,5 @@
 <?php
 
-
 return [
 
     'filters' => [
@@ -25,8 +24,8 @@ return [
             'advanced' => [
                 'created_by' => [
                     'type' => 'integer',
-                    'reference' => 'users'
-                ]
+                    'reference' => 'users',
+                ],
             ],
         ],
 
@@ -40,7 +39,6 @@ return [
             'phone',
             'gender',
         ],
-    ]
+    ],
 
 ];
-

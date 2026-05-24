@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 return [
 
     /*
@@ -43,7 +45,7 @@ return [
         'api' => [
             'driver' => 'sanctum',
             'provider' => 'users',
-        ]
+        ],
     ],
 
     /*
@@ -66,7 +68,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => \App\Models\User::class,
+            'model' => User::class,
         ],
         // 'users' => [
         //     'driver' => 'database',

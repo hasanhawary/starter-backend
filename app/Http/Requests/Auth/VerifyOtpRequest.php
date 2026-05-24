@@ -13,7 +13,7 @@ class VerifyOtpRequest extends BaseFormRequest
         return [
             'email' => 'required|email',
             'otp' => 'required',
-            'type' => ['required', new Enum(OtpTypeEnum::class)]
+            'type' => ['required', new Enum(OtpTypeEnum::class)],
         ];
     }
 }

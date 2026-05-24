@@ -17,7 +17,6 @@ use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Throwable;
-use function __;
 
 class RoleController extends BaseController
 {
@@ -28,14 +27,10 @@ class RoleController extends BaseController
         parent::__construct();
         $this->model = Role::class;
 
-        $this->setDeleteGuards('delete', fn(Role $role) => !$role->roleUsers()->exists())
-            ->beforeDelete('delete', fn(Role $role) => $role->permissions()->detach());
+        $this->setDeleteGuards('delete', fn (Role $role) => ! $role->roleUsers()->exists())
+            ->beforeDelete('delete', fn (Role $role) => $role->permissions()->detach());
     }
 
-    /**
-     * @param PageRequest $request
-     * @return JsonResponse
-     */
     public function index(PageRequest $request): JsonResponse
     {
         Gate::authorize('view', Role::class);
@@ -49,8 +44,6 @@ class RoleController extends BaseController
     }
 
     /**
-     * @param RoleRequest $request
-     * @return JsonResponse
      * @throws Throwable
      */
     public function store(RoleRequest $request): JsonResponse
@@ -66,10 +59,6 @@ class RoleController extends BaseController
         });
     }
 
-    /**
-     * @param Role $role
-     * @return JsonResponse
-     */
     public function show(Role $role): JsonResponse
     {
         Gate::authorize('view', $role);
@@ -78,9 +67,6 @@ class RoleController extends BaseController
     }
 
     /**
-     * @param RoleRequest $request
-     * @param Role $role
-     * @return JsonResponse
      * @throws Throwable
      * @throws Throwable
      */

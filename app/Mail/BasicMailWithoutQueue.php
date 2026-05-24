@@ -13,9 +13,7 @@ class BasicMailWithoutQueue extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Authenticatable|null $user, public array $data)
-    {
-    }
+    public function __construct(public ?Authenticatable $user, public array $data) {}
 
     /**
      * @throws ContainerExceptionInterface

@@ -15,16 +15,11 @@ class ValidLength implements ValidationRule
         $this->length = null;
     }
 
-    /**
-     * @param string $attribute
-     * @param mixed $value
-     * @param Closure $fail
-     * @return void
-     */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!class_exists($this->modelClass) || !is_subclass_of($this->modelClass, Model::class)) {
+        if (! class_exists($this->modelClass) || ! is_subclass_of($this->modelClass, Model::class)) {
             $fail(__('validation.invalid_model'));
+
             return;
         }
 
@@ -33,10 +28,10 @@ class ValidLength implements ValidationRule
         if ($model && $model->{$this->lengthColumn}) {
             $this->length = $model->{$this->lengthColumn};
 
-            if (strlen($value) !== (int)$this->length) {
+            if (strlen($value) !== (int) $this->length) {
                 $fail(__('validation.exact_length', [
                     'length' => $this->length,
-                    'attribute' => __('validation.attributes.phone')
+                    'attribute' => __('validation.attributes.phone'),
                 ]));
             }
         }

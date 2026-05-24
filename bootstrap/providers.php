@@ -1,8 +1,13 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\ExtendedSanctumServiceProvider;
+use HasanHawary\ReportBuilder\ReportBuilderServiceProvider;
+use Spatie\Permission\PermissionServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\ExtendedSanctumServiceProvider::class,
-    Spatie\Permission\PermissionServiceProvider::class,
-    HasanHawary\ReportBuilder\ReportBuilderServiceProvider::class,
+    AppServiceProvider::class,
+    ExtendedSanctumServiceProvider::class,
+    PermissionServiceProvider::class,
+    ReportBuilderServiceProvider::class,
 ];

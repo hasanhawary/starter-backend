@@ -14,7 +14,7 @@ class NotificationResource extends JsonResource
             'target_type' => @$this->data['target_type'],
             'url' => @$this->data['url'],
             'group' => @$this->data['group'],
-            'title'   => strip_tags(transWithParams($this->data['title'] ?? '', 'notifications.notify')),
+            'title' => strip_tags(transWithParams($this->data['title'] ?? '', 'notifications.notify')),
             'message' => strip_tags(transWithParams($this->data['message'] ?? '', 'notifications.notify')),
             'read_at' => $this->read_at,
             'open_at' => $this->open_at,

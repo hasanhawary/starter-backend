@@ -17,7 +17,7 @@ class ResetPasswordRequest extends BaseFormRequest
                 'required',
                 'confirmed',
                 'min:8',
-                config('project.auth.strong_password') ? new StrongPassword : ''
+                config('project.auth.strong_password') ? new StrongPassword : '',
             ],
         ];
     }

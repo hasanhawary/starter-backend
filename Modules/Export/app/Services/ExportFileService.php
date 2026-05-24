@@ -13,7 +13,7 @@ class ExportFileService
     {
         $filters = array_merge($data, match ($format) {
             ExportFormatEnum::Excel => ['related_type' => 'count', 'format' => 'xlsx'],
-            ExportFormatEnum::Pdf   => ['lang' => app()->getLocale() ?? 'ar', 'format' => 'pdf'],
+            ExportFormatEnum::Pdf => ['lang' => app()->getLocale() ?? 'ar', 'format' => 'pdf'],
             default => throw new \Exception('Unexpected match value'),
         });
 
@@ -55,7 +55,7 @@ class ExportFileService
 
     public function deleteExport(ExportFile $export): bool
     {
-        if (!empty($export->getRawOriginal('file_path')) && Storage::exists($export->getRawOriginal('file_path'))) {
+        if (! empty($export->getRawOriginal('file_path')) && Storage::exists($export->getRawOriginal('file_path'))) {
             Storage::delete($export->getRawOriginal('file_path'));
         }
 

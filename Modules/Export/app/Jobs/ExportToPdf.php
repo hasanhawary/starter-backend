@@ -18,6 +18,7 @@ class ExportToPdf implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $timeout = 3600;
+
     public int $tries = 3;
 
     public function __construct(
@@ -31,7 +32,7 @@ class ExportToPdf implements ShouldQueue
     {
         $export = ExportFile::find($this->exportId);
 
-        if (!$export) {
+        if (! $export) {
             return;
         }
 
@@ -42,7 +43,7 @@ class ExportToPdf implements ShouldQueue
             $realPath = $response->getFile()->getRealPath();
 
             $fileName = $this->generateFileName();
-            $path = Media::withName(fn() => $fileName)->upload($realPath, $this->folderPath);
+            $path = Media::withName(fn () => $fileName)->upload($realPath, $this->folderPath);
 
             $exportService->markAsCompleted($export, $path, Media::meta($path)->basename());
 
@@ -56,6 +57,7 @@ class ExportToPdf implements ShouldQueue
     {
         $name = $this->filters['name'] ?? $this->exportType;
         $timestamp = time();
+
         return "{$name}_export_{$timestamp}.pdf";
     }
 }

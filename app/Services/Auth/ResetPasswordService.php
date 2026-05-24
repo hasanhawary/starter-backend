@@ -9,15 +9,11 @@ use App\Http\Requests\Auth\VerifyOtpRequest;
 
 class ResetPasswordService extends BaseAuthService
 {
-    public function __construct(protected OTPService $otpService)
-    {
-    }
+    public function __construct(protected OTPService $otpService) {}
 
     /**
      * Reset user password using OTP
      *
-     * @param ResetPasswordRequest $request
-     * @return bool
      * @throws InvalidOtpException
      */
     public function reset(ResetPasswordRequest $request): bool
@@ -27,7 +23,7 @@ class ResetPasswordService extends BaseAuthService
             ->setModel($this->model)
             ->check(new VerifyOtpRequest($request->validated()), OtpTypeEnum::ResetPassword->value);
 
-        if (!$user) {
+        if (! $user) {
             throw new InvalidOtpException(__('api.invalid_otp'));
         }
 

@@ -10,8 +10,7 @@ class SessionResource extends JsonResource
     /**
      * Transform the session token into an array
      *
-     * @param Request $request
-     * @return array
+     * @param  Request  $request
      */
     public function toArray($request): array
     {

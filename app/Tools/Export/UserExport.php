@@ -5,7 +5,6 @@ namespace App\Tools\Export;
 use App\Enum\User\UserGenderEnum;
 use App\Models\User;
 use HasanHawary\ExportBuilder\BaseExport;
-use Illuminate\Support\Arr;
 
 class UserExport extends BaseExport
 {
@@ -35,12 +34,11 @@ class UserExport extends BaseExport
                 'many' => [
                     'count' => [],
                     'list' => [],
-                    'concat' => ['roles' => ['display_name' => 'text']]
-                ]
-            ]
+                    'concat' => ['roles' => ['display_name' => 'text']],
+                ],
+            ],
         ];
 
         parent::__construct($config, $filter);
     }
 }
-

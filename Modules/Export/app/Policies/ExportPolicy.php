@@ -35,7 +35,6 @@ class ExportPolicy
         return $this->canPerform($user, $model, 'force-delete-export-file');
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Helpers

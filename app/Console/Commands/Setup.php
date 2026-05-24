@@ -17,6 +17,7 @@ use Throwable;
 class Setup extends Command
 {
     protected string $db;
+
     protected string $defaultConnection;
 
     /**
@@ -39,6 +40,7 @@ class Setup extends Command
 
     /**
      * Execute the console command.
+     *
      * @throws Throwable
      */
     public function handle(): void
@@ -50,7 +52,7 @@ class Setup extends Command
         $this->copyEnvExampleToEnv();
 
         $this->db = $this->option('db-database')
-            ?: Str::snake(config('app.name')) . '_' . random_int(999, 9999) . '_db';
+            ?: Str::snake(config('app.name')).'_'.random_int(999, 9999).'_db';
 
         $this->updateEnvVariablesFromOptions();
 
@@ -72,14 +74,12 @@ class Setup extends Command
 
     private function copyEnvExampleToEnv(): void
     {
-        if (!File::exists(base_path('.env')) && File::exists(base_path('.env.example'))) {
+        if (! File::exists(base_path('.env')) && File::exists(base_path('.env.example'))) {
             File::copy(base_path('.env.example'), base_path('.env'));
             $this->info('✔ .env file created.');
         }
     }
 
-    /**
-     */
     private function updateEnvVariablesFromOptions(): void
     {
         updateDotEnv([
@@ -154,21 +154,21 @@ class Setup extends Command
             DB::reconnect($connection);
             DB::connection($connection)->getPdo();
 
-            //Migrate
+            // Migrate
             $this->warn('Running migrate...');
             Artisan::call('migrate:fresh', ['--force' => true]);
 
             $this->info('✔ Migrations executed.');
 
-            //Seed (DEFAULT = yes)
-            if (!$this->option('no-seed')) {
+            // Seed (DEFAULT = yes)
+            if (! $this->option('no-seed')) {
                 $this->warn('Running seeders...');
                 Artisan::call('db:seed', ['--force' => true]);
                 $this->info('✔ Seeders executed.');
             }
 
         } catch (Throwable $e) {
-            $this->error('❌ Database setup failed: ' . $e->getMessage());
+            $this->error('❌ Database setup failed: '.$e->getMessage());
 
             // Only attempt DROP DATABASE for MySQL
             if ($config['driver'] === 'mysql') {
@@ -222,7 +222,7 @@ class Setup extends Command
             Artisan::call("module:enable {$name}");
             Artisan::call("module:migrate:fresh {$name}", ['--force' => true]);
 
-            if (!$this->option('no-seed')) {
+            if (! $this->option('no-seed')) {
                 Artisan::call("module:seed {$name}", ['--force' => true]);
             }
 

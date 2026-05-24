@@ -16,8 +16,6 @@ class ResetPasswordController extends BaseController
     }
 
     /**
-     * @param ResetPasswordRequest $request
-     * @return JsonResponse
      * @throws InvalidOtpException
      */
     public function __invoke(ResetPasswordRequest $request): JsonResponse

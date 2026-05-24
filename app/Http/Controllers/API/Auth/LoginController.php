@@ -16,10 +16,9 @@ use Illuminate\Http\JsonResponse;
 class LoginController extends BaseController
 {
     public function __construct(
-        protected LoginService    $loginService,
+        protected LoginService $loginService,
         protected ThrottleService $throttleService
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -46,6 +45,7 @@ class LoginController extends BaseController
 
         } catch (InvalidEmailAndPasswordCombinationException|InActiveUserException|InvalidOtpException $e) {
             $this->throttleService->incrementRateLimit($key, config('project.auth.lockout_time'));
+
             return failResponse($e->getMessage());
         } catch (EmailVerifiedException $e) {
 

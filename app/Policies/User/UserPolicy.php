@@ -79,7 +79,7 @@ class UserPolicy
     */
     protected function ownsOrAll(Authenticatable $user, ?User $model): bool
     {
-        return !$model
+        return ! $model
             || $user->can('view-all-user')
             || $model->created_by === $user->id;
     }
@@ -89,7 +89,8 @@ class UserPolicy
         return in_array($model->id, [...rootUsers(), $user->id], true);
     }
 
-    protected function canAny(Authenticatable $user, ?User $model, array $permissions): bool {
+    protected function canAny(Authenticatable $user, ?User $model, array $permissions): bool
+    {
         foreach ($permissions as $permission) {
             if ($user->can($permission)) {
                 return $this->ownsOrAll($user, $model);

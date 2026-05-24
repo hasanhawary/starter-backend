@@ -13,6 +13,7 @@ class Setting extends BaseModel
     use HasTranslations;
 
     public bool $inPermission = true;
+
     public array $translatable = ['label', 'placeholder'];
 
     public array $basicOperations = ['read', 'update'];
@@ -33,21 +34,16 @@ class Setting extends BaseModel
     public function value(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->castValue($value),
-            set: static fn($value) => is_array($value)
+            get: fn ($value) => $this->castValue($value),
+            set: static fn ($value) => is_array($value)
                 ? json_encode($value, JSON_THROW_ON_ERROR)
                 : $value
         );
     }
 
-    /**
-     * Scope a query to only include public settings.
-     *
-     * @return Builder
-     */
-    public function scopePublic(): Builder
+    public function scopePublic(Builder $query): Builder
     {
-        return $this->where('is_env', false);
+        return $query->where('is_env', false);
     }
 
     /**

@@ -105,6 +105,6 @@ return [
                 ['key' => 'port', 'type' => 'text', 'label' => ['ar' => 'المنفذ', 'en' => 'Port'], 'placeholder' => ['ar' => 'الخيارات: 8080, 9000, 3000', 'en' => 'Options: 8080, 9000, 3000'], 'is_multi_lang' => false],
                 ['key' => 'scheme', 'type' => 'text', 'label' => ['ar' => 'البروتوكول', 'en' => 'Scheme'], 'placeholder' => ['ar' => 'الخيارات: http, https, ws, wss', 'en' => 'Options: http, https, ws, wss'], 'is_multi_lang' => false],
             ],
-        ]
-    ]
+        ],
+    ],
 ];

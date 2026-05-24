@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Notification extends BaseModel
 {
-    protected $guarded = [];
+    protected $fillable = ['type', 'notifiable_type', 'notifiable_id', 'data', 'read_at', 'open_at'];
 
     protected $casts = [
         'id' => 'string',
@@ -24,15 +24,5 @@ class Notification extends BaseModel
             'notifiable_type' => User::class,
             'notifiable_id' => auth()->id(),
         ]);
-    }
-
-    public function markAsOpen(): void
-    {
-        $this->whereNull('open_at')->update(['open_at' => now()]);
-    }
-
-    public function markAsRead(?array $ids = []): void
-    {
-        $this->whereIn('id', $ids)->update(['read_at' => now()]);
     }
 }

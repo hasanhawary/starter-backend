@@ -51,7 +51,7 @@ class UserRequest extends BaseFormRequest
                 'required',
                 'confirmed',
                 'min:8',
-                config('project.auth.strong_password') ? new StrongPassword : ''
+                config('project.auth.strong_password') ? new StrongPassword : '',
             ],
 
             'gender' => ['required', new Enum(UserGenderEnum::class)],
@@ -88,7 +88,7 @@ class UserRequest extends BaseFormRequest
         }
 
         $roles = $this->input('roles', []);
-        if (!is_array($roles)) {
+        if (! is_array($roles)) {
             $this->merge(['roles' => Arr::wrap($roles)]);
         }
     }

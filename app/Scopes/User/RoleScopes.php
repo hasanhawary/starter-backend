@@ -8,7 +8,7 @@ trait RoleScopes
 {
     public function scopeRelated(Builder $builder): void
     {
-        $builder->when(!auth()->user()->can('view-all-role'), function ($subQuery) {
+        $builder->when(! auth()->user()->can('view-all-role'), function ($subQuery) {
             $subQuery->where('created_by', auth()->id());
         })
             ->excludeRoot()

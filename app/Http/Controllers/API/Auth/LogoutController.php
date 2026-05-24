@@ -10,21 +10,19 @@ class LogoutController extends BaseController
 {
     /**
      * Logout user from current device, all devices, or a specific session
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function __invoke(Request $request): JsonResponse
     {
         $user = auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return failResponse(trans('api.user_not_found'));
         }
 
         // Logout from all devices
         if ($request->boolean('all_devices')) {
             $user->tokens()->delete();
+
             return successResponse(msg: trans('api.user_logged_out_all_devices'));
         }
 

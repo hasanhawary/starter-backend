@@ -31,13 +31,9 @@ class UserController extends BaseController
     {
         parent::__construct();
         $this->model = User::class;
-        $this->beforeDelete('force', fn(User $user) => Media::delete($user->avatar));
+        $this->beforeDelete('force', fn (User $user) => Media::delete($user->avatar));
     }
 
-    /**
-     * @param PageRequest $request
-     * @return JsonResponse
-     */
     public function index(PageRequest $request): JsonResponse
     {
         Gate::authorize('view', User::class);
@@ -51,8 +47,6 @@ class UserController extends BaseController
     }
 
     /**
-     * @param UserRequest $request
-     * @return JsonResponse
      * @throws Throwable
      */
     public function store(UserRequest $request): JsonResponse
@@ -63,16 +57,13 @@ class UserController extends BaseController
             $user = User::create($request->validated());
             $this->syncRelations($user, $request);
 
-            DB::afterCommit(fn() => $this->sendCredentials($user, $request));
+            DB::afterCommit(fn () => $this->sendCredentials($user, $request));
 
             return successResponse(new UserResource($user->refresh()), __('api.created_success'));
         });
     }
 
     /**
-     * @param UserRequest $request
-     * @param User $user
-     * @return JsonResponse
      * @throws Throwable
      */
     public function update(UserRequest $request, User $user): JsonResponse
@@ -83,16 +74,12 @@ class UserController extends BaseController
             $user->update($request->validated());
             $this->syncRelations($user, $request);
 
-            DB::afterCommit(fn() => $this->sendCredentials($user->refresh(), $request));
+            DB::afterCommit(fn () => $this->sendCredentials($user->refresh(), $request));
 
             return successResponse(new UserResource($user->refresh()), __('api.updated_success'));
         });
     }
 
-    /**
-     * @param User $user
-     * @return JsonResponse
-     */
     public function show(User $user): JsonResponse
     {
         Gate::authorize('view', $user);
@@ -107,28 +94,22 @@ class UserController extends BaseController
     */
     private function syncRelations(User $user, UserRequest $request): void
     {
-        when($request->filled('roles'), static fn() => $user->syncRoles(Role::whereId($request->roles)->pluck('name')));
-        when($request->filled('permissions'), static fn() => $user->syncPermissions($request->permissions));
+        when($request->filled('roles'), static fn () => $user->syncRoles(Role::whereId($request->roles)->pluck('name')));
+        when($request->filled('permissions'), static fn () => $user->syncPermissions($request->permissions));
     }
 
-    /**
-     * @param User $user
-     * @param UserRequest $request
-     * @param bool $isCreate
-     * @return void
-     */
     private function sendCredentials(User $user, UserRequest $request, bool $isCreate = true): void
     {
         // Skip update if nothing changed
-         if (!$isCreate && !($user->isDirty('email') || $user->isDirty('password'))) {
-             return;
-         }
+        if (! $isCreate && ! ($user->isDirty('email') || $user->isDirty('password'))) {
+            return;
+        }
 
         $params = [
             'name' => $request->name,       // optional use types (plain, json, enum) DelimiterParamValue::plain($request->name)
             'email' => $request->email,
             'phone' => $user->getFullPhone(),
-            'password' => (string)$request->password,
+            'password' => (string) $request->password,
         ];
         $params[$isCreate ? 'created_at' : 'updated_at'] = DelimiterParamValue::plain(now()->format('Y-m-d H:i'));
         $user->sendNotification([
@@ -136,7 +117,7 @@ class UserController extends BaseController
             'msg' => buildDelimiterMessage($isCreate ? 'create_admin_data_msg' : 'update_admin_data_msg', $params),
             'target_id' => $user->id,
             'target_type' => 'users',
-            'group' => NotificationGroupEnum::Global->value
+            'group' => NotificationGroupEnum::Global->value,
         ], ['email', 'realtime', 'notify']);
     }
 }

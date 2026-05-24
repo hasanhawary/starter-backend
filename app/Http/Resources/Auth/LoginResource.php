@@ -10,9 +10,6 @@ use Random\RandomException;
 
 class LoginResource extends JsonResource
 {
-    /**
-     * @var string|null
-     */
     private ?string $token;
 
     public function __construct(User $resource, ?string $token)
@@ -28,14 +25,14 @@ class LoginResource extends JsonResource
     public function toArray(Request $request): array
     {
         $permissions = $this->roles
-            ?->flatMap(fn($role) => $role->permissions->pluck('name'))
+            ?->flatMap(fn ($role) => $role->permissions->pluck('name'))
             ->unique()
             ->values()
             ->toArray();
 
-        $roles = $this->roles?->map(fn($role) => [
+        $roles = $this->roles?->map(fn ($role) => [
             'id' => $role->id,
-            'name' => $role->name
+            'name' => $role->name,
         ])->toArray();
 
         $encryptRole = config('project.auth.encryption.outgoing.roles', true);

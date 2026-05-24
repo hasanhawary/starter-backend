@@ -4,14 +4,14 @@ return [
 
     'export_format' => [
         'excel' => 'Excel',
-        'pdf'   => 'PDF',
+        'pdf' => 'PDF',
     ],
 
     'export_status' => [
-        'pending'    => 'Pending',
+        'pending' => 'Pending',
         'processing' => 'Processing',
-        'completed'  => 'Completed',
-        'failed'     => 'Failed',
+        'completed' => 'Completed',
+        'failed' => 'Failed',
     ],
 
 ];

@@ -13,7 +13,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use JsonException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class SettingController extends BaseController implements HasMiddleware
@@ -30,13 +29,10 @@ class SettingController extends BaseController implements HasMiddleware
         ];
     }
 
-    /**
-     * @return JsonResponse
-     */
     public function index(): JsonResponse
     {
         $settings = app(Pipeline::class)
-            ->send(Setting::query()->when(auth()->check(), fn($q) => $q->public()))
+            ->send(Setting::query()->when(auth()->check(), fn ($q) => $q->public()))
             ->through([KeyFilter::class, GroupFilter::class])
             ->thenReturn()
             ->get();
@@ -44,10 +40,6 @@ class SettingController extends BaseController implements HasMiddleware
         return successResponse(SettingGroupResource::organizeNested($settings));
     }
 
-    /**
-     * @param SettingRequest $request
-     * @return JsonResponse
-     */
     public function update(SettingRequest $request): JsonResponse
     {
         $this->service->updateSettings($request->validated()['settings']);

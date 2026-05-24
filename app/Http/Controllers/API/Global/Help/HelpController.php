@@ -13,9 +13,6 @@ class HelpController extends BaseController
 {
     /**
      * Retrieves and transforms data from specified models based on the provided request.
-     *
-     * @param HelpModelRequest $request
-     * @return JsonResponse
      */
     public function models(HelpModelRequest $request): JsonResponse
     {
@@ -26,9 +23,6 @@ class HelpController extends BaseController
 
     /**
      * Retrieves a list of enums based on the request parameters.
-     *
-     * @param HelpEnumRequest $request
-     * @return JsonResponse
      */
     public function enums(HelpEnumRequest $request): JsonResponse
     {
@@ -46,5 +40,4 @@ class HelpController extends BaseController
 
         return successResponse($result);
     }
-
 }

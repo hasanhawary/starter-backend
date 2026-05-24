@@ -19,8 +19,6 @@ class NotificationEvent implements ShouldBroadcast
 
     /**
      * Get the channels the event should broadcast on.
-     *
-     * @return array
      */
     public function broadcastOn(): array
     {
@@ -33,9 +31,9 @@ class NotificationEvent implements ShouldBroadcast
             'target_id' => $this->data['target_id'] ?? null,
             'target_type' => $this->data['target_type'] ?? null,
             'url' => $this->data['url'] ?? null,
-            'title' => !empty($this->data['title']) ? transWithParams($this->data['title'], 'notifications.realtime') : '',
-            'message' => !empty($this->data['msg']) ? transWithParams($this->data['msg'], 'notifications.realtime') : '',
-            'created_at' => now()
+            'title' => ! empty($this->data['title']) ? transWithParams($this->data['title'], 'notifications.realtime') : '',
+            'message' => ! empty($this->data['msg']) ? transWithParams($this->data['msg'], 'notifications.realtime') : '',
+            'created_at' => now(),
         ];
     }
 }

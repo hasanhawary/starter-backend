@@ -16,6 +16,7 @@ class SettingTableSeeder extends Seeder
 
         if (empty($template)) {
             $this->command->error('❌ No template found.');
+
             return;
         }
 
@@ -45,21 +46,20 @@ class SettingTableSeeder extends Seeder
      * SAME BEHAVIOR AS OLD SEEDER
      */
     private function storeSettings(
-        array   $settings,
-        string  $key,
-        array   $brandValues,
+        array $settings,
+        string $key,
+        array $brandValues,
         ?string $groupPrefix = null
-    ): void
-    {
+    ): void {
         // Build group EXACTLY like old seeder
         $group = $groupPrefix
-            ? $groupPrefix . '.' . $key
+            ? $groupPrefix.'.'.$key
             : $key;
 
         // Numeric array = settings list
-        if (!$this->isAssoc($settings)) {
+        if (! $this->isAssoc($settings)) {
             foreach ($settings as $item) {
-                if (!isset($item['key'])) {
+                if (! isset($item['key'])) {
                     continue;
                 }
 
@@ -100,15 +100,14 @@ class SettingTableSeeder extends Seeder
     private function getBrandValue(
         string $group,
         string $key,
-        array  $brandValues
-    ): mixed
-    {
+        array $brandValues
+    ): mixed {
         $parts = explode('.', $group);
 
         $section = $parts[0] ?? null;
         $groupKey = $parts[1] ?? null;
 
-        if (!$section || !$groupKey) {
+        if (! $section || ! $groupKey) {
             return null;
         }
 
@@ -126,7 +125,10 @@ class SettingTableSeeder extends Seeder
      */
     private function isAssoc(array $arr): bool
     {
-        if ([] === $arr) return false;
+        if ($arr === []) {
+            return false;
+        }
+
         return array_keys($arr) !== range(0, count($arr) - 1);
     }
 }

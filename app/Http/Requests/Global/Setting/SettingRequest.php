@@ -6,7 +6,6 @@ use App\Http\Requests\BaseFormRequest;
 
 class SettingRequest extends BaseFormRequest
 {
-
     public function rules(): array
     {
         return [

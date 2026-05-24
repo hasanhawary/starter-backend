@@ -13,16 +13,15 @@ class SendEmailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected NotificationService $notificationService;
-
-    public function __construct(public $users, public array $data, public ?array $types = [])
-    {
-        $this->notificationService = new NotificationService();
-    }
+    public function __construct(
+        public $users,
+        public array $data,
+        public ?array $types = [],
+        protected NotificationService $notificationService = new NotificationService
+    ) {}
 
     public function handle(): void
     {
-        // Send email notification to each user in the array
-        collect($this->users)->each(fn($user) =>  $this->notificationService->resolve($user, $this->data, $this->types));
+        collect($this->users)->each(fn ($user) => $this->notificationService->resolve($user, $this->data, $this->types));
     }
 }

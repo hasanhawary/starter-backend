@@ -16,7 +16,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         'token',
         'abilities',
         'expires_at',
-        'meta'
+        'meta',
     ];
 
     /**
@@ -30,5 +30,4 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         'expires_at' => 'datetime',
         'meta' => 'json',
     ];
-
 }

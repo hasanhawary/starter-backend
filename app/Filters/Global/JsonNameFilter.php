@@ -12,7 +12,7 @@ class JsonNameFilter
         $query = $next($request);
         $search = request('search');
 
-        when($search, static fn() => QueryHelper::applyJsonSearch($query, 'name', $search));
+        when($search, static fn () => QueryHelper::applyJsonSearch($query, 'name', $search));
 
         return $query;
     }

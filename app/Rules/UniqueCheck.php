@@ -14,9 +14,8 @@ class UniqueCheck implements ValidationRule
     public function __construct(
         protected string $modelClass,
         protected string $resourceClass,
-        protected string|null $ignoreId = null
-    ) {
-    }
+        protected ?string $ignoreId = null
+    ) {}
 
     /**
      * @throws ModelAlreadyExistsException

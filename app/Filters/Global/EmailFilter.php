@@ -10,7 +10,7 @@ class EmailFilter
     {
         $query = $next($request);
 
-        when(request('search'), static fn() => $query->where('email', 'like', '%' . request('search') . '%'));
+        when(request('search'), static fn () => $query->where('email', 'like', '%'.request('search').'%'));
 
         return $query;
     }

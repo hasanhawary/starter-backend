@@ -9,11 +9,7 @@ class QueryHelper
     /**
      * Add a search condition for JSON fields in multiple languages.
      *
-     * @param Builder $query
-     * @param string $field
-     * @param string|array $search
-     * @param bool $isExact To determine if the search should be exact or a partial match
-     * @return Builder
+     * @param  bool  $isExact  To determine if the search should be exact or a partial match
      */
     public static function applyJsonSearch(Builder $query, string $field, string|array $search, bool $isExact = false): Builder
     {

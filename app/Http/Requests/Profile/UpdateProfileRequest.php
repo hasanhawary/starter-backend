@@ -26,7 +26,7 @@ class UpdateProfileRequest extends BaseFormRequest
             'phone' => [
                 'nullable',
                 'regex:/^[0-9]+$/',
-                new ValidLength($this->input('phone_code_id'), Country::class, 'phone_length')
+                new ValidLength($this->input('phone_code_id'), Country::class, 'phone_length'),
             ],
 
             'avatar' => [
@@ -39,8 +39,8 @@ class UpdateProfileRequest extends BaseFormRequest
                 'nullable',
                 'confirmed',
                 'min:8',
-                new CheckSamePassword(),
-                config('project.auth.strong_password') ? new StrongPassword : ''
+                new CheckSamePassword,
+                config('project.auth.strong_password') ? new StrongPassword : '',
             ],
         ];
     }

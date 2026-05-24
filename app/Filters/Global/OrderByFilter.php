@@ -23,7 +23,7 @@ class OrderByFilter
             return $query->orderBy($sortColumn, $sortDirection);
 
         } catch (QueryException|\Exception $e) {
-            Log::error('OrderByFilter unexpected error: ' . $e->getMessage());
+            Log::error('OrderByFilter unexpected error: '.$e->getMessage());
 
             return $query->orderBy('id', 'desc'); // Fallback to default sorting
         }
@@ -32,7 +32,7 @@ class OrderByFilter
     protected function resolveSortColumn(string $table, ?string $requested): string
     {
         try {
-            if (!$requested) {
+            if (! $requested) {
                 return 'id';
             }
 
@@ -56,7 +56,8 @@ class OrderByFilter
 
             return 'id';
         } catch (\Exception $e) {
-            Log::warning('Failed to resolve sort column: ' . $e->getMessage());
+            Log::warning('Failed to resolve sort column: '.$e->getMessage());
+
             return 'id';
         }
     }

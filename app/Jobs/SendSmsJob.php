@@ -19,22 +19,23 @@ class SendSmsJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($recipients, public $message)
-    {
-    }
+    public function __construct($recipients, public $message) {}
 
     public function handle(): void
     {
         if (config('services.sms.enable')) {
-            Http::withOptions(['verify' => false])
+            Http::timeout(10)
+                ->connectTimeout(5)
+                ->retry([100, 500, 1000])
+                ->withOptions(['verify' => false])
                 ->withHeaders([
                     'Content-Type' => 'application/json',
-                    'Authorization' => "Bearer " . config('services.sms.token'),
-                ])->post(config("services.sms.url"), [
-                    'sender' => config("services.sms.sender"),
+                    'Authorization' => 'Bearer '.config('services.sms.token'),
+                ])->post(config('services.sms.url'), [
+                    'sender' => config('services.sms.sender'),
                     'recipients' => Arr::wrap($this->recipients),
                     'body' => $this->message,
-                ]);
+                ])->throw();
         }
     }
 }

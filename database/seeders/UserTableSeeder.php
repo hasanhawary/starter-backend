@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use App\Enum\User\UserGenderEnum;
-use App\Models\Admin;
-use App\Models\User;
 use App\Models\Country;
+use App\Models\User;
 use HasanHawary\PermissionManager\Facades\Access;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -37,28 +36,28 @@ class UserTableSeeder extends Seeder
         $countryId = Country::first()->id;
         $domain = Str::snake(brandName());
         User::query()->firstOrCreate([
-            'email' => "root@$domain.com"
+            'email' => "root@$domain.com",
         ], [
             'name' => __('api.root'),
             'password' => '123456',
             'phone' => '01005164154',
             'phone_code_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
-            'is_active' => true
+            'is_active' => true,
         ])->assignRole('root');
 
         User::query()->firstOrCreate([
-            'email' => "admin@$domain.com"
+            'email' => "admin@$domain.com",
         ], [
             'name' => __('api.admin'),
             'password' => '123456',
             'phone' => '01005164154',
             'phone_code_id' => $countryId,
             'gender' => UserGenderEnum::Male->value,
-            'is_active' => true
+            'is_active' => true,
         ])->assignRole('admin');
 
-        //Factory
+        // Factory
         $users = User::factory()
             ->count(30)
             ->create([

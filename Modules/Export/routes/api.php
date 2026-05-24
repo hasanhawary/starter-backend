@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Middleware\LanguageMiddleware;
 use Illuminate\Support\Facades\Route;
 use Modules\Export\App\Http\Controllers\ExportController;
-use App\Http\Middleware\LanguageMiddleware;
 use Modules\Export\app\Http\Controllers\ExportJobController;
 
 Route::middleware([LanguageMiddleware::class, 'auth:sanctum'])->group(function () {

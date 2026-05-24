@@ -16,8 +16,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Modules\Export\App\Enum\ExportFormatEnum;
 use Modules\Export\app\Filters\ExportFilter;
-use Modules\Export\App\Http\Requests\ForceDeleteExportRequest;
 use Modules\Export\App\Http\Requests\ExportRequest;
+use Modules\Export\App\Http\Requests\ForceDeleteExportRequest;
 use Modules\Export\App\Http\Resources\ExportResource;
 use Modules\Export\App\Jobs\ExportToExcel;
 use Modules\Export\App\Jobs\ExportToPdf;
@@ -29,8 +29,8 @@ class ExportJobController extends BaseController implements HasMiddleware
 {
     use HasDeleteMethods;
 
-
-    public function __construct(private readonly ExportFileService $exportService) {
+    public function __construct(private readonly ExportFileService $exportService)
+    {
         parent::__construct();
         $this->model = ExportFile::class;
     }
@@ -58,18 +58,18 @@ class ExportJobController extends BaseController implements HasMiddleware
     public function export(ExportRequest $request): JsonResponse
     {
         $filters = $request->all();
-        $format  = ExportFormatEnum::from($filters['format']);
+        $format = ExportFormatEnum::from($filters['format']);
 
         $export = $this->exportService->createExport($filters, $format);
         $job = match ($format) {
             ExportFormatEnum::Excel => ExportToExcel::class,
-            ExportFormatEnum::Pdf   => ExportToPdf::class,
+            ExportFormatEnum::Pdf => ExportToPdf::class,
         };
 
         $job::dispatch($export->id, $filters, $filters['page'], "exports/{$filters['page']}");
+
         return successResponse(['export_id' => $export->id], msg: __('Export started successfully'));
     }
-
 
     public function forceDelete(ForceDeleteExportRequest $request): JsonResponse
     {

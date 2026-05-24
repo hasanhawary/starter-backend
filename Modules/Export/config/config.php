@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Resources\Global\Other\BasicResource;
-use App\Models\User;
 use App\Http\Resources\Global\Other\BasicUserResource;
+use App\Models\User;
 
 return [
     'name' => 'Export',

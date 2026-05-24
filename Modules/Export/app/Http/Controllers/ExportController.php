@@ -9,10 +9,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportController extends BaseController
 {
-    /**
-     * @param ExportRequest $request
-     * @return BinaryFileResponse
-     */
     public function __invoke(ExportRequest $request): BinaryFileResponse
     {
         return (new ExportBuilder($this->filters($request)))->response();
@@ -20,9 +16,6 @@ class ExportController extends BaseController
 
     /**
      * Prepare filters for the report service.
-     *
-     * @param ExportRequest $request
-     * @return array
      */
     private function filters(ExportRequest $request): array
     {

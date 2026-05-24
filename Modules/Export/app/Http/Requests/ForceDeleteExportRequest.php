@@ -16,7 +16,7 @@ class ForceDeleteExportRequest extends FormRequest
     {
         return [
             'id' => ['required_without:ids', Rule::exists('export_files', 'id')],
-            'ids'   => ['required_without:id', 'array', 'min:1'],
+            'ids' => ['required_without:id', 'array', 'min:1'],
             'ids.*' => ['required', 'integer', Rule::exists('export_files', 'id')],
         ];
     }

@@ -5,19 +5,18 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class TranslatableNullable implements ValidationRule
 {
     protected array $languageRules;
+
     protected array $attributeLabels;
 
     public function __construct(
-        protected string  $table,
-        protected array   $rules = [], //['sometimes','nullable']
+        protected string $table,
+        protected array $rules = [], // ['sometimes','nullable']
         protected ?string $route = null,
-    )
-    {
+    ) {
         $this->languageRules = config('lang.languages_validation', []);
         $this->attributeLabels = $this->flattenAttributes(trans('validation.attributes'));
     }
@@ -31,9 +30,9 @@ class TranslatableNullable implements ValidationRule
             $rulesForLang[] = 'nullable';
 
             $validator = Validator::make([
-                $attribute => [$lang => $val]
+                $attribute => [$lang => $val],
             ], [
-                "$attribute.$lang" => $rulesForLang
+                "$attribute.$lang" => $rulesForLang,
             ], [], $this->attributeLabels);
 
             if ($validator->fails()) {
@@ -60,5 +59,4 @@ class TranslatableNullable implements ValidationRule
 
         return $flattened;
     }
-
 }

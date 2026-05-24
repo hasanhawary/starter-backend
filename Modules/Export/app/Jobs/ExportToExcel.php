@@ -28,7 +28,7 @@ class ExportToExcel implements ShouldQueue
     {
         $export = ExportFile::find($this->exportId);
 
-        if (!$export) {
+        if (! $export) {
             return;
         }
 
@@ -39,7 +39,7 @@ class ExportToExcel implements ShouldQueue
             $realPath = $response->getFile()->getRealPath();
 
             $fileName = $this->generateFileName();
-            $path = Media::withName(fn() => $fileName)->upload($realPath, $this->folderPath);
+            $path = Media::withName(fn () => $fileName)->upload($realPath, $this->folderPath);
 
             $exportService->markAsCompleted($export, $path, Media::meta($path)->basename());
 
@@ -64,6 +64,7 @@ class ExportToExcel implements ShouldQueue
     {
         $name = $this->filters['name'] ?? $this->exportType;
         $timestamp = time();
+
         return "{$name}_export_{$timestamp}.xlsx";
     }
 }

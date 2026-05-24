@@ -17,10 +17,12 @@ use Modules\Export\App\Scopes\ExportFileScopes;
 
 class ExportFile extends Model
 {
-    use SoftDeletes, HasDeletedBy, CreatedByObserver, ExportFileScopes;
+    use CreatedByObserver, ExportFileScopes, HasDeletedBy, SoftDeletes;
 
     public bool $inPermission = true;
+
     public array $basicOperations = ['create', 'delete'];
+
     public array $specialOperations = ['view-all', 'view-own', 'force-delete', 'restore'];
 
     protected $fillable = [
@@ -43,10 +45,10 @@ class ExportFile extends Model
      |--------------------------------------------------------------------------
     */
     protected $casts = [
-        'format'   => ExportFormatEnum::class,
-        'status'   => ExportStatusEnum::class,
+        'format' => ExportFormatEnum::class,
+        'status' => ExportStatusEnum::class,
         'metadata' => 'array',
-        'started_at'   => 'datetime',
+        'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
 
@@ -64,7 +66,7 @@ class ExportFile extends Model
     */
     public function isReady(): bool
     {
-        return $this->status === ExportStatusEnum::Completed && !empty($this->attributes['file_path']);
+        return $this->status === ExportStatusEnum::Completed && ! empty($this->attributes['file_path']);
     }
 
     /*

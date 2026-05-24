@@ -10,7 +10,7 @@ class KeyFilter
     {
         $query = $next($request);
 
-        when(request('key'), static fn() => $query->where('key', 'like', '%' . request('key') . '%'));
+        when(request('key'), static fn () => $query->where('key', 'like', '%'.request('key').'%'));
 
         return $query;
     }

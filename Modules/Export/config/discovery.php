@@ -1,6 +1,5 @@
 <?php
 
-
 return [
 
     'filters' => [
@@ -28,7 +27,6 @@ return [
         //     'phone',
         //     'gender',
         // ],
-    ]
+    ],
 
 ];
-

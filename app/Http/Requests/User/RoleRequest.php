@@ -29,7 +29,7 @@ class RoleRequest extends BaseFormRequest
             'display_name' => [
                 'required',
                 'array',
-                new TranslatableRequired('roles', ['string', 'max:191'], 'country')
+                new TranslatableRequired('roles', ['string', 'max:191'], 'country'),
             ],
 
             'permissions' => [
@@ -44,7 +44,7 @@ class RoleRequest extends BaseFormRequest
             ],
 
             'guard_name' => [
-                'required', 'string'
+                'required', 'string',
             ],
         ];
     }
@@ -55,7 +55,7 @@ class RoleRequest extends BaseFormRequest
 
         $this->merge([
             'guard_name' => 'sanctum',
-            'permissions' => array_values(array_unique(array_merge($this->permissions ?? [], config('roles.default.permissions'))))
+            'permissions' => array_values(array_unique(array_merge($this->permissions ?? [], config('roles.default.permissions')))),
         ]);
     }
 }

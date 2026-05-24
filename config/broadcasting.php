@@ -42,8 +42,8 @@ return [
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
             'client_options' => [
-            // /   CURLOPT_SSL_VERIFYHOST => false,
-               // CURLOPT_SSL_VERIFYPEER => false,
+                // /   CURLOPT_SSL_VERIFYHOST => false,
+                // CURLOPT_SSL_VERIFYPEER => false,
             ],
         ],
 

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 abstract class BaseController
 {
     protected ?string $guard;
+
     protected ?string $userModel;
 
     public function __construct()

@@ -12,9 +12,8 @@ class ExtendedSanctumServiceProvider extends SanctumServiceProvider
     /**
      * Register the guard.
      *
-     * @param Factory $auth
-     * @param array $config
-     * @return RequestGuard
+     * @param  Factory  $auth
+     * @param  array  $config
      */
     protected function createGuard($auth, $config): RequestGuard
     {

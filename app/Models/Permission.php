@@ -9,11 +9,11 @@ class Permission extends SpatiePermission
 {
     use HasTranslations;
 
-    public bool  $inPermission = true;
+    public bool $inPermission = true;
 
     public array $translatable = ['display_name'];
 
     protected $fillable = [
-        'name', 'guard_name', 'display_name', 'group'
+        'name', 'guard_name', 'display_name', 'group',
     ];
 }

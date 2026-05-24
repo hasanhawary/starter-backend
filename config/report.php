@@ -1,4 +1,5 @@
 <?php
+
 return [
     // Optional: set a global namespace for your app report classes
     'namespace' => 'App\\Tools\\Report',
@@ -34,6 +35,6 @@ return [
                     ],
                 ],
             ],
-        ]
-    ]
+        ],
+    ],
 ];

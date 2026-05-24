@@ -10,7 +10,7 @@ class GroupFilter
     {
         $query = $next($request);
 
-        when(request('group'), static fn() => $query->where('group', 'like', '%' . request('group') . '%'));
+        when(request('group'), static fn () => $query->where('group', 'like', '%'.request('group').'%'));
 
         return $query;
     }

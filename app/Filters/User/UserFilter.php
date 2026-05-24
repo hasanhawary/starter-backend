@@ -11,6 +11,7 @@ class UserFilter
     use AdvancedFilter;
 
     protected array $filter = [];
+
     protected array $relations = [];
 
     public function __construct()
@@ -38,11 +39,11 @@ class UserFilter
 
     private function applySearchFilter(Builder $query): static
     {
-        $query->when(request()->has('search') && !empty(request('search')), function ($query) {
+        $query->when(request()->has('search') && ! empty(request('search')), function ($query) {
             $query->where(function ($query) {
-                $query->where('name', 'like', '%' . request('search') . '%')
-                    ->orWhere('email', 'like', '%' . request('search') . '%')
-                    ->orWhere('phone', 'like', '%' . request('search') . '%');
+                $query->where('name', 'like', '%'.request('search').'%')
+                    ->orWhere('email', 'like', '%'.request('search').'%')
+                    ->orWhere('phone', 'like', '%'.request('search').'%');
             });
         });
 

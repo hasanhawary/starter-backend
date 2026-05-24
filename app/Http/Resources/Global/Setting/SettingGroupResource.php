@@ -12,17 +12,17 @@ class SettingGroupResource extends JsonResource
     public static function organizeNested($collection)
     {
         return collect($collection)
-            ->groupBy(fn($item) => explode('.', $item->group)[0])
+            ->groupBy(fn ($item) => explode('.', $item->group)[0])
             ->map(function ($groupItems, $groupKey) {
                 $groupItems = collect($groupItems);
 
                 $tabs = $groupItems
-                    ->filter(fn($item) => str_contains($item->group, '.'))
-                    ->groupBy(fn($item) => explode('.', $item->group)[1])
+                    ->filter(fn ($item) => str_contains($item->group, '.'))
+                    ->groupBy(fn ($item) => explode('.', $item->group)[1])
                     ->map(function ($tabItems, $tabKey) {
                         return [
                             'label' => $tabKey,
-                            'display_label' => resolveTrans("settings_trans." . $tabKey),
+                            'display_label' => resolveTrans('settings_trans.'.$tabKey),
                             'nested' => null,
                             'items' => SettingResource::collection($tabItems),
                         ];
@@ -30,11 +30,11 @@ class SettingGroupResource extends JsonResource
                     ->values();
 
                 // Items directly under group (no tab)
-                $items = $groupItems->filter(fn($item) => !str_contains($item->group, '.'));
+                $items = $groupItems->filter(fn ($item) => ! str_contains($item->group, '.'));
 
                 return [
                     'label' => $groupKey,
-                    'display_label' => resolveTrans("settings_trans." . $groupKey),
+                    'display_label' => resolveTrans('settings_trans.'.$groupKey),
                     'nested' => $tabs->isNotEmpty() ? $tabs : null,
                     'items' => $items->isNotEmpty() ? SettingResource::collection($items) : null,
                 ];

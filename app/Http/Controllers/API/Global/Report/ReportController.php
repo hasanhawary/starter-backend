@@ -11,7 +11,6 @@ use Illuminate\Http\JsonResponse;
 class ReportController extends BaseController
 {
     /**
-     * @param ReportRequest $request
      * @return JsonResponse*
      */
     public function __invoke(ReportRequest $request): JsonResponse
@@ -21,16 +20,12 @@ class ReportController extends BaseController
         return successResponse($report->response());
     }
 
-    /**
-     * @param ReportRequest $request
-     * @return array
-     */
     private function filters(ReportRequest $request): array
     {
         $filter = $request->validated();
-        $filter ['page'] = $request->page ?? 'user';
-        $filter ['apply_date'] = $request->start || $request->end;
-        $filter ['prefer_chart'] = $request->prefer_chart ?? ReportChartTypeEnum::default();
+        $filter['page'] = $request->page ?? 'user';
+        $filter['apply_date'] = $request->start || $request->end;
+        $filter['prefer_chart'] = $request->prefer_chart ?? ReportChartTypeEnum::default();
 
         return $filter;
     }

@@ -13,7 +13,7 @@ class NotificationFilter
 
         $query->when(
             request()->has('group'),
-            fn($query) => $query->whereIn('data->group', Arr::wrap(request('group'))),
+            fn ($query) => $query->whereIn('data->group', Arr::wrap(request('group'))),
         );
 
         return $query;

@@ -7,7 +7,6 @@ use Illuminate\Validation\Rule;
 
 class NotificationRequest extends BaseFormRequest
 {
-
     public function rules(): array
     {
         return [

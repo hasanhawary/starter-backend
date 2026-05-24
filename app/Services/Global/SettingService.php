@@ -17,7 +17,7 @@ class SettingService
     {
         $brand = brandName();
 
-        return Cache::rememberForever($this->cacheKeyPrefix . $brand, function () {
+        return Cache::rememberForever($this->cacheKeyPrefix.$brand, function () {
             $settings = Setting::all();
 
             $nested = [];
@@ -26,7 +26,9 @@ class SettingService
                 $current = &$nested;
 
                 foreach ($keys as $key) {
-                    if (!isset($current[$key])) $current[$key] = [];
+                    if (! isset($current[$key])) {
+                        $current[$key] = [];
+                    }
                     $current = &$current[$key];
                 }
 
@@ -54,7 +56,7 @@ class SettingService
         $current = $settings;
 
         foreach ($keys as $key) {
-            if (!isset($current[$key])) {
+            if (! isset($current[$key])) {
                 return $default;
             }
 
@@ -62,7 +64,7 @@ class SettingService
         }
 
         // If leaf is a setting item, return 'value'
-        if (!empty($current['value'])) {
+        if (! empty($current['value'])) {
             if (is_array($current['value'])) {
                 // Return value for the requested language if exists, otherwise return the whole array
                 return $current['value'][$lang] ?? $current['value'];
@@ -83,7 +85,7 @@ class SettingService
     public function clearCache(): void
     {
         $brand = brandName();
-        Cache::forget($this->cacheKeyPrefix . $brand);
+        Cache::forget($this->cacheKeyPrefix.$brand);
     }
 
     /**
@@ -98,12 +100,12 @@ class SettingService
                 ->where('group', $item['group'])
                 ->first();
 
-            if (!$setting) {
+            if (! $setting) {
                 continue;
             }
 
             $payload[] = [
-                'key'   => $item['key'],
+                'key' => $item['key'],
                 'group' => $item['group'],
                 'value' => $this->normalizeValue($item['value'], $setting->type),
             ];
@@ -142,7 +144,7 @@ class SettingService
         updateDotEnv([
             \strtoupper($value['key']) => \is_array($value)
                 ? \json_encode($value, JSON_THROW_ON_ERROR)
-                : $value
+                : $value,
         ]);
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PermissionResource extends JsonResource
 {
-
     public function toArray(Request $request): array
     {
         return [
@@ -16,7 +15,7 @@ class PermissionResource extends JsonResource
             'translation_display_name' => $this->display_name,
             'display_name' => $this->getTranslations('display_name'),
             'group' => $this->group,
-            'display_group' => resolveTrans($this->group)
+            'display_group' => resolveTrans($this->group),
         ];
     }
 }

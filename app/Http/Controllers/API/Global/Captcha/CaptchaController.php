@@ -10,33 +10,27 @@ use Illuminate\Support\Str;
 
 class CaptchaController extends BaseController
 {
-    /**
-     * @return JsonResponse
-     */
     public function generateCaptcha(): JsonResponse
     {
         $captchaText = Str::random(5);
         $captchaCode = Str::uuid7()->toString();
-        $cacheKey = 'captcha_' . $captchaCode;
+        $cacheKey = 'captcha_'.$captchaCode;
 
         Cache::put($cacheKey, $captchaText, now()->addMinutes(10));
 
         return response()->json([
             'token' => $cacheKey,
-            'captcha_code' => $captchaText
+            'captcha_code' => $captchaText,
         ]);
     }
 
-    /**
-     * @param CaptchaRequest $request
-     * @return JsonResponse
-     */
-    public function verifyCaptcha(CaptchaRequest $request) : JsonResponse
+    public function verifyCaptcha(CaptchaRequest $request): JsonResponse
     {
         $storedCaptcha = Cache::get($request->token);
 
         if ($storedCaptcha && $storedCaptcha === $request->captcha) {
             Cache::forget($request->token);
+
             return successResponse(msg: 'Captcha Verified');
         }
 

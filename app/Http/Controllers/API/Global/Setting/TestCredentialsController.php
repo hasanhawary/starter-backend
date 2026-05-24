@@ -20,10 +20,6 @@ class TestCredentialsController extends BaseController implements HasMiddleware
         ];
     }
 
-    /**
-     * @param TestCredentialsRequest $request
-     * @return JsonResponse
-     */
     public function testEmail(TestCredentialsRequest $request): JsonResponse
     {
         Mail::to($request->email)->send(new BasicMailWithoutQueue(null, [

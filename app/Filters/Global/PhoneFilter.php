@@ -10,7 +10,7 @@ class PhoneFilter
     {
         $query = $next($request);
 
-        when(request('search'), static fn() => $query->where('phone', 'like', '%' . request('search') . '%'));
+        when(request('search'), static fn () => $query->where('phone', 'like', '%'.request('search').'%'));
 
         return $query;
     }

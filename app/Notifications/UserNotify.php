@@ -30,9 +30,6 @@ class UserNotify extends Notification
         return ['database'];
     }
 
-    /**
-     * @return array
-     */
     public function toDatabase(): array
     {
         return [

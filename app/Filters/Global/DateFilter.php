@@ -11,11 +11,11 @@ class DateFilter
     {
         $query = $next($request);
 
-        if (!empty(request('start'))) {
+        if (! empty(request('start'))) {
             $query->whereDate('created_at', '>=', Carbon::parse(request('start'))->format('Y-m-d'));
         }
 
-        if (!empty(request('end'))) {
+        if (! empty(request('end'))) {
             $query->whereDate('created_at', '<=', Carbon::parse(request('end'))->format('Y-m-d'));
         }
 

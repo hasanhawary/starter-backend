@@ -8,7 +8,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class RoleResource extends JsonResource
 {
-
     public function toArray(Request $request): array
     {
         return [
@@ -16,8 +15,8 @@ class RoleResource extends JsonResource
             'name' => $this->name,
             'translation_display_name' => $this->display_name,
             'display_name' => $this->getTranslations('display_name'),
-            'permissions' => $this->whenLoaded('permissions', fn() => PermissionResource::collection($this->permissions), []),
-            'creator' => $this->whenLoaded('creator', fn() => new BasicUserResource($this->creator), ['id' => $this->created_by]),
+            'permissions' => $this->whenLoaded('permissions', fn () => PermissionResource::collection($this->permissions), []),
+            'creator' => $this->whenLoaded('creator', fn () => new BasicUserResource($this->creator), ['id' => $this->created_by]),
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

@@ -17,7 +17,7 @@ class ExportRequest extends BaseFormRequest
             'start' => 'required|date',
             'end' => 'required|date|after_or_equal:start',
             'page' => 'required|string',
-            'format'  => ['required', 'string', Rule::enum(ExportFormatEnum::class)],
+            'format' => ['required', 'string', Rule::enum(ExportFormatEnum::class)],
             'columns' => 'sometimes|required|array',
         ];
     }

@@ -15,7 +15,6 @@ use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
-use function __;
 
 class PermissionController extends BaseController implements HasMiddleware
 {
@@ -32,14 +31,10 @@ class PermissionController extends BaseController implements HasMiddleware
         return [
             new Middleware(PermissionMiddleware::using('read-permission'), only: ['index', 'show']),
             new Middleware(PermissionMiddleware::using('create-permission'), only: ['store']),
-            new Middleware(PermissionMiddleware::using('update-permission'), only: ['update'])
+            new Middleware(PermissionMiddleware::using('update-permission'), only: ['update']),
         ];
     }
 
-    /**
-     * @param PageRequest $request
-     * @return JsonResponse
-     */
     public function index(PageRequest $request): JsonResponse
     {
         $query = app(Pipeline::class)
@@ -50,10 +45,6 @@ class PermissionController extends BaseController implements HasMiddleware
         return successResponse(wrapPaginate($query, PermissionResource::class));
     }
 
-    /**
-     * @param PermissionRequest $request
-     * @return JsonResponse
-     */
     public function store(PermissionRequest $request): JsonResponse
     {
         $permission = Permission::create($request->validated());
@@ -61,20 +52,11 @@ class PermissionController extends BaseController implements HasMiddleware
         return successResponse(new PermissionResource($permission), __('api.created_success'));
     }
 
-    /**
-     * @param Permission $permission
-     * @return JsonResponse
-     */
     public function show(Permission $permission): JsonResponse
     {
         return successResponse(new PermissionResource($permission));
     }
 
-    /**
-     * @param PermissionRequest $request
-     * @param Permission $permission
-     * @return JsonResponse
-     */
     public function update(PermissionRequest $request, Permission $permission): JsonResponse
     {
         $permission->update($request->validated());

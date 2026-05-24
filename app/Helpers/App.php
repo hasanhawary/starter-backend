@@ -1,9 +1,9 @@
 <?php
 
+use App\Helpers\DelimiterParamValue;
 use App\Models\User;
 use App\Services\Global\SettingService;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -14,38 +14,37 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use App\Helpers\DelimiterParamValue;
 
 /*
 |--------------------------------------------------------------------------
 | Responses Methods
 |--------------------------------------------------------------------------
 */
-if (!function_exists('successResponse')) {
+if (! function_exists('successResponse')) {
     function successResponse($data = [], $msg = null, $code = 200): JsonResponse
     {
         return response()->json([
             'status' => true,
             'code' => $code,
             'message' => $msg ?? __('api.success'),
-            'data' => $data
+            'data' => $data,
         ], $code);
     }
 }
 
-if (!function_exists('failResponse')) {
+if (! function_exists('failResponse')) {
     function failResponse($msg = 'fail', $data = [], $code = 400): JsonResponse
     {
         return response()->json([
             'status' => false,
             'code' => $code,
             'message' => $msg,
-            'data' => $data
+            'data' => $data,
         ], $code);
     }
 }
 
-if (!function_exists('abort403')) {
+if (! function_exists('abort403')) {
     function abort403($condition = true): void
     {
         if ($condition) {
@@ -53,10 +52,10 @@ if (!function_exists('abort403')) {
         }
     }
 }
-if (!function_exists('unKnownError')) {
+if (! function_exists('unKnownError')) {
     function unKnownError($message = null): JsonResponse|RedirectResponse
     {
-        $message = trans('api.something_error') . '' . (config('debug') ? " : $message" : '');
+        $message = trans('api.something_error').''.(config('debug') ? " : $message" : '');
 
         return request()?->expectsJson()
             ? failResponse($message)
@@ -69,14 +68,14 @@ if (!function_exists('unKnownError')) {
 | App Check Methods (IS)
 |--------------------------------------------------------------------------
 */
-if (!function_exists('isArrayIndex')) {
+if (! function_exists('isArrayIndex')) {
     function isArrayIndex($value): bool
     {
         return is_array($value) && count(array_filter(array_keys($value), 'is_string')) === 0;
     }
 }
 
-if (!function_exists('iSnake')) {
+if (! function_exists('iSnake')) {
     function iSnake($value): bool
     {
         // Define the pattern for snake_case
@@ -91,7 +90,7 @@ if (!function_exists('iSnake')) {
     }
 }
 
-if (!function_exists('isBase64')) {
+if (! function_exists('isBase64')) {
     function isBase64($data): bool
     {
         $decoded_data = base64_decode($data, true);
@@ -101,7 +100,7 @@ if (!function_exists('isBase64')) {
             return false;
         }
 
-        if (!ctype_print($decoded_data)) {
+        if (! ctype_print($decoded_data)) {
             return false;
         }
 
@@ -109,7 +108,7 @@ if (!function_exists('isBase64')) {
     }
 }
 
-if (!function_exists('isRoot')) {
+if (! function_exists('isRoot')) {
     function isRoot($user = null): bool
     {
         $user = $user ?? auth()->user();
@@ -118,13 +117,12 @@ if (!function_exists('isRoot')) {
     }
 }
 
-
 /*
 |--------------------------------------------------------------------------
 | Resolves Methods
 |--------------------------------------------------------------------------
 */
-if (!function_exists('resolveTrans')) {
+if (! function_exists('resolveTrans')) {
     function resolveTrans($trans = '', $page = 'api', $lang = null, $snaked = true): ?string
     {
         if (empty($trans)) {
@@ -139,7 +137,7 @@ if (!function_exists('resolveTrans')) {
     }
 }
 
-if (!function_exists('resolveBool')) {
+if (! function_exists('resolveBool')) {
     function resolveBool($item): string
     {
         if ($item === 0) {
@@ -154,7 +152,7 @@ if (!function_exists('resolveBool')) {
     }
 }
 
-if (!function_exists('resolvePhoto')) {
+if (! function_exists('resolvePhoto')) {
     function resolvePhoto($image = null, $type = 'user')
     {
         $result = ($type === 'user'
@@ -175,49 +173,48 @@ if (!function_exists('resolvePhoto')) {
     }
 }
 
-if (!function_exists('resolveArray')) {
+if (! function_exists('resolveArray')) {
     function resolveArray(string|array $array): array
     {
         return is_array($array) ? $array : explode(',', $array);
     }
 }
 
-if (!function_exists('resolveModel')) {
+if (! function_exists('resolveModel')) {
     function resolveModel(string $name, $module = null): ?object
     {
-        $modelPath = !empty($module) && $module !== 'none'
-            ? "Modules\\" . ucfirst(Str::camel($module)) . "\\App\\Models"
-            : "App\\Models";
+        $modelPath = ! empty($module) && $module !== 'none'
+            ? 'Modules\\'.ucfirst(Str::camel($module)).'\\App\\Models'
+            : 'App\\Models';
 
-
-        $modelClass = $modelPath . "\\" . Str::studly(Str::singular($name));
+        $modelClass = $modelPath.'\\'.Str::studly(Str::singular($name));
 
         return class_exists($modelClass) ? app($modelClass) : null;
     }
 }
 
-if (!function_exists('resolveClass')) {
+if (! function_exists('resolveClass')) {
     function resolveClass(string $path): ?object
     {
         return class_exists($path) ? app($path) : null;
     }
 }
 
-if (!function_exists('resolveEmptyLang')) {
+if (! function_exists('resolveEmptyLang')) {
     function resolveEmptyLang(array $trans): array
     {
-        $trans['ar'] = $trans['ar'] ?? $trans['en'] ?? "";
-        $trans['en'] = $trans['en'] ?? $trans['ar'] ?? "";
+        $trans['ar'] = $trans['ar'] ?? $trans['en'] ?? '';
+        $trans['en'] = $trans['en'] ?? $trans['ar'] ?? '';
 
         return $trans;
     }
 }
 
-if (!function_exists('resolveEmptyToNull')) {
+if (! function_exists('resolveEmptyToNull')) {
     function resolveEmptyToNull($value)
     {
         if (is_array($value)) {
-            return collect($value)->map(fn($v) => resolveEmptyToNull($v))->toArray();
+            return collect($value)->map(fn ($v) => resolveEmptyToNull($v))->toArray();
         }
 
         if (is_string($value)) {
@@ -240,10 +237,10 @@ if (!function_exists('resolveEmptyToNull')) {
 | App Global Methods
 |--------------------------------------------------------------------------
 */
-if (!function_exists('getModelKey')) {
+if (! function_exists('getModelKey')) {
     function getModelKey(?string $className = null, $trans = false): ?string
     {
-        if (!$className) {
+        if (! $className) {
             return null;
         }
 
@@ -254,27 +251,27 @@ if (!function_exists('getModelKey')) {
     }
 }
 
-if (!function_exists('detectModelPath')) {
+if (! function_exists('detectModelPath')) {
     function detectModelPath($type): string
     {
-        return "App\\Models\\" . Str::ucfirst(Str::camel(Str::singular($type)));
+        return 'App\\Models\\'.Str::ucfirst(Str::camel(Str::singular($type)));
     }
 }
 
-//Old Way
-if (!function_exists('fetchData')) {
+// Old Way
+if (! function_exists('fetchData')) {
     function fetchData(Builder $query, string|int|null $pageSize = null, $resource = null, $meta = [])
     {
         return wrapPaginate($query, $resource, $meta);
     }
 }
 
-if (!function_exists('wrapPaginate')) {
+if (! function_exists('wrapPaginate')) {
     function wrapPaginate(Builder $query, $resource = null, $meta = [])
     {
         $perPage = request('per_page', config('project.pagination.per_page'));
 
-        if ($perPage && (int)$perPage !== -1) {
+        if ($perPage && (int) $perPage !== -1) {
             $data = $query->paginate($perPage);
 
             if ($resource) {
@@ -295,14 +292,14 @@ if (!function_exists('wrapPaginate')) {
     }
 }
 
-if (!function_exists('imageExtensions')) {
+if (! function_exists('imageExtensions')) {
     function imageExtensions(): array
     {
         return ['jpg', 'png', 'jpeg', 'png', 'gif'];
     }
 }
 
-if (!function_exists('updateDotEnv')) {
+if (! function_exists('updateDotEnv')) {
     function updateDotEnv(array $data = []): void
     {
         $path = base_path('.env');
@@ -312,10 +309,10 @@ if (!function_exists('updateDotEnv')) {
                 $dataValue = $dataValue ? 'true' : 'false';
             }
 
-            if (str_contains(file_get_contents($path), "\n" . $dataKey . '=')) {
+            if (str_contains(file_get_contents($path), "\n".$dataKey.'=')) {
                 $contents = array_values(array_filter(explode("\n", file_get_contents($path))));
                 foreach ($contents as $content) {
-                    if (str_starts_with($content, $dataKey . '=')) {
+                    if (str_starts_with($content, $dataKey.'=')) {
                         $delim = '';
 
                         if (str_contains($content, '"') || str_contains($dataValue, ' ') || str_contains($dataValue, '#')) {
@@ -325,29 +322,29 @@ if (!function_exists('updateDotEnv')) {
                             $path,
                             str_replace(
                                 $content,
-                                $dataKey . '=' . $delim . $dataValue . $delim,
+                                $dataKey.'='.$delim.$dataValue.$delim,
                                 file_get_contents($path)
                             )
                         );
                     }
                 }
-            } else if (str_contains($dataValue, ' ') || str_contains($dataValue, '#')) {
-                File::append($path, $dataKey . '="' . $dataValue . '"' . "\n");
+            } elseif (str_contains($dataValue, ' ') || str_contains($dataValue, '#')) {
+                File::append($path, $dataKey.'="'.$dataValue.'"'."\n");
             } else {
-                File::append($path, $dataKey . '=' . $dataValue . "\n");
+                File::append($path, $dataKey.'='.$dataValue."\n");
             }
         }
     }
 }
 
-if (!function_exists('logError')) {
+if (! function_exists('logError')) {
     function logError($exception): void
     {
-        info("Error In Line => " . $exception->getLine() . " in File => {$exception->getFile()} , ErrorDetails => " . $exception->getMessage());
+        info('Error In Line => '.$exception->getLine()." in File => {$exception->getFile()} , ErrorDetails => ".$exception->getMessage());
     }
 }
 
-if (!function_exists('when')) {
+if (! function_exists('when')) {
     /**
      * Executes the given closure if the condition is true.
      * The condition is considered true if:
@@ -356,28 +353,27 @@ if (!function_exists('when')) {
      * - It is an array and not empty
      * - It is a string and not empty
      *
-     * @param mixed $condition
-     * @param callable $closure The closure to execute if the condition is pass from check.
+     * @param  callable  $closure  The closure to execute if the condition is pass from check.
      */
     function when(mixed $condition, callable $closure): void
     {
-        //Determine if the condition is true based on its type using match
+        // Determine if the condition is true based on its type using match
         $isTrue = match (true) {
             is_bool($condition) => $condition,
-            $condition instanceof Collection => !$condition->isEmpty(),
-            is_array($condition) => !empty($condition),
+            $condition instanceof Collection => ! $condition->isEmpty(),
+            is_array($condition) => ! empty($condition),
             is_string($condition) => $condition !== '',
             default => false,
         };
 
-        //If the condition is true, execute the closure
+        // If the condition is true, execute the closure
         if ($isTrue) {
             $closure();
         }
     }
 }
 
-if (!function_exists('buildDelimiterMessage')) {
+if (! function_exists('buildDelimiterMessage')) {
     /**
      * Build the packed message string.
      *
@@ -398,20 +394,20 @@ if (!function_exists('buildDelimiterMessage')) {
         foreach ($params as $key => $value) {
             if ($value instanceof DelimiterParamValue) {
                 $resolvedKey = $value->type === 'enum' ? "enum_{$key}" : $key;
-                $parts[]     = "{$resolvedKey}={$value->formatted}";
+                $parts[] = "{$resolvedKey}={$value->formatted}";
             } else {
                 $parts[] = "{$key}={$value}";
             }
         }
 
-        return $translationKey . '|' . implode('|', $parts);
+        return $translationKey.'|'.implode('|', $parts);
     }
 }
 
-if (!function_exists('transWithParams')) {
+if (! function_exists('transWithParams')) {
     function transWithParams(?string $data, string $page = 'notifications.emails', array $params = []): ?string
     {
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
@@ -419,7 +415,7 @@ if (!function_exists('transWithParams')) {
         $key = array_shift($parts);
 
         foreach ($parts as $part) {
-            if (!str_contains($part, '=')) {
+            if (! str_contains($part, '=')) {
                 continue;
             }
 
@@ -429,11 +425,12 @@ if (!function_exists('transWithParams')) {
 
             // Enum: enum_status => App\Enums\StatusEnum@Active
             if (str_starts_with($k, 'enum_')) {
-                $paramKey      = substr($k, 5); // strip "enum_"
-                [$fqn, $case]  = explode('@', $v, 2);
+                $paramKey = substr($k, 5); // strip "enum_"
+                [$fqn, $case] = explode('@', $v, 2);
                 $params[$paramKey] = enum_exists($fqn)
                     ? $fqn::resolve($case)   // e.g. SettingTypeEnum::resolve('Active')
                     : $case;                 // fallback to raw case name
+
                 continue;
             }
 
@@ -445,6 +442,7 @@ if (!function_exists('transWithParams')) {
                     $params[$k] = $decoded[app()->getLocale()]
                         ?? $decoded['en']
                         ?? $v;
+
                     continue;
                 }
             }
@@ -457,7 +455,7 @@ if (!function_exists('transWithParams')) {
     }
 }
 
-if (!function_exists('emailTrans')) {
+if (! function_exists('emailTrans')) {
     function emailTrans(?string $data, array $params = []): ?string
     {
         return transWithParams(
@@ -470,28 +468,29 @@ if (!function_exists('emailTrans')) {
     }
 }
 
-
-if (!function_exists('rootUsers')) {
+if (! function_exists('rootUsers')) {
     function rootUsers(): array
     {
-        return User::whereHas('roles', static fn($q) => $q->where('name', 'root'))
+        return User::whereHas('roles', static fn ($q) => $q->where('name', 'root'))
             ->pluck('id')
             ->toArray();
     }
 }
 
-if (!function_exists('utf8StrRev')) {
+if (! function_exists('utf8StrRev')) {
     function utf8StrRev($str = null): ?string
     {
         if ($str) {
             preg_match_all('/./us', $str, $ar);
-            return join('', array_reverse($ar[0]));
+
+            return implode('', array_reverse($ar[0]));
         }
+
         return null;
     }
 }
 
-if (!function_exists('safeExecute')) {
+if (! function_exists('safeExecute')) {
     function safeExecute($callback, $return = true)
     {
         try {
@@ -508,17 +507,18 @@ if (!function_exists('safeExecute')) {
     }
 }
 
-if (!function_exists('prepareModelType')) {
+if (! function_exists('prepareModelType')) {
     function prepareModelType($model): string
     {
         return strtolower(Arr::last(explode('\\', $model)));
     }
 }
 
-if (!function_exists('allModelsNames')) {
+if (! function_exists('allModelsNames')) {
     function allModelsNames(): Collection
     {
         $modelPath = app_path('Models');
+
         return collect(File::allFiles($modelPath))
             ->map(function ($file) {
                 return str_replace(
@@ -530,18 +530,19 @@ if (!function_exists('allModelsNames')) {
     }
 }
 
-if (!function_exists('allAttributesFillableModels')) {
+if (! function_exists('allAttributesFillableModels')) {
     function allAttributesFillableModels(): array
     {
         $modelPath = app_path('Models');
         $models = collect(File::allFiles($modelPath))
             ->map(function ($file) {
                 $namespace = 'App\\Models\\';
-                $class = $namespace . str_replace(
-                        ['/', '.php'],
-                        ['\\', ''],
-                        $file->getRelativePathname()
-                    );
+                $class = $namespace.str_replace(
+                    ['/', '.php'],
+                    ['\\', ''],
+                    $file->getRelativePathname()
+                );
+
                 return new $class;
             });
 
@@ -562,10 +563,11 @@ function getCurrentGuard(): int|string|null
             return $guard;
         }
     }
+
     return null; // No guard is currently authenticated
 }
 
-if (!function_exists('encryptCode')) {
+if (! function_exists('encryptCode')) {
     function encryptCode(array $data): array
     {
         try {
@@ -590,7 +592,7 @@ if (!function_exists('encryptCode')) {
     }
 }
 
-if (!function_exists('shouldVerifyOtp')) {
+if (! function_exists('shouldVerifyOtp')) {
     function shouldVerifyOtp(): bool
     {
         $default = config('auth.defaults.guard');
@@ -601,7 +603,7 @@ if (!function_exists('shouldVerifyOtp')) {
     }
 }
 
-if (!function_exists('setting')) {
+if (! function_exists('setting')) {
     /*
      *
      * Get setting value by path, optionally specify language.
@@ -621,13 +623,12 @@ if (!function_exists('setting')) {
     }
 }
 
-
-if (!function_exists('brandSettings')) {
+if (! function_exists('brandSettings')) {
     /**
      * Get all brand settings as an associative array.
      *
-     * @param string|null $lang Optional language code. Defaults to app locale.
-     * @return array
+     * @param  string|null  $lang  Optional language code. Defaults to app locale.
+     *
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -673,11 +674,7 @@ if (!function_exists('brandSettings')) {
     }
 }
 
-
-if (!function_exists('brandName')) {
-    /**
-     * @return string
-     */
+if (! function_exists('brandName')) {
     function brandName(): string
     {
         return config('brands.default_brand', 'Default');
