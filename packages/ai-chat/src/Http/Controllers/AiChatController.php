@@ -4,6 +4,7 @@ namespace AiChat\Http\Controllers;
 
 use AiChat\Agents\ChatAgent;
 use AiChat\Chat\ConversationManager;
+use AiChat\Chat\HistorySelector;
 use AiChat\Chat\MessageManager;
 use AiChat\Chat\StreamManager;
 use AiChat\Http\Requests\FeedbackRequest;
@@ -17,6 +18,7 @@ use AiChat\Models\AiChatConversation;
 use AiChat\Models\AiFeedback;
 use AiChat\Pipeline\ChatPayload;
 use AiChat\Pipeline\ChatPipeline;
+use AiChat\Pipeline\ExecutionPlan;
 use AiChat\Pipeline\Steps\ApplyPolicies;
 use AiChat\Pipeline\Steps\PlanStep;
 use AiChat\Pipeline\Steps\ResolveAgent;
@@ -102,9 +104,8 @@ class AiChatController extends Controller
 
         $selectedToolNames = array_keys($planningPayload->tools ?? []);
         $systemPrompt = $this->buildSystemPrompt($planningPayload);
-        $historyLimit = $planningPayload->executionPlan?->historyLimit ?? 6;
 
-        $agent = $this->buildChatAgent($request, $conversationId, $selectedToolNames, $systemPrompt, $historyLimit);
+        $agent = $this->buildChatAgent($request, $conversationId, $selectedToolNames, $systemPrompt, $planningPayload->executionPlan);
 
         $finalConversationId = $conversationId;
 
@@ -272,7 +273,7 @@ class AiChatController extends Controller
         ];
     }
 
-    protected function buildChatAgent(SendMessageRequest $request, ?string $conversationId, array $toolNames = [], ?string $systemPrompt = null, int $historyLimit = 100): ChatAgent
+    protected function buildChatAgent(SendMessageRequest $request, ?string $conversationId, array $toolNames = [], ?string $systemPrompt = null, ?ExecutionPlan $plan = null): ChatAgent
     {
         $agent = new ChatAgent($systemPrompt ?? $request->validated('system_prompt'));
         $sessionId = $request->validated('session_id');
@@ -287,7 +288,15 @@ class AiChatController extends Controller
             $agent->withTools($toolNames);
         }
 
-        $agent->withHistoryLimit($historyLimit);
+        if ($plan) {
+            $message = $request->validated('message');
+            $agent->withExecutionPlan($plan);
+            $agent->withCurrentMessage($message);
+
+            $selector = app(HistorySelector::class);
+            $policy = $selector->select($plan, $message);
+            $agent->withHistoryPolicy($policy);
+        }
 
         return $agent;
     }
@@ -302,16 +311,34 @@ class AiChatController extends Controller
             $parts[] = $agentPrompt;
         }
 
+        $policy = null;
+        $historyLabel = '';
         if ($plan) {
-            if ($plan->intent === 'direct' && $plan->historyLimit === 0) {
-                $parts[] = "\n\nThis is a greeting or casual message. Reply naturally and briefly to the current message only. Do not summarize, repeat, or answer previous unrelated questions unless the user explicitly asks.";
-            } elseif ($plan->isSimpleLiveData()) {
-                $parts[] = "\n\nUse the available tools to answer this live-data question. Do not invent values.";
-            } elseif ($plan->isKnowledgeRequest()) {
-                $parts[] = "\n\nAnswer only from retrieved project knowledge. If missing, say you do not have enough information.";
-            } elseif ($plan->isMemoryRequest()) {
-                $parts[] = "\n\nUse the conversation memory context to provide a relevant response.";
+            $selector = app(HistorySelector::class);
+            $policy = $selector->select($plan, $payload->message);
+            $historyLabel = $selector->buildHistoryLabel($policy);
+        }
+
+        if ($policy) {
+            if (! $policy->useHistory) {
+                $parts[] = "\n\nThis is a greeting, identity statement, or casual message. Reply naturally and briefly to the current message only. Do not summarize, repeat, or answer previous unrelated questions unless the user explicitly asks.";
+            } elseif ($policy->mode === 'summary') {
+                $parts[] = "\n\nThe user is asking for a conversation summary. Use the conversation history to provide a summary of all topics discussed. Do not re-answer any individual questions.";
+            } elseif ($policy->mode === 'relevant') {
+                $parts[] = "\n\nOnly the most relevant previous context is provided. Use it only if the user's latest message requires it. Do not re-answer previous questions or mention unrelated topics.";
+            } elseif ($plan) {
+                if ($plan->isSimpleLiveData()) {
+                    $parts[] = "\n\nUse the available tools to answer this live-data question. Do not invent values.";
+                } elseif ($plan->isKnowledgeRequest()) {
+                    $parts[] = "\n\nAnswer only from retrieved project knowledge. If missing, say you do not have enough information.";
+                } elseif ($plan->isMemoryRequest()) {
+                    $parts[] = "\n\nUse the conversation memory context to provide a relevant response.";
+                }
             }
+        }
+
+        if ($historyLabel !== '') {
+            $parts[] = "\n\n{$historyLabel}";
         }
 
         if (! empty($payload->context)) {

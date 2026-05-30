@@ -167,6 +167,7 @@ class HeuristicPlanner
         if ($greetingMatch !== null) {
             $plan->intent = 'direct';
             $plan->historyLimit = 0;
+            $plan->historyMode = 'none';
             $plan->useRag = false;
             $plan->useMemory = false;
             $plan->tools = [];
@@ -182,6 +183,7 @@ class HeuristicPlanner
 
         $this->checkMemory($plan, $normalizedMessage, $originalMessage, $matchedTools);
         if ($plan->intent === 'memory') {
+            $plan->historyMode = 'relevant';
             $plan->metadata['confidence'] = 0.90;
             $plan->metadata['reason'] = 'memory_phrase_match';
 
@@ -228,6 +230,7 @@ class HeuristicPlanner
         }
 
         $plan->intent = 'direct';
+        $plan->historyMode = 'recent';
         $plan->metadata['confidence'] = 0.50;
         $plan->metadata['reason'] = 'unknown_direct';
 

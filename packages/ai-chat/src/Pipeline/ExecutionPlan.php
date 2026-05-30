@@ -22,6 +22,8 @@ class ExecutionPlan
 
     public int $historyLimit = 6;
 
+    public string $historyMode = 'recent';
+
     public bool $needsClarification = false;
 
     public ?string $clarificationQuestion = null;
@@ -42,6 +44,7 @@ class ExecutionPlan
         $plan->memoryQuery = $data['memory_query'] ?? $data['memoryQuery'] ?? null;
         $plan->memoryLimit = $data['memory_limit'] ?? $data['memoryLimit'] ?? 3;
         $plan->historyLimit = $data['history_limit'] ?? $data['historyLimit'] ?? 6;
+        $plan->historyMode = $data['history_mode'] ?? $data['historyMode'] ?? 'recent';
         $plan->needsClarification = $data['needs_clarification'] ?? $data['needsClarification'] ?? false;
         $plan->clarificationQuestion = $data['clarification_question'] ?? $data['clarificationQuestion'] ?? null;
         $plan->metadata = $data['metadata'] ?? [];
@@ -62,6 +65,7 @@ class ExecutionPlan
             'memory_query' => $this->memoryQuery,
             'memory_limit' => $this->memoryLimit,
             'history_limit' => $this->historyLimit,
+            'history_mode' => $this->historyMode,
             'needs_clarification' => $this->needsClarification,
             'clarification_question' => $this->clarificationQuestion,
             'metadata' => $this->metadata,

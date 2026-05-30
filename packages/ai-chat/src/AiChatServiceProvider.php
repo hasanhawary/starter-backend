@@ -8,6 +8,7 @@ use AiChat\Agents\ProjectAssistantAgent;
 use AiChat\Chat\ChatResponseBuilder;
 use AiChat\Chat\ConversationManager;
 use AiChat\Chat\HistoryManager;
+use AiChat\Chat\HistorySelector;
 use AiChat\Chat\MessageManager;
 use AiChat\Chat\StreamManager;
 use AiChat\Console\Commands\AiChatBuildCommand;
@@ -140,6 +141,7 @@ class AiChatServiceProvider extends ServiceProvider
         $this->app->singleton(ConversationManager::class);
         $this->app->singleton(MessageManager::class);
         $this->app->singleton(HistoryManager::class);
+        $this->app->singleton(HistorySelector::class);
         $this->app->singleton(StreamManager::class);
         $this->app->singleton(ChatResponseBuilder::class);
     }

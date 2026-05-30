@@ -40,6 +40,7 @@
         ],
         agentAvatar: '',
         onlineStatus: 'online',
+        fontSize: 'medium',
     };
 
     var STATE = {
@@ -57,6 +58,7 @@
     var config = {};
     var shadowRoot = null;
     var container = null;
+    var styleEl = null;
     var bubble = null;
     var windowEl = null;
     var abortController = null;
@@ -65,6 +67,8 @@
     var isRtl = false;
     var currentLang = 'ar';
     var LANG_KEY = 'ai_chat_lang';
+    var THEME_KEY = 'ai_chat_theme';
+    var FONT_SIZE_KEY = 'ai_chat_font_size';
 
     var TRANSLATIONS = {
         ar: {
@@ -105,6 +109,17 @@
             clearConfirm: 'سيتم مسح كل الرسائل. هل أنت متأكد؟',
             cancel: 'إلغاء',
             confirm: 'تأكيد',
+            settings: 'الإعدادات',
+            theme: 'المظهر',
+            light: 'فاتح',
+            dark: 'داكن',
+            fontSize: 'حجم الخط',
+            small: 'صغير',
+            medium: 'متوسط',
+            large: 'كبير',
+            exportChat: 'تصدير المحادثة',
+            you: 'أنت',
+            exportedVia: 'تم التصدير عبر',
         },
     };
 
@@ -268,6 +283,11 @@
             more: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
             globe: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
             globeAr: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><line x1="12" y1="2" x2="12" y2="22"/><path d="M4.93 4.93A10 10 0 0 1 12 2a10 10 0 0 1 7.07 2.93"/><path d="M4.93 19.07A10 10 0 0 0 12 22a10 10 0 0 0 7.07-2.93"/></svg>',
+            sun: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.22 19.78l1.42-1.42"/><path d="M18.36 5.64l1.42-1.42"/></svg>',
+            moon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+            download: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+            textSize: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>',
+            settings: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
         };
         return icons[name] || '';
     }
@@ -422,7 +442,7 @@
             '  background: ' + bg + ';',
             '  border-radius: var(--ai-radius);',
             '  box-shadow: 0 0 0 1px ' + borderLight + ', 0 1px 4px ' + shadowColor + ', 0 16px 48px ' + shadowColor + ';',
-            '  display: flex; flex-direction: column; overflow: hidden;',
+            '  display: flex; flex-direction: column;',
             '  font-size: 14px; color: var(--ai-text);',
             '  transition: opacity 0.2s ease, transform 0.25s ease;',
             '  opacity: 0; transform: scale(0.95) translateY(12px);',
@@ -465,7 +485,7 @@
             '  background: ' + headerBg + ';',
             '  color: #fff; display: flex; align-items: center;',
             '  justify-content: space-between; flex-shrink: 0;',
-            '  position: relative; overflow: hidden;',
+            '  position: relative;',
             '  cursor: pointer;',
             '  border-radius: 16px 16px 0 0;',
             '  min-height: 60px;',
@@ -1080,6 +1100,81 @@
             '}',
             '',
             '/* ===== REDUCED MOTION ===== */',
+            '/* ===== FONT SIZES ===== */',
+            '.ai-chat-window.ai-font-small { font-size: 13px; }',
+            '.ai-chat-window.ai-font-medium { font-size: 14px; }',
+            '.ai-chat-window.ai-font-large { font-size: 16px; }',
+            '.ai-font-small .ai-msg-bubble { font-size: 13px; }',
+            '.ai-font-medium .ai-msg-bubble { font-size: 14px; }',
+            '.ai-font-large .ai-msg-bubble { font-size: 16px; }',
+            '.ai-font-small .ai-chat-header-info h3 { font-size: 14px; }',
+            '.ai-font-medium .ai-chat-header-info h3 { font-size: 15px; }',
+            '.ai-font-large .ai-chat-header-info h3 { font-size: 17px; }',
+            '.ai-font-small .ai-chat-header-info p { font-size: 10px; }',
+            '.ai-font-medium .ai-chat-header-info p { font-size: 11px; }',
+            '.ai-font-large .ai-chat-header-info p { font-size: 13px; }',
+            '.ai-font-small .ai-chat-textarea { font-size: 13px; }',
+            '.ai-font-medium .ai-chat-textarea { font-size: 14px; }',
+            '.ai-font-large .ai-chat-textarea { font-size: 15px; }',
+            '',
+            '/* ===== SETTINGS PANEL ===== */',
+            '.ai-settings-overlay {',
+            '  position: absolute; inset: 0;',
+            '  background: rgba(0,0,0,0.35); backdrop-filter: blur(2px);',
+            '  display: flex; align-items: center; justify-content: center;',
+            '  z-index: 2147483005 !important; border-radius: 16px;',
+            '  opacity: 0; pointer-events: none;',
+            '  transition: opacity 0.2s;',
+            '}',
+            '.ai-settings-overlay.open { opacity: 1; pointer-events: auto; }',
+            '.ai-settings-panel {',
+            '  background: var(--ai-bg); border-radius: 14px;',
+            '  width: calc(100% - 32px); max-width: 300px;',
+            '  box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 0 1px var(--ai-border);',
+            '  overflow: hidden;',
+            '}',
+            '.ai-settings-header {',
+            '  display: flex; align-items: center; justify-content: space-between;',
+            '  padding: 14px 16px 10px; font-size: 15px; font-weight: 600;',
+            '  color: var(--ai-text);',
+            '}',
+            '.ai-settings-close {',
+            '  background: none; border: none; color: var(--ai-text-muted);',
+            '  cursor: pointer; padding: 4px; border-radius: 6px;',
+            '  display: flex; align-items: center; justify-content: center;',
+            '  transition: background 0.15s;',
+            '}',
+            '.ai-settings-close:hover { background: ' + hoverBg + '; color: var(--ai-text); }',
+            '.ai-settings-body { padding: 4px 16px 16px; }',
+            '.ai-settings-group { margin-bottom: 14px; }',
+            '.ai-settings-label {',
+            '  font-size: 12px; font-weight: 500; color: var(--ai-text-secondary);',
+            '  margin-bottom: 6px; display: block; text-transform: uppercase;',
+            '  letter-spacing: 0.03em;',
+            '}',
+            '.ai-settings-row { display: flex; gap: 6px; }',
+            '.ai-settings-btn {',
+            '  flex: 1; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--ai-border);',
+            '  background: transparent; color: var(--ai-text-secondary); cursor: pointer;',
+            '  font-size: 13px; font-weight: 500; transition: all 0.12s;',
+            '  display: flex; align-items: center; justify-content: center; gap: 5px;',
+            '  font-family: inherit;',
+            '}',
+            '.ai-settings-btn:hover { border-color: ' + primary + '44; background: ' + primary + '08; }',
+            '.ai-settings-btn.active {',
+            '  border-color: ' + primary + '; background: ' + primary + '14; color: var(--ai-primary);',
+            '}',
+            '.ai-settings-btn:focus-visible { outline: 2px solid var(--ai-primary); outline-offset: 2px; }',
+            '.ai-settings-divider { height: 1px; background: var(--ai-border); margin: 14px 0; }',
+            '.ai-settings-export {',
+            '  width: 100%; padding: 9px 14px; border-radius: 8px;',
+            '  border: 1px solid var(--ai-border); background: transparent;',
+            '  color: var(--ai-text); cursor: pointer; font-size: 13px; font-weight: 500;',
+            '  display: flex; align-items: center; justify-content: center; gap: 7px;',
+            '  transition: all 0.12s; font-family: inherit;',
+            '}',
+            '.ai-settings-export:hover { background: ' + primary + '0c; border-color: ' + primary + '44; color: var(--ai-primary); }',
+            '',
             '@media (prefers-reduced-motion: reduce) {',
             '  .ai-chat-bubble,',
             '  .ai-chat-window,',
@@ -1220,6 +1315,10 @@
                     span.textContent = STATE.isFullscreen ? __('exitFullscreen', 'Exit fullscreen') : __('fullscreen', 'Fullscreen');
                     var fsIcon = item.querySelector('svg');
                     if (fsIcon) fsIcon.outerHTML = STATE.isFullscreen ? svgIcon('minimize2') : svgIcon('maximize');
+                } else if (action === 'settings') {
+                    span.textContent = __('settings', 'Settings');
+                } else if (action === 'export') {
+                    span.textContent = __('exportChat', 'Export Chat');
                 } else if (action === 'clear') {
                     span.textContent = __('clearConversation', 'Clear conversation');
                 }
@@ -1283,13 +1382,248 @@
         });
 
         refreshEmptyState();
+
+        var settingsPanel = windowEl.querySelector('.ai-settings-overlay');
+        if (settingsPanel && settingsPanel.classList.contains('open')) {
+            updateSettingsPanel();
+        }
     }
 
-    function refreshEmptyState() {
-        var messagesEl = windowEl.querySelector('.ai-chat-messages');
-        var emptyState = messagesEl && messagesEl.querySelector('.ai-empty-state');
-        if (emptyState) {
-            showEmptyState();
+    function getStoredTheme() {
+        return localStorage.getItem(THEME_KEY) || '';
+    }
+
+    function setStoredTheme(val) {
+        localStorage.setItem(THEME_KEY, val);
+    }
+
+    function getStoredFontSize() {
+        return localStorage.getItem(FONT_SIZE_KEY) || '';
+    }
+
+    function setStoredFontSize(val) {
+        localStorage.setItem(FONT_SIZE_KEY, val);
+    }
+
+    function toggleTheme() {
+        var newTheme = config.theme === 'dark' ? 'light' : 'dark';
+        config.theme = newTheme;
+        setStoredTheme(newTheme);
+        if (styleEl) {
+            styleEl.textContent = createStyles();
+        }
+        applyTheme();
+        if (windowEl) {
+            var panel = windowEl.querySelector('.ai-settings-overlay');
+            if (panel && panel.classList.contains('open')) {
+                updateSettingsPanel();
+            }
+        }
+    }
+
+    function applyTheme() {
+        if (!windowEl) return;
+        if (config.theme === 'dark') {
+            windowEl.classList.add('ai-theme-dark');
+        } else {
+            windowEl.classList.remove('ai-theme-dark');
+        }
+        var themeItems = windowEl.querySelectorAll('.ai-chat-more-item[data-action="theme"]');
+        themeItems.forEach(function (item) {
+            var span = item.querySelector('span');
+            var icon = item.querySelector('svg');
+            if (span) {
+                span.textContent = __('theme', 'Theme') + ': ' + (config.theme === 'dark' ? __('light', 'Light') : __('dark', 'Dark'));
+            }
+            if (icon) {
+                icon.outerHTML = config.theme === 'dark' ? svgIcon('sun') : svgIcon('moon');
+            }
+        });
+    }
+
+    function cycleFontSize() {
+        var sizes = ['small', 'medium', 'large'];
+        var idx = sizes.indexOf(config.fontSize);
+        config.fontSize = sizes[(idx + 1) % sizes.length];
+        setStoredFontSize(config.fontSize);
+        applyFontSize();
+        if (windowEl) {
+            var panel = windowEl.querySelector('.ai-settings-overlay');
+            if (panel && panel.classList.contains('open')) {
+                updateSettingsPanel();
+            }
+        }
+    }
+
+    function applyFontSize() {
+        if (!windowEl) return;
+        windowEl.classList.remove('ai-font-small', 'ai-font-medium', 'ai-font-large');
+        windowEl.classList.add('ai-font-' + config.fontSize);
+        var sizeItems = windowEl.querySelectorAll('.ai-chat-more-item[data-action="fontsize"]');
+        sizeItems.forEach(function (item) {
+            var span = item.querySelector('span');
+            if (span) {
+                span.textContent = __('fontSize', 'Font Size') + ': ' + __(config.fontSize, config.fontSize.charAt(0).toUpperCase() + config.fontSize.slice(1));
+            }
+        });
+    }
+
+    function exportChat() {
+        if (STATE.messages.length === 0) return;
+        var text = '';
+        text += '=== ' + config.title + ' ===\n';
+        text += __('subtitle', config.subtitle) + '\n';
+        text += '---\n\n';
+        for (var i = 0; i < STATE.messages.length; i++) {
+            var m = STATE.messages[i];
+            var role = m.role === 'user' ? __('you', 'You') : config.title;
+            var time = m.timestamp ? ' (' + formatTime(new Date(m.timestamp)) + ')' : '';
+            text += role + time + ':\n' + m.content + '\n\n';
+        }
+        text += '---\n';
+        text += __('exportedVia', 'Exported via') + ' ' + config.title;
+
+        var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'chat-export-' + new Date().toISOString().slice(0, 10) + '.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function showSettingsPanel() {
+        closeSettingsPanel();
+        var overlay = document.createElement('div');
+        overlay.className = 'ai-settings-overlay';
+        overlay.innerHTML = '<div class="ai-settings-panel">'
+            + '<div class="ai-settings-header">'
+            + '<span>' + __('settings', 'Settings') + '</span>'
+            + '<button class="ai-settings-close" aria-label="' + __('close', 'Close') + '">' + svgIcon('close') + '</button>'
+            + '</div>'
+            + '<div class="ai-settings-body">'
+            + '  <div class="ai-settings-group" data-setting="theme">'
+            + '    <span class="ai-settings-label">' + __('theme', 'Theme') + '</span>'
+            + '    <div class="ai-settings-row">'
+            + '      <button class="ai-settings-btn" data-theme="light">' + svgIcon('sun') + ' ' + __('light', 'Light') + '</button>'
+            + '      <button class="ai-settings-btn" data-theme="dark">' + svgIcon('moon') + ' ' + __('dark', 'Dark') + '</button>'
+            + '    </div>'
+            + '  </div>'
+            + '  <div class="ai-settings-group" data-setting="fontsize">'
+            + '    <span class="ai-settings-label">' + __('fontSize', 'Font Size') + '</span>'
+            + '    <div class="ai-settings-row">'
+            + '      <button class="ai-settings-btn" data-size="small">' + __('small', 'S') + '</button>'
+            + '      <button class="ai-settings-btn" data-size="medium">' + __('medium', 'M') + '</button>'
+            + '      <button class="ai-settings-btn" data-size="large">' + __('large', 'L') + '</button>'
+            + '    </div>'
+            + '  </div>'
+            + '  <div class="ai-settings-group" data-setting="lang">'
+            + '    <span class="ai-settings-label">' + __('toggleLanguage', 'Language') + '</span>'
+            + '    <div class="ai-settings-row">'
+            + '      <button class="ai-settings-btn" data-lang="en">English</button>'
+            + '      <button class="ai-settings-btn" data-lang="ar">العربية</button>'
+            + '    </div>'
+            + '  </div>'
+            + '  <div class="ai-settings-divider"></div>'
+            + '  <button class="ai-settings-export">' + svgIcon('download') + ' ' + __('exportChat', 'Export Chat') + '</button>'
+            + '</div>'
+            + '</div>';
+
+        windowEl.appendChild(overlay);
+        requestAnimationFrame(function () {
+            overlay.classList.add('open');
+        });
+
+        updateSettingsPanel();
+
+        var closeBtn = overlay.querySelector('.ai-settings-close');
+        closeBtn.addEventListener('click', function () { closeSettingsPanel(); });
+
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeSettingsPanel();
+        });
+
+        overlay.querySelectorAll('.ai-settings-btn[data-theme]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var theme = btn.getAttribute('data-theme');
+                if (theme !== config.theme) {
+                    config.theme = theme;
+                    setStoredTheme(theme);
+                    if (styleEl) styleEl.textContent = createStyles();
+                    applyTheme();
+                    updateSettingsPanel();
+                }
+            });
+        });
+
+        overlay.querySelectorAll('.ai-settings-btn[data-size]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var size = btn.getAttribute('data-size');
+                if (size !== config.fontSize) {
+                    config.fontSize = size;
+                    setStoredFontSize(size);
+                    applyFontSize();
+                    updateSettingsPanel();
+                }
+            });
+        });
+
+        overlay.querySelectorAll('.ai-settings-btn[data-lang]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var lang = btn.getAttribute('data-lang');
+                if (lang !== currentLang) {
+                    currentLang = lang;
+                    setStoredLanguage(lang);
+                    isRtl = lang === 'ar';
+                    applyLanguage();
+                    updateSettingsPanel();
+                }
+            });
+        });
+
+        var exportBtn = overlay.querySelector('.ai-settings-export');
+        exportBtn.addEventListener('click', function () {
+            closeSettingsPanel();
+            exportChat();
+        });
+    }
+
+    function closeSettingsPanel() {
+        var existing = windowEl.querySelector('.ai-settings-overlay');
+        if (existing) {
+            existing.classList.remove('open');
+            setTimeout(function () { if (existing.parentNode) existing.remove(); }, 200);
+        }
+    }
+
+    function updateSettingsPanel() {
+        var overlay = windowEl.querySelector('.ai-settings-overlay');
+        if (!overlay) return;
+        overlay.querySelectorAll('.ai-settings-btn[data-theme]').forEach(function (btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-theme') === config.theme);
+        });
+        overlay.querySelectorAll('.ai-settings-btn[data-size]').forEach(function (btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-size') === config.fontSize);
+        });
+        overlay.querySelectorAll('.ai-settings-btn[data-lang]').forEach(function (btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
+        });
+        var headerSpan = overlay.querySelector('.ai-settings-header span');
+        if (headerSpan) headerSpan.textContent = __('settings', 'Settings');
+        var labels = overlay.querySelectorAll('.ai-settings-label');
+        labels.forEach(function (label) {
+            var group = label.closest('[data-setting]');
+            if (!group) return;
+            var setting = group.getAttribute('data-setting');
+            if (setting === 'theme') label.textContent = __('theme', 'Theme');
+            else if (setting === 'fontsize') label.textContent = __('fontSize', 'Font Size');
+            else if (setting === 'lang') label.textContent = __('toggleLanguage', 'Language');
+        });
+        var exportBtn = overlay.querySelector('.ai-settings-export');
+        if (exportBtn) {
+            exportBtn.innerHTML = svgIcon('download') + ' ' + __('exportChat', 'Export Chat');
         }
     }
 
@@ -1331,8 +1665,11 @@
             '      <div class="ai-chat-more-menu" role="menu">',
             '        <button class="ai-chat-more-item" data-action="new" role="menuitem">' + svgIcon('newChat') + '<span>' + __('newConversation', 'New conversation') + '</span></button>',
             '        <button class="ai-chat-more-item" data-action="lang" role="menuitem">' + (currentLang === 'ar' ? svgIcon('globeAr') : svgIcon('globe')) + '<span>' + __('toggleLanguage', 'English') + '</span></button>',
-            (config.allowFullscreen ? '        <div class="ai-chat-more-divider"></div><button class="ai-chat-more-item" data-action="fullscreen" role="menuitem">' + svgIcon('maximize') + '<span>' + __('fullscreen', 'Fullscreen') + '</span></button>' : ''),
             '        <div class="ai-chat-more-divider"></div>',
+            '        <button class="ai-chat-more-item" data-action="settings" role="menuitem">' + svgIcon('settings') + '<span>' + __('settings', 'Settings') + '</span></button>',
+            (config.allowFullscreen ? '        <button class="ai-chat-more-item" data-action="fullscreen" role="menuitem">' + svgIcon('maximize') + '<span>' + __('fullscreen', 'Fullscreen') + '</span></button>' : ''),
+            '        <div class="ai-chat-more-divider"></div>',
+            '        <button class="ai-chat-more-item" data-action="export" role="menuitem">' + svgIcon('download') + '<span>' + __('exportChat', 'Export Chat') + '</span></button>',
             '        <button class="ai-chat-more-item" data-action="clear" role="menuitem">' + svgIcon('trash') + '<span>' + __('clearConversation', 'Clear conversation') + '</span></button>',
             '      </div>',
             '    </div>',
@@ -1438,8 +1775,12 @@
                     resetConversation();
                 } else if (action === 'lang') {
                     toggleLanguage();
+                } else if (action === 'settings') {
+                    showSettingsPanel();
                 } else if (action === 'fullscreen') {
                     toggleFullscreen();
+                } else if (action === 'export') {
+                    exportChat();
                 } else if (action === 'clear') {
                     showClearConfirm();
                 }
@@ -1502,6 +1843,7 @@
             windowEl.classList.remove('fullscreen');
             STATE.isFullscreen = false;
             STATE.isMinimized = false;
+            closeSettingsPanel();
             bubble.style.display = 'flex';
             if (typeof config.onClose === 'function') config.onClose();
             if (abortController) {
@@ -2421,6 +2763,16 @@
         currentLang = storedLang || (docLang.startsWith('ar') ? 'ar' : 'ar');
         isRtl = currentLang === 'ar';
 
+        var storedTheme = getStoredTheme();
+        if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
+            config.theme = storedTheme;
+        }
+
+        var storedFontSize = getStoredFontSize();
+        if (storedFontSize && ['small', 'medium', 'large'].indexOf(storedFontSize) !== -1) {
+            config.fontSize = storedFontSize;
+        }
+
         if (typeof ShadowRoot !== 'undefined') {
             container = document.createElement('div');
             container.style.position = 'relative';
@@ -2428,9 +2780,9 @@
             container.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
             shadowRoot = container.attachShadow({ mode: 'open' });
 
-            var style = document.createElement('style');
-            style.textContent = createStyles();
-            shadowRoot.appendChild(style);
+            styleEl = document.createElement('style');
+            styleEl.textContent = createStyles();
+            shadowRoot.appendChild(styleEl);
 
             shadowRoot.appendChild(buildBubble());
             shadowRoot.appendChild(buildWindow());
@@ -2440,6 +2792,9 @@
             console.error('[AIChatWidget] Shadow DOM is not supported in this browser');
             return;
         }
+
+        applyTheme();
+        applyFontSize();
 
         var storedId = getStoredConversationId();
         if (storedId) {
@@ -2483,6 +2838,25 @@
         getLanguage: function () {
             return currentLang;
         },
+        setTheme: function (theme) {
+            if (theme === 'light' || theme === 'dark') {
+                config.theme = theme;
+                setStoredTheme(theme);
+                if (styleEl) styleEl.textContent = createStyles();
+                applyTheme();
+            }
+        },
+        getTheme: function () { return config.theme; },
+        setFontSize: function (size) {
+            if (['small', 'medium', 'large'].indexOf(size) !== -1) {
+                config.fontSize = size;
+                setStoredFontSize(size);
+                applyFontSize();
+            }
+        },
+        getFontSize: function () { return config.fontSize; },
+        exportChat: exportChat,
+        showSettings: showSettingsPanel,
         sendMessage: function (msg) {
             sendTextMessage(msg);
         },
