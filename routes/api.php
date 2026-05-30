@@ -29,6 +29,8 @@ Route::prefix('captcha')->group(function () {
     Route::post('/verify', [CaptchaController::class, 'verifyCaptcha']);
 });
 
+// AI Chat routes are registered by the HasanHawary\AiChat package service provider.
+
 /*
 |--------------------------------------------------------------------------
 | Auth Routes (Public)

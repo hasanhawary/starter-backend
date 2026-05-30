@@ -5,7 +5,14 @@
     "description": "The skeleton application for the Laravel framework.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/*"
+        }
+    ],
     "require": {
+        "hasanhawary/ai-chat": "*",
         "php": "^8.3|^8.4|^8.5",
         "ext-fileinfo": "*",
         "ext-openssl": "*",
