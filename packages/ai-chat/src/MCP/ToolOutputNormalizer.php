@@ -78,8 +78,8 @@ class ToolOutputNormalizer
     protected function limitCollections(array $data): array
     {
         return array_map(function ($value) {
-            if (is_array($value) && array_is_list($value) && count($value) > self::MAX_COLLECTION_ITEMS) {
-                return array_slice($value, 0, self::MAX_COLLECTION_ITEMS);
+            if (is_array($value) && array_is_list($value) && count($value) > $this->maxCollectionItems) {
+                return array_slice($value, 0, $this->maxCollectionItems);
             }
 
             if (is_array($value)) {

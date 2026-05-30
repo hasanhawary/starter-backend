@@ -71,6 +71,14 @@ class AnonymousConversationStore implements ConversationStore
         return $message->id;
     }
 
+    public function getRecentConversations(string $sessionId, int $limit = 3): Collection
+    {
+        return AiChatConversation::where('session_id', $sessionId)
+            ->orderBy('updated_at', 'desc')
+            ->limit($limit)
+            ->pluck('id');
+    }
+
     public function getLatestConversationMessages(string $conversationId, int $limit): Collection
     {
         return AiChatMessage::where('conversation_id', $conversationId)

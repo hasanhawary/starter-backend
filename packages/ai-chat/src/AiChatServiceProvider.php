@@ -61,8 +61,6 @@ use AiChat\Support\TenantResolver;
 use AiChat\Support\TokenBudgetManager;
 use AiChat\Vector\Drivers\NullVectorDriver;
 use AiChat\Vector\Drivers\PgVectorDriver;
-use AiChat\Vector\Drivers\PineconeDriver;
-use AiChat\Vector\Drivers\QdrantDriver;
 use AiChat\Vector\EmbeddingGenerator;
 use AiChat\Vector\VectorManager;
 use Illuminate\Support\Facades\Route;
@@ -155,21 +153,27 @@ class AiChatServiceProvider extends ServiceProvider
     protected function registerVectorBindings(): void
     {
         $this->app->singleton(VectorStoreInterface::class, function ($app) {
-            return match (config('ai-chat.vector.driver', 'null')) {
-                'pgvector' => new PgVectorDriver(
-                    config('ai-chat.vector.pgvector.connection', 'pgsql'),
-                    config('ai-chat.vector.pgvector.table', 'ai_vectors'),
-                ),
-                'qdrant' => new QdrantDriver(
-                    config('ai-chat.vector.qdrant.url', 'http://localhost:6333'),
-                    config('ai-chat.vector.qdrant.api_key'),
-                    config('ai-chat.vector.qdrant.collection', 'ai_chat'),
-                ),
-                'pinecone' => new PineconeDriver(
-                    config('ai-chat.vector.pinecone.api_key'),
-                    config('ai-chat.vector.pinecone.environment'),
-                    config('ai-chat.vector.pinecone.index', 'ai-chat'),
-                ),
+            $driver = config('ai-chat.vector.driver', 'null');
+
+            return match ($driver) {
+                'database' => new Drivers\DatabaseVectorDriver([
+                    'connection' => config('ai-chat.vector.database.connection', config('database.default')),
+                    'table' => config('ai-chat.vector.database.table', 'ai_knowledge_chunks'),
+                ]),
+                'pgvector' => new PgVectorDriver([
+                    'connection' => config('ai-chat.vector.pgvector.connection', 'pgsql'),
+                    'table' => config('ai-chat.vector.pgvector.table', 'ai_vectors'),
+                ]),
+                'qdrant' => new Drivers\QdrantDriver([
+                    'url' => config('ai-chat.vector.qdrant.url', 'http://localhost:6333'),
+                    'api_key' => config('ai-chat.vector.qdrant.api_key'),
+                    'collection' => config('ai-chat.vector.qdrant.collection', 'ai_chat'),
+                ]),
+                'pinecone' => new Drivers\PineconeDriver([
+                    'api_key' => config('ai-chat.vector.pinecone.api_key'),
+                    'environment' => config('ai-chat.vector.pinecone.environment'),
+                    'index' => config('ai-chat.vector.pinecone.index', 'ai-chat'),
+                ]),
                 default => new NullVectorDriver,
             };
         });

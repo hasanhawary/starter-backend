@@ -2,15 +2,17 @@
 
 namespace AiChat\Pipeline\Steps;
 
-use AiChat\Contracts\MemoryStoreInterface;
 use AiChat\Pipeline\ChatPayload;
+use AiChat\Storage\AnonymousConversationStore;
 use AiChat\Support\TokenCounter;
 use Closure;
-use Illuminate\Support\Facades\App;
-use Laravel\Ai\AiManager;
 
 class RetrieveMemory
 {
+    public function __construct(
+        protected AnonymousConversationStore $conversationStore,
+    ) {}
+
     public function handle(ChatPayload $payload, Closure $next): ChatPayload
     {
         if (! config('ai-chat.memory.enabled', false)) {
@@ -21,45 +23,43 @@ class RetrieveMemory
             return $next($payload);
         }
 
-        $storeClass = config('ai-chat.memory.store');
+        $sessionId = $payload->metadata['session_id'] ?? null;
 
-        if (! $storeClass || ! class_exists($storeClass)) {
-            return $next($payload);
-        }
-
-        $conversationId = $payload->conversationId();
-
-        if (! $conversationId) {
+        if (! $sessionId) {
             return $next($payload);
         }
 
         try {
-            $store = App::make($storeClass);
+            $limit = (int) ($payload->executionPlan?->memoryLimit ?? config('ai-chat.context.memory_limit', 3));
+            $historyLimit = (int) config('ai-chat.context.history_limit', 6);
 
-            if (! ($store instanceof MemoryStoreInterface)) {
-                return $next($payload);
-            }
-
-            $embedding = $this->generateEmbedding($payload->message);
-
-            $query = $payload->executionPlan?->memoryQuery ?? $payload->message;
-            $limit = (int) ($payload->executionPlan?->memoryLimit ?? config('ai-chat.memory.max_results', 5));
-
-            $results = $store->retrieve($conversationId, $embedding ?? [], $limit);
+            $conversations = $this->conversationStore->getRecentConversations($sessionId, $limit);
 
             $budget = (int) config('ai-chat.memory.token_budget', 1000);
             $used = 0;
 
-            foreach ($results as $result) {
-                $content = is_array($result) ? json_encode($result) : (string) $result;
-                $tokens = TokenCounter::estimate($content);
+            foreach ($conversations as $conversationId) {
+                $messages = $this->conversationStore->getLatestConversationMessages(
+                    $conversationId,
+                    $historyLimit,
+                );
 
-                if ($used + $tokens > $budget) {
-                    break;
+                foreach ($messages as $message) {
+                    $content = $this->extractContent($message);
+
+                    if (empty($content)) {
+                        continue;
+                    }
+
+                    $tokens = TokenCounter::estimate($content);
+
+                    if ($used + $tokens > $budget) {
+                        break 2;
+                    }
+
+                    $payload->memory[] = $content;
+                    $used += $tokens;
                 }
-
-                $payload->memory[] = $result;
-                $used += $tokens;
             }
         } catch (\Throwable) {
             return $next($payload);
@@ -68,16 +68,28 @@ class RetrieveMemory
         return $next($payload);
     }
 
-    protected function generateEmbedding(string $text): ?array
+    protected function extractContent(mixed $message): string
     {
-        try {
-            $response = app(AiManager::class)
-                ->driver(config('ai-chat.default_for_embeddings', 'openai'))
-                ->embed($text);
-
-            return $response;
-        } catch (\Throwable) {
-            return null;
+        if (is_string($message)) {
+            return $message;
         }
+
+        if (is_array($message)) {
+            return $message['content'] ?? json_encode($message);
+        }
+
+        if (method_exists($message, 'content')) {
+            return (string) $message->content();
+        }
+
+        if (property_exists($message, 'content')) {
+            return (string) $message->content;
+        }
+
+        if (method_exists($message, 'getText')) {
+            return (string) $message->getText();
+        }
+
+        return '';
     }
 }

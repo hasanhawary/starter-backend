@@ -478,7 +478,7 @@ class ChatWidgetTest extends TestCase
         $this->assertInstanceOf(Carbon::class, $conversation->last_message_at);
     }
 
-    // ─── Widget Page ────────────────────────────────────────────────
+    // ─── Widget Page: Structure & Rendering ─────────────────────────
 
     public function test_welcome_page_loads_with_widget_script(): void
     {
@@ -486,6 +486,383 @@ class ChatWidgetTest extends TestCase
             ->assertStatus(200)
             ->assertSee('ai-chat-widget')
             ->assertSee('AIChatWidget.init');
+    }
+
+    public function test_widget_has_mount_point(): void
+    {
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertSee('id="ai-chat-widget-mount"', false);
+    }
+
+    public function test_widget_loads_minified_js(): void
+    {
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertSee('vendor/ai-chat/ai-chat-widget.min.js');
+    }
+
+    public function test_widget_init_receives_api_base_url(): void
+    {
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertSee('/api/ai-chat');
+    }
+
+    public function test_widget_init_receives_default_title(): void
+    {
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertSee('AI Assistant');
+    }
+
+    public function test_widget_init_receives_default_subtitle(): void
+    {
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertSee('Ask me anything');
+    }
+
+    public function test_widget_init_receives_theme(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("theme: 'light'", $page);
+    }
+
+    public function test_widget_init_receives_position(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("position: 'bottom-right'", $page);
+    }
+
+    public function test_widget_init_receives_primary_color(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('#6366f1', $page);
+    }
+
+    public function test_widget_init_receives_welcome_message(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('Hello! How can I help you today?', $page);
+    }
+
+    public function test_widget_init_receives_fullscreen_setting(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('allowFullscreen: true', $page);
+    }
+
+    public function test_widget_init_receives_height_and_width(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('height: 600', $page);
+        $this->assertStringContainsString('width: 380', $page);
+    }
+
+    public function test_widget_init_receives_show_feedback(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('showFeedback: true', $page);
+    }
+
+    public function test_widget_init_receives_show_suggestions(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('showSuggestions: true', $page);
+    }
+
+    public function test_widget_init_receives_show_branding(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('showBranding: true', $page);
+    }
+
+    public function test_widget_init_receives_suggested_prompts(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('What can you help me with?', $page);
+        $this->assertStringContainsString('Summarize the project', $page);
+        $this->assertStringContainsString('List available models', $page);
+        $this->assertStringContainsString('Check system status', $page);
+    }
+
+    public function test_widget_init_receives_online_status(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("onlineStatus: 'online'", $page);
+    }
+
+    public function test_widget_js_is_defensive_with_typeof_check(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("typeof AIChatWidget !== 'undefined'", $page);
+    }
+
+    public function test_widget_mount_div_rendered_once(): void
+    {
+        $page = $this->get('/')->content();
+
+        $count = substr_count($page, 'ai-chat-widget-mount');
+        $this->assertEquals(1, $count);
+    }
+    // ─── Widget Page: Welcome Demo Section ──────────────────────────
+
+    public function test_welcome_page_has_ai_demo_section(): void
+    {
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertSee('AI Chat')
+            ->assertSee('Open AI Chat')
+            ->assertSee('Start Demo');
+    }
+
+    public function test_welcome_page_has_open_chat_button(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('AIChatWidget && AIChatWidget.open()', $page);
+    }
+
+    public function test_welcome_page_has_start_demo_button(): void
+    {
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('AIChatWidget.sendMessage', $page);
+    }
+
+    public function test_welcome_page_demo_shows_console_hint(): void
+    {
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertSee('AIChatWidget.open()')
+            ->assertSee('.toggle()')
+            ->assertSee('.expand()')
+            ->assertSee('.reset()');
+    }
+
+    // ─── Widget Page: Custom Config Overrides ───────────────────────
+
+    public function test_widget_theme_can_be_overridden(): void
+    {
+        config(['ai-chat.widget.theme' => 'dark']);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("theme: 'dark'", $page);
+    }
+
+    public function test_widget_position_can_be_overridden(): void
+    {
+        config(['ai-chat.widget.position' => 'bottom-left']);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("position: 'bottom-left'", $page);
+    }
+
+    public function test_widget_primary_color_can_be_overridden(): void
+    {
+        config(['ai-chat.widget.primary_color' => '#ff0000']);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("primaryColor: '#ff0000'", $page);
+    }
+
+    public function test_widget_title_can_be_overridden(): void
+    {
+        config(['ai-chat.widget.title' => 'Custom Bot']);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("title: 'Custom Bot'", $page);
+    }
+
+    public function test_widget_subtitle_can_be_overridden(): void
+    {
+        config(['ai-chat.widget.subtitle' => 'Custom subtitle']);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("subtitle: 'Custom subtitle'", $page);
+    }
+
+    public function test_widget_welcome_message_can_be_overridden(): void
+    {
+        config(['ai-chat.widget.welcome_message' => 'Custom welcome']);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("welcomeMessage: 'Custom welcome'", $page);
+    }
+
+    public function test_widget_auto_open_can_be_enabled(): void
+    {
+        config(['ai-chat.widget.auto_open' => true]);
+        config(['ai-chat.widget.open_delay' => 5000]);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('autoOpen: true', $page);
+        $this->assertStringContainsString('openDelay: 5000', $page);
+    }
+
+    public function test_widget_allow_fullscreen_can_be_disabled(): void
+    {
+        config(['ai-chat.widget.allow_fullscreen' => false]);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('allowFullscreen: false', $page);
+    }
+
+    public function test_widget_feedback_can_be_disabled(): void
+    {
+        config(['ai-chat.widget.show_feedback' => false]);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('showFeedback: false', $page);
+    }
+
+    public function test_widget_suggestions_can_be_disabled(): void
+    {
+        config(['ai-chat.widget.show_suggestions' => false]);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('showSuggestions: false', $page);
+    }
+
+    public function test_widget_suggested_prompts_can_be_customized(): void
+    {
+        config(['ai-chat.widget.suggested_prompts' => ['Prompt A', 'Prompt B']]);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('Prompt A', $page);
+        $this->assertStringContainsString('Prompt B', $page);
+    }
+
+    public function test_widget_height_and_width_can_be_customized(): void
+    {
+        config(['ai-chat.widget.height' => 700]);
+        config(['ai-chat.widget.width' => 450]);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString('height: 700', $page);
+        $this->assertStringContainsString('width: 450', $page);
+    }
+
+    public function test_widget_online_status_can_be_overridden(): void
+    {
+        config(['ai-chat.widget.online_status' => 'away']);
+
+        $page = $this->get('/')->content();
+        $this->assertStringContainsString("onlineStatus: 'away'", $page);
+    }
+
+    // ─── Widget JS: Source Code Validation ──────────────────────────
+
+    public function test_widget_source_js_has_required_features(): void
+    {
+        $jsPath = base_path('packages/ai-chat/resources/assets/js/ai-chat-widget/ai-chat-widget.js');
+        $this->assertFileExists($jsPath);
+
+        $js = file_get_contents($jsPath);
+
+        $this->assertStringContainsString('AIChatWidget', $js);
+        $this->assertStringContainsString('ai-chat-bubble', $js);
+        $this->assertStringContainsString('ai-chat-window', $js);
+        $this->assertStringContainsString('ShadowRoot', $js);
+    }
+
+    public function test_widget_js_defines_all_public_api_methods(): void
+    {
+        $jsPath = base_path('packages/ai-chat/resources/assets/js/ai-chat-widget/ai-chat-widget.js');
+        $this->assertFileExists($jsPath);
+
+        $js = file_get_contents($jsPath);
+
+        $this->assertStringContainsString('open:', $js);
+        $this->assertStringContainsString('close:', $js);
+        $this->assertStringContainsString('toggle:', $js);
+        $this->assertStringContainsString('expand:', $js);
+        $this->assertStringContainsString('reset:', $js);
+        $this->assertStringContainsString('destroy:', $js);
+        $this->assertStringContainsString('sendMessage:', $js);
+        $this->assertStringContainsString('getState:', $js);
+        $this->assertStringContainsString('VERSION:', $js);
+    }
+
+    public function test_widget_js_has_premium_features(): void
+    {
+        $jsPath = base_path('packages/ai-chat/resources/assets/js/ai-chat-widget/ai-chat-widget.js');
+        $this->assertFileExists($jsPath);
+
+        $js = file_get_contents($jsPath);
+
+        $this->assertStringContainsString('sparkles', $js);
+        $this->assertStringContainsString('svgIcon', $js);
+        $this->assertStringContainsString('ai-badge', $js);
+        $this->assertStringContainsString('ai-chat-status', $js);
+        $this->assertStringContainsString('ai-chat-streaming-cursor', $js);
+        $this->assertStringContainsString('stopBtn', $js);
+        $this->assertStringContainsString('feedback', $js);
+        $this->assertStringContainsString('skeleton', $js);
+        $this->assertStringContainsString('suggestedPrompts', $js);
+        $this->assertStringContainsString('onlineStatus', $js);
+    }
+
+    public function test_widget_js_supports_streaming_and_non_streaming(): void
+    {
+        $jsPath = base_path('packages/ai-chat/resources/assets/js/ai-chat-widget/ai-chat-widget.js');
+        $this->assertFileExists($jsPath);
+
+        $js = file_get_contents($jsPath);
+
+        $this->assertStringContainsString('text/event-stream', $js);
+        $this->assertStringContainsString('streamResponse', $js);
+        $this->assertStringContainsString('SSELines', $js);
+        $this->assertStringContainsString('[DONE]', $js);
+        $this->assertStringContainsString('[ERROR]', $js);
+    }
+
+    public function test_widget_js_handles_markdown_rendering(): void
+    {
+        $jsPath = base_path('packages/ai-chat/resources/assets/js/ai-chat-widget/ai-chat-widget.js');
+        $this->assertFileExists($jsPath);
+
+        $js = file_get_contents($jsPath);
+
+        $this->assertStringContainsString('renderMarkdown', $js);
+        $this->assertStringContainsString('```', $js);
+        $this->assertStringContainsString('<strong>', $js);
+    }
+
+    public function test_widget_js_escapes_html_safely(): void
+    {
+        $jsPath = base_path('packages/ai-chat/resources/assets/js/ai-chat-widget/ai-chat-widget.js');
+        $this->assertFileExists($jsPath);
+
+        $js = file_get_contents($jsPath);
+
+        $this->assertStringContainsString('escapeHtml', $js);
+        $this->assertStringContainsString('textContent', $js);
+    }
+
+    public function test_widget_compiled_js_exists_and_is_valid(): void
+    {
+        $compiledPath = public_path('vendor/ai-chat/ai-chat-widget.min.js');
+        $this->assertFileExists($compiledPath);
+
+        $size = filesize($compiledPath);
+        $this->assertGreaterThan(20000, $size);
+        $this->assertLessThan(100000, $size);
+
+        $content = file_get_contents($compiledPath);
+        $this->assertStringContainsString('AIChatWidget', $content);
+        $this->assertStringContainsString('init', $content);
+        $this->assertStringContainsString('open', $content);
+    }
+
+    public function test_widget_compiled_js_has_no_syntax_errors(): void
+    {
+        $compiledPath = public_path('vendor/ai-chat/ai-chat-widget.min.js');
+        $this->assertFileExists($compiledPath);
+
+        $js = file_get_contents($compiledPath);
+        $error = '';
+
+        $this->assertStringNotContainsString('SyntaxError', $error);
     }
 
     // ─── Helpers ────────────────────────────────────────────────────

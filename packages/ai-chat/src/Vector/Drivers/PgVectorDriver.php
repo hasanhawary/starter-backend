@@ -14,7 +14,7 @@ class PgVectorDriver implements VectorStoreInterface
     public function __construct(array $config = [])
     {
         $this->connection = $config['connection'] ?? config('database.default');
-        $this->table = $config['table'] ?? 'ai_vector_store';
+        $this->table = $config['table'] ?? 'ai_vectors';
     }
 
     public function index(string $id, array $embedding, array $metadata = []): bool

@@ -2,8 +2,7 @@
 
 namespace AiChat\Console\Commands;
 
-use AiChat\Contracts\VectorStoreInterface;
-use AiChat\Models\AiKnowledgeDocument;
+use AiChat\RAG\KnowledgeIndexer;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
@@ -13,7 +12,7 @@ class IndexKnowledgeCommand extends Command
 
     protected $description = 'Index knowledge documents for RAG';
 
-    public function handle(): int
+    public function handle(KnowledgeIndexer $indexer): int
     {
         $path = base_path($this->option('path'));
 
@@ -25,10 +24,8 @@ class IndexKnowledgeCommand extends Command
 
         if ($this->option('reindex')) {
             $this->components->info('Reindexing all documents...');
-            AiKnowledgeDocument::query()->delete();
 
-            $vectorStore = app(VectorStoreInterface::class);
-            $vectorStore->deleteAll();
+            $indexer->removeStale([]);
         }
 
         $extensions = ['md', 'txt', 'html', 'json'];
@@ -46,42 +43,30 @@ class IndexKnowledgeCommand extends Command
 
         foreach ($files as $file) {
             $relativePath = str_replace(base_path().'/', '', $file->getRealPath());
-
-            $contentHash = md5_file($file->getRealPath());
-
-            if (! $this->option('reindex')) {
-                $exists = AiKnowledgeDocument::where('source_path', $relativePath)
-                    ->where('content_hash', $contentHash)
-                    ->exists();
-
-                if ($exists) {
-                    $skipped++;
-                    $this->components->twoColumnDetail($relativePath, '<fg=yellow>Unchanged</>');
-
-                    continue;
-                }
-            }
-
             $content = File::get($file->getRealPath());
 
-            AiKnowledgeDocument::updateOrCreate(
-                ['source_path' => $relativePath],
-                [
-                    'id' => AiKnowledgeDocument::generateId(),
+            try {
+                $doc = $indexer->indexDocument([
                     'title' => $file->getBasename('.'.$file->getExtension()),
+                    'content' => $content,
+                    'source_path' => $relativePath,
                     'source_type' => $file->getExtension(),
-                    'content_hash' => $contentHash,
-                    'chunk_count' => 0,
                     'metadata' => [
                         'size' => $file->getSize(),
                         'mime_type' => File::mimeType($file->getRealPath()),
                     ],
-                    'indexed_at' => now(),
-                ],
-            );
+                ]);
 
-            $this->components->task("Indexed {$relativePath}", fn () => true);
-            $indexed++;
+                if ($doc->wasRecentlyCreated) {
+                    $this->components->task("Indexed {$relativePath}", fn () => true);
+                    $indexed++;
+                } else {
+                    $this->components->twoColumnDetail($relativePath, '<fg=yellow>Unchanged</>');
+                    $skipped++;
+                }
+            } catch (\Throwable $e) {
+                $this->components->error("Failed to index {$relativePath}: {$e->getMessage()}");
+            }
         }
 
         $this->newLine();

@@ -8,8 +8,11 @@ trait CreatedByObserver
 {
     public static function bootCreatedByObserver(): void
     {
-        if (auth()->check()) {
-            static::creating(static fn (Model $model) => $model->created_by = auth()?->id());
-        }
+        static::creating(function (Model $model) {
+            try {
+                $model->created_by = auth()->id();
+            } catch (\Throwable) {
+            }
+        });
     }
 }

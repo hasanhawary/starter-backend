@@ -22,7 +22,7 @@ class ResolveTools
         }
 
         $context = new ChatContext(
-            action: 'chat',
+            action: 'read',
             agent: $payload->agent,
             user: $payload->user,
             payload: [

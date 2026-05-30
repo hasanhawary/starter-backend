@@ -80,13 +80,13 @@ PROMPT;
             ['role' => 'user', 'content' => "Plan this request: {$message}{$toolListInfo}\n\nRespond with JSON only."],
         ];
 
-        $response = $driver->text($model, $messages)->text ?? null;
+        $response = $driver->text($model, $messages);
 
         if (! $response) {
             return null;
         }
 
-        $cleaned = trim($response);
+        $cleaned = trim(is_string($response) ? $response : ($response->text ?? (string) $response));
 
         if (str_starts_with($cleaned, '```json')) {
             $cleaned = substr($cleaned, 7);

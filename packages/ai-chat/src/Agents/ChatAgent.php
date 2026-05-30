@@ -95,20 +95,20 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
     {
         $registry = app(ToolRegistry::class);
         $allTools = $registry->all();
-        $enabled = config('ai-chat.tools.enabled', []);
 
         if ($this->enabledTools) {
-            $enabled = $this->enabledTools;
+            $resolved = [];
+
+            foreach ($this->enabledTools as $name) {
+                if (isset($allTools[$name])) {
+                    $resolved[] = new ToolAdapter($allTools[$name]);
+                }
+            }
+
+            return $resolved;
         }
 
-        if (empty($enabled) || $enabled === ['*'] || in_array('*', $enabled)) {
-            return array_map(fn ($tool) => new ToolAdapter($tool), $allTools);
-        }
-
-        return array_values(array_map(
-            fn ($name) => new ToolAdapter($allTools[$name]),
-            array_filter($enabled, fn ($name) => isset($allTools[$name])),
-        ));
+        return [];
     }
 
     public function currentConversation(): ?string

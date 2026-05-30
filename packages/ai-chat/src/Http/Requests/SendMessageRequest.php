@@ -14,10 +14,15 @@ class SendMessageRequest extends BaseFormRequest
         return [
             'message' => ['required', 'string', 'max:10000'],
             'conversation_id' => ['nullable', 'string', 'size:36'],
-            'session_id' => ['required_without:user', 'string', 'min:10'],
+            'session_id' => [$this->isGuest() ? 'required' : 'nullable', 'string', 'min:10'],
             'system_prompt' => ['nullable', 'string', 'max:5000'],
             'stream' => ['nullable', 'boolean'],
             'agent' => ['nullable', 'string', 'max:100'],
         ];
+    }
+
+    protected function isGuest(): bool
+    {
+        return ! $this->user('sanctum');
     }
 }

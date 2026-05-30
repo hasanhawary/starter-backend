@@ -220,6 +220,32 @@ class HeuristicPlanner
             return true;
         }
 
+        $toolParts = explode('_', $name);
+        $modelWord = $toolParts[0] ?? '';
+
+        if ($modelWord !== '' && str_contains($normalizedMessage, $modelWord)) {
+            $actionParts = array_slice($toolParts, 1);
+            $actionWord = $actionParts[0] ?? '';
+
+            if ($actionWord !== '') {
+                $actionMap = [
+                    'count' => ['how many', 'number of', 'count of', 'total', 'كم', 'عدد'],
+                    'search' => ['search', 'find', 'look for', 'lookup', 'filter', 'where', 'بحث', 'ابحث'],
+                    'latest' => ['latest', 'recent', 'newest', 'last', 'new', 'اخر', 'أخر', 'احدث', 'أحدث'],
+                    'stats' => ['stats', 'statistics', 'analytics', 'overview', 'إحصائيات'],
+                    'summary' => ['summary', 'summarize', 'overview', 'average', 'avg', 'ملخص'],
+                ];
+
+                $actionSynonyms = $actionMap[$actionWord] ?? [];
+
+                foreach ($actionSynonyms as $synonym) {
+                    if (str_contains($normalizedMessage, $synonym)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
         $keywords = method_exists($tool, 'keywords') ? $tool->keywords() : [];
 
         foreach ($keywords as $keyword) {

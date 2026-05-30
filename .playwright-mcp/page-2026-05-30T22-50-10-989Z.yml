@@ -1,0 +1,174 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: API ONLINE
+    - heading "Welcome" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: This endpoint serves a backend API.
+      - text: No web interface is provided.
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Host
+        - generic [ref=e10]: localhost
+      - generic [ref=e11]:
+        - generic [ref=e12]: Client IP
+        - generic [ref=e13]: 127.0.0.1
+      - generic [ref=e14]:
+        - generic [ref=e15]: Secure Connection
+        - generic [ref=e16]: "No"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Server Time (UTC)
+        - generic [ref=e19]: 2026-05-30 22:47:10
+    - generic [ref=e20]:
+      - generic [ref=e21]: AI Chat
+      - generic [ref=e22]:
+        - button "Open AI Chat" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Open AI Chat
+        - button "Start Demo" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Start Demo
+      - generic [ref=e29]:
+        - text: Use
+        - code [ref=e30]: AIChatWidget.open()
+        - text: /
+        - code [ref=e31]: .close()
+        - text: /
+        - code [ref=e32]: .toggle()
+        - text: /
+        - code [ref=e33]: .expand()
+        - text: /
+        - code [ref=e34]: .reset()
+        - text: in your browser console.
+  - generic:
+    - button "فتح المحادثة" [ref=e35] [cursor=pointer]:
+      - img [ref=e37]
+      - generic: "1"
+    - generic:
+      - button "تبديل التصغير":
+        - generic:
+          - generic:
+            - img
+          - generic:
+            - heading "المساعد الذكي" [level=3]
+            - paragraph: متصل الآن
+        - generic:
+          - button "English":
+            - img
+            - generic: EN
+          - generic:
+            - button "خيارات إضافية":
+              - img
+            - menu:
+              - menuitem "محادثة جديدة":
+                - img
+                - generic: محادثة جديدة
+              - menuitem "English":
+                - img
+                - generic: English
+              - menuitem "شاشة كاملة":
+                - img
+                - generic: شاشة كاملة
+              - menuitem "مسح المحادثة":
+                - img
+                - generic: مسح المحادثة
+          - button "تصغير":
+            - img
+          - button "شاشة كاملة":
+            - img
+          - button "إغلاق":
+            - img
+      - log "رسائل المحادثة":
+        - generic:
+          - generic: What are the refund rules?
+          - generic:
+            - generic: 01:47
+        - generic:
+          - generic:
+            - text: "Based on the project's Refund and Revenue Policy, the refund rules are as follows:"
+            - text: "*"
+            - strong: "Time Limit:"
+            - text: Refunds are allowed within 14 days from the payment date.
+            - text: "*"
+            - strong: "Approval:"
+            - text: Refund requests must be approved by an admin.
+            - text: "*"
+            - strong: "Transaction ID:"
+            - text: All refund requests require the original transaction ID.
+            - text: "*"
+            - strong: "Partial Refunds:"
+            - text: Partial refunds are allowed up to the remaining balance.
+            - emphasis: "Source: Refund and Revenue Policy (app/AI/Knowledge/test-rag.md)"
+          - generic:
+            - generic: 01:47
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+        - generic:
+          - generic: How many users are registered?
+          - generic:
+            - generic: 01:48
+        - generic:
+          - generic:
+            - text: "Hello! Let me address your questions:"
+            - strong: "1. Refund Rules:"
+            - text: I don't have access to any specific tool or data source that contains refund rules. This would typically depend on the specific business or platform you're referring to. I'd recommend checking the relevant terms of service, policy pages, or contacting customer support for accurate refund policy details.
+            - strong: "2. Number of Registered Users:"
+            - text: Let me look that up for you right now!Based on the data returned, there are currently
+            - strong: 0 registered users
+            - text: in the system.
+            - text: "This could mean:"
+            - listitem: The system is new and no users have been registered yet, or
+            - listitem: The user database is currently empty for another reason.
+            - text: Is there anything else you'd like to know?
+          - generic:
+            - generic: 01:48
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+        - generic:
+          - generic: My name is Alice, I work in sales
+          - generic:
+            - generic: 01:49
+        - generic:
+          - generic:
+            - text: "Hello, Alice! Nice to meet you. I see you've asked a few questions, so let me address them:"
+            - text: "1."
+            - strong: Refund Rules
+            - text: ": I don't have access to any specific company policies, documentation, or knowledge bases that would contain refund rules. If your organization has a policy document or knowledge base, I'd need access to that to provide accurate information. I wouldn't want to give you incorrect information by guessing."
+            - text: "2."
+            - strong: Number of Registered Users
+            - text: ": I don't have access to any user database or system that would allow me to look up registration counts. I operate in read-only mode and can only reference data that has been explicitly provided through my context or tools."
+            - text: "3."
+            - strong: Your Introduction
+            - text: ": Thank you for sharing that your name is Alice and you work in sales! However, I should let you know that I operate in"
+            - strong: read-only mode
+            - text: — I cannot create, update, or store any user profile information. So while I appreciate the introduction, I won't be able to save this information for future interactions.
+            - text: Is there something else I can help you with? If you have access to specific data sources or documents you'd like me to reference, please let me know and I'd be happy to help analyze them!
+          - generic:
+            - generic: 01:49
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+        - generic:
+          - generic: What is my name and department?
+          - generic:
+            - generic: 01:50
+      - generic:
+        - generic:
+          - textbox "إرسال" [disabled]:
+            - /placeholder: اكتب رسالتك...
+          - button "إرسال" [disabled]:
+            - img
+      - generic: مدعوم من WaKeb AI

@@ -1,5 +1,15 @@
 {
     "$schema": "https://opencode.ai/config.json",
+    "model": "openrouter/free",
+    "provider": {
+        "openrouter": {
+        "options": {
+            "timeout": 600000,
+            "chunkTimeout": 60000
+        }
+        }
+    },
+
     "skills": {
         "paths": [
             ".ai/skills/generated"

@@ -6,6 +6,7 @@ use AiChat\Models\AiKnowledgeChunk;
 use AiChat\Models\AiKnowledgeDocument;
 use AiChat\Models\AiProjectMap;
 use AiChat\Vector\EmbeddingGenerator;
+use AiChat\Vector\VectorManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -15,6 +16,7 @@ class KnowledgeIndexer
         protected DocumentLoader $loader,
         protected DocumentChunker $chunker,
         protected EmbeddingGenerator $embeddings,
+        protected VectorManager $vectorManager,
     ) {}
 
     public function indexDocument(array $document): AiKnowledgeDocument
@@ -49,14 +51,24 @@ class KnowledgeIndexer
             foreach ($chunks as $chunk) {
                 $embedding = $this->embeddings->generate($chunk['content']);
 
+                $chunkId = Str::uuid()->toString();
+
                 $chunkModel = AiKnowledgeChunk::create([
-                    'id' => Str::uuid()->toString(),
+                    'id' => $chunkId,
                     'document_id' => $doc->id,
                     'content' => $chunk['content'],
                     'chunk_index' => $chunk['chunk_index'],
                     'embedding' => $embedding,
                     'metadata' => $chunk['metadata'],
                 ]);
+
+                if (! empty(array_filter($embedding))) {
+                    $this->vectorManager->index($chunkId, $embedding, [
+                        'document_id' => $doc->id,
+                        'source_path' => $doc->source_path,
+                        'chunk_index' => $chunk['chunk_index'],
+                    ]);
+                }
 
                 $chunkModels[] = $chunkModel;
             }
@@ -116,6 +128,10 @@ class KnowledgeIndexer
 
         DB::transaction(function () use ($stale, &$removed) {
             foreach ($stale as $document) {
+                foreach ($document->chunks as $chunk) {
+                    $this->vectorManager->delete($chunk->id);
+                }
+
                 $document->chunks()->delete();
                 $document->delete();
                 $removed++;

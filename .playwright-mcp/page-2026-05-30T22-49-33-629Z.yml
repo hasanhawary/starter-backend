@@ -1,0 +1,146 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: API ONLINE
+    - heading "Welcome" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: This endpoint serves a backend API.
+      - text: No web interface is provided.
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Host
+        - generic [ref=e10]: localhost
+      - generic [ref=e11]:
+        - generic [ref=e12]: Client IP
+        - generic [ref=e13]: 127.0.0.1
+      - generic [ref=e14]:
+        - generic [ref=e15]: Secure Connection
+        - generic [ref=e16]: "No"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Server Time (UTC)
+        - generic [ref=e19]: 2026-05-30 22:47:10
+    - generic [ref=e20]:
+      - generic [ref=e21]: AI Chat
+      - generic [ref=e22]:
+        - button "Open AI Chat" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Open AI Chat
+        - button "Start Demo" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Start Demo
+      - generic [ref=e29]:
+        - text: Use
+        - code [ref=e30]: AIChatWidget.open()
+        - text: /
+        - code [ref=e31]: .close()
+        - text: /
+        - code [ref=e32]: .toggle()
+        - text: /
+        - code [ref=e33]: .expand()
+        - text: /
+        - code [ref=e34]: .reset()
+        - text: in your browser console.
+  - generic:
+    - button "فتح المحادثة" [ref=e35] [cursor=pointer]:
+      - img [ref=e37]
+      - generic: "1"
+    - generic:
+      - button "تبديل التصغير":
+        - generic:
+          - generic:
+            - img
+          - generic:
+            - heading "المساعد الذكي" [level=3]
+            - paragraph: متصل الآن
+        - generic:
+          - button "English":
+            - img
+            - generic: EN
+          - generic:
+            - button "خيارات إضافية":
+              - img
+            - menu:
+              - menuitem "محادثة جديدة":
+                - img
+                - generic: محادثة جديدة
+              - menuitem "English":
+                - img
+                - generic: English
+              - menuitem "شاشة كاملة":
+                - img
+                - generic: شاشة كاملة
+              - menuitem "مسح المحادثة":
+                - img
+                - generic: مسح المحادثة
+          - button "تصغير":
+            - img
+          - button "شاشة كاملة":
+            - img
+          - button "إغلاق":
+            - img
+      - log "رسائل المحادثة":
+        - generic:
+          - generic: What are the refund rules?
+          - generic:
+            - generic: 01:47
+        - generic:
+          - generic:
+            - text: "Based on the project's Refund and Revenue Policy, the refund rules are as follows:"
+            - text: "*"
+            - strong: "Time Limit:"
+            - text: Refunds are allowed within 14 days from the payment date.
+            - text: "*"
+            - strong: "Approval:"
+            - text: Refund requests must be approved by an admin.
+            - text: "*"
+            - strong: "Transaction ID:"
+            - text: All refund requests require the original transaction ID.
+            - text: "*"
+            - strong: "Partial Refunds:"
+            - text: Partial refunds are allowed up to the remaining balance.
+            - emphasis: "Source: Refund and Revenue Policy (app/AI/Knowledge/test-rag.md)"
+          - generic:
+            - generic: 01:47
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+        - generic:
+          - generic: How many users are registered?
+          - generic:
+            - generic: 01:48
+        - generic:
+          - generic:
+            - text: "Hello! Let me address your questions:"
+            - strong: "1. Refund Rules:"
+            - text: I don't have access to any specific tool or data source that contains refund rules. This would typically depend on the specific business or platform you're referring to. I'd recommend checking the relevant terms of service, policy pages, or contacting customer support for accurate refund policy details.
+            - strong: "2. Number of Registered Users:"
+            - text: Let me look that up for you right now!Based on the data returned, there are currently
+            - strong: 0 registered users
+            - text: in the system.
+            - text: "This could mean:"
+            - listitem: The system is new and no users have been registered yet, or
+            - listitem: The user database is currently empty for another reason.
+            - text: Is there anything else you'd like to know?
+          - generic:
+            - generic: 01:48
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+        - generic:
+          - generic: My name is Alice, I work in sales
+          - generic:
+            - generic: 01:49
+      - generic:
+        - generic:
+          - textbox "إرسال" [disabled]:
+            - /placeholder: اكتب رسالتك...
+          - button "إرسال" [disabled]:
+            - img
+      - generic: مدعوم من WaKeb AI

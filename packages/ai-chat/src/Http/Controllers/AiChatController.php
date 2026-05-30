@@ -10,15 +10,25 @@ use AiChat\Http\Requests\FeedbackRequest;
 use AiChat\Http\Requests\GetConversationRequest;
 use AiChat\Http\Requests\ListConversationsRequest;
 use AiChat\Http\Requests\SendMessageRequest;
+use AiChat\Http\Resources\ConversationResource;
+use AiChat\Http\Resources\FeedbackResource;
+use AiChat\Http\Resources\MessageResource;
 use AiChat\Models\AiChatConversation;
 use AiChat\Models\AiFeedback;
 use AiChat\Pipeline\ChatPayload;
 use AiChat\Pipeline\ChatPipeline;
-use AiChat\Resources\ConversationResource;
-use AiChat\Resources\FeedbackResource;
-use AiChat\Resources\MessageResource;
+use AiChat\Pipeline\Steps\ApplyPolicies;
+use AiChat\Pipeline\Steps\PlanStep;
+use AiChat\Pipeline\Steps\ResolveAgent;
+use AiChat\Pipeline\Steps\ResolveContext;
+use AiChat\Pipeline\Steps\ResolveTools;
+use AiChat\Pipeline\Steps\ResolveUser;
+use AiChat\Pipeline\Steps\RetrieveKnowledge;
+use AiChat\Pipeline\Steps\RetrieveMemory;
+use AiChat\Pipeline\Steps\ValidateMessage;
 use AiChat\Storage\AnonymousConversationStore;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controller;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -62,14 +72,14 @@ class AiChatController extends Controller
 
         return successResponse([
             'conversation_id' => $conversationId,
-            'message' => new MessageResource([
+            'message' => [
                 'id' => null,
                 'role' => 'assistant',
                 'content' => $payload->response ?? '',
                 'usage' => $payload->metadata['usage'] ?? null,
                 'created_at' => now()->toIso8601String(),
                 'tool_calls' => ! empty($payload->toolResults),
-            ]),
+            ],
             'plan' => $payload->executionPlan?->toArray() ?? null,
         ]);
     }
@@ -77,28 +87,30 @@ class AiChatController extends Controller
     public function streamMessage(SendMessageRequest $request): StreamedResponse
     {
         $payload = $this->buildPayload($request, streaming: true);
-
         $conversationId = $this->ensureConversation($request);
 
         if ($conversationId) {
-            $payload->conversation = $this->conversationManager->find($conversationId);
+            $payload->conversation = $this->conversationManager->get($conversationId);
         }
 
-        $agent = $this->buildAgentForStream($request, $conversationId);
+        $planningPayload = (clone $payload);
+        $planningSteps = $this->getPlanningSteps();
+        $planningPayload = app(Pipeline::class)
+            ->send($planningPayload)
+            ->through($planningSteps)
+            ->thenReturn();
 
-        $planPayload = (clone $payload);
-        $planPayload = $this->pipeline->process($planPayload);
+        $selectedToolNames = array_keys($planningPayload->tools ?? []);
+        $systemPrompt = $this->buildSystemPrompt($planningPayload);
 
-        $selectedToolNames = array_keys($planPayload->tools ?? []);
+        $agent = $this->buildChatAgent($request, $conversationId, $selectedToolNames, $systemPrompt);
 
-        if (! empty($selectedToolNames)) {
-            $agent->withTools($selectedToolNames);
-        }
+        $finalConversationId = $conversationId;
 
-        return new StreamedResponse(function () use ($agent, $request, $conversationId, $payload) {
-            if ($conversationId) {
+        return new StreamedResponse(function () use ($agent, $request, $finalConversationId, $payload) {
+            if ($finalConversationId) {
                 echo "event: conversation_id\n";
-                echo 'data: '.json_encode(['conversation_id' => $conversationId])."\n\n";
+                echo 'data: '.json_encode(['conversation_id' => $finalConversationId])."\n\n";
 
                 if (ob_get_level() > 0) {
                     ob_flush();
@@ -108,7 +120,7 @@ class AiChatController extends Controller
 
             $message = $request->validated('message');
 
-            $this->streamManager->startStream($conversationId ?? 'unknown');
+            $this->streamManager->startStream($finalConversationId ?? 'unknown');
 
             try {
                 $stream = $agent->stream($message);
@@ -126,16 +138,16 @@ class AiChatController extends Controller
                     }
                     flush();
 
-                    $this->streamManager->appendToStream($conversationId ?? 'unknown', $content);
+                    $this->streamManager->appendToStream($finalConversationId ?? 'unknown', $content);
                 }
 
                 $payload->response = $fullContent;
 
-                $this->persistStreamResponse($payload, $conversationId);
+                $this->persistStreamResponse($payload, $finalConversationId);
 
-                $this->streamManager->endStream($conversationId ?? 'unknown', $fullContent);
+                $this->streamManager->endStream($finalConversationId ?? 'unknown', $fullContent);
             } catch (\Throwable $e) {
-                $this->streamManager->abortStream($conversationId ?? 'unknown');
+                $this->streamManager->abortStream($finalConversationId ?? 'unknown');
 
                 echo 'data: '.json_encode(['error' => $e->getMessage()])."\n\n";
             }
@@ -244,9 +256,24 @@ class AiChatController extends Controller
         return $payload;
     }
 
-    protected function buildAgentForStream(SendMessageRequest $request, ?string $conversationId): ChatAgent
+    protected function getPlanningSteps(): array
     {
-        $agent = new ChatAgent($request->validated('system_prompt'));
+        return [
+            ValidateMessage::class,
+            ResolveUser::class,
+            ResolveAgent::class,
+            PlanStep::class,
+            ApplyPolicies::class,
+            ResolveContext::class,
+            RetrieveKnowledge::class,
+            RetrieveMemory::class,
+            ResolveTools::class,
+        ];
+    }
+
+    protected function buildChatAgent(SendMessageRequest $request, ?string $conversationId, array $toolNames = [], ?string $systemPrompt = null): ChatAgent
+    {
+        $agent = new ChatAgent($systemPrompt ?? $request->validated('system_prompt'));
         $sessionId = $request->validated('session_id');
 
         if ($conversationId) {
@@ -255,7 +282,50 @@ class AiChatController extends Controller
             $agent->forSession($sessionId);
         }
 
+        if (! empty($toolNames)) {
+            $agent->withTools($toolNames);
+        }
+
         return $agent;
+    }
+
+    protected function buildSystemPrompt(ChatPayload $payload): string
+    {
+        $parts = [];
+        $agentPrompt = $payload->agent?->systemPrompt() ?? config('ai-chat.conversations.default_system_prompt', '');
+        $plan = $payload->executionPlan;
+
+        if ($agentPrompt !== '') {
+            $parts[] = $agentPrompt;
+        }
+
+        if ($plan) {
+            if ($plan->isSimpleLiveData()) {
+                $parts[] = "\n\nUse the available tools to answer this live-data question. Do not invent values.";
+            } elseif ($plan->isKnowledgeRequest()) {
+                $parts[] = "\n\nAnswer only from retrieved project knowledge. If missing, say you do not have enough information.";
+            } elseif ($plan->isMemoryRequest()) {
+                $parts[] = "\n\nUse the conversation memory context to provide a relevant response.";
+            }
+        }
+
+        if (! empty($payload->context)) {
+            $parts[] = "\n\n## Context\n".json_encode($payload->context, JSON_PRETTY_PRINT);
+        }
+
+        if (! empty($payload->knowledge)) {
+            $parts[] = "\n\n## Knowledge Base\n".collect($payload->knowledge)
+                ->map(fn ($k, $i) => '['.($i + 1).'] '.(is_array($k) ? json_encode($k) : (string) $k))
+                ->implode("\n");
+        }
+
+        if (! empty($payload->memory)) {
+            $parts[] = "\n\n## Conversation Memory\n".collect($payload->memory)
+                ->map(fn ($m) => is_array($m) ? json_encode($m) : (string) $m)
+                ->implode("\n");
+        }
+
+        return implode('', $parts);
     }
 
     protected function ensureConversation(SendMessageRequest $request): ?string

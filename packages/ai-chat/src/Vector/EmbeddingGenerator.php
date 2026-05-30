@@ -58,10 +58,23 @@ class EmbeddingGenerator
         try {
             $driver = config('ai-chat.default_for_embeddings', 'openai');
 
-            $response = app(AiManager::class)->driver($driver)->embed($text);
+            $aiManager = app(AiManager::class);
 
-            if (is_array($response) && ! empty($response)) {
-                return $response;
+            if (method_exists($aiManager, 'embeddingProvider')) {
+                try {
+                    $provider = $aiManager->embeddingProvider($driver);
+
+                    $result = $provider->embed($text);
+
+                    if (is_array($result) && ! empty($result)) {
+                        return $result;
+                    }
+                } catch (\LogicException $e) {
+                    Log::debug('Embedding provider not available for driver, using fallback', [
+                        'driver' => $driver,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
         } catch (\Throwable $e) {
             Log::debug('Embedding provider failed, using fallback', [

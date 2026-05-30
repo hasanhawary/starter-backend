@@ -1,8 +1,5 @@
 <?php
 
-use App\Models\PasswordResetToken;
-use App\Models\PersonalAccessToken;
-
 return [
 
     'provider' => env('AI_CHAT_PROVIDER', 'glm'),
@@ -29,8 +26,8 @@ return [
     'blocked_actions' => ['create', 'update', 'delete', 'export_sensitive', 'charge', 'refund', 'send', 'execute'],
 
     'blocked_models' => [
-        PasswordResetToken::class,
-        PersonalAccessToken::class,
+        'App\Models\PasswordResetToken',
+        'App\Models\PersonalAccessToken',
     ],
 
     'blocked_fields' => [
@@ -51,11 +48,17 @@ return [
         'max_messages' => (int) env('AI_CHAT_MAX_MESSAGES', 100),
         'history_limit' => (int) env('AI_CHAT_HISTORY_LIMIT', 6),
         'max_prompt_tokens' => (int) env('AI_CHAT_MAX_PROMPT_TOKENS', 4000),
-        'default_system_prompt' => env('AI_CHAT_SYSTEM_PROMPT', 'You are a helpful AI assistant. Be concise, accurate, and friendly. Only answer based on available tools, context, memory, or knowledge. Do not invent data.'),
+        'default_system_prompt' => env('AI_CHAT_SYSTEM_PROMPT', 'You are a helpful AI assistant. Be concise, accurate, and friendly. When tools, knowledge, or memory are available, prefer using them for accurate answers. Otherwise, answer based on your general knowledge.'),
     ],
 
     'tool_logging' => [
         'driver' => env('AI_CHAT_TOOL_LOG_DRIVER', 'database'),
+    ],
+
+    'policies' => [
+        'read_only' => env('AI_CHAT_READ_ONLY', true),
+        'blocked_actions' => ['create', 'update', 'delete', 'export_sensitive', 'charge', 'refund', 'send', 'execute'],
+        'write_actions' => ['create', 'update', 'delete', 'write', 'modify', 'execute'],
     ],
 
     'widget' => [
@@ -65,6 +68,26 @@ return [
         'theme' => env('AI_CHAT_WIDGET_THEME', 'light'),
         'position' => env('AI_CHAT_WIDGET_POSITION', 'bottom-right'),
         'title' => env('AI_CHAT_WIDGET_TITLE', 'AI Assistant'),
+        'subtitle' => env('AI_CHAT_WIDGET_SUBTITLE', 'Ask me anything'),
+        'primary_color' => env('AI_CHAT_WIDGET_PRIMARY_COLOR', '#6366f1'),
+        'avatar_url' => env('AI_CHAT_WIDGET_AVATAR_URL', ''),
+        'welcome_message' => env('AI_CHAT_WIDGET_WELCOME_MESSAGE', 'Hello! How can I help you today?'),
+        'allow_fullscreen' => env('AI_CHAT_WIDGET_ALLOW_FULLSCREEN', true),
+        'auto_open' => env('AI_CHAT_WIDGET_AUTO_OPEN', false),
+        'open_delay' => (int) env('AI_CHAT_WIDGET_OPEN_DELAY', 3000),
+        'height' => (int) env('AI_CHAT_WIDGET_HEIGHT', 600),
+        'width' => (int) env('AI_CHAT_WIDGET_WIDTH', 380),
+        'suggested_prompts' => [
+            env('AI_CHAT_PROMPT_1', 'What can you help me with?'),
+            env('AI_CHAT_PROMPT_2', 'Summarize the project'),
+            env('AI_CHAT_PROMPT_3', 'List available models'),
+            env('AI_CHAT_PROMPT_4', 'Check system status'),
+        ],
+        'show_branding' => true,
+        'show_feedback' => true,
+        'show_suggestions' => true,
+        'agent_avatar' => env('AI_CHAT_WIDGET_AVATAR_URL', ''),
+        'online_status' => 'online',
     ],
 
     'knowledge' => [
@@ -76,10 +99,16 @@ return [
         ],
         'chunk_size' => (int) env('AI_CHAT_CHUNK_SIZE', 500),
         'chunk_overlap' => (int) env('AI_CHAT_CHUNK_OVERLAP', 50),
+        'vector_store' => env('AI_CHAT_KNOWLEDGE_VECTOR_STORE'),
+        'token_budget' => (int) env('AI_CHAT_KNOWLEDGE_TOKEN_BUDGET', 2000),
     ],
 
     'vector' => [
-        'driver' => env('AI_CHAT_VECTOR_DRIVER', 'null'),
+        'driver' => env('AI_CHAT_VECTOR_DRIVER', 'database'),
+        'database' => [
+            'connection' => env('AI_CHAT_VECTOR_DB_CONNECTION'),
+            'table' => env('AI_CHAT_VECTOR_DB_TABLE', 'ai_knowledge_chunks'),
+        ],
         'pgvector' => [
             'connection' => env('AI_CHAT_PGVECTOR_CONNECTION', 'pgsql'),
             'table' => env('AI_CHAT_PGVECTOR_TABLE', 'ai_vectors'),
@@ -101,6 +130,7 @@ return [
         'store_every_message' => env('AI_CHAT_STORE_EVERY_MESSAGE', false),
         'extract_after_messages' => (int) env('AI_CHAT_EXTRACT_AFTER_MESSAGES', 6),
         'min_importance' => (float) env('AI_CHAT_MIN_IMPORTANCE', 0.6),
+        'token_budget' => (int) env('AI_CHAT_MEMORY_TOKEN_BUDGET', 1000),
     ],
 
     'planning' => [

@@ -4,7 +4,6 @@ namespace AiChat\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class ResolveAiChatUser
@@ -16,14 +15,11 @@ class ResolveAiChatUser
             $request->attributes->set('ai_chat_session_id', (string) $request->user('sanctum')->getAuthIdentifier());
         } else {
             $sessionId = $request->input('session_id')
-                ?? $request->query('session_id')
-                ?? (string) Str::uuid();
+                ?? $request->query('session_id');
 
-            $request->attributes->set('ai_chat_user', null);
-            $request->attributes->set('ai_chat_session_id', $sessionId);
-
-            if (! $request->has('session_id') && ! $request->query->has('session_id')) {
-                $request->merge(['session_id' => $sessionId]);
+            if ($sessionId) {
+                $request->attributes->set('ai_chat_user', null);
+                $request->attributes->set('ai_chat_session_id', $sessionId);
             }
         }
 

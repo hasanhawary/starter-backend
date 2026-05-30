@@ -47,7 +47,7 @@ return [
 
     'conversations' => [
         'max_messages' => (int) env('AI_CHAT_MAX_MESSAGES', 100),
-        'default_system_prompt' => env('AI_CHAT_SYSTEM_PROMPT', 'You are a helpful AI assistant. Be concise, accurate, and friendly. Only answer based on available tools, context, memory, or knowledge. Do not invent data.'),
+        'default_system_prompt' => env('AI_CHAT_SYSTEM_PROMPT', 'You are a helpful AI assistant. Be concise, accurate, and friendly. When tools, knowledge, or memory are available, prefer using them for accurate answers. Otherwise, answer based on your general knowledge.'),
     ],
 
     'tool_logging' => [
@@ -61,10 +61,29 @@ return [
         'theme' => env('AI_CHAT_WIDGET_THEME', 'light'),
         'position' => env('AI_CHAT_WIDGET_POSITION', 'bottom-right'),
         'title' => env('AI_CHAT_WIDGET_TITLE', 'AI Assistant'),
+        'subtitle' => env('AI_CHAT_WIDGET_SUBTITLE', 'Ask me anything'),
+        'primary_color' => env('AI_CHAT_WIDGET_PRIMARY_COLOR', '#6366f1'),
+        'avatar_url' => env('AI_CHAT_WIDGET_AVATAR_URL', ''),
+        'welcome_message' => env('AI_CHAT_WIDGET_WELCOME_MESSAGE', 'Hello! How can I help you today?'),
+        'allow_fullscreen' => env('AI_CHAT_WIDGET_ALLOW_FULLSCREEN', true),
+        'auto_open' => env('AI_CHAT_WIDGET_AUTO_OPEN', false),
+        'open_delay' => (int) env('AI_CHAT_WIDGET_OPEN_DELAY', 3000),
+        'height' => (int) env('AI_CHAT_WIDGET_HEIGHT', 600),
+        'width' => (int) env('AI_CHAT_WIDGET_WIDTH', 380),
+        'suggested_prompts' => [
+            env('AI_CHAT_PROMPT_1', 'What can you help me with?'),
+            env('AI_CHAT_PROMPT_2', 'Summarize the project'),
+            env('AI_CHAT_PROMPT_3', 'List available models'),
+            env('AI_CHAT_PROMPT_4', 'Check system status'),
+        ],
+        'show_branding' => true,
+        'show_feedback' => true,
+        'show_suggestions' => true,
+        'agent_avatar' => env('AI_CHAT_WIDGET_AVATAR_URL', ''),
     ],
 
     'knowledge' => [
-        'enabled' => env('AI_CHAT_KNOWLEDGE_ENABLED', false),
+        'enabled' => env('AI_CHAT_KNOWLEDGE_ENABLED', true),
         'paths' => [
             app_path('AI/Knowledge'),
             base_path('README.md'),
@@ -75,7 +94,11 @@ return [
     ],
 
     'vector' => [
-        'driver' => env('AI_CHAT_VECTOR_DRIVER', 'null'),
+        'driver' => env('AI_CHAT_VECTOR_DRIVER', 'database'),
+        'database' => [
+            'connection' => env('AI_CHAT_VECTOR_DB_CONNECTION'),
+            'table' => env('AI_CHAT_VECTOR_DB_TABLE', 'ai_knowledge_chunks'),
+        ],
         'pgvector' => [
             'connection' => env('AI_CHAT_PGVECTOR_CONNECTION', 'pgsql'),
             'table' => env('AI_CHAT_PGVECTOR_TABLE', 'ai_vectors'),
@@ -93,7 +116,7 @@ return [
     ],
 
     'memory' => [
-        'enabled' => env('AI_CHAT_MEMORY_ENABLED', false),
+        'enabled' => env('AI_CHAT_MEMORY_ENABLED', true),
     ],
 
     'tenant_resolver' => env('AI_CHAT_TENANT_RESOLVER'),

@@ -3,7 +3,6 @@
 namespace AiChat\Pipeline;
 
 use AiChat\Pipeline\Steps\ApplyPolicies;
-use AiChat\Pipeline\Steps\BuildPrompt;
 use AiChat\Pipeline\Steps\ExecuteTools;
 use AiChat\Pipeline\Steps\PersistResponse;
 use AiChat\Pipeline\Steps\PlanStep;
@@ -29,7 +28,6 @@ class ChatPipeline
         RetrieveKnowledge::class,
         RetrieveMemory::class,
         ResolveTools::class,
-        BuildPrompt::class,
         SendToProvider::class,
         ExecuteTools::class,
         PersistResponse::class,

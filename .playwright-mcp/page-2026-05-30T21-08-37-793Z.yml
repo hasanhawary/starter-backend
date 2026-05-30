@@ -1,0 +1,75 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: API ONLINE
+    - heading "Welcome" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: This endpoint serves a backend API.
+      - text: No web interface is provided.
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Host
+        - generic [ref=e10]: localhost
+      - generic [ref=e11]:
+        - generic [ref=e12]: Client IP
+        - generic [ref=e13]: 127.0.0.1
+      - generic [ref=e14]:
+        - generic [ref=e15]: Secure Connection
+        - generic [ref=e16]: "No"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Server Time (UTC)
+        - generic [ref=e19]: 2026-05-30 21:06:47
+    - generic [ref=e20]:
+      - generic [ref=e21]: AI Chat
+      - generic [ref=e22]:
+        - button "Open AI Chat" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Open AI Chat
+        - button "Start Demo" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Start Demo
+      - generic [ref=e29]:
+        - text: Use
+        - code [ref=e30]: AIChatWidget.open()
+        - text: /
+        - code [ref=e31]: .close()
+        - text: /
+        - code [ref=e32]: .toggle()
+        - text: /
+        - code [ref=e33]: .expand()
+        - text: /
+        - code [ref=e34]: .reset()
+        - text: in your browser console.
+  - generic [ref=e40]:
+    - button "Toggle minimize" [ref=e41] [cursor=pointer]:
+      - generic [ref=e42]:
+        - img [ref=e44]
+        - generic [ref=e48]:
+          - heading "AI Assistant" [level=3] [ref=e49]
+          - paragraph [ref=e50]: Ask me anything
+      - generic [ref=e51]:
+        - button "New conversation" [ref=e52]:
+          - img [ref=e53]
+        - button "Minimize" [ref=e54]:
+          - img [ref=e55]
+        - button "Toggle fullscreen" [ref=e56]:
+          - img [ref=e105]
+        - button "Close" [ref=e62]:
+          - img [ref=e63]
+    - log "Chat messages" [ref=e66]:
+      - generic [ref=e123]:
+        - generic [ref=e124]: What can you help me with?
+        - generic [ref=e126]: 00:08
+      - alert [ref=e127]:
+        - generic [ref=e128]: Call to undefined method AiChat\Chat\ConversationManager::find()
+        - button "Retry" [ref=e129] [cursor=pointer]:
+          - img [ref=e130]
+          - text: Retry
+        - button "Dismiss error" [ref=e133] [cursor=pointer]:
+          - img [ref=e134]
+    - generic [ref=e81]:
+      - textbox "Chat message" [ref=e82]:
+        - /placeholder: Type a message...
+      - button "Send message" [disabled] [ref=e83]:
+        - img [ref=e84]
+        - img [ref=e87]
+    - generic [ref=e90]: Powered by AI

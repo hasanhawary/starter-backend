@@ -4,7 +4,6 @@ namespace AiChat\Vector;
 
 use AiChat\Contracts\VectorStoreInterface;
 use AiChat\Vector\Drivers\NullVectorDriver;
-use Illuminate\Support\Facades\App;
 
 class VectorManager
 {
@@ -43,12 +42,26 @@ class VectorManager
     protected function resolveDriver(?string $driverName): VectorStoreInterface
     {
         $name = $driverName ?? config('ai-chat.vector.driver', 'null');
-        $config = config("ai-chat.vector.drivers.{$name}", []);
 
         return match ($name) {
-            'pgvector' => App::make(Drivers\PgVectorDriver::class, ['config' => $config]),
-            'qdrant' => App::make(Drivers\QdrantDriver::class, ['config' => $config]),
-            'pinecone' => App::make(Drivers\PineconeDriver::class, ['config' => $config]),
+            'database' => new Drivers\DatabaseVectorDriver([
+                'connection' => config('ai-chat.vector.database.connection', config('database.default')),
+                'table' => config('ai-chat.vector.database.table', 'ai_knowledge_chunks'),
+            ]),
+            'pgvector' => new Drivers\PgVectorDriver([
+                'connection' => config('ai-chat.vector.pgvector.connection', 'pgsql'),
+                'table' => config('ai-chat.vector.pgvector.table', 'ai_vectors'),
+            ]),
+            'qdrant' => new Drivers\QdrantDriver([
+                'url' => config('ai-chat.vector.qdrant.url', 'http://localhost:6333'),
+                'api_key' => config('ai-chat.vector.qdrant.api_key'),
+                'collection' => config('ai-chat.vector.qdrant.collection', 'ai_chat'),
+            ]),
+            'pinecone' => new Drivers\PineconeDriver([
+                'api_key' => config('ai-chat.vector.pinecone.api_key'),
+                'environment' => config('ai-chat.vector.pinecone.environment'),
+                'index' => config('ai-chat.vector.pinecone.index', 'ai-chat'),
+            ]),
             'null' => new NullVectorDriver,
             default => new NullVectorDriver,
         };
