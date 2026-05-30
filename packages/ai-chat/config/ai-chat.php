@@ -139,6 +139,30 @@ return [
         'planner_model' => env('AI_CHAT_PLANNER_MODEL'),
         'cache_plans' => env('AI_CHAT_CACHE_PLANS', true),
         'cache_ttl' => (int) env('AI_CHAT_PLAN_CACHE_TTL', 3600),
+        'heuristic_confidence_threshold' => (float) env('AI_CHAT_HEURISTIC_CONFIDENCE_THRESHOLD', 0.75),
+        'tool_match_threshold' => (float) env('AI_CHAT_TOOL_MATCH_THRESHOLD', 0.70),
+        'tool_search' => [
+            'driver' => env('AI_CHAT_TOOL_SEARCH_DRIVER', 'array'),
+            'drivers' => [
+                'array' => [],
+                'meilisearch' => [
+                    'enabled' => false,
+                    'index' => 'ai_chat_tools',
+                ],
+                'typesense' => [
+                    'enabled' => false,
+                    'collection' => 'ai_chat_tools',
+                ],
+                'opensearch' => [
+                    'enabled' => false,
+                    'index' => 'ai_chat_tools',
+                ],
+                'elasticsearch' => [
+                    'enabled' => false,
+                    'index' => 'ai_chat_tools',
+                ],
+            ],
+        ],
     ],
 
     'context' => [

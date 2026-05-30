@@ -64,7 +64,13 @@ class HybridPlanner
     protected function hybrid(string $message, array $availableTools, ?string $locale): ExecutionPlan
     {
         if ($this->heuristicPlanner->canHandle($message)) {
-            return $this->heuristicPlanner->plan($message, $availableTools, $locale);
+            $heuristicPlan = $this->heuristicPlanner->plan($message, $availableTools, $locale);
+
+            if (! $this->heuristicPlanner->shouldUseLlm($heuristicPlan)) {
+                return $heuristicPlan;
+            }
+        } else {
+            $heuristicPlan = $this->heuristicPlanner->plan($message, $availableTools, $locale);
         }
 
         $toolNames = array_map(
@@ -75,7 +81,7 @@ class HybridPlanner
         $plan = $this->llmPlanner->plan($message, $toolNames, $locale);
 
         if ($plan === null) {
-            return $this->heuristicPlanner->plan($message, $availableTools, $locale);
+            return $heuristicPlan;
         }
 
         return $plan;

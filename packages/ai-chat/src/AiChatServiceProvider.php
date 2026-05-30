@@ -43,6 +43,8 @@ use AiChat\Pipeline\ChatPipeline;
 use AiChat\Planning\HeuristicPlanner;
 use AiChat\Planning\HybridPlanner;
 use AiChat\Planning\LlmPlanner;
+use AiChat\Planning\ToolSearch\ArrayToolSearchIndex;
+use AiChat\Planning\ToolSearch\ToolSearchIndex;
 use AiChat\Policies\DefaultReadOnlyPolicy;
 use AiChat\Policies\PolicyManager;
 use AiChat\Providers\GlmProvider;
@@ -84,6 +86,7 @@ class AiChatServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/ai-chat.php', 'ai-chat');
+        $this->mergeConfigFrom(__DIR__.'/../config/ai-chat-dialects.php', 'ai-chat-dialects');
 
         $this->registerCoreBindings();
         $this->registerMcpBindings();
@@ -254,6 +257,14 @@ class AiChatServiceProvider extends ServiceProvider
         $this->app->singleton(ToolSelector::class);
         $this->app->singleton(TokenBudgetManager::class);
         $this->app->singleton(MemoryExtractor::class);
+        $this->app->bind(ToolSearchIndex::class, function ($app) {
+            $driver = config('ai-chat.planning.tool_search.driver', 'array');
+
+            return match ($driver) {
+                'array' => new ArrayToolSearchIndex,
+                default => new ArrayToolSearchIndex,
+            };
+        });
     }
 
     protected function registerFacades(): void
