@@ -102,8 +102,9 @@ class AiChatController extends Controller
 
         $selectedToolNames = array_keys($planningPayload->tools ?? []);
         $systemPrompt = $this->buildSystemPrompt($planningPayload);
+        $historyLimit = $planningPayload->executionPlan?->historyLimit ?? 6;
 
-        $agent = $this->buildChatAgent($request, $conversationId, $selectedToolNames, $systemPrompt);
+        $agent = $this->buildChatAgent($request, $conversationId, $selectedToolNames, $systemPrompt, $historyLimit);
 
         $finalConversationId = $conversationId;
 
@@ -271,7 +272,7 @@ class AiChatController extends Controller
         ];
     }
 
-    protected function buildChatAgent(SendMessageRequest $request, ?string $conversationId, array $toolNames = [], ?string $systemPrompt = null): ChatAgent
+    protected function buildChatAgent(SendMessageRequest $request, ?string $conversationId, array $toolNames = [], ?string $systemPrompt = null, int $historyLimit = 100): ChatAgent
     {
         $agent = new ChatAgent($systemPrompt ?? $request->validated('system_prompt'));
         $sessionId = $request->validated('session_id');
@@ -285,6 +286,8 @@ class AiChatController extends Controller
         if (! empty($toolNames)) {
             $agent->withTools($toolNames);
         }
+
+        $agent->withHistoryLimit($historyLimit);
 
         return $agent;
     }
@@ -300,7 +303,9 @@ class AiChatController extends Controller
         }
 
         if ($plan) {
-            if ($plan->isSimpleLiveData()) {
+            if ($plan->intent === 'direct' && $plan->historyLimit === 0) {
+                $parts[] = "\n\nThis is a greeting or casual message. Reply naturally and briefly to the current message only. Do not summarize, repeat, or answer previous unrelated questions unless the user explicitly asks.";
+            } elseif ($plan->isSimpleLiveData()) {
                 $parts[] = "\n\nUse the available tools to answer this live-data question. Do not invent values.";
             } elseif ($plan->isKnowledgeRequest()) {
                 $parts[] = "\n\nAnswer only from retrieved project knowledge. If missing, say you do not have enough information.";

@@ -86,7 +86,7 @@ class ExecutionPlan
 
     public function requiresTools(): bool
     {
-        return ! empty($this->tools) || in_array($this->intent, ['live_data', 'mixed', 'direct']);
+        return ! empty($this->tools) || in_array($this->intent, ['live_data', 'mixed']);
     }
 
     public function needsLlmCall(): bool

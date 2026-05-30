@@ -64,12 +64,31 @@ class HeuristicPlanner
         'as we discussed' => 'memory',
         'we talked about' => 'memory',
         'like before' => 'memory',
+        'like we discussed' => 'memory',
+        'from before' => 'memory',
         'previous' => 'memory',
         'earlier' => 'memory',
         'last time' => 'memory',
         'report' => 'memory',
         'تقرير' => 'memory',
         'again' => 'memory',
+        'قبل كده' => 'memory',
+        'اللي قولتلك' => 'memory',
+        'كمل اللي' => 'memory',
+        'قلتلك' => 'memory',
+        'discussed before' => 'memory',
+    ];
+
+    protected array $greetingPatterns = [
+        'ازيك', 'ازايك', 'إزيك', 'إزايك', 'صباح الخير', 'مساء الخير',
+        'اهلا', 'أهلا', 'اهلاً', 'أهلاً', 'مرحبا', 'مرحباً',
+        'سلام', 'السلام عليكم', 'هلا', 'يا هلا',
+        'hello', 'hi', 'hey', 'good morning', 'good evening', 'howdy',
+        'whats up', 'what\'s up', 'sup',
+        'عامل ايه', 'عامل إيه', 'عاملين ايه', 'عاملين إيه',
+        'كيف حالك', 'كيفك', 'كيفك', 'كيف الحال',
+        'ايش اخبارك', 'ايش أخبارك', 'شخبارك',
+        'تمام', 'الحمد لله',
     ];
 
     public function __construct(
@@ -81,6 +100,16 @@ class HeuristicPlanner
         $normalizedMessage = mb_strtolower(trim($message));
         $plan = new ExecutionPlan;
         $plan->planner = 'heuristic';
+
+        if ($this->isGreeting($normalizedMessage)) {
+            $plan->intent = 'direct';
+            $plan->historyLimit = 0;
+            $plan->useRag = false;
+            $plan->useMemory = false;
+            $plan->tools = [];
+
+            return $plan;
+        }
 
         $detectedIntent = $this->detectIntent($normalizedMessage);
         $plan->intent = $detectedIntent;
@@ -305,6 +334,17 @@ class HeuristicPlanner
 
         foreach ($complexIndicators as $indicator) {
             if (str_contains($normalizedMessage, $indicator)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function isGreeting(string $normalizedMessage): bool
+    {
+        foreach ($this->greetingPatterns as $greeting) {
+            if ($normalizedMessage === $greeting || $normalizedMessage === $greeting.'?' || $normalizedMessage === $greeting.'!') {
                 return true;
             }
         }

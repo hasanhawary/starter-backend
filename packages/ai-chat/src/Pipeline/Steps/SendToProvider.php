@@ -44,6 +44,10 @@ class SendToProvider
             $agent->withTools(array_keys($payload->tools));
         }
 
+        if ($payload->executionPlan) {
+            $agent->withHistoryLimit($payload->executionPlan->historyLimit);
+        }
+
         return $agent;
     }
 
@@ -58,7 +62,9 @@ class SendToProvider
         }
 
         if ($plan) {
-            if ($plan->isSimpleLiveData()) {
+            if ($plan->intent === 'direct' && $plan->historyLimit === 0) {
+                $parts[] = "\n\nThis is a greeting or casual message. Reply naturally and briefly to the current message only. Do not summarize, repeat, or answer previous unrelated questions unless the user explicitly asks.";
+            } elseif ($plan->isSimpleLiveData()) {
                 $parts[] = "\n\nUse the available tools to answer this live-data question. Do not invent values.";
             } elseif ($plan->isKnowledgeRequest()) {
                 $parts[] = "\n\nAnswer only from retrieved project knowledge. If missing, say you do not have enough information.";

@@ -102,7 +102,7 @@ class HybridPlanner
 
         $plan->ragLimit = max(1, min((int) $plan->ragLimit, 10));
         $plan->memoryLimit = max(1, min((int) $plan->memoryLimit, 10));
-        $plan->historyLimit = max(2, min((int) $plan->historyLimit, 20));
+        $plan->historyLimit = max(0, min((int) $plan->historyLimit, 20));
 
         if ($plan->needsClarification && empty($plan->clarificationQuestion)) {
             $plan->needsClarification = false;

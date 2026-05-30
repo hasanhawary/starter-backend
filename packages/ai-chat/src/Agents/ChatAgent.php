@@ -38,6 +38,8 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
 
     protected array $enabledTools = [];
 
+    protected int $historyLimit = 100;
+
     public function __construct(?string $systemPrompt = null)
     {
         $this->systemPrompt = $systemPrompt ?? config('ai-chat.conversations.default_system_prompt');
@@ -73,6 +75,13 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
         return $this;
     }
 
+    public function withHistoryLimit(int $limit): static
+    {
+        $this->historyLimit = $limit;
+
+        return $this;
+    }
+
     public function instructions(): Stringable|string
     {
         return $this->systemPrompt;
@@ -80,14 +89,14 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
 
     public function messages(): iterable
     {
-        if (! $this->conversationId) {
+        if (! $this->conversationId || $this->historyLimit <= 0) {
             return [];
         }
 
         return $this->conversationStore()
             ->getLatestConversationMessages(
                 $this->conversationId,
-                config('ai-chat.conversations.max_messages', 100),
+                min($this->historyLimit, config('ai-chat.conversations.max_messages', 100)),
             )->all();
     }
 
