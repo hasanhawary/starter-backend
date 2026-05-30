@@ -35,9 +35,14 @@ use AiChat\MCP\ToolInputValidator;
 use AiChat\MCP\ToolOutputNormalizer;
 use AiChat\MCP\ToolPermissionGuard;
 use AiChat\MCP\ToolRegistry;
+use AiChat\MCP\ToolSelector;
+use AiChat\Memory\MemoryExtractor;
 use AiChat\Memory\MemoryManager;
 use AiChat\Memory\MemoryRetriever;
 use AiChat\Pipeline\ChatPipeline;
+use AiChat\Planning\HeuristicPlanner;
+use AiChat\Planning\HybridPlanner;
+use AiChat\Planning\LlmPlanner;
 use AiChat\Policies\DefaultReadOnlyPolicy;
 use AiChat\Policies\PolicyManager;
 use AiChat\Providers\GlmProvider;
@@ -53,6 +58,7 @@ use AiChat\Search\SqlSearch;
 use AiChat\Search\VectorSearch;
 use AiChat\Storage\AnonymousConversationStore;
 use AiChat\Support\TenantResolver;
+use AiChat\Support\TokenBudgetManager;
 use AiChat\Vector\Drivers\NullVectorDriver;
 use AiChat\Vector\Drivers\PgVectorDriver;
 use AiChat\Vector\Drivers\PineconeDriver;
@@ -238,6 +244,12 @@ class AiChatServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ChatPipeline::class);
         $this->app->singleton(AgentResolver::class);
+        $this->app->singleton(HeuristicPlanner::class);
+        $this->app->singleton(LlmPlanner::class);
+        $this->app->singleton(HybridPlanner::class);
+        $this->app->singleton(ToolSelector::class);
+        $this->app->singleton(TokenBudgetManager::class);
+        $this->app->singleton(MemoryExtractor::class);
     }
 
     protected function registerFacades(): void

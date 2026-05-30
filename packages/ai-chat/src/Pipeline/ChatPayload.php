@@ -39,6 +39,8 @@ class ChatPayload
 
     public bool $streaming = false;
 
+    public ?ExecutionPlan $executionPlan = null;
+
     public function __construct(string $message, ?Authenticatable $user = null)
     {
         $this->message = $message;

@@ -1,7 +1,9 @@
 {
     "$schema": "https://opencode.ai/config.json",
     "skills": {
-        "paths": [".ai/skills/generated"]
+        "paths": [
+            ".ai/skills/generated"
+        ]
     },
     "mcp": {
         "laravel-boost": {

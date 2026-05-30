@@ -1,14 +1,28 @@
 {
     "agents": [
+        "codex",
+        "claude_code",
+        "amp",
+        "gemini",
+        "cursor",
+        "copilot",
+        "junie",
+        "kiro",
         "opencode"
     ],
-    "cloud": false,
+    "cloud": true,
     "guidelines": true,
     "mcp": true,
     "nightwatch": false,
+    "packages": [
+        "spatie/laravel-translatable"
+    ],
     "sail": false,
     "skills": [
+        "ai-sdk-development",
         "laravel-best-practices",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "translatable-development",
+        "deploying-laravel-cloud"
     ]
 }

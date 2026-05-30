@@ -6,6 +6,7 @@ use AiChat\Pipeline\Steps\ApplyPolicies;
 use AiChat\Pipeline\Steps\BuildPrompt;
 use AiChat\Pipeline\Steps\ExecuteTools;
 use AiChat\Pipeline\Steps\PersistResponse;
+use AiChat\Pipeline\Steps\PlanStep;
 use AiChat\Pipeline\Steps\ResolveAgent;
 use AiChat\Pipeline\Steps\ResolveContext;
 use AiChat\Pipeline\Steps\ResolveTools;
@@ -22,6 +23,7 @@ class ChatPipeline
         ValidateMessage::class,
         ResolveUser::class,
         ResolveAgent::class,
+        PlanStep::class,
         ApplyPolicies::class,
         ResolveContext::class,
         RetrieveKnowledge::class,

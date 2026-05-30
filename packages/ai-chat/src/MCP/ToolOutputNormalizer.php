@@ -9,7 +9,12 @@ use Illuminate\Support\Collection;
 
 class ToolOutputNormalizer
 {
-    private const MAX_COLLECTION_ITEMS = 50;
+    private int $maxCollectionItems;
+
+    public function __construct()
+    {
+        $this->maxCollectionItems = (int) config('ai-chat.context.max_tool_result_items', 10);
+    }
 
     public function normalize(mixed $output): array
     {

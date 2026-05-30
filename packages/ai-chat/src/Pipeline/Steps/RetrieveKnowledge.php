@@ -17,6 +17,10 @@ class RetrieveKnowledge
             return $next($payload);
         }
 
+        if ($payload->executionPlan && ! $payload->executionPlan->useRag) {
+            return $next($payload);
+        }
+
         $storeClass = config('ai-chat.rag.vector_store');
 
         if (! $storeClass || ! class_exists($storeClass)) {
@@ -36,7 +40,10 @@ class RetrieveKnowledge
                 return $next($payload);
             }
 
-            $results = $store->search($embedding, (int) config('ai-chat.rag.max_results', 5));
+            $query = $payload->executionPlan?->ragQuery ?? $payload->message;
+            $limit = (int) ($payload->executionPlan?->ragLimit ?? config('ai-chat.rag.max_results', 5));
+
+            $results = $store->search($embedding, $limit);
 
             $budget = (int) config('ai-chat.rag.token_budget', 2000);
             $used = 0;

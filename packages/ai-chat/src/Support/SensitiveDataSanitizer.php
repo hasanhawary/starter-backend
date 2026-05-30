@@ -19,6 +19,8 @@ class SensitiveDataSanitizer
         'otp_data',
         'two_factor_secret',
         'two_factor_recovery_codes',
+        'authorization',
+        'bearer',
     ];
 
     public static function sanitize(array $data): array

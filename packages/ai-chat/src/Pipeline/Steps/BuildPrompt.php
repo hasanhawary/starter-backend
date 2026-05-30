@@ -4,19 +4,19 @@ namespace AiChat\Pipeline\Steps;
 
 use AiChat\Chat\HistoryManager;
 use AiChat\Pipeline\ChatPayload;
+use AiChat\Support\TokenBudgetManager;
 use Closure;
 
 class BuildPrompt
 {
     public function __construct(
         protected HistoryManager $historyManager,
+        protected TokenBudgetManager $budgetManager,
     ) {}
 
     public function handle(ChatPayload $payload, Closure $next): ChatPayload
     {
         $systemPrompt = $this->buildSystemPrompt($payload);
-
-        $conversationId = $payload->conversationId();
 
         $messages = [];
 
@@ -27,8 +27,10 @@ class BuildPrompt
             ];
         }
 
+        $conversationId = $payload->conversationId();
+
         if ($conversationId) {
-            $historyLimit = (int) config('ai-chat.conversations.history_limit', 20);
+            $historyLimit = $this->resolveHistoryLimit($payload);
             $history = $this->historyManager->getForAI($conversationId, $historyLimit);
             $messages = array_merge($messages, $history);
         }
@@ -38,7 +40,7 @@ class BuildPrompt
             'content' => $payload->message,
         ];
 
-        $maxTokens = (int) config('ai-chat.conversations.max_prompt_tokens', 4000);
+        $maxTokens = $this->budgetManager->getMaxContextTokens();
         $messages = $this->historyManager->truncateIfNeeded($messages, $maxTokens);
 
         $payload->messages = $messages;
@@ -49,11 +51,22 @@ class BuildPrompt
     protected function buildSystemPrompt(ChatPayload $payload): string
     {
         $parts = [];
+        $plan = $payload->executionPlan;
 
         $agentPrompt = $payload->agent?->systemPrompt() ?? config('ai-chat.conversations.default_system_prompt', '');
 
         if ($agentPrompt !== '') {
             $parts[] = $agentPrompt;
+        }
+
+        if ($plan) {
+            if ($plan->isSimpleLiveData()) {
+                $parts[] = "\n\nUse the available tools to answer this live-data question. Do not invent values.";
+            } elseif ($plan->isKnowledgeRequest()) {
+                $parts[] = "\n\nAnswer only from retrieved project knowledge. If missing, say you do not have enough information.";
+            } elseif ($plan->isMemoryRequest()) {
+                $parts[] = "\n\nUse the conversation memory context to provide a relevant response.";
+            }
         }
 
         if (! empty($payload->context)) {
@@ -73,5 +86,14 @@ class BuildPrompt
         }
 
         return implode('', $parts);
+    }
+
+    protected function resolveHistoryLimit(ChatPayload $payload): int
+    {
+        if ($payload->executionPlan && $payload->executionPlan->historyLimit > 0) {
+            return $this->budgetManager->getHistoryLimit($payload->executionPlan->historyLimit);
+        }
+
+        return (int) config('ai-chat.conversations.history_limit', 6);
     }
 }

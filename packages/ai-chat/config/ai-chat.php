@@ -49,6 +49,8 @@ return [
 
     'conversations' => [
         'max_messages' => (int) env('AI_CHAT_MAX_MESSAGES', 100),
+        'history_limit' => (int) env('AI_CHAT_HISTORY_LIMIT', 6),
+        'max_prompt_tokens' => (int) env('AI_CHAT_MAX_PROMPT_TOKENS', 4000),
         'default_system_prompt' => env('AI_CHAT_SYSTEM_PROMPT', 'You are a helpful AI assistant. Be concise, accurate, and friendly. Only answer based on available tools, context, memory, or knowledge. Do not invent data.'),
     ],
 
@@ -96,6 +98,27 @@ return [
 
     'memory' => [
         'enabled' => env('AI_CHAT_MEMORY_ENABLED', false),
+        'store_every_message' => env('AI_CHAT_STORE_EVERY_MESSAGE', false),
+        'extract_after_messages' => (int) env('AI_CHAT_EXTRACT_AFTER_MESSAGES', 6),
+        'min_importance' => (float) env('AI_CHAT_MIN_IMPORTANCE', 0.6),
+    ],
+
+    'planning' => [
+        'mode' => env('AI_CHAT_PLANNING_MODE', 'hybrid'),
+        'use_llm_planner_for_complex_questions_only' => env('AI_CHAT_USE_LLM_PLANNER_COMPLEX_ONLY', true),
+        'planner_model' => env('AI_CHAT_PLANNER_MODEL'),
+        'cache_plans' => env('AI_CHAT_CACHE_PLANS', true),
+        'cache_ttl' => (int) env('AI_CHAT_PLAN_CACHE_TTL', 3600),
+    ],
+
+    'context' => [
+        'max_context_tokens' => (int) env('AI_CHAT_MAX_CONTEXT_TOKENS', 8000),
+        'system_prompt_budget' => (int) env('AI_CHAT_SYSTEM_PROMPT_BUDGET', 1500),
+        'max_tools' => (int) env('AI_CHAT_MAX_TOOLS', 5),
+        'rag_limit' => (int) env('AI_CHAT_RAG_LIMIT', 3),
+        'memory_limit' => (int) env('AI_CHAT_MEMORY_LIMIT', 3),
+        'history_limit' => (int) env('AI_CHAT_HISTORY_LIMIT', 6),
+        'max_tool_result_items' => (int) env('AI_CHAT_MAX_TOOL_RESULT_ITEMS', 10),
     ],
 
     'tenant_resolver' => env('AI_CHAT_TENANT_RESOLVER'),

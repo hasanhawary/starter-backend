@@ -17,6 +17,10 @@ class RetrieveMemory
             return $next($payload);
         }
 
+        if ($payload->executionPlan && ! $payload->executionPlan->useMemory) {
+            return $next($payload);
+        }
+
         $storeClass = config('ai-chat.memory.store');
 
         if (! $storeClass || ! class_exists($storeClass)) {
@@ -38,7 +42,8 @@ class RetrieveMemory
 
             $embedding = $this->generateEmbedding($payload->message);
 
-            $limit = (int) config('ai-chat.memory.max_results', 5);
+            $query = $payload->executionPlan?->memoryQuery ?? $payload->message;
+            $limit = (int) ($payload->executionPlan?->memoryLimit ?? config('ai-chat.memory.max_results', 5));
 
             $results = $store->retrieve($conversationId, $embedding ?? [], $limit);
 
