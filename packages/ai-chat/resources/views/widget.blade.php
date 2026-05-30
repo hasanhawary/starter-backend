@@ -1,6 +1,6 @@
 @once
 <div id="ai-chat-widget-mount"></div>
-<script src="{{ asset('vendor/ai-chat/ai-chat-widget.min.js') }}"></script>
+<script src="{{ asset('vendor/ai-chat/js/ai-chat-widget/ai-chat-widget.js') }}"></script>
 <script>
     if (typeof AIChatWidget !== 'undefined') {
         AIChatWidget.init({

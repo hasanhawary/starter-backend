@@ -106,13 +106,6 @@
     </div>
 </div>
 
-<script src="{{ asset('vendor/ai-chat/ai-chat-widget.min.js') }}"></script>
-<script>
-    AIChatWidget.init({
-        apiBaseUrl: '/api/ai-chat',
-        theme: 'light',
-        position: 'bottom-right',
-    });
-</script>
+@aiChat
 </body>
 </html>

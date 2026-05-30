@@ -517,12 +517,13 @@
         var reader = response.body.getReader();
         var decoder = new TextDecoder();
         var buffer = '';
+        var currentEvent = '';
 
         setThinking(true);
 
         function processChunk(result) {
             if (result.done) {
-                if (buffer.trim()) parseSSE(buffer);
+                if (buffer.trim()) parseSSELines(buffer.split('\n'));
                 finalizeStream(fullText);
                 return;
             }
@@ -531,49 +532,69 @@
             var lines = buffer.split('\n');
             buffer = lines.pop() || '';
 
-            for (var i = 0; i < lines.length; i++) {
-                parseSSE(lines[i]);
-            }
+            parseSSELines(lines);
 
             return reader.read().then(processChunk);
         }
 
-        function parseSSE(line) {
-            line = line.trim();
-            if (!line || !line.startsWith('data:')) return;
-            var data = line.substring(5).trim();
-            if (data === '[DONE]') return;
+        function parseSSELines(lines) {
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
 
-            try {
-                var parsed = JSON.parse(data);
-
-                if (parsed.type === 'thinking_start' || parsed.type === 'reasoning_start') {
-                    setThinking(true);
+                if (line.startsWith('event:')) {
+                    currentEvent = line.substring(6).trim();
                     return;
                 }
 
-                if (parsed.type === 'thinking_end' || parsed.type === 'reasoning_end') {
-                    setThinking(false);
+                if (!line || !line.startsWith('data:')) return;
+                var data = line.substring(5).trim();
+
+                if (currentEvent === 'conversation_id') {
+                    try {
+                        var parsed = JSON.parse(data);
+                        if (parsed.conversation_id) {
+                            STATE.currentConversationId = parsed.conversation_id;
+                        }
+                    } catch (e) {}
+                    currentEvent = '';
                     return;
                 }
 
-                if (parsed.type === 'thinking_delta' || parsed.type === 'reasoning_delta') {
-                    return;
-                }
+                currentEvent = '';
 
-                if (parsed.type === 'text_delta' || parsed.type === 'text_start') {
-                    var delta = parsed.delta || parsed.content || '';
-                    fullText += delta;
-                    setThinking(false);
-                    updateLastAssistantMessage(fullText);
-                    return;
-                }
+                if (data === '[DONE]') return;
 
-                if (parsed.type === 'text_end' || parsed.type === 'stream_end') {
-                    return;
+                try {
+                    var parsed = JSON.parse(data);
+
+                    if (parsed.type === 'thinking_start' || parsed.type === 'reasoning_start') {
+                        setThinking(true);
+                        return;
+                    }
+
+                    if (parsed.type === 'thinking_end' || parsed.type === 'reasoning_end') {
+                        setThinking(false);
+                        return;
+                    }
+
+                    if (parsed.type === 'thinking_delta' || parsed.type === 'reasoning_delta') {
+                        return;
+                    }
+
+                    if (parsed.type === 'text_delta' || parsed.type === 'text_start') {
+                        var delta = parsed.delta || parsed.content || '';
+                        fullText += delta;
+                        setThinking(false);
+                        updateLastAssistantMessage(fullText);
+                        return;
+                    }
+
+                    if (parsed.type === 'text_end' || parsed.type === 'stream_end') {
+                        return;
+                    }
+                } catch (e) {
+                    // skip unparseable lines
                 }
-            } catch (e) {
-                // skip unparseable lines
             }
         }
 

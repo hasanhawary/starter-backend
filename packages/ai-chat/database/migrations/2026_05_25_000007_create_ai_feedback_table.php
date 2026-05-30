@@ -19,7 +19,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('ALTER TABLE ai_feedback ADD CONSTRAINT chk_rating_range CHECK (rating BETWEEN 1 AND 5)');
+        $driver = Schema::getConnection()->getDriverName();
+        if ($driver === 'mysql' || $driver === 'pgsql') {
+            DB::statement('ALTER TABLE ai_feedback ADD CONSTRAINT chk_rating_range CHECK (rating BETWEEN 1 AND 5)');
+        }
     }
 
     public function down(): void

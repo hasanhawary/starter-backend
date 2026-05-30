@@ -20,7 +20,8 @@ class MakeToolCommand extends Command
 
         $stubManager = app(StubManager::class);
 
-        $className = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name))).'Tool';
+        $baseName = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
+        $className = Str::endsWith($baseName, 'Tool') ? $baseName : $baseName.'Tool';
         $toolName = Str::snake($name);
 
         $outputPath = app_path('AI/Tools/Custom');
@@ -56,7 +57,7 @@ class MakeToolCommand extends Command
             'table' => $model ? Str::snake(Str::pluralStudly($model)) : 'table',
             'schema' => $this->buildSchema(),
             'body' => $body,
-            'imports' => 'use AiChat\\AiChat\\Contracts\\ToolInterface;'."\n".'use AiChat\\AiChat\\MCP\\ToolResult;'."\n".'use AiChat\\AiChat\\Policies\\ChatContext;',
+            'imports' => 'use AiChat\\Contracts\\ToolInterface;'."\n".'use AiChat\\MCP\\ToolResult;'."\n".'use AiChat\\Policies\\ChatContext;',
         ]);
 
         File::put($filePath, $content);

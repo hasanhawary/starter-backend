@@ -12,6 +12,8 @@ class AiChatConversation extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'agent_conversations';
+
     protected static function newFactory()
     {
         return AiChatConversationFactory::new();

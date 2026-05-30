@@ -2,13 +2,37 @@
 
 namespace Tests\Feature\AiChat;
 
-use HasanHawary\AiChat\Agents\ChatAgent;
+use AiChat\Agents\ChatAgent;
+use AiChat\Contracts\LLMProviderInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SendMessageTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function fakeProvider(string $responseText = 'Hello!'): void
+    {
+        $this->app->singleton(LLMProviderInterface::class, fn () => new class($responseText) implements LLMProviderInterface
+        {
+            public function __construct(private string $text) {}
+
+            public function send(array $messages, array $tools = [], array $options = []): array
+            {
+                return ['content' => $this->text, 'usage' => ['total_tokens' => 50]];
+            }
+
+            public function stream(array $messages, array $tools = [], array $options = []): \Generator
+            {
+                yield ['content' => $this->text];
+            }
+
+            public function name(): string
+            {
+                return 'fake';
+            }
+        });
+    }
 
     public function test_missing_session_id_returns_validation_error(): void
     {
@@ -43,7 +67,7 @@ class SendMessageTest extends TestCase
 
         $response->assertStatus(200);
 
-        $data = $response->json('data.data');
+        $data = $response->json('data');
         $this->assertIsArray($data);
         $this->assertEmpty($data);
     }
@@ -81,9 +105,7 @@ class SendMessageTest extends TestCase
 
     public function test_send_message_with_faked_agent(): void
     {
-        ChatAgent::fake([
-            'This is a test response.',
-        ]);
+        $this->fakeProvider('This is a test response.');
 
         $response = $this->postJson('/api/ai-chat/messages', [
             'message' => 'Hello',

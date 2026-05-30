@@ -21,7 +21,7 @@ class UserSettingStatsTool implements ToolInterface
 
     public function schema(): array
     {
-        return         [
+        return [
             'type' => 'object',
             'properties' => [],
         ];
@@ -34,9 +34,8 @@ class UserSettingStatsTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-                $total = UserSetting::count();
+        $total = UserSetting::count();
         $stats = ['total' => $total];
-
 
         if (UserSetting::usesTimestamps()) {
             $stats['latest_created'] = UserSetting::latest()->value('created_at');

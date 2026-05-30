@@ -291,10 +291,10 @@ class ToolGenerator
 
     protected function buildToolImports(): string
     {
-        return 'use AiChat\\AiChat\\Contracts\\ToolInterface;'
-            ."\nuse AiChat\\AiChat\\MCP\\ToolResult;"
-            ."\nuse AiChat\\AiChat\\Policies\\ChatContext;"
-            ."\nuse AiChat\\AiChat\\Support\\SafeQueryBuilder;";
+        return 'use AiChat\\Contracts\\ToolInterface;'
+            ."\nuse AiChat\\MCP\\ToolResult;"
+            ."\nuse AiChat\\Policies\\ChatContext;"
+            ."\nuse AiChat\\Support\\SafeQueryBuilder;";
     }
 
     protected function hasNumericFields(array $modelData): bool

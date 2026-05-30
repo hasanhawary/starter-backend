@@ -23,13 +23,19 @@ class ManageAnonymousConversation
 
         if (! $conversationId) {
             $conversationId = $this->store->storeConversation($sessionId, 'New Chat');
+
+            if (method_exists($agent, 'continue')) {
+                $agent->continue($conversationId, $sessionId);
+            }
         }
 
         $this->store->storeUserMessage($conversationId, $sessionId, $prompt);
 
         $response = $next($prompt);
 
-        if (method_exists($response, 'conversationId')) {
+        if (method_exists($response, 'conversationId') && $response->conversationId) {
+            $this->store->storeAssistantMessage($conversationId, $sessionId, $prompt, $response);
+        } elseif (method_exists($response, 'text')) {
             $this->store->storeAssistantMessage($conversationId, $sessionId, $prompt, $response);
         }
 

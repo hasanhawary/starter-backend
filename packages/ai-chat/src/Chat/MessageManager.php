@@ -14,6 +14,7 @@ class MessageManager
             'id' => (string) Str::uuid7(),
             'conversation_id' => $conversationId,
             'session_id' => $userId,
+            'agent' => $metadata['agent'] ?? config('ai-chat.default_agent', 'project_assistant'),
             'role' => 'user',
             'content' => $content,
             'meta' => $metadata,
@@ -29,6 +30,7 @@ class MessageManager
         $message = AiChatMessage::create([
             'id' => (string) Str::uuid7(),
             'conversation_id' => $conversationId,
+            'agent' => $metadata['agent'] ?? config('ai-chat.default_agent', 'project_assistant'),
             'role' => 'assistant',
             'content' => $content,
             'meta' => $metadata,
@@ -44,6 +46,7 @@ class MessageManager
         $message = AiChatMessage::create([
             'id' => (string) Str::uuid7(),
             'conversation_id' => $conversationId,
+            'agent' => config('ai-chat.default_agent', 'project_assistant'),
             'role' => 'assistant',
             'content' => '',
             'tool_calls' => $toolCalls,

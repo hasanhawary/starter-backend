@@ -248,9 +248,9 @@ class AiChatServiceProvider extends ServiceProvider
 
     protected function registerConfig(): void
     {
-        $this->publishes([
-            __DIR__.'/../config/ai-chat.php' => config_path('ai-chat.php'),
-        ], 'ai-chat-config');
+        $this->mergeConfigFrom(__DIR__.'/../config/ai-chat.php', 'ai-chat');
+
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'ai-chat');
     }
 
     protected function registerRoutes(): void

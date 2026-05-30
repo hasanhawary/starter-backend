@@ -15,7 +15,7 @@ class AiChatBuildCommand extends Command
     {
         $this->components->info('Building AI Chat widget...');
 
-        $configPath = __DIR__.'/../../vite.widget.config.js';
+        $configPath = __DIR__.'/../../../vite.widget.config.js';
 
         $result = Process::path(base_path())
             ->run(['npx', 'vite', 'build', '--config', $configPath]);

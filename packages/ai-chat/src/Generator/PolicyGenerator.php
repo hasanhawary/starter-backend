@@ -16,7 +16,8 @@ class PolicyGenerator
         $outputPath = app_path('AI/Policies');
         File::ensureDirectoryExists($outputPath);
 
-        $className = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name))).'Policy';
+        $baseName = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
+        $className = Str::endsWith($baseName, 'Policy') ? $baseName : $baseName.'Policy';
 
         $filePath = $outputPath."/{$className}.php";
 

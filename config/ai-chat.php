@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\PasswordResetToken;
 use App\Models\PersonalAccessToken;
 
 return [
@@ -29,7 +28,6 @@ return [
     'blocked_actions' => ['create', 'update', 'delete', 'export_sensitive', 'charge', 'refund', 'send', 'execute'],
 
     'blocked_models' => [
-        PasswordResetToken::class,
         PersonalAccessToken::class,
     ],
 

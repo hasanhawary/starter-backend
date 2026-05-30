@@ -98,7 +98,7 @@ class DoctorCommand extends Command
 
     protected function checkWidgetAssets(bool $allPassed): bool
     {
-        $published = File::exists(public_path('vendor/ai-chat/ai-chat-widget.min.js'));
+        $published = File::exists(public_path('vendor/ai-chat/js/ai-chat-widget/ai-chat-widget.js'));
 
         $this->displayCheck('Widget assets published', $published);
 

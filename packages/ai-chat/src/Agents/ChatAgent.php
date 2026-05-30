@@ -11,6 +11,7 @@ use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\ConversationStore;
+use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasMiddleware;
 use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
@@ -21,7 +22,7 @@ use Stringable;
 #[MaxTokens(65536)]
 #[Temperature(1.0)]
 #[Timeout(300)]
-class ChatAgent implements Agent, HasMiddleware, HasProviderOptions
+class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOptions
 {
     use Promptable;
 
@@ -33,7 +34,7 @@ class ChatAgent implements Agent, HasMiddleware, HasProviderOptions
 
     public function __construct(?string $systemPrompt = null)
     {
-        $this->systemPrompt = $systemPrompt ?? config('ai-conversations.default_system_prompt');
+        $this->systemPrompt = $systemPrompt ?? config('ai-chat.conversations.default_system_prompt');
     }
 
     public function forSession(string $sessionId): static
@@ -73,7 +74,7 @@ class ChatAgent implements Agent, HasMiddleware, HasProviderOptions
         return $this->conversationStore()
             ->getLatestConversationMessages(
                 $this->conversationId,
-                config('aiconversations.max_messages', 100),
+                config('ai-chat.conversations.max_messages', 100),
             )->all();
     }
 
@@ -96,10 +97,10 @@ class ChatAgent implements Agent, HasMiddleware, HasProviderOptions
 
     public function providerOptions(Lab|string $provider): array
     {
-        if (config('aithinking.enabled', true)) {
+        if (config('ai-chat.thinking.enabled', true)) {
             return [
                 'thinking' => [
-                    'type' => config('aithinking.type', 'enabled'),
+                    'type' => config('ai-chat.thinking.type', 'enabled'),
                 ],
             ];
         }
@@ -109,7 +110,7 @@ class ChatAgent implements Agent, HasMiddleware, HasProviderOptions
 
     public function model(): string
     {
-        return config('aimodel', 'glm-5.1');
+        return config('ai-chat.model', 'glm-5.1');
     }
 
     protected function conversationStore(): ConversationStore

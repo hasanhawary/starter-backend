@@ -11,6 +11,8 @@ class AiChatMessage extends Model
 {
     use HasFactory;
 
+    protected $table = 'agent_conversation_messages';
+
     protected static function newFactory()
     {
         return AiChatMessageFactory::new();

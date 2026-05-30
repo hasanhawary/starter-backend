@@ -16,7 +16,8 @@ class AgentGenerator
         $outputPath = app_path('AI/Agents');
         File::ensureDirectoryExists($outputPath);
 
-        $className = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name))).'Agent';
+        $baseName = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
+        $className = Str::endsWith($baseName, 'Agent') ? $baseName : $baseName.'Agent';
 
         $filePath = $outputPath."/{$className}.php";
 
