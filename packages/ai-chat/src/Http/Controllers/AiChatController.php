@@ -14,9 +14,9 @@ use AiChat\Http\Resources\FeedbackResource;
 use AiChat\Http\Resources\MessageResource;
 use AiChat\Models\AiChatConversation;
 use AiChat\Models\AiFeedback;
+use AiChat\Storage\AnonymousConversationStore;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use Laravel\Ai\Responses\StreamableAgentResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AiChatController extends Controller
@@ -126,13 +126,8 @@ class AiChatController extends Controller
     protected function streamAgentResponse(ChatAgent $agent, string $message): StreamedResponse
     {
         $conversationId = $agent->currentConversation();
-        $stream = $agent->stream($message);
 
-        return new StreamedResponse(function () use ($stream, $agent) {
-            header('X-Accel-Buffering: no');
-
-            $conversationId = $agent->currentConversation();
-
+        return new StreamedResponse(function () use ($agent, $message, $conversationId) {
             if ($conversationId) {
                 echo "event: conversation_id\n";
                 echo 'data: '.json_encode(['conversation_id' => $conversationId])."\n\n";
@@ -142,6 +137,8 @@ class AiChatController extends Controller
                 }
                 flush();
             }
+
+            $stream = $agent->stream($message);
 
             foreach ($stream as $event) {
                 echo 'data: '.((string) $event)."\n\n";
@@ -176,6 +173,10 @@ class AiChatController extends Controller
             $agent->continue($conversationId, $sessionId);
         } else {
             $agent->forSession($sessionId);
+
+            $store = app(AnonymousConversationStore::class);
+            $newId = $store->storeConversation($sessionId, 'New Chat');
+            $agent->continue($newId, $sessionId);
         }
 
         return $agent;

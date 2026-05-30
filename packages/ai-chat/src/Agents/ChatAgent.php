@@ -3,16 +3,20 @@
 namespace AiChat\Agents;
 
 use AiChat\Contracts\HasProviderOptions;
+use AiChat\MCP\ToolAdapter;
+use AiChat\MCP\ToolRegistry;
 use AiChat\Middleware\ManageAnonymousConversation;
 use AiChat\Storage\AnonymousConversationStore;
 use Laravel\Ai\Attributes\MaxTokens;
+use Laravel\Ai\Attributes\Model;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
-use Laravel\Ai\Contracts\ConversationStore;
 use Laravel\Ai\Contracts\Conversational;
+use Laravel\Ai\Contracts\ConversationStore;
 use Laravel\Ai\Contracts\HasMiddleware;
+use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 use Stringable;
@@ -22,7 +26,7 @@ use Stringable;
 #[MaxTokens(65536)]
 #[Temperature(1.0)]
 #[Timeout(300)]
-class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOptions
+class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOptions, HasTools
 {
     use Promptable;
 
@@ -31,6 +35,8 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
     protected ?string $sessionId = null;
 
     protected ?string $systemPrompt = null;
+
+    protected array $enabledTools = [];
 
     public function __construct(?string $systemPrompt = null)
     {
@@ -60,6 +66,13 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
         return $this;
     }
 
+    public function withTools(array $toolNames): static
+    {
+        $this->enabledTools = $toolNames;
+
+        return $this;
+    }
+
     public function instructions(): Stringable|string
     {
         return $this->systemPrompt;
@@ -76,6 +89,26 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
                 $this->conversationId,
                 config('ai-chat.conversations.max_messages', 100),
             )->all();
+    }
+
+    public function tools(): iterable
+    {
+        $registry = app(ToolRegistry::class);
+        $allTools = $registry->all();
+        $enabled = config('ai-chat.tools.enabled', []);
+
+        if ($this->enabledTools) {
+            $enabled = $this->enabledTools;
+        }
+
+        if (empty($enabled) || $enabled === ['*'] || in_array('*', $enabled)) {
+            return array_map(fn ($tool) => new ToolAdapter($tool), $allTools);
+        }
+
+        return array_values(array_map(
+            fn ($name) => new ToolAdapter($allTools[$name]),
+            array_filter($enabled, fn ($name) => isset($allTools[$name])),
+        ));
     }
 
     public function currentConversation(): ?string

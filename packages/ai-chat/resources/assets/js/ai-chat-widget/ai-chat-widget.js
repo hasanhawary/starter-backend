@@ -543,10 +543,10 @@
 
                 if (line.startsWith('event:')) {
                     currentEvent = line.substring(6).trim();
-                    return;
+                    continue;
                 }
 
-                if (!line || !line.startsWith('data:')) return;
+                if (!line || !line.startsWith('data:')) continue;
                 var data = line.substring(5).trim();
 
                 if (currentEvent === 'conversation_id') {
@@ -557,28 +557,28 @@
                         }
                     } catch (e) {}
                     currentEvent = '';
-                    return;
+                    continue;
                 }
 
                 currentEvent = '';
 
-                if (data === '[DONE]') return;
+                if (data === '[DONE]') continue;
 
                 try {
                     var parsed = JSON.parse(data);
 
                     if (parsed.type === 'thinking_start' || parsed.type === 'reasoning_start') {
                         setThinking(true);
-                        return;
+                        continue;
                     }
 
                     if (parsed.type === 'thinking_end' || parsed.type === 'reasoning_end') {
                         setThinking(false);
-                        return;
+                        continue;
                     }
 
                     if (parsed.type === 'thinking_delta' || parsed.type === 'reasoning_delta') {
-                        return;
+                        continue;
                     }
 
                     if (parsed.type === 'text_delta' || parsed.type === 'text_start') {
@@ -586,11 +586,11 @@
                         fullText += delta;
                         setThinking(false);
                         updateLastAssistantMessage(fullText);
-                        return;
+                        continue;
                     }
 
                     if (parsed.type === 'text_end' || parsed.type === 'stream_end') {
-                        return;
+                        continue;
                     }
                 } catch (e) {
                     // skip unparseable lines
