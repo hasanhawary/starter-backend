@@ -123,10 +123,18 @@ class AiChatInstallCommand extends Command
 
         $options['__custom__'] = '✏️  Type a custom model name...';
 
+        $defaultModel = null;
+        foreach ($models as $modelId => $info) {
+            if ($info['default'] ?? false) {
+                $defaultModel = $modelId;
+                break;
+            }
+        }
+
         $selected = select(
             label: 'Which model do you want to use?',
             options: $options,
-            default: ProviderCatalog::defaultModel($providerKey),
+            default: $defaultModel,
             scroll: 15,
         );
 
@@ -143,6 +151,8 @@ class AiChatInstallCommand extends Command
             'ollama' => 'e.g. llama3.1:8b, qwen2.5:7b, codellama:13b',
             'openrouter' => 'e.g. anthropic/claude-sonnet-4.6, deepseek/deepseek-v4-flash',
             'openai' => 'e.g. gpt-5.4, gpt-4o, my-fine-tuned-model',
+            'cohere' => 'e.g. command-a-03-2025, command-r7b-12-2024',
+            'together' => 'e.g. deepseek-ai/DeepSeek-V4-Flash, meta-llama/Llama-3.3-70B-Instruct-Turbo',
             'custom' => 'e.g. llama3, mistral, codellama',
             default => 'e.g. my-fine-tuned-model',
         };

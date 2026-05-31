@@ -91,7 +91,8 @@ class SendMessageTest extends TestCase
     {
         $agent = new ChatAgent('Custom instructions');
 
-        $this->assertEquals('Custom instructions', (string) $agent->instructions());
+        $this->assertStringContainsString('Custom instructions', (string) $agent->instructions());
+        $this->assertStringContainsString('latest user message', (string) $agent->instructions());
     }
 
     public function test_chat_agent_session_binding(): void

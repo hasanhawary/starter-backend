@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use AiChat\Agents\ChatAgent;
+use AiChat\Chat\HistoryPolicy;
 use AiChat\MCP\ToolRegistry;
 use AiChat\Pipeline\ChatPayload;
 use AiChat\Pipeline\ExecutionPlan;
@@ -121,45 +122,42 @@ class GreetingRegressionTest extends TestCase
 
     public function test_system_prompt_for_greeting_includes_brief_instruction(): void
     {
-        $payload = new ChatPayload('ازيك', null);
-        $plan = new ExecutionPlan;
-        $plan->intent = 'direct';
-        $plan->historyLimit = 0;
-        $payload->executionPlan = $plan;
+        $agent = new ChatAgent('You are a helpful AI assistant.');
+        $agent->withHistoryPolicy(HistoryPolicy::none());
 
-        $step = new SendToProvider;
-        $systemPrompt = $this->invokeResolveSystemPrompt($step, $payload);
+        $instructions = (string) $agent->instructions();
 
-        $this->assertStringContainsString('Reply naturally and briefly', $systemPrompt);
-        $this->assertStringContainsString('Do not summarize', $systemPrompt);
+        $this->assertStringContainsString('not asking about any previous conversation topic', $instructions);
+        $this->assertStringContainsString('Reply naturally', $instructions);
+        $this->assertStringContainsString('latest user message', $instructions);
     }
 
     public function test_system_prompt_for_knowledge_does_not_include_greeting_instruction(): void
     {
-        $payload = new ChatPayload('ما هي سياسة الاسترداد', null);
+        $agent = new ChatAgent('You are a helpful AI assistant.');
         $plan = new ExecutionPlan;
         $plan->intent = 'knowledge';
         $plan->useRag = true;
-        $payload->executionPlan = $plan;
+        $agent->withExecutionPlan($plan);
+        $agent->withCurrentMessage('ما هي سياسة الاسترداد');
 
-        $step = new SendToProvider;
-        $systemPrompt = $this->invokeResolveSystemPrompt($step, $payload);
+        $instructions = (string) $agent->instructions();
 
-        $this->assertStringNotContainsString('Reply naturally and briefly', $systemPrompt);
+        $this->assertStringNotContainsString('not asking about any previous conversation topic', $instructions);
     }
 
     public function test_system_prompt_for_memory_does_not_include_greeting_instruction(): void
     {
-        $payload = new ChatPayload('كمل التقرير', null);
+        $agent = new ChatAgent('You are a helpful AI assistant.');
         $plan = new ExecutionPlan;
         $plan->intent = 'memory';
         $plan->useMemory = true;
-        $payload->executionPlan = $plan;
+        $agent->withExecutionPlan($plan);
+        $agent->withCurrentMessage('كمل التقرير');
 
-        $step = new SendToProvider;
-        $systemPrompt = $this->invokeResolveSystemPrompt($step, $payload);
+        $instructions = (string) $agent->instructions();
 
-        $this->assertStringNotContainsString('Reply naturally and briefly', $systemPrompt);
+        $this->assertStringNotContainsString('not asking about any previous conversation topic', $instructions);
     }
 
     #[DataProvider('greetingProvider')]

@@ -311,6 +311,34 @@ return [
                 ],
             ],
         ],
+        'cohere' => [
+            'driver' => 'cohere',
+            'key' => env('COHERE_API_KEY'),
+            'url' => env('COHERE_URL', 'https://api.cohere.com/v1'),
+            'models' => [
+                'text' => [
+                    'default' => env('AI_CHAT_COHERE_TEXT_MODEL', 'command-a-plus-05-2026'),
+                    'cheapest' => 'command-r7b-12-2024',
+                    'smartest' => 'command-a-plus-05-2026',
+                ],
+                'embeddings' => [
+                    'default' => 'embed-english-v3.0',
+                    'dimensions' => 1024,
+                ],
+            ],
+        ],
+        'together' => [
+            'driver' => 'openai',
+            'key' => env('TOGETHER_API_KEY'),
+            'url' => env('TOGETHER_URL', 'https://api.together.ai/v1'),
+            'models' => [
+                'text' => [
+                    'default' => env('AI_CHAT_TOGETHER_TEXT_MODEL', 'deepseek-ai/DeepSeek-V4-Flash'),
+                    'cheapest' => 'mistralai/Ministral-3-14B-Instruct-2512',
+                    'smartest' => 'deepseek-ai/DeepSeek-V4-Pro',
+                ],
+            ],
+        ],
         'ollama' => [
             'driver' => 'ollama',
             'key' => env('OLLAMA_API_KEY', ''),

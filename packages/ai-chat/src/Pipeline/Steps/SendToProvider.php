@@ -98,22 +98,22 @@ class SendToProvider
         }
 
         if (! empty($payload->context)) {
-            $parts[] = "\n\n## Context\n".json_encode($payload->context, JSON_PRETTY_PRINT);
+            $parts[] = "## Context\n".json_encode($payload->context, JSON_PRETTY_PRINT);
         }
 
         if (! empty($payload->knowledge)) {
-            $parts[] = "\n\n## Knowledge Base\n".collect($payload->knowledge)
+            $parts[] = "## Knowledge Base\n".collect($payload->knowledge)
                 ->map(fn ($k, $i) => '['.($i + 1).'] '.(is_array($k) ? json_encode($k) : (string) $k))
                 ->implode("\n");
         }
 
         if (! empty($payload->memory)) {
-            $parts[] = "\n\n## Conversation Memory\n".collect($payload->memory)
+            $parts[] = "## Conversation Memory\n".collect($payload->memory)
                 ->map(fn ($m) => is_array($m) ? json_encode($m) : (string) $m)
                 ->implode("\n");
         }
 
-        return implode('', $parts);
+        return implode("\n\n", $parts);
     }
 
     protected function handleSync(ChatPayload $payload, ChatAgent $chatAgent, Closure $next): ChatPayload

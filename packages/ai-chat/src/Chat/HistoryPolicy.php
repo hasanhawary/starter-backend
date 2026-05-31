@@ -12,6 +12,12 @@ class HistoryPolicy
 
     public int $limit = 6;
 
+    public ?string $context = null;
+
+    public bool $includeToolResults = false;
+
+    public bool $includeToolFailures = false;
+
     public static function none(): self
     {
         $policy = new self;
@@ -19,6 +25,9 @@ class HistoryPolicy
         $policy->mode = 'none';
         $policy->query = null;
         $policy->limit = 0;
+        $policy->context = null;
+        $policy->includeToolResults = false;
+        $policy->includeToolFailures = false;
 
         return $policy;
     }
@@ -30,6 +39,9 @@ class HistoryPolicy
         $policy->mode = 'recent';
         $policy->query = null;
         $policy->limit = $limit;
+        $policy->context = null;
+        $policy->includeToolResults = false;
+        $policy->includeToolFailures = false;
 
         return $policy;
     }
@@ -41,6 +53,9 @@ class HistoryPolicy
         $policy->mode = 'relevant';
         $policy->query = $query;
         $policy->limit = $limit;
+        $policy->context = null;
+        $policy->includeToolResults = false;
+        $policy->includeToolFailures = false;
 
         return $policy;
     }
@@ -52,6 +67,9 @@ class HistoryPolicy
         $policy->mode = 'summary';
         $policy->query = null;
         $policy->limit = 20;
+        $policy->context = null;
+        $policy->includeToolResults = true;
+        $policy->includeToolFailures = true;
 
         return $policy;
     }
@@ -63,6 +81,7 @@ class HistoryPolicy
             'mode' => $this->mode,
             'query' => $this->query,
             'limit' => $this->limit,
+            'context' => $this->context,
         ];
     }
 

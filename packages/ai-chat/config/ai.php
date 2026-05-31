@@ -106,10 +106,6 @@ return [
             'use_default_credential_provider' => env('AWS_USE_DEFAULT_CREDENTIALS', true),
         ],
 
-        'cohere' => [
-            'driver' => 'cohere',
-            'key' => env('COHERE_API_KEY'),
-        ],
 
         'deepseek' => [
             'driver' => 'deepseek',
@@ -178,6 +174,18 @@ return [
             'driver' => 'glm',
             'key' => env('GLM_API_KEY'),
             'url' => env('GLM_API_URL', 'https://open.bigmodel.cn/api/paas/v4'),
+        ],
+
+        'cohere' => [
+            'driver' => 'cohere',
+            'key' => env('COHERE_API_KEY'),
+            'url' => env('COHERE_URL'),
+        ],
+
+        'together' => [
+            'driver' => 'openai',
+            'key' => env('TOGETHER_API_KEY'),
+            'url' => env('TOGETHER_URL', 'https://api.together.ai/v1'),
         ],
     ],
 

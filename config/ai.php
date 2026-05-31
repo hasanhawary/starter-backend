@@ -79,6 +79,13 @@ return [
         'cohere' => [
             'driver' => 'cohere',
             'key' => env('COHERE_API_KEY'),
+            'url' => env('COHERE_URL'),
+        ],
+
+        'together' => [
+            'driver' => 'openai',
+            'key' => env('TOGETHER_API_KEY'),
+            'url' => env('TOGETHER_URL', 'https://api.together.ai/v1'),
         ],
 
         'deepseek' => [

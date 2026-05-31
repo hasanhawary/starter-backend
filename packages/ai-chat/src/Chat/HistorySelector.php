@@ -304,8 +304,10 @@ class HistorySelector
     protected function extractRecallQuery(string $normalized, string $original): string
     {
         $extractors = [
-            'اسمي' => 'user name',
+            'اسمي' => 'اسمي',
+            'اسم' => 'اسم',
             'name' => 'user name',
+            'تفتكر' => null,
             'قلتلك' => null,
             'قوله' => null,
             'told you' => null,

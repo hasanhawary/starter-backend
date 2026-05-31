@@ -22,6 +22,7 @@ use Laravel\Ai\Contracts\ConversationStore;
 use Laravel\Ai\Contracts\HasMiddleware;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Enums\Lab;
+use Laravel\Ai\Messages\MessageRole;
 use Laravel\Ai\Promptable;
 use Stringable;
 
@@ -49,6 +50,10 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
     protected ?ExecutionPlan $executionPlan = null;
 
     protected ?string $currentMessage = null;
+
+    protected ?string $storedContext = null;
+
+    protected bool $contextPrepared = false;
 
     public function __construct(?string $systemPrompt = null)
     {
@@ -115,7 +120,32 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
 
     public function instructions(): Stringable|string
     {
-        return $this->systemPrompt;
+        $this->prepareContextIfNeeded();
+
+        $policy = $this->resolveHistoryPolicy();
+
+        $parts = [];
+
+        if ($this->systemPrompt) {
+            $parts[] = $this->systemPrompt;
+        }
+
+        $parts[] = 'Previous messages in this conversation have already been answered. Do not answer, revisit, summarize, or even mention any previous user messages or questions. The only exception: if the latest user message explicitly asks about a specific previous topic. Always answer only the latest user message. If old messages are shown below as context, they are only provided as background — never respond to them as if they are new questions.';
+
+        if (! $policy->useHistory) {
+            $parts[] = 'The user is not asking about any previous conversation topic. Reply naturally to their current message only. Ignore any previous conversation context entirely. Never mention or reference any previous questions, tool results, data sources, or any earlier conversation topics. Act as if this is a completely new interaction starting now.';
+        }
+
+        if ($policy->mode === 'relevant' && $this->storedContext) {
+            $parts[] = "Relevant context from previous conversation:\n{$this->storedContext}";
+            $parts[] = 'The user is asking about a specific previously discussed fact, such as their name or a previous topic. Use the relevant context above to answer. IMPORTANT: In Arabic dialect, phrases like "اسمي ايه", "اسمى اى", "اسمي اي", "انا اسمى اى", "اسمي مين" mean "what is my name?" — they are QUESTIONS, not name declarations. Similarly "فاكر اسمي" means "do you remember my name?". Answer the question directly from the context. If the context shows the user previously said their name, answer with that name. Do NOT treat a name recall question as a new name declaration.';
+        }
+
+        if ($policy->mode === 'summary') {
+            $parts[] = 'The user is asking for a summary of the conversation. Provide a concise summary covering all key points discussed.';
+        }
+
+        return trim(implode("\n\n", $parts));
     }
 
     public function messages(): iterable
@@ -127,28 +157,23 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
         $policy = $this->resolveHistoryPolicy();
 
         if (! $policy->useHistory) {
+            $this->storedContext = null;
+
             return [];
         }
 
-        $allMessages = $this->conversationStore()
-            ->getLatestConversationMessages(
-                $this->conversationId,
-                min($this->historyLimit, config('ai-chat.conversations.max_messages', 100)),
-            )->all();
+        $allMessages = $this->getAllMessages();
 
         if (empty($allMessages)) {
             return [];
         }
 
-        if ($policy->mode === 'recent') {
-            return array_slice($allMessages, -max($policy->limit, 1));
-        }
-
-        if ($policy->mode === 'relevant' && $policy->query) {
-            return $this->filterRelevant($allMessages, $policy->query, $policy->limit);
-        }
-
-        return $allMessages;
+        return match ($policy->mode) {
+            'relevant' => [],
+            'recent' => array_slice($allMessages, -max($policy->limit, 1)),
+            'summary' => $allMessages,
+            default => [],
+        };
     }
 
     public function tools(): iterable
@@ -209,6 +234,64 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
     public function provider(): string
     {
         return config('ai-chat.provider', 'openai');
+    }
+
+    protected function handleRelevantMode(array $allMessages, HistoryPolicy $policy): array
+    {
+        $filtered = $this->filterRelevant($allMessages, $policy->query, $policy->limit);
+
+        if (empty($filtered)) {
+            $this->storedContext = null;
+
+            return [];
+        }
+
+        $lines = [];
+        foreach ($filtered as $message) {
+            $role = $this->extractRole($message);
+            $content = $this->extractContent($message);
+            if ($content !== '' && $role !== null) {
+                $lines[] = "[{$role}] {$content}";
+            }
+        }
+
+        if (! empty($lines)) {
+            $this->storedContext = implode("\n", $lines);
+        }
+
+        return [];
+    }
+
+    protected function prepareContextIfNeeded(): void
+    {
+        if ($this->contextPrepared || ! $this->conversationId) {
+            return;
+        }
+
+        $this->contextPrepared = true;
+
+        $policy = $this->resolveHistoryPolicy();
+
+        if ($policy->mode !== 'relevant') {
+            return;
+        }
+
+        $allMessages = $this->getAllMessages();
+
+        if (empty($allMessages)) {
+            return;
+        }
+
+        $this->handleRelevantMode($allMessages, $policy);
+    }
+
+    protected function getAllMessages(): array
+    {
+        return $this->conversationStore()
+            ->getLatestConversationMessages(
+                $this->conversationId,
+                min($this->historyLimit, config('ai-chat.conversations.max_messages', 100)),
+            )->all();
     }
 
     protected function resolveHistoryPolicy(): HistoryPolicy
@@ -293,15 +376,26 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
             return (string) ($message['content'] ?? '');
         }
 
-        if (is_object($message) && method_exists($message, 'content')) {
-            return (string) $message->content();
-        }
-
         if (is_object($message) && property_exists($message, 'content')) {
             return (string) $message->content;
         }
 
         return (string) $message;
+    }
+
+    protected function extractRole(mixed $message): ?string
+    {
+        if (is_array($message)) {
+            return $message['role'] ?? null;
+        }
+
+        if (is_object($message) && property_exists($message, 'role')) {
+            $role = $message->role;
+
+            return $role instanceof MessageRole ? $role->value : (string) $role;
+        }
+
+        return null;
     }
 
     protected function conversationStore(): ConversationStore
