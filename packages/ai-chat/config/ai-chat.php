@@ -2,9 +2,9 @@
 
 return [
 
-    'provider' => env('AI_CHAT_PROVIDER', 'glm'),
+    'provider' => env('AI_CHAT_PROVIDER', 'openai'),
 
-    'model' => env('AI_CHAT_MODEL', 'glm-5.1'),
+    'model' => env('AI_CHAT_MODEL', 'gpt-5.4'),
 
     'thinking' => [
         'enabled' => env('AI_CHAT_THINKING_ENABLED', true),
@@ -199,7 +199,7 @@ return [
         'storage_path' => storage_path('ai/project-map.json'),
     ],
 
-    'default' => env('AI_CHAT_PROVIDER', 'glm'),
+    'default' => env('AI_CHAT_PROVIDER', 'openai'),
     'default_for_images' => 'gemini',
     'default_for_audio' => 'openai',
     'default_for_transcription' => 'openai',
@@ -222,7 +222,7 @@ return [
                 'text' => [
                     'default' => env('AI_CHAT_OPENAI_TEXT_MODEL', 'gpt-5.4'),
                     'cheapest' => 'gpt-5.4-nano',
-                    'smartest' => 'gpt-5.4-pro',
+                    'smartest' => 'gpt-5.5',
                 ],
                 'embeddings' => [
                     'default' => 'text-embedding-3-small',
@@ -238,7 +238,7 @@ return [
                 'text' => [
                     'default' => env('AI_CHAT_ANTHROPIC_TEXT_MODEL', 'claude-sonnet-4-6'),
                     'cheapest' => 'claude-haiku-4-5-20251001',
-                    'smartest' => 'claude-opus-4-7',
+                    'smartest' => 'claude-opus-4-8',
                 ],
             ],
         ],
@@ -264,9 +264,9 @@ return [
             'url' => env('DEEPSEEK_URL', 'https://api.deepseek.com'),
             'models' => [
                 'text' => [
-                    'default' => env('AI_CHAT_DEEPSEEK_TEXT_MODEL', 'deepseek-chat'),
-                    'cheapest' => 'deepseek-chat',
-                    'smartest' => 'deepseek-reasoner',
+                    'default' => env('AI_CHAT_DEEPSEEK_TEXT_MODEL', 'deepseek-v4-flash'),
+                    'cheapest' => 'deepseek-v4-flash',
+                    'smartest' => 'deepseek-v4-pro',
                 ],
             ],
         ],
@@ -276,8 +276,8 @@ return [
             'url' => env('GROQ_URL', 'https://api.groq.com/openai/v1'),
             'models' => [
                 'text' => [
-                    'default' => env('AI_CHAT_GROQ_TEXT_MODEL', 'openai/gpt-oss-120b'),
-                    'cheapest' => 'openai/gpt-oss-20b',
+                    'default' => env('AI_CHAT_GROQ_TEXT_MODEL', 'llama-3.3-70b-versatile'),
+                    'cheapest' => 'llama-3.1-8b-instant',
                     'smartest' => 'openai/gpt-oss-120b',
                 ],
             ],
@@ -288,7 +288,7 @@ return [
             'url' => env('MISTRAL_URL', 'https://api.mistral.ai/v1'),
             'models' => [
                 'text' => [
-                    'default' => env('AI_CHAT_MISTRAL_TEXT_MODEL', 'mistral-medium-latest'),
+                    'default' => env('AI_CHAT_MISTRAL_TEXT_MODEL', 'mistral-large-latest'),
                     'cheapest' => 'mistral-small-latest',
                     'smartest' => 'mistral-large-latest',
                 ],
@@ -304,20 +304,21 @@ return [
             'url' => env('XAI_URL', 'https://api.x.ai/v1'),
             'models' => [
                 'text' => [
-                    'default' => env('AI_CHAT_XAI_TEXT_MODEL', 'grok-4-1-fast-reasoning'),
-                    'cheapest' => 'grok-4-1-fast-reasoning',
-                    'smartest' => 'grok-4-1-fast-reasoning',
+                    'default' => env('AI_CHAT_XAI_TEXT_MODEL', 'grok-4.3'),
+                    'cheapest' => 'grok-4.3',
+                    'smartest' => 'grok-4.20-multi-agent',
                 ],
             ],
         ],
         'openrouter' => [
             'driver' => 'openrouter',
             'key' => env('OPENROUTER_API_KEY'),
+            'url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
             'models' => [
                 'text' => [
-                    'default' => env('AI_CHAT_OPENROUTER_TEXT_MODEL', 'anthropic/claude-sonnet-4.6'),
-                    'cheapest' => 'anthropic/claude-haiku-4.5',
-                    'smartest' => 'anthropic/claude-opus-4.6',
+                    'default' => env('AI_CHAT_OPENROUTER_TEXT_MODEL', 'openrouter/free'),
+                    'cheapest' => 'openrouter/free',
+                    'smartest' => 'openrouter/free',
                 ],
             ],
         ],
@@ -328,8 +329,8 @@ return [
             'models' => [
                 'text' => [
                     'default' => env('AI_CHAT_GLM_TEXT_MODEL', 'glm-5.1'),
-                    'cheapest' => 'glm-4-flash',
-                    'smartest' => 'glm-4-plus',
+                    'cheapest' => 'glm-4.5-flash',
+                    'smartest' => 'glm-5.1',
                 ],
             ],
         ],
@@ -337,11 +338,11 @@ return [
             'driver' => 'azure_openai',
             'key' => env('AZURE_OPENAI_API_KEY'),
             'url' => env('AZURE_OPENAI_URL'),
-            'deployment' => env('AZURE_OPENAI_DEPLOYMENT', 'gpt-4o'),
+            'deployment' => env('AZURE_OPENAI_DEPLOYMENT', 'gpt-5.4'),
             'api_version' => env('AZURE_OPENAI_API_VERSION', '2025-04-01-preview'),
             'models' => [
                 'text' => [
-                    'default' => env('AZURE_OPENAI_DEPLOYMENT', 'gpt-4o'),
+                    'default' => env('AZURE_OPENAI_DEPLOYMENT', 'gpt-5.4'),
                 ],
                 'embeddings' => [
                     'default' => 'text-embedding-3-small',
@@ -357,9 +358,9 @@ return [
             'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
             'models' => [
                 'text' => [
-                    'default' => env('AI_CHAT_BEDROCK_TEXT_MODEL', 'us.anthropic.claude-sonnet-4-5-20250929-v1:0'),
+                    'default' => env('AI_CHAT_BEDROCK_TEXT_MODEL', 'us.anthropic.claude-sonnet-4-6-v1'),
                     'cheapest' => 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
-                    'smartest' => 'us.anthropic.claude-opus-4-6-v1',
+                    'smartest' => 'us.anthropic.claude-opus-4-8-v1',
                 ],
                 'embeddings' => [
                     'default' => 'amazon.titan-embed-text-v2:0',

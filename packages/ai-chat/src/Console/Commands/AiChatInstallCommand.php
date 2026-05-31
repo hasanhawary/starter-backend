@@ -139,11 +139,10 @@ class AiChatInstallCommand extends Command
 
     protected function selectCustomModel(string $providerKey): string
     {
-        $provider = ProviderCatalog::providers()[$providerKey] ?? null;
-
         $hint = match ($providerKey) {
             'ollama' => 'e.g. llama3.1:8b, qwen2.5:7b, codellama:13b',
-            'openrouter' => 'e.g. anthropic/claude-sonnet-4.6, google/gemini-3-flash-preview',
+            'openrouter' => 'e.g. anthropic/claude-sonnet-4.6, deepseek/deepseek-v4-flash',
+            'openai' => 'e.g. gpt-5.4, gpt-4o, my-fine-tuned-model',
             'custom' => 'e.g. llama3, mistral, codellama',
             default => 'e.g. my-fine-tuned-model',
         };
@@ -169,63 +168,144 @@ class AiChatInstallCommand extends Command
         $this->setEnvValue($envPath, 'AI_CHAT_PROVIDER', $providerKey);
         $this->setEnvValue($envPath, 'AI_CHAT_MODEL', $model);
 
-        if ($provider['env_key'] && $providerKey !== 'ollama' && $providerKey !== 'custom') {
-            $existingValue = env($provider['env_key']);
-            $existingInFile = $this->getEnvValue($envPath, $provider['env_key']);
+        $this->askForApiKey($envPath, $providerKey, $provider);
+        $this->askForUrl($envPath, $providerKey, $provider);
+        $this->handleProviderSpecific($envPath, $providerKey, $provider);
 
-            if (empty($existingInFile)) {
-                $apiKey = text(
-                    label: "Enter your {$provider['name']} API key",
-                    placeholder: 'sk-...',
-                    validate: fn (string $value) => strlen($value) >= 3 ? null : 'API key must be at least 3 characters',
+        $this->components->info("Provider configured: {$provider['name']} / {$model}");
+    }
+
+    protected function askForApiKey(string $envPath, string $providerKey, array $provider): void
+    {
+        if (! $provider['requires_key']) {
+            return;
+        }
+
+        $envKey = $provider['env_key'];
+
+        $existingInFile = $this->getEnvValue($envPath, $envKey);
+        if (! empty($existingInFile)) {
+            $this->components->twoColumnDetail($envKey, '<fg=green>Already set</>');
+
+            return;
+        }
+
+        $apiKey = text(
+            label: "Enter your {$provider['name']} API key",
+            placeholder: 'sk-...',
+            validate: fn (string $value) => strlen($value) >= 3 ? null : 'API key must be at least 3 characters',
+        );
+
+        $this->setEnvValue($envPath, $envKey, $apiKey);
+    }
+
+    protected function askForUrl(string $envPath, string $providerKey, array $provider): void
+    {
+        if (! $provider['requires_url']) {
+            return;
+        }
+
+        $envUrl = $provider['env_url'];
+        $defaultUrl = $provider['default_url'];
+
+        $existingInFile = $this->getEnvValue($envPath, $envUrl);
+        if (! empty($existingInFile)) {
+            $this->components->twoColumnDetail($envUrl, '<fg=green>Already set</>');
+
+            return;
+        }
+
+        $url = text(
+            label: "Enter your {$provider['name']} base URL",
+            placeholder: $defaultUrl ?? 'https://your-endpoint.com/v1',
+            required: true,
+        );
+
+        $this->setEnvValue($envPath, $envUrl, $url);
+    }
+
+    protected function handleProviderSpecific(string $envPath, string $providerKey, array $provider): void
+    {
+        if ($providerKey === 'custom') {
+            $customUrl = $this->getEnvValue($envPath, 'AI_CHAT_CUSTOM_URL');
+            if (empty($customUrl)) {
+                $url = text(
+                    label: 'Enter your custom API base URL',
+                    placeholder: 'http://localhost:11434/v1',
+                    required: true,
                 );
-
-                $this->setEnvValue($envPath, $provider['env_key'], $apiKey);
+                $this->setEnvValue($envPath, 'AI_CHAT_CUSTOM_URL', $url);
             } else {
-                $this->components->twoColumnDetail($provider['env_key'], '<fg=green>Already set</>');
+                $this->components->twoColumnDetail('AI_CHAT_CUSTOM_URL', '<fg=green>Already set</>');
+            }
+
+            $customKey = $this->getEnvValue($envPath, 'AI_CHAT_CUSTOM_KEY');
+            if (empty($customKey)) {
+                $key = text(
+                    label: 'Enter API key (leave empty if not required)',
+                    placeholder: 'Optional — many local models need no key',
+                );
+                $this->setEnvValue($envPath, 'AI_CHAT_CUSTOM_KEY', $key);
+            } else {
+                $this->components->twoColumnDetail('AI_CHAT_CUSTOM_KEY', '<fg=green>Already set</>');
             }
         }
 
-        if ($providerKey === 'custom') {
-            $customUrl = text(
-                label: 'Enter your custom API base URL',
-                placeholder: 'http://localhost:11434/v1',
-                required: true,
-            );
-
-            $this->setEnvValue($envPath, 'AI_CHAT_CUSTOM_URL', $customUrl);
-
-            $customKey = text(
-                label: 'Enter API key (leave empty if not required)',
-                placeholder: 'Optional — many local models need no key',
-            );
-
-            $this->setEnvValue($envPath, 'AI_CHAT_CUSTOM_KEY', $customKey);
-        }
-
         if ($providerKey === 'azure_openai') {
-            $azureUrl = text(
-                label: 'Enter your Azure OpenAI endpoint URL',
-                placeholder: 'https://your-resource.openai.azure.com',
-                required: true,
-            );
+            $azureUrl = $this->getEnvValue($envPath, 'AZURE_OPENAI_URL');
+            if (empty($azureUrl)) {
+                $url = text(
+                    label: 'Enter your Azure OpenAI endpoint URL',
+                    placeholder: 'https://your-resource.openai.azure.com',
+                    required: true,
+                );
+                $this->setEnvValue($envPath, 'AZURE_OPENAI_URL', $url);
+            } else {
+                $this->components->twoColumnDetail('AZURE_OPENAI_URL', '<fg=green>Already set</>');
+            }
 
-            $this->setEnvValue($envPath, 'AZURE_OPENAI_URL', $azureUrl);
-
-            $deployment = text(
-                label: 'Enter your deployment name',
-                placeholder: 'gpt-4o',
-                required: true,
-            );
-
-            $this->setEnvValue($envPath, 'AZURE_OPENAI_DEPLOYMENT', $deployment);
+            $deployment = $this->getEnvValue($envPath, 'AZURE_OPENAI_DEPLOYMENT');
+            if (empty($deployment)) {
+                $dep = text(
+                    label: 'Enter your deployment name',
+                    placeholder: 'gpt-5.4',
+                    required: true,
+                );
+                $this->setEnvValue($envPath, 'AZURE_OPENAI_DEPLOYMENT', $dep);
+            } else {
+                $this->components->twoColumnDetail('AZURE_OPENAI_DEPLOYMENT', '<fg=green>Already set</>');
+            }
         }
 
         if ($providerKey === 'ollama') {
-            $this->setEnvValue($envPath, 'OLLAMA_URL', 'http://localhost:11434');
+            $ollamaUrl = $this->getEnvValue($envPath, 'OLLAMA_URL');
+            if (empty($ollamaUrl)) {
+                $this->setEnvValue($envPath, 'OLLAMA_URL', 'http://localhost:11434');
+                $this->components->twoColumnDetail('OLLAMA_URL', '<fg=green>Set to http://localhost:11434</>');
+            }
         }
 
-        $this->components->info("Provider configured: {$provider['name']} / {$model}");
+        if ($providerKey === 'openrouter') {
+            $baseUrl = $this->getEnvValue($envPath, 'OPENROUTER_BASE_URL');
+            if (empty($baseUrl)) {
+                $customUrl = text(
+                    label: 'Enter OpenRouter base URL (leave empty for default)',
+                    placeholder: 'https://openrouter.ai/api/v1',
+                    default: 'https://openrouter.ai/api/v1',
+                );
+                $this->setEnvValue($envPath, 'OPENROUTER_BASE_URL', $customUrl);
+            }
+        }
+
+        if ($providerKey === 'bedrock') {
+            $region = $this->getEnvValue($envPath, 'AWS_DEFAULT_REGION');
+            if (empty($region)) {
+                $this->setEnvValue($envPath, 'AWS_DEFAULT_REGION', 'us-east-1');
+                $this->components->twoColumnDetail('AWS_DEFAULT_REGION', '<fg=green>Set to us-east-1</>');
+            }
+
+            $this->components->warn('AWS Bedrock also requires AWS_SECRET_ACCESS_KEY and optionally AWS_SESSION_TOKEN in your .env.');
+        }
     }
 
     protected function setEnvValue(string $envPath, string $key, string $value): void
@@ -501,7 +581,7 @@ MD;
         $this->newLine();
         $this->components->info("Active Provider: {$providerName} / {$model}");
 
-        if ($providerInfo && $providerInfo['env_key'] && $provider !== 'ollama') {
+        if ($providerInfo && $providerInfo['requires_key']) {
             $hasKey = env($providerInfo['env_key']) ? true : false;
 
             if (! $hasKey) {
@@ -529,16 +609,5 @@ MD;
         $this->line('  php artisan ai-chat:doctor         - Check package health');
         $this->newLine();
         $this->components->info('Widget usage (add to any HTML page):');
-        //        $this->line(<<<'HTML'
-        // <script src="/vendor/ai-chat/ai-chat-widget.min.js"></script>
-        // <script>
-        //    AIChatWidget.init({
-        //        apiBaseUrl: '/api/ai-chat',
-        //        title: 'AI Assistant',
-        //        theme: 'light',
-        //        position: 'bottom-right',
-        //    });
-        // </script>
-        // HTML);
     }
 }

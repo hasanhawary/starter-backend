@@ -2,9 +2,9 @@
 
 return [
 
-    'provider' => env('AI_CHAT_PROVIDER', 'glm'),
+    'provider' => env('AI_CHAT_PROVIDER', 'openai'),
 
-    'model' => env('AI_CHAT_MODEL', 'glm-5.1'),
+    'model' => env('AI_CHAT_MODEL', 'gpt-5.4'),
 
     'thinking' => [
         'enabled' => env('AI_CHAT_THINKING_ENABLED', true),
@@ -25,7 +25,7 @@ return [
 
     'conversations' => [
         'max_messages' => (int) env('AI_CHAT_MAX_MESSAGES', 100),
-        'default_system_prompt' => env('AI_CHAT_SYSTEM_PROMPT', 'You are a helpful AI assistant powered by GLM-5.1. Be concise, accurate, and friendly.'),
+        'default_system_prompt' => env('AI_CHAT_SYSTEM_PROMPT', 'You are a helpful AI assistant. Be concise, accurate, and friendly.'),
     ],
 
     'widget' => [
@@ -43,7 +43,7 @@ return [
     |
     */
 
-    'default' => env('AI_CHAT_PROVIDER', 'glm'),
+    'default' => env('AI_CHAT_PROVIDER', 'openai'),
     'default_for_images' => 'gemini',
     'default_for_audio' => 'openai',
     'default_for_transcription' => 'openai',
@@ -114,6 +114,7 @@ return [
         'deepseek' => [
             'driver' => 'deepseek',
             'key' => env('DEEPSEEK_API_KEY'),
+            'url' => env('DEEPSEEK_URL', 'https://api.deepseek.com'),
         ],
 
         'eleven' => [
@@ -130,6 +131,7 @@ return [
         'groq' => [
             'driver' => 'groq',
             'key' => env('GROQ_API_KEY'),
+            'url' => env('GROQ_URL', 'https://api.groq.com/openai/v1'),
         ],
 
         'jina' => [
@@ -140,6 +142,7 @@ return [
         'mistral' => [
             'driver' => 'mistral',
             'key' => env('MISTRAL_API_KEY'),
+            'url' => env('MISTRAL_URL', 'https://api.mistral.ai/v1'),
         ],
 
         'ollama' => [
@@ -157,6 +160,7 @@ return [
         'openrouter' => [
             'driver' => 'openrouter',
             'key' => env('OPENROUTER_API_KEY'),
+            'url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
         ],
 
         'voyageai' => [
@@ -167,6 +171,7 @@ return [
         'xai' => [
             'driver' => 'xai',
             'key' => env('XAI_API_KEY'),
+            'url' => env('XAI_URL', 'https://api.x.ai/v1'),
         ],
 
         'glm' => [

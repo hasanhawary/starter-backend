@@ -95,6 +95,9 @@ class HeuristicPlanner
         'like we discussed' => 'memory',
         'from before' => 'memory',
         'previous conversation' => 'memory',
+        'do you remember' => 'memory',
+        'remember' => 'memory',
+        'recall' => 'memory',
         'المرة اللي فاتت' => 'memory',
         'قبل كده' => 'memory',
         'كمل اللي فات' => 'memory',
@@ -107,6 +110,14 @@ class HeuristicPlanner
         'زي ما قولتلك' => 'memory',
         'فاكر التقرير' => 'memory',
         'فاكر اللي قولته' => 'memory',
+        'فاكر' => 'memory',
+        'تفتكر' => 'memory',
+        'تذكر' => 'memory',
+        'هل فاكر' => 'memory',
+        'هل تفتكر' => 'memory',
+        'هل تذكر' => 'memory',
+        'فاكرني' => 'memory',
+        'تفتكرني' => 'memory',
     ];
 
     protected array $greetingPatterns = [

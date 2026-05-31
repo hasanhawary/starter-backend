@@ -203,7 +203,12 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
 
     public function model(): string
     {
-        return config('ai-chat.model', 'glm-5.1');
+        return config('ai-chat.model', 'gpt-5.4');
+    }
+
+    public function provider(): string
+    {
+        return config('ai-chat.provider', 'openai');
     }
 
     protected function resolveHistoryPolicy(): HistoryPolicy

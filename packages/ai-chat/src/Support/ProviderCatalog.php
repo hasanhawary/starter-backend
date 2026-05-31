@@ -14,21 +14,25 @@ class ProviderCatalog
                 'env_url' => 'OPENAI_URL',
                 'default_url' => 'https://api.openai.com/v1',
                 'category' => 'cloud',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => true,
                 'supports_images' => true,
                 'supports_audio' => true,
             ],
             'anthropic' => [
-                'name' => 'Anthropic',
+                'name' => 'Anthropic Claude',
                 'driver' => 'anthropic',
                 'env_key' => 'ANTHROPIC_API_KEY',
                 'env_url' => 'ANTHROPIC_URL',
                 'default_url' => 'https://api.anthropic.com/v1',
                 'category' => 'cloud',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => false,
-                'supports_images' => false,
+                'supports_images' => true,
                 'supports_audio' => false,
             ],
             'gemini' => [
@@ -38,6 +42,8 @@ class ProviderCatalog
                 'env_url' => 'GEMINI_URL',
                 'default_url' => 'https://generativelanguage.googleapis.com/v1beta/',
                 'category' => 'cloud',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => true,
                 'supports_images' => true,
@@ -50,10 +56,13 @@ class ProviderCatalog
                 'env_url' => 'DEEPSEEK_URL',
                 'default_url' => 'https://api.deepseek.com',
                 'category' => 'cloud',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => false,
                 'supports_images' => false,
                 'supports_audio' => false,
+                'note' => 'V4 models (deepseek-v4-pro, deepseek-v4-flash) now available. Legacy deepseek-chat and deepseek-reasoner retire July 24, 2026.',
             ],
             'groq' => [
                 'name' => 'Groq',
@@ -62,30 +71,36 @@ class ProviderCatalog
                 'env_url' => 'GROQ_URL',
                 'default_url' => 'https://api.groq.com/openai/v1',
                 'category' => 'cloud',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => false,
                 'supports_images' => false,
                 'supports_audio' => false,
             ],
             'mistral' => [
-                'name' => 'Mistral',
+                'name' => 'Mistral AI',
                 'driver' => 'mistral',
                 'env_key' => 'MISTRAL_API_KEY',
                 'env_url' => 'MISTRAL_URL',
                 'default_url' => 'https://api.mistral.ai/v1',
                 'category' => 'cloud',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => true,
                 'supports_images' => false,
                 'supports_audio' => false,
             ],
             'xai' => [
-                'name' => 'xAI (Grok)',
+                'name' => 'xAI Grok',
                 'driver' => 'xai',
                 'env_key' => 'XAI_API_KEY',
                 'env_url' => 'XAI_URL',
                 'default_url' => 'https://api.x.ai/v1',
                 'category' => 'cloud',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => false,
                 'supports_images' => true,
@@ -95,21 +110,26 @@ class ProviderCatalog
                 'name' => 'OpenRouter',
                 'driver' => 'openrouter',
                 'env_key' => 'OPENROUTER_API_KEY',
-                'env_url' => null,
-                'default_url' => null,
+                'env_url' => 'OPENROUTER_BASE_URL',
+                'default_url' => 'https://openrouter.ai/api/v1',
                 'category' => 'cloud',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => true,
                 'supports_images' => true,
                 'supports_audio' => true,
             ],
             'glm' => [
-                'name' => 'GLM (ZhipuAI)',
+                'name' => 'Z.ai / GLM',
                 'driver' => 'glm',
                 'env_key' => 'GLM_API_KEY',
+                'alt_env_key' => 'ZAI_API_KEY',
                 'env_url' => 'GLM_API_URL',
                 'default_url' => 'https://open.bigmodel.cn/api/paas/v4',
                 'category' => 'cloud',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => false,
                 'supports_images' => false,
@@ -122,6 +142,8 @@ class ProviderCatalog
                 'env_url' => 'AZURE_OPENAI_URL',
                 'default_url' => null,
                 'category' => 'enterprise',
+                'requires_key' => true,
+                'requires_url' => true,
                 'supports_text' => true,
                 'supports_embeddings' => true,
                 'supports_images' => true,
@@ -134,6 +156,8 @@ class ProviderCatalog
                 'env_url' => null,
                 'default_url' => null,
                 'category' => 'enterprise',
+                'requires_key' => true,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => true,
                 'supports_images' => true,
@@ -146,18 +170,22 @@ class ProviderCatalog
                 'env_url' => 'OLLAMA_URL',
                 'default_url' => 'http://localhost:11434',
                 'category' => 'local',
+                'requires_key' => false,
+                'requires_url' => false,
                 'supports_text' => true,
                 'supports_embeddings' => true,
                 'supports_images' => false,
                 'supports_audio' => false,
             ],
             'custom' => [
-                'name' => 'Custom / OpenAI-Compatible',
+                'name' => 'Custom OpenAI-Compatible',
                 'driver' => 'openai',
                 'env_key' => 'AI_CHAT_CUSTOM_KEY',
                 'env_url' => 'AI_CHAT_CUSTOM_URL',
                 'default_url' => null,
                 'category' => 'local',
+                'requires_key' => false,
+                'requires_url' => true,
                 'supports_text' => true,
                 'supports_embeddings' => false,
                 'supports_images' => false,
@@ -166,8 +194,27 @@ class ProviderCatalog
         ];
     }
 
+    public static function providerAliases(): array
+    {
+        return [
+            'zhipu' => 'glm',
+            'zhipuai' => 'glm',
+            'zai' => 'glm',
+            'grok' => 'xai',
+        ];
+    }
+
+    public static function resolveProviderAlias(string $key): string
+    {
+        $aliases = static::providerAliases();
+
+        return $aliases[$key] ?? $key;
+    }
+
     public static function models(string $provider): array
     {
+        $provider = static::resolveProviderAlias($provider);
+
         return match ($provider) {
             'openai' => static::openaiModels(),
             'anthropic' => static::anthropicModels(),
@@ -188,6 +235,7 @@ class ProviderCatalog
 
     public static function defaultModel(string $provider): string
     {
+        $provider = static::resolveProviderAlias($provider);
         $models = static::models($provider);
 
         foreach ($models as $id => $info) {
@@ -204,16 +252,17 @@ class ProviderCatalog
         return [
             'gpt-5.5' => ['name' => 'GPT-5.5 (Latest Flagship)', 'default' => false, 'tier' => 'smartest'],
             'gpt-5.4' => ['name' => 'GPT-5.4 (Recommended)', 'default' => true, 'tier' => 'default'],
-            'gpt-5.4-mini' => ['name' => 'GPT-5.4 Mini (Fast & Cheap)', 'default' => false, 'tier' => 'cheapest'],
+            'gpt-5.4-mini' => ['name' => 'GPT-5.4 Mini', 'default' => false, 'tier' => 'default'],
             'gpt-5.4-nano' => ['name' => 'GPT-5.4 Nano (Fastest)', 'default' => false, 'tier' => 'cheapest'],
             'gpt-5.4-pro' => ['name' => 'GPT-5.4 Pro (Most Capable)', 'default' => false, 'tier' => 'smartest'],
             'o3' => ['name' => 'o3 (Reasoning)', 'default' => false, 'tier' => 'smartest'],
             'o3-mini' => ['name' => 'o3 Mini (Reasoning)', 'default' => false, 'tier' => 'cheapest'],
             'o4-mini' => ['name' => 'o4 Mini (Reasoning)', 'default' => false, 'tier' => 'default'],
-            'gpt-4o' => ['name' => 'GPT-4o', 'default' => false, 'tier' => 'default'],
-            'gpt-4o-mini' => ['name' => 'GPT-4o Mini', 'default' => false, 'tier' => 'cheapest'],
-            'gpt-4-turbo' => ['name' => 'GPT-4 Turbo (Legacy)', 'default' => false, 'tier' => 'default'],
-            'gpt-3.5-turbo' => ['name' => 'GPT-3.5 Turbo (Legacy)', 'default' => false, 'tier' => 'cheapest'],
+            'gpt-4.1' => ['name' => 'GPT-4.1 (Long Context)', 'default' => false, 'tier' => 'default'],
+            'gpt-4.1-mini' => ['name' => 'GPT-4.1 Mini', 'default' => false, 'tier' => 'cheapest'],
+            'gpt-4.1-nano' => ['name' => 'GPT-4.1 Nano', 'default' => false, 'tier' => 'cheapest'],
+            'gpt-4o' => ['name' => 'GPT-4o (Legacy)', 'default' => false, 'tier' => 'default'],
+            'gpt-4o-mini' => ['name' => 'GPT-4o Mini (Legacy)', 'default' => false, 'tier' => 'cheapest'],
         ];
     }
 
@@ -222,86 +271,81 @@ class ProviderCatalog
         return [
             'claude-sonnet-4-6' => ['name' => 'Claude Sonnet 4.6 (Recommended)', 'default' => true, 'tier' => 'default'],
             'claude-haiku-4-5-20251001' => ['name' => 'Claude Haiku 4.5 (Fast)', 'default' => false, 'tier' => 'cheapest'],
-            'claude-opus-4-7' => ['name' => 'Claude Opus 4.7 (Most Capable)', 'default' => false, 'tier' => 'smartest'],
+            'claude-opus-4-8' => ['name' => 'Claude Opus 4.8 (Latest)', 'default' => false, 'tier' => 'smartest'],
+            'claude-opus-4-7' => ['name' => 'Claude Opus 4.7', 'default' => false, 'tier' => 'smartest'],
             'claude-opus-4-6' => ['name' => 'Claude Opus 4.6', 'default' => false, 'tier' => 'smartest'],
             'claude-sonnet-4-5-20250929' => ['name' => 'Claude Sonnet 4.5', 'default' => false, 'tier' => 'default'],
-            'claude-opus-4-5-20251101' => ['name' => 'Claude Opus 4.5', 'default' => false, 'tier' => 'smartest'],
-            'claude-opus-4-1-20250805' => ['name' => 'Claude Opus 4.1', 'default' => false, 'tier' => 'smartest'],
-            'claude-3-5-sonnet-20241022' => ['name' => 'Claude 3.5 Sonnet (Legacy)', 'default' => false, 'tier' => 'default'],
-            'claude-3-haiku-20240307' => ['name' => 'Claude 3 Haiku (Legacy)', 'default' => false, 'tier' => 'cheapest'],
         ];
     }
 
     protected static function geminiModels(): array
     {
         return [
-            'gemini-3-flash-preview' => ['name' => 'Gemini 3 Flash (Recommended)', 'default' => true, 'tier' => 'default'],
-            'gemini-3.1-pro-preview' => ['name' => 'Gemini 3.1 Pro (Most Capable)', 'default' => false, 'tier' => 'smartest'],
-            'gemini-3.1-flash-lite-preview' => ['name' => 'Gemini 3.1 Flash Lite (Fast)', 'default' => false, 'tier' => 'cheapest'],
-            'gemini-2.5-pro' => ['name' => 'Gemini 2.5 Pro', 'default' => false, 'tier' => 'smartest'],
-            'gemini-2.5-flash' => ['name' => 'Gemini 2.5 Flash', 'default' => false, 'tier' => 'default'],
-            'gemini-2.0-flash' => ['name' => 'Gemini 2.0 Flash', 'default' => false, 'tier' => 'cheapest'],
-            'gemini-2.0-flash-lite' => ['name' => 'Gemini 2.0 Flash Lite', 'default' => false, 'tier' => 'cheapest'],
+            'gemini-3-flash-preview' => ['name' => 'Gemini 3 Flash Preview (Recommended)', 'default' => true, 'tier' => 'default'],
+            'gemini-3.1-pro-preview' => ['name' => 'Gemini 3.1 Pro Preview (Most Capable)', 'default' => false, 'tier' => 'smartest'],
+            'gemini-3.1-flash-lite-preview' => ['name' => 'Gemini 3.1 Flash Lite Preview (Fast)', 'default' => false, 'tier' => 'cheapest'],
+            'gemini-2.5-pro' => ['name' => 'Gemini 2.5 Pro (Stable)', 'default' => false, 'tier' => 'smartest'],
+            'gemini-2.5-flash' => ['name' => 'Gemini 2.5 Flash (Stable)', 'default' => false, 'tier' => 'default'],
+            'gemini-2.5-flash-lite' => ['name' => 'Gemini 2.5 Flash Lite (Stable)', 'default' => false, 'tier' => 'cheapest'],
+            'gemini-2.0-flash' => ['name' => 'Gemini 2.0 Flash (Legacy)', 'default' => false, 'tier' => 'cheapest'],
         ];
     }
 
     protected static function deepseekModels(): array
     {
         return [
-            'deepseek-chat' => ['name' => 'DeepSeek Chat (Recommended)', 'default' => true, 'tier' => 'default'],
-            'deepseek-reasoner' => ['name' => 'DeepSeek Reasoner (Most Capable)', 'default' => false, 'tier' => 'smartest'],
-            'deepseek-v4-flash' => ['name' => 'DeepSeek V4 Flash', 'default' => false, 'tier' => 'cheapest'],
-            'deepseek-v4-pro' => ['name' => 'DeepSeek V4 Pro', 'default' => false, 'tier' => 'smartest'],
+            'deepseek-v4-flash' => ['name' => 'DeepSeek V4 Flash (Recommended)', 'default' => true, 'tier' => 'default'],
+            'deepseek-v4-pro' => ['name' => 'DeepSeek V4 Pro (Most Capable)', 'default' => false, 'tier' => 'smartest'],
+            'deepseek-chat' => ['name' => 'DeepSeek Chat (Legacy — retires Jul 24, 2026)', 'default' => false, 'tier' => 'default'],
+            'deepseek-reasoner' => ['name' => 'DeepSeek Reasoner (Legacy — retires Jul 24, 2026)', 'default' => false, 'tier' => 'smartest'],
         ];
     }
 
     protected static function groqModels(): array
     {
         return [
-            'openai/gpt-oss-120b' => ['name' => 'GPT-OSS 120B (Recommended)', 'default' => true, 'tier' => 'default'],
-            'openai/gpt-oss-20b' => ['name' => 'GPT-OSS 20B (Fast)', 'default' => false, 'tier' => 'cheapest'],
-            'llama-3.3-70b-versatile' => ['name' => 'Llama 3.3 70B', 'default' => false, 'tier' => 'default'],
+            'llama-3.3-70b-versatile' => ['name' => 'Llama 3.3 70B (Recommended)', 'default' => true, 'tier' => 'default'],
             'llama-3.1-8b-instant' => ['name' => 'Llama 3.1 8B (Fast)', 'default' => false, 'tier' => 'cheapest'],
-            'meta-llama/llama-4-scout-17b-16e-instruct' => ['name' => 'Llama 4 Scout', 'default' => false, 'tier' => 'default'],
+            'meta-llama/llama-4-scout-17b-16e-instruct' => ['name' => 'Llama 4 Scout 17B (Vision)', 'default' => false, 'tier' => 'default'],
             'qwen/qwen3-32b' => ['name' => 'Qwen3 32B', 'default' => false, 'tier' => 'default'],
+            'openai/gpt-oss-120b' => ['name' => 'GPT-OSS 120B', 'default' => false, 'tier' => 'smartest'],
+            'openai/gpt-oss-20b' => ['name' => 'GPT-OSS 20B (Fast)', 'default' => false, 'tier' => 'cheapest'],
         ];
     }
 
     protected static function mistralModels(): array
     {
         return [
-            'mistral-medium-latest' => ['name' => 'Mistral Medium (Recommended)', 'default' => true, 'tier' => 'default'],
+            'mistral-large-latest' => ['name' => 'Mistral Large (Latest)', 'default' => true, 'tier' => 'default'],
+            'mistral-medium-latest' => ['name' => 'Mistral Medium', 'default' => false, 'tier' => 'default'],
             'mistral-small-latest' => ['name' => 'Mistral Small (Fast)', 'default' => false, 'tier' => 'cheapest'],
-            'mistral-large-latest' => ['name' => 'Mistral Large (Most Capable)', 'default' => false, 'tier' => 'smartest'],
-            'mistral-medium-2508' => ['name' => 'Mistral Medium 3.1', 'default' => false, 'tier' => 'default'],
-            'mistral-small-2506' => ['name' => 'Mistral Small 3.2', 'default' => false, 'tier' => 'cheapest'],
+            'codestral-latest' => ['name' => 'Codestral (Code)', 'default' => false, 'tier' => 'default'],
             'open-mistral-nemo' => ['name' => 'Mistral Nemo 12B (Open)', 'default' => false, 'tier' => 'cheapest'],
-            'devstral-2512' => ['name' => 'Devstral 2 (Code)', 'default' => false, 'tier' => 'default'],
-            'codestral-2508' => ['name' => 'Codestral (Code)', 'default' => false, 'tier' => 'default'],
         ];
     }
 
     protected static function xaiModels(): array
     {
         return [
-            'grok-4-1-fast-reasoning' => ['name' => 'Grok 4.1 Fast Reasoning (Recommended)', 'default' => true, 'tier' => 'default'],
-            'grok-4.3' => ['name' => 'Grok 4.3 (Latest)', 'default' => false, 'tier' => 'smartest'],
-            'grok-4.20-0309-reasoning' => ['name' => 'Grok 4.20 Reasoning', 'default' => false, 'tier' => 'smartest'],
-            'grok-4.20-0309-non-reasoning' => ['name' => 'Grok 4.20', 'default' => false, 'tier' => 'default'],
-            'grok-4.20-multi-agent-0309' => ['name' => 'Grok 4.20 Multi-Agent', 'default' => false, 'tier' => 'smartest'],
+            'grok-4.3' => ['name' => 'Grok 4.3 (Recommended)', 'default' => true, 'tier' => 'default'],
+            'grok-4.20' => ['name' => 'Grok 4.20 (Most Capable)', 'default' => false, 'tier' => 'smartest'],
+            'grok-4.20-multi-agent' => ['name' => 'Grok 4.20 Multi-Agent', 'default' => false, 'tier' => 'smartest'],
         ];
     }
 
     protected static function openrouterModels(): array
     {
         return [
-            'anthropic/claude-sonnet-4.6' => ['name' => 'Claude Sonnet 4.6 (Recommended)', 'default' => true, 'tier' => 'default'],
+            'openrouter/free' => ['name' => 'Free Models Router (Auto)', 'default' => true, 'tier' => 'cheapest'],
+            'anthropic/claude-sonnet-4.6' => ['name' => 'Claude Sonnet 4.6 (Recommended)', 'default' => false, 'tier' => 'default'],
             'anthropic/claude-haiku-4.5' => ['name' => 'Claude Haiku 4.5 (Fast)', 'default' => false, 'tier' => 'cheapest'],
             'anthropic/claude-opus-4.6' => ['name' => 'Claude Opus 4.6 (Most Capable)', 'default' => false, 'tier' => 'smartest'],
             'openai/gpt-5.4' => ['name' => 'GPT-5.4', 'default' => false, 'tier' => 'default'],
             'openai/gpt-4o' => ['name' => 'GPT-4o', 'default' => false, 'tier' => 'default'],
-            'google/gemini-3-flash-preview' => ['name' => 'Gemini 3 Flash', 'default' => false, 'tier' => 'cheapest'],
-            'deepseek/deepseek-chat' => ['name' => 'DeepSeek Chat', 'default' => false, 'tier' => 'cheapest'],
+            'google/gemini-3-flash-preview' => ['name' => 'Gemini 3 Flash Preview', 'default' => false, 'tier' => 'cheapest'],
+            'deepseek/deepseek-v4-flash' => ['name' => 'DeepSeek V4 Flash', 'default' => false, 'tier' => 'cheapest'],
+            'deepseek/deepseek-v4-pro' => ['name' => 'DeepSeek V4 Pro', 'default' => false, 'tier' => 'smartest'],
+            'deepseek/deepseek-v4-flash:free' => ['name' => 'DeepSeek V4 Flash (Free)', 'default' => false, 'tier' => 'cheapest'],
         ];
     }
 
@@ -309,11 +353,13 @@ class ProviderCatalog
     {
         return [
             'glm-5.1' => ['name' => 'GLM-5.1 (Recommended)', 'default' => true, 'tier' => 'default'],
-            'glm-4-plus' => ['name' => 'GLM-4 Plus (Most Capable)', 'default' => false, 'tier' => 'smartest'],
-            'glm-4-flash' => ['name' => 'GLM-4 Flash (Fast)', 'default' => false, 'tier' => 'cheapest'],
-            'glm-4-long' => ['name' => 'GLM-4 Long (Long Context)', 'default' => false, 'tier' => 'default'],
-            'glm-4-air' => ['name' => 'GLM-4 Air', 'default' => false, 'tier' => 'cheapest'],
-            'glm-4-airx' => ['name' => 'GLM-4 AirX', 'default' => false, 'tier' => 'default'],
+            'glm-4.7' => ['name' => 'GLM-4.7', 'default' => false, 'tier' => 'default'],
+            'glm-4.6' => ['name' => 'GLM-4.6', 'default' => false, 'tier' => 'default'],
+            'glm-4.5' => ['name' => 'GLM-4.5', 'default' => false, 'tier' => 'default'],
+            'glm-4.5-air' => ['name' => 'GLM-4.5 Air (Fast)', 'default' => false, 'tier' => 'cheapest'],
+            'glm-4.5-flash' => ['name' => 'GLM-4.5 Flash (Free)', 'default' => false, 'tier' => 'cheapest'],
+            'glm-4-plus' => ['name' => 'GLM-4 Plus (Legacy)', 'default' => false, 'tier' => 'smartest'],
+            'glm-4-flash' => ['name' => 'GLM-4 Flash (Legacy Fast)', 'default' => false, 'tier' => 'cheapest'],
         ];
     }
 
@@ -340,15 +386,16 @@ class ProviderCatalog
     {
         return [
             'llama3.1:8b' => ['name' => 'Llama 3.1 8B (Recommended)', 'default' => true, 'tier' => 'cheapest'],
-            'llama3.1:70b' => ['name' => 'Llama 3.1 70B (Most Capable)', 'default' => false, 'tier' => 'smartest'],
+            'llama3.1:70b' => ['name' => 'Llama 3.1 70B', 'default' => false, 'tier' => 'smartest'],
             'llama3.3:70b' => ['name' => 'Llama 3.3 70B', 'default' => false, 'tier' => 'smartest'],
             'qwen2.5:7b' => ['name' => 'Qwen 2.5 7B', 'default' => false, 'tier' => 'cheapest'],
             'qwen2.5:32b' => ['name' => 'Qwen 2.5 32B', 'default' => false, 'tier' => 'default'],
             'qwen2.5:72b' => ['name' => 'Qwen 2.5 72B', 'default' => false, 'tier' => 'smartest'],
+            'deepseek-r1:8b' => ['name' => 'DeepSeek R1 8B', 'default' => false, 'tier' => 'cheapest'],
+            'deepseek-r1:70b' => ['name' => 'DeepSeek R1 70B', 'default' => false, 'tier' => 'smartest'],
             'codellama:7b' => ['name' => 'Code Llama 7B', 'default' => false, 'tier' => 'cheapest'],
             'codellama:13b' => ['name' => 'Code Llama 13B', 'default' => false, 'tier' => 'default'],
             'mistral:7b' => ['name' => 'Mistral 7B', 'default' => false, 'tier' => 'cheapest'],
-            'deepseek-coder-v2:16b' => ['name' => 'DeepSeek Coder V2 16B', 'default' => false, 'tier' => 'default'],
             'gemma2:9b' => ['name' => 'Gemma 2 9B', 'default' => false, 'tier' => 'cheapest'],
             'phi3:14b' => ['name' => 'Phi-3 14B', 'default' => false, 'tier' => 'default'],
             'nomic-embed-text' => ['name' => 'Nomic Embed Text (Embeddings)', 'default' => false, 'tier' => 'cheapest'],

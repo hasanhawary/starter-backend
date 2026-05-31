@@ -325,7 +325,7 @@ class AiChatController extends Controller
             } elseif ($policy->mode === 'summary') {
                 $parts[] = "\n\nThe user is asking for a conversation summary. Use the conversation history to provide a summary of all topics discussed. Do not re-answer any individual questions.";
             } elseif ($policy->mode === 'relevant') {
-                $parts[] = "\n\nOnly the most relevant previous context is provided. Use it only if the user's latest message requires it. Do not re-answer previous questions or mention unrelated topics.";
+                $parts[] = "\n\nThe user is asking about something from a previous conversation (e.g. their name, a topic discussed earlier, something they told you). Relevant previous context is provided below. Directly answer their question using that context. Do NOT start with a greeting. Do NOT re-answer unrelated previous questions.";
             } elseif ($plan) {
                 if ($plan->isSimpleLiveData()) {
                     $parts[] = "\n\nUse the available tools to answer this live-data question. Do not invent values.";

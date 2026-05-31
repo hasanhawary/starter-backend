@@ -24,6 +24,9 @@ class HistorySelector
         'from before',
         'in our conversation',
         'in the conversation',
+        'remember my',
+        'remember what',
+        'recall',
         'اسمي ايه',
         'اسمي اي',
         'اسمي مين',
@@ -32,8 +35,13 @@ class HistorySelector
         'اي اسمي',
         'ايش اسمي',
         'فاكر اسمي',
-        'فاكر اللي قلته',
         'فاكر اسم',
+        'فاكرني',
+        'تفتكر اسمي',
+        'تفتكرني',
+        'تفتكر',
+        'تذكر',
+        'هل فاكر',
         'مين انا',
         'قولتلي ايه',
         'قلت ايه',
@@ -43,8 +51,6 @@ class HistorySelector
         'محتاج ذكرت',
         'لسه قايلك',
         'قلتلك قبل كده',
-        'فاكرني',
-        'تعرفني',
     ];
 
     protected array $followUpPatterns = [
