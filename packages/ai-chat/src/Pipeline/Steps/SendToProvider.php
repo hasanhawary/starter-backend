@@ -3,6 +3,7 @@
 namespace AiChat\Pipeline\Steps;
 
 use AiChat\Agents\ChatAgent;
+use AiChat\Chat\ConversationManager;
 use AiChat\Chat\HistorySelector;
 use AiChat\Pipeline\ChatPayload;
 use Closure;
@@ -28,6 +29,8 @@ class SendToProvider
 
     protected function buildChatAgent(ChatPayload $payload): ChatAgent
     {
+        $this->ensureConversation($payload);
+
         $systemPrompt = $this->resolveSystemPrompt($payload);
 
         $agent = new ChatAgent($systemPrompt);
@@ -45,6 +48,12 @@ class SendToProvider
             $agent->withTools(array_keys($payload->tools));
         }
 
+        $agent->withToolContextPayload([
+            'conversation_id' => $conversationId,
+            'session_id' => $sessionId,
+            'message' => $payload->message,
+        ]);
+
         if ($payload->executionPlan) {
             $agent->withExecutionPlan($payload->executionPlan);
             $agent->withCurrentMessage($payload->message);
@@ -55,6 +64,24 @@ class SendToProvider
         }
 
         return $agent;
+    }
+
+    protected function ensureConversation(ChatPayload $payload): void
+    {
+        if ($payload->conversationId()) {
+            return;
+        }
+
+        $sessionId = $payload->metadata['session_id'] ?? null;
+
+        if (! is_string($sessionId) || $sessionId === '') {
+            return;
+        }
+
+        $payload->conversation = app(ConversationManager::class)->create(
+            $sessionId,
+            'New Chat',
+        );
     }
 
     protected function resolveSystemPrompt(ChatPayload $payload): string
@@ -102,14 +129,21 @@ class SendToProvider
             $payload->setMetadata('usage', (array) $response->usage);
         }
 
-        if ($response->toolCalls ?? false) {
-            $payload->rawResponse = [
-                'tool_calls' => $response->toolCalls->map(fn ($tc) => [
-                    'id' => $tc->id,
-                    'name' => $tc->name,
-                    'arguments' => $tc->arguments,
-                ])->toArray(),
-            ];
+        $toolCalls = collect($response->toolCalls ?? []);
+
+        if ($toolCalls->isNotEmpty()) {
+            $payload->setMetadata('tool_calls', $toolCalls->map(fn ($tc) => [
+                'id' => $tc->id,
+                'name' => $tc->name,
+                'arguments' => $tc->arguments,
+            ])->toArray());
+            $payload->setMetadata('tool_calls_used', true);
+        }
+
+        $toolResults = collect($response->toolResults ?? []);
+
+        if ($toolResults->isNotEmpty()) {
+            $payload->setMetadata('tool_results', $toolResults->values()->toArray());
         }
 
         return $next($payload);

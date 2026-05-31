@@ -16,7 +16,7 @@ class HybridPlanner
 
     public function plan(string $message, array $availableTools = [], ?string $locale = null): ExecutionPlan
     {
-        $mode = config('ai-chat.planning.mode', 'hybrid');
+        $mode = config('ai-chat.planning.mode', 'heuristic');
         $cachePlans = config('ai-chat.planning.cache_plans', true);
 
         if ($cachePlans) {
@@ -63,10 +63,8 @@ class HybridPlanner
 
     protected function hybrid(string $message, array $availableTools, ?string $locale): ExecutionPlan
     {
-        $heuristicPlan = $this->heuristicPlanner->plan($message, $availableTools, $locale);
-
-        if (! $this->heuristicPlanner->shouldUseLlm($heuristicPlan)) {
-            return $heuristicPlan;
+        if ($this->heuristicPlanner->canHandle($message)) {
+            return $this->heuristicPlanner->plan($message, $availableTools, $locale);
         }
 
         $toolNames = array_map(
@@ -76,16 +74,16 @@ class HybridPlanner
 
         $plan = $this->llmPlanner->plan($message, $toolNames, $locale);
 
-        if ($plan === null) {
-            return $heuristicPlan;
+        if ($plan !== null) {
+            return $plan;
         }
 
-        return $plan;
+        return $this->heuristicPlanner->plan($message, $availableTools, $locale);
     }
 
     protected function validateAndSanitize(ExecutionPlan $plan): ExecutionPlan
     {
-        $validIntents = ['live_data', 'knowledge', 'memory', 'project_structure', 'mixed', 'direct', 'clarification'];
+        $validIntents = ['live_data', 'knowledge', 'memory', 'project_structure', 'mixed', 'direct', 'clarification', 'summary'];
 
         if (! in_array($plan->intent, $validIntents)) {
             $plan->intent = 'direct';

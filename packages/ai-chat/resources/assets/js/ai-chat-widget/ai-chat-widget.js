@@ -41,6 +41,7 @@
         agentAvatar: '',
         onlineStatus: 'online',
         fontSize: 'medium',
+        language: 'auto',
     };
 
     var STATE = {
@@ -80,6 +81,7 @@
             stopGenerating: 'إيقاف التوليد',
             retry: 'إعادة المحاولة',
             copyReply: 'نسخ الرد',
+            copyCode: 'نسخ الكود',
             helpful: 'مفيد',
             notHelpful: 'غير مفيد',
             openChat: 'فتح المحادثة',
@@ -110,6 +112,7 @@
             cancel: 'إلغاء',
             confirm: 'تأكيد',
             settings: 'الإعدادات',
+            inputLabel: 'رسالة المحادثة',
             theme: 'المظهر',
             light: 'فاتح',
             dark: 'داكن',
@@ -211,6 +214,13 @@
         return div.innerHTML;
     }
 
+    function escapeAttribute(text) {
+        return escapeHtml(text)
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/`/g, '&#96;');
+    }
+
     function formatTime(date) {
         var d = new Date(date);
         var now = new Date();
@@ -229,34 +239,165 @@
 
     function renderMarkdown(text) {
         if (!text) return '';
-        var escaped = escapeHtml(text);
+        var codeBlocks = [];
+        var source = String(text).replace(/\r\n/g, '\n');
 
-        escaped = escaped.replace(/```(\w*)\n?([\s\S]*?)```/g, function (match, lang, code) {
-            var langClass = lang ? ' class="lang-' + escapeHtml(lang) + '"' : '';
-            var langLabel = lang ? '<span class="ai-code-lang">' + escapeHtml(lang) + '</span>' : '';
-            return '<div class="ai-code-block">' +
+        source = source.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function (match, lang, code) {
+            var index = codeBlocks.length;
+            var trimmedCode = code.replace(/^\n|\n$/g, '');
+            var safeLang = (lang || '').trim().replace(/[^\w#+.-]/g, '');
+            var langClass = safeLang ? ' class="lang-' + escapeAttribute(safeLang) + '"' : '';
+            var langLabel = safeLang ? '<span class="ai-code-lang">' + escapeHtml(safeLang) + '</span>' : '';
+
+            codeBlocks.push('<div class="ai-code-block" dir="ltr">' +
                 langLabel +
-                '<button class="ai-code-copy" data-code="' + escapeHtml(code.trim()) + '" title="Copy code">' +
-                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+                '<button class="ai-code-copy" type="button" data-code="' + escapeAttribute(trimmedCode) + '" title="' + escapeAttribute(__('copyCode', 'Copy code')) + '" aria-label="' + escapeAttribute(__('copyCode', 'Copy code')) + '">' +
+                svgIcon('copy') +
                 '</button>' +
-                '<pre><code' + langClass + '>' + code.trim() + '</code></pre>' +
-                '</div>';
+                '<pre><code' + langClass + '>' + escapeHtml(trimmedCode) + '</code></pre>' +
+                '</div>');
+
+            return '\n@@AI_CODE_BLOCK_' + index + '@@\n';
         });
 
-        escaped = escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+        var lines = source.split('\n');
+        var html = [];
+        var paragraph = [];
+        var i = 0;
 
+        function flushParagraph() {
+            if (!paragraph.length) return;
+            html.push('<p>' + renderInlineMarkdown(paragraph.join('\n')).replace(/\n/g, '<br>') + '</p>');
+            paragraph = [];
+        }
+
+        while (i < lines.length) {
+            var line = lines[i];
+            var trimmed = line.trim();
+
+            if (!trimmed) {
+                flushParagraph();
+                i++;
+                continue;
+            }
+
+            if (/^@@AI_CODE_BLOCK_\d+@@$/.test(trimmed)) {
+                flushParagraph();
+                html.push(trimmed);
+                i++;
+                continue;
+            }
+
+            if (/^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test((lines[i + 1] || '').trim()) && trimmed.indexOf('|') !== -1) {
+                flushParagraph();
+                var tableLines = [line, lines[i + 1]];
+                i += 2;
+                while (i < lines.length && lines[i].trim().indexOf('|') !== -1 && lines[i].trim()) {
+                    tableLines.push(lines[i]);
+                    i++;
+                }
+                html.push(renderTable(tableLines));
+                continue;
+            }
+
+            if (/^#{1,3}\s+/.test(trimmed)) {
+                flushParagraph();
+                var level = Math.min(trimmed.match(/^#+/)[0].length + 1, 4);
+                html.push('<h' + level + '>' + renderInlineMarkdown(trimmed.replace(/^#{1,3}\s+/, '')) + '</h' + level + '>');
+                i++;
+                continue;
+            }
+
+            if (/^>\s+/.test(trimmed)) {
+                flushParagraph();
+                var quoteLines = [];
+                while (i < lines.length && /^>\s+/.test(lines[i].trim())) {
+                    quoteLines.push(lines[i].trim().replace(/^>\s+/, ''));
+                    i++;
+                }
+                html.push('<blockquote>' + renderInlineMarkdown(quoteLines.join('\n')).replace(/\n/g, '<br>') + '</blockquote>');
+                continue;
+            }
+
+            if (/^[-*+]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed)) {
+                flushParagraph();
+                var ordered = /^\d+\.\s+/.test(trimmed);
+                var tag = ordered ? 'ol' : 'ul';
+                var items = [];
+                var itemPattern = ordered ? /^\d+\.\s+/ : /^[-*+]\s+/;
+                while (i < lines.length && itemPattern.test(lines[i].trim())) {
+                    items.push('<li>' + renderInlineMarkdown(lines[i].trim().replace(itemPattern, '')) + '</li>');
+                    i++;
+                }
+                html.push('<' + tag + '>' + items.join('') + '</' + tag + '>');
+                continue;
+            }
+
+            if (/^---+$/.test(trimmed)) {
+                flushParagraph();
+                html.push('<hr>');
+                i++;
+                continue;
+            }
+
+            paragraph.push(line);
+            i++;
+        }
+
+        flushParagraph();
+
+        return html.join('').replace(/@@AI_CODE_BLOCK_(\d+)@@/g, function (match, index) {
+            return codeBlocks[Number(index)] || '';
+        });
+    }
+
+    function renderInlineMarkdown(text) {
+        var inlineCode = [];
+        var source = String(text).replace(/`([^`]+)`/g, function (match, code) {
+            var index = inlineCode.length;
+            inlineCode.push('<code>' + escapeHtml(code) + '</code>');
+            return '@@AI_INLINE_CODE_' + index + '@@';
+        });
+
+        var escaped = escapeHtml(source);
+
+        escaped = escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g, function (match, label, href) {
+            return '<a href="' + escapeAttribute(href) + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
+        });
         escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        escaped = escaped.replace(/\*(.+?)\*/g, '<em>$1</em>');
+        escaped = escaped.replace(/(^|\s)\*(\S[^*]*?)\*(?=\s|$)/g, '$1<em>$2</em>');
 
-        escaped = escaped.replace(/^### (.+)$/gm, '<h4>$1</h4>');
-        escaped = escaped.replace(/^## (.+)$/gm, '<h3>$1</h3>');
-        escaped = escaped.replace(/^# (.+)$/gm, '<h2>$1</h2>');
+        return escaped.replace(/@@AI_INLINE_CODE_(\d+)@@/g, function (match, index) {
+            return inlineCode[Number(index)] || '';
+        });
+    }
 
-        escaped = escaped.replace(/^- (.+)/gm, '<li>$1</li>');
+    function splitTableRow(line) {
+        return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(function (cell) {
+            return cell.trim();
+        });
+    }
 
-        escaped = escaped.replace(/\n/g, '<br>');
+    function renderTable(lines) {
+        var headers = splitTableRow(lines[0]);
+        var rows = lines.slice(2).map(splitTableRow);
+        var html = '<div class="ai-table-wrap"><table><thead><tr>';
 
-        return escaped;
+        headers.forEach(function (header) {
+            html += '<th>' + renderInlineMarkdown(header) + '</th>';
+        });
+
+        html += '</tr></thead><tbody>';
+        rows.forEach(function (row) {
+            html += '<tr>';
+            headers.forEach(function (header, index) {
+                html += '<td>' + renderInlineMarkdown(row[index] || '') + '</td>';
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+
+        return html;
     }
 
     function svgIcon(name) {
@@ -311,6 +452,7 @@
         var shadowColor = isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.08)';
         var inputBg = isDark ? '#1e293b' : '#f9fafb';
         var surfaceColor = isDark ? '#1e293b' : '#ffffff';
+        var panelColor = isDark ? '#111827' : '#ffffff';
         var mutedColor = isDark ? '#64748b' : '#9ca3af';
         var textSecondary = isDark ? '#94a3b8' : '#6b7280';
         var borderLight = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
@@ -327,6 +469,8 @@
             '  --ai-primary-rgb: ' + hexToRgb(primary) + ';',
             '  --ai-bg: ' + bg + ';',
             '  --ai-bg-rgb: ' + hexToRgb(bg) + ';',
+            '  --ai-surface: ' + surfaceColor + ';',
+            '  --ai-panel: ' + panelColor + ';',
             '  --ai-text: ' + text + ';',
             '  --ai-text-secondary: ' + textSecondary + ';',
             '  --ai-text-muted: ' + mutedColor + ';',
@@ -344,13 +488,14 @@
             '  --ai-transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);',
             '  --ai-transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);',
             '  font-family: var(--ai-font);',
+            '  color-scheme: ' + (isDark ? 'dark' : 'light') + ';',
             '}',
             '',
             '/* ===== LAUNCHER ===== */',
             '.ai-chat-bubble {',
             '  position: fixed; z-index: var(--ai-z-index) !important;',
             '  width: var(--ai-launcher-size); height: var(--ai-launcher-size); border-radius: 50%;',
-            '  background: ' + headerBg + ';',
+            '  background: linear-gradient(135deg, color-mix(in srgb, ' + headerBg + ' 88%, white), ' + headerBg + ' 55%, color-mix(in srgb, ' + headerBg + ' 82%, #111827));',
             '  color: #fff; cursor: pointer;',
             '  display: flex; align-items: center; justify-content: center;',
             '  box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 8px 32px ' + primary + '33;',
@@ -385,6 +530,7 @@
             '  transform: scale(1.05);',
             '  box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 12px 40px ' + primary + '44;',
             '}',
+            '.ai-chat-bubble:focus-visible { outline: 3px solid rgba(var(--ai-primary-rgb), 0.35); outline-offset: 4px; }',
             '',
             '.ai-chat-bubble:active { transform: scale(0.92); }',
             '',
@@ -439,9 +585,10 @@
             '  position: fixed; z-index: calc(var(--ai-z-index) + 1) !important;',
             '  width: var(--ai-widget-width); height: var(--ai-widget-height);',
             '  max-height: 85vh; max-width: calc(100vw - 32px);',
-            '  background: ' + bg + ';',
+            '  background: var(--ai-panel);',
             '  border-radius: var(--ai-radius);',
-            '  box-shadow: 0 0 0 1px ' + borderLight + ', 0 1px 4px ' + shadowColor + ', 0 16px 48px ' + shadowColor + ';',
+            '  border: 1px solid ' + (isDark ? 'rgba(148,163,184,0.14)' : 'rgba(15,23,42,0.08)') + ';',
+            '  box-shadow: 0 0 0 1px ' + borderLight + ', 0 18px 60px ' + shadowColor + ', 0 6px 20px rgba(15,23,42,0.10);',
             '  display: flex; flex-direction: column;',
             '  font-size: 14px; color: var(--ai-text);',
             '  transition: opacity 0.2s ease, transform 0.25s ease;',
@@ -482,7 +629,7 @@
             '/* ===== HEADER ===== */',
             '.ai-chat-header {',
             '  padding: 14px 16px;',
-            '  background: ' + headerBg + ';',
+            '  background: linear-gradient(135deg, color-mix(in srgb, ' + headerBg + ' 88%, white), ' + headerBg + ' 58%, color-mix(in srgb, ' + headerBg + ' 82%, #0f172a));',
             '  color: #fff; display: flex; align-items: center;',
             '  justify-content: space-between; flex-shrink: 0;',
             '  position: relative;',
@@ -586,10 +733,11 @@
             '',
             '/* ===== MORE DROPDOWN ===== */',
             '.ai-chat-more-wrap { position: relative; }',
-            '.ai-chat-more-menu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 200px; background: var(--ai-bg); border: 1px solid var(--ai-border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.06); padding: 6px; z-index: 2147483002 !important; opacity: 0; transform: translateY(-4px) scale(0.96); pointer-events: none; transition: opacity 0.15s ease, transform 0.15s ease; }',
-            '.ai-chat-more-menu.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }',
+            '.ai-chat-more-menu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 200px; background: var(--ai-panel); border: 1px solid var(--ai-border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.06); padding: 6px; z-index: 2147483002 !important; opacity: 0; visibility: hidden; transform: translateY(-4px) scale(0.96); pointer-events: none; transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease; }',
+            '.ai-chat-more-menu.open { opacity: 1; visibility: visible; transform: translateY(0) scale(1); pointer-events: auto; }',
             '.ai-chat-more-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--ai-text); background: transparent; border: none; width: 100%; text-align: left; transition: background 0.1s ease; font-family: inherit; }',
             '.ai-chat-more-item:hover { background: rgba(var(--ai-primary-rgb), 0.08); color: var(--ai-primary); }',
+            '.ai-chat-more-item:focus-visible { outline: 2px solid var(--ai-primary); outline-offset: 2px; }',
             '.ai-chat-more-item svg { flex-shrink: 0; width: 16px; height: 16px; }',
             '.ai-chat-more-divider { height: 1px; background: var(--ai-border); margin: 4px 8px; }',
 ':host-context([dir="rtl"]) .ai-chat-more-menu, [dir="rtl"] .ai-chat-more-menu { right: auto; left: 0; }',
@@ -598,7 +746,7 @@
             '/* ===== CONFIRM OVERLAY ===== */',
             '.ai-confirm-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 2147483003 !important; border-radius: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }',
             '.ai-confirm-overlay.open { opacity: 1; pointer-events: auto; }',
-            '.ai-confirm-box { background: var(--ai-bg); border-radius: 14px; padding: 20px 24px; max-width: 260px; box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 0 1px var(--ai-border); text-align: center; }',
+            '.ai-confirm-box { background: var(--ai-panel); border-radius: 14px; padding: 20px 24px; max-width: 260px; box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 0 1px var(--ai-border); text-align: center; }',
             '.ai-confirm-text { font-size: 14px; color: var(--ai-text); margin-bottom: 16px; line-height: 1.5; }',
             '.ai-confirm-actions { display: flex; gap: 8px; justify-content: center; }',
             '.ai-confirm-btn { padding: 7px 18px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.12s; font-family: inherit; }',
@@ -612,7 +760,7 @@
             '  flex: 1; overflow-y: auto; padding: 20px 20px 24px;',
             '  display: flex; flex-direction: column; gap: 14px;',
             '  scroll-behavior: smooth;',
-            '  background: ' + bg + ';',
+            '  background: radial-gradient(circle at top, rgba(var(--ai-primary-rgb), 0.07), transparent 34%), ' + bg + ';',
             '}',
             '',
             '.ai-chat-messages::-webkit-scrollbar { width: 4px; }',
@@ -626,7 +774,7 @@
             '',
             '/* ===== MESSAGE BUBBLES ===== */',
             '.ai-msg {',
-            '  max-width: 85%; display: flex; flex-direction: column;',
+            '  max-width: 86%; display: flex; flex-direction: column;',
             '  animation: ai-msg-in 0.25s ease-out;',
             '  position: relative;',
             '}',
@@ -641,8 +789,9 @@
             '',
             '.ai-msg-bubble {',
             '  padding: 10px 16px; border-radius: 18px; line-height: 1.6;',
-            '  word-wrap: break-word; position: relative;',
+            '  word-wrap: break-word; overflow-wrap: anywhere; position: relative;',
             '  font-size: 14px;',
+            '  text-align: start;',
             '}',
             '',
             '.ai-msg-user .ai-msg-bubble {',
@@ -658,12 +807,21 @@
             '}',
             '',
             '.ai-msg-bubble li {',
-            '  margin-left: 16px; padding: 1px 0;',
+            '  margin-left: 18px; padding: 2px 0;',
             '}',
             '',
-            '.ai-msg-bubble p { margin: 6px 0; }',
+            '.ai-msg-bubble p { margin: 8px 0; }',
             '.ai-msg-bubble p:first-child { margin-top: 0; }',
             '.ai-msg-bubble p:last-child { margin-bottom: 0; }',
+            '.ai-msg-bubble ul, .ai-msg-bubble ol { margin: 8px 0; padding: 0; }',
+            '.ai-msg-bubble blockquote { margin: 10px 0; padding: 8px 12px; border-inline-start: 3px solid var(--ai-primary); background: rgba(var(--ai-primary-rgb), 0.08); border-radius: 8px; color: var(--ai-text-secondary); }',
+            '.ai-msg-bubble hr { border: 0; border-top: 1px solid var(--ai-border); margin: 12px 0; }',
+            '.ai-msg-bubble a { color: var(--ai-primary); text-decoration: underline; text-underline-offset: 2px; }',
+            '.ai-table-wrap { margin: 10px 0; max-width: 100%; overflow-x: auto; border: 1px solid var(--ai-border); border-radius: 10px; background: ' + (isDark ? '#0f172a' : '#fff') + '; }',
+            '.ai-msg-bubble table { width: 100%; min-width: 260px; border-collapse: collapse; font-size: 13px; }',
+            '.ai-msg-bubble th, .ai-msg-bubble td { padding: 8px 10px; border-bottom: 1px solid var(--ai-border); text-align: start; vertical-align: top; }',
+            '.ai-msg-bubble th { font-weight: 700; color: var(--ai-text); background: rgba(var(--ai-primary-rgb), 0.08); }',
+            '.ai-msg-bubble tr:last-child td { border-bottom: 0; }',
             '',
             '.ai-msg-bubble pre {',
             '  background: ' + (isDark ? '#0f172a' : '#e2e8f0') + ';',
@@ -671,6 +829,7 @@
             '  margin: 8px 0; font-size: 13px; line-height: 1.5;',
             '  border: 1px solid ' + (isDark ? '#1e293b' : '#e2e8f0') + ';',
             '}',
+            '.ai-msg-bubble pre code { white-space: pre; }',
             '',
             '.ai-msg-bubble code {',
             '  font-family: var(--ai-font-mono); font-size: 13px;',
@@ -686,6 +845,7 @@
             '  border-radius: var(--ai-radius-xs); overflow: hidden;',
             '  border: 1px solid ' + (isDark ? '#1e293b' : '#d1d5db') + ';',
             '}',
+            '.ai-code-block pre { margin: 0; border: 0; border-radius: 0; }',
             '',
             '.ai-code-lang {',
             '  display: block; padding: 6px 12px; font-size: 11px;',
@@ -741,6 +901,8 @@
             '.ai-msg-action-btn.active { opacity: 1 !important; color: ' + primary + '; }',
             '.ai-msg-action-btn.copied { opacity: 1 !important; color: #22c55e; }',
             '.ai-msg-action-btn:focus-visible { outline: 2px solid ' + primary + '; outline-offset: 2px; opacity: 1; }',
+            '.ai-msg-streaming .ai-msg-action-btn { display: none; }',
+            '@media (hover: none) { .ai-msg-action-btn { opacity: 0.7; } }',
             '',
             '.ai-msg-feedback {',
             '  display: inline-flex; align-items: center; gap: 1px;',
@@ -883,7 +1045,7 @@
             '/* ===== INPUT AREA ===== */',
             '.ai-chat-input-container {',
             '  padding: 12px 16px 12px; border-top: 1px solid var(--ai-border);',
-            '  background: ' + bg + '; flex-shrink: 0;',
+            '  background: var(--ai-panel); flex-shrink: 0;',
             '}',
             '',
             '.ai-chat-input-row {',
@@ -909,7 +1071,7 @@
             '',
             '.ai-chat-send {',
             '  width: 42px; height: 42px; border-radius: 12px;',
-            '  background: var(--ai-primary); color: #fff; border: none; cursor: pointer;',
+            '  background: linear-gradient(135deg, var(--ai-primary), color-mix(in srgb, var(--ai-primary) 82%, #0f172a)); color: #fff; border: none; cursor: pointer;',
             '  display: flex; align-items: center; justify-content: center;',
             '  font-size: 18px; flex-shrink: 0;',
             '  transition: opacity 0.15s ease, background 0.15s ease;',
@@ -931,7 +1093,7 @@
             '.ai-chat-stop-btn {',
             '  align-self: center; margin-bottom: 8px;',
             '  padding: 6px 14px; border-radius: 8px;',
-            '  border: 1px solid var(--ai-border); background: ' + bg + ';',
+            '  border: 1px solid var(--ai-border); background: var(--ai-panel);',
             '  color: var(--ai-text-secondary); cursor: pointer; font-size: 12px; font-weight: 500;',
             '  display: flex; align-items: center; gap: 6px;',
             '  transition: all 0.15s ease; animation: ai-fade-in-up 0.15s ease-out;',
@@ -1128,7 +1290,7 @@
             '}',
             '.ai-settings-overlay.open { opacity: 1; pointer-events: auto; }',
             '.ai-settings-panel {',
-            '  background: var(--ai-bg); border-radius: 14px;',
+            '  background: var(--ai-panel); border-radius: 14px;',
             '  width: calc(100% - 32px); max-width: 300px;',
             '  box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 0 1px var(--ai-border);',
             '  overflow: hidden;',
@@ -1258,7 +1420,7 @@
             var currentPos = 'pos-' + config.position;
             var newPos = isRtl ? swapPosition(currentPos) : currentPos;
             bubble.className = bubble.className.replace(/pos-\S+/g, newPos);
-            bubble.setAttribute('aria-label', isRtl ? __('closeChat', 'Close chat') : (STATE.isOpen ? __('closeChat', 'Close chat') : __('openChat', 'Open chat')));
+            bubble.setAttribute('aria-label', STATE.isOpen ? __('closeChat', 'Close chat') : __('openChat', 'Open chat'));
         }
 
         if (!windowEl) return;
@@ -1346,7 +1508,7 @@
         var textarea = windowEl.querySelector('.ai-chat-textarea');
         if (textarea) {
             textarea.setAttribute('placeholder', __('inputPlaceholder', 'Type a message...'));
-            textarea.setAttribute('aria-label', __('sendMessage', 'Chat message'));
+            textarea.setAttribute('aria-label', __('inputLabel', 'Chat message'));
             textarea.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
         }
 
@@ -1386,6 +1548,14 @@
         var settingsPanel = windowEl.querySelector('.ai-settings-overlay');
         if (settingsPanel && settingsPanel.classList.contains('open')) {
             updateSettingsPanel();
+        }
+    }
+
+    function refreshEmptyState() {
+        if (!windowEl) return;
+        var messagesEl = windowEl.querySelector('.ai-chat-messages');
+        if (messagesEl && messagesEl.querySelector('.ai-empty-state')) {
+            showEmptyState();
         }
     }
 
@@ -1662,7 +1832,7 @@
             '    <button class="ai-chat-header-btn ai-chat-lang-btn" title="' + __('toggleLanguage', 'Switch language') + '" aria-label="' + __('toggleLanguage', 'Switch language') + '">' + (currentLang === 'ar' ? svgIcon('globeAr') : svgIcon('globe')) + '<span class="ai-chat-header-lang">' + (currentLang === 'ar' ? 'EN' : 'ع') + '</span></button>',
             '    <div class="ai-chat-more-wrap">',
             '      <button class="ai-chat-header-btn ai-chat-more-btn" title="' + __('moreOptions', 'More options') + '" aria-label="' + __('moreOptions', 'More options') + '" aria-haspopup="true" aria-expanded="false">' + svgIcon('more') + '</button>',
-            '      <div class="ai-chat-more-menu" role="menu">',
+            '      <div class="ai-chat-more-menu" role="menu" aria-hidden="true">',
             '        <button class="ai-chat-more-item" data-action="new" role="menuitem">' + svgIcon('newChat') + '<span>' + __('newConversation', 'New conversation') + '</span></button>',
             '        <button class="ai-chat-more-item" data-action="lang" role="menuitem">' + (currentLang === 'ar' ? svgIcon('globeAr') : svgIcon('globe')) + '<span>' + __('toggleLanguage', 'English') + '</span></button>',
             '        <div class="ai-chat-more-divider"></div>',
@@ -1681,7 +1851,7 @@
             '<div class="ai-chat-messages" role="log" aria-live="polite" aria-label="' + __('chatMessages', 'Chat messages') + '"></div>',
             '<div class="ai-chat-input-container">',
             '  <div class="ai-chat-input-row">',
-            '    <textarea class="ai-chat-textarea" rows="1" placeholder="' + inputPlaceholder + '" aria-label="' + __('sendMessage', 'Chat message') + '" enterkeyhint="send"></textarea>',
+            '    <textarea class="ai-chat-textarea" rows="1" placeholder="' + inputPlaceholder + '" aria-label="' + __('inputLabel', 'Chat message') + '" enterkeyhint="send"></textarea>',
             '    <button class="ai-chat-send" disabled aria-label="' + __('sendMessage', 'Send message') + '"></button>',
             '  </div>',
             '</div>',
@@ -1752,6 +1922,7 @@
         function closeMoreMenu() {
             if (moreMenu) {
                 moreMenu.classList.remove('open');
+                moreMenu.setAttribute('aria-hidden', 'true');
                 if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
             }
         }
@@ -1761,6 +1932,7 @@
                 e.stopPropagation();
                 var isOpen = moreMenu.classList.contains('open');
                 moreMenu.classList.toggle('open');
+                moreMenu.setAttribute('aria-hidden', String(isOpen));
                 moreBtn.setAttribute('aria-expanded', String(!isOpen));
             });
 
@@ -1879,7 +2051,8 @@
         var btn = windowEl.querySelector('.ai-chat-fullscreen-btn');
         if (btn) {
             btn.innerHTML = STATE.isFullscreen ? svgIcon('minimize2') : svgIcon('maximize');
-            btn.title = STATE.isFullscreen ? 'Exit fullscreen' : 'Toggle fullscreen';
+            btn.title = STATE.isFullscreen ? __('exitFullscreen', 'Exit fullscreen') : __('fullscreen', 'Toggle fullscreen');
+            btn.setAttribute('aria-label', btn.title);
         }
         var fsItem = windowEl.querySelector('.ai-chat-more-item[data-action="fullscreen"]');
         if (fsItem) {
@@ -1904,11 +2077,11 @@
         var metaHtml = '<div class="ai-msg-meta"><span class="ai-msg-time">' + time + '</span>';
 
         if (role === 'assistant') {
-            metaHtml += '<button class="ai-msg-action-btn ai-msg-copy" title="Copy reply" aria-label="Copy reply">' + svgIcon('copy') + '</button>';
-            if (config.showFeedback) {
+            metaHtml += '<button class="ai-msg-action-btn ai-msg-copy" title="' + escapeAttribute(__('copyReply', 'Copy reply')) + '" aria-label="' + escapeAttribute(__('copyReply', 'Copy reply')) + '">' + svgIcon('copy') + '</button>';
+            if (config.showFeedback && id) {
                 metaHtml += '<span class="ai-msg-feedback">';
-                metaHtml += '<button class="ai-msg-action-btn ai-msg-upvote" title="Helpful" aria-label="Mark as helpful">' + svgIcon('thumbsUp') + '</button>';
-                metaHtml += '<button class="ai-msg-action-btn ai-msg-downvote" title="Not helpful" aria-label="Mark as not helpful">' + svgIcon('thumbsDown') + '</button>';
+                metaHtml += '<button class="ai-msg-action-btn ai-msg-upvote" title="' + escapeAttribute(__('helpful', 'Helpful')) + '" aria-label="' + escapeAttribute(__('helpful', 'Helpful')) + '">' + svgIcon('thumbsUp') + '</button>';
+                metaHtml += '<button class="ai-msg-action-btn ai-msg-downvote" title="' + escapeAttribute(__('notHelpful', 'Not helpful')) + '" aria-label="' + escapeAttribute(__('notHelpful', 'Not helpful')) + '">' + svgIcon('thumbsDown') + '</button>';
                 metaHtml += '</span>';
             }
         }
@@ -1918,40 +2091,52 @@
         msg.innerHTML = bubbleHtml + metaHtml;
         messagesEl.appendChild(msg);
 
+        bindAssistantActions(msg, content);
+
+        attachCodeCopyListeners(msg);
+
+        scrollToBottom();
+        return msg;
+    }
+
+    function bindAssistantActions(msg, content) {
         var copyBtn = msg.querySelector('.ai-msg-copy');
         if (copyBtn) {
-            copyBtn.addEventListener('click', function () {
-                copyToClipboard(content, copyBtn);
+            var freshCopyBtn = copyBtn.cloneNode(true);
+            copyBtn.parentNode.replaceChild(freshCopyBtn, copyBtn);
+            freshCopyBtn.addEventListener('click', function () {
+                copyToClipboard(content, freshCopyBtn);
             });
         }
 
         var upvoteBtn = msg.querySelector('.ai-msg-upvote');
         var downvoteBtn = msg.querySelector('.ai-msg-downvote');
         if (upvoteBtn && downvoteBtn) {
-            upvoteBtn.addEventListener('click', function () {
-                if (upvoteBtn.classList.contains('active')) {
-                    upvoteBtn.classList.remove('active');
+            var freshUpvoteBtn = upvoteBtn.cloneNode(true);
+            var freshDownvoteBtn = downvoteBtn.cloneNode(true);
+            upvoteBtn.parentNode.replaceChild(freshUpvoteBtn, upvoteBtn);
+            downvoteBtn.parentNode.replaceChild(freshDownvoteBtn, downvoteBtn);
+
+            freshUpvoteBtn.addEventListener('click', function () {
+                if (freshUpvoteBtn.classList.contains('active')) {
+                    freshUpvoteBtn.classList.remove('active');
                 } else {
-                    upvoteBtn.classList.add('active');
-                    downvoteBtn.classList.remove('active');
-                    submitFeedback(content, 'helpful');
+                    freshUpvoteBtn.classList.add('active');
+                    freshDownvoteBtn.classList.remove('active');
+                    submitFeedback(msg.dataset.messageId, 'helpful');
                 }
             });
-            downvoteBtn.addEventListener('click', function () {
-                if (downvoteBtn.classList.contains('active')) {
-                    downvoteBtn.classList.remove('active');
+
+            freshDownvoteBtn.addEventListener('click', function () {
+                if (freshDownvoteBtn.classList.contains('active')) {
+                    freshDownvoteBtn.classList.remove('active');
                 } else {
-                    downvoteBtn.classList.add('active');
-                    upvoteBtn.classList.remove('active');
-                    submitFeedback(content, 'not_helpful');
+                    freshDownvoteBtn.classList.add('active');
+                    freshUpvoteBtn.classList.remove('active');
+                    submitFeedback(msg.dataset.messageId, 'not_helpful');
                 }
             });
         }
-
-        attachCodeCopyListeners(msg);
-
-        scrollToBottom();
-        return msg;
     }
 
     function attachCodeCopyListeners(container) {
@@ -2008,10 +2193,11 @@
     function showEmptyState() {
         var messagesEl = windowEl.querySelector('.ai-chat-messages');
         var welcomeMsg = currentLang === 'ar' ? __('welcomeMessage', config.welcomeMessage) : config.welcomeMessage;
+        var titleText = currentLang === 'ar' ? __('aiTitle', config.title) : config.title;
         var html = [
             '<div class="ai-empty-state">',
             '  <div class="ai-empty-icon">' + svgIcon('sparkles') + '</div>',
-            '  <div class="ai-empty-title">' + escapeHtml(config.title) + '</div>',
+            '  <div class="ai-empty-title">' + escapeHtml(titleText) + '</div>',
             '  <div class="ai-empty-desc">' + escapeHtml(welcomeMsg) + '</div>',
         ].join('\n');
 
@@ -2054,7 +2240,7 @@
         var closeBtn = document.createElement('button');
         closeBtn.innerHTML = svgIcon('close');
         closeBtn.style.cssText = 'background:none;border:none;cursor:pointer;color:inherit;flex-shrink:0;padding:2px;opacity:0.6;';
-        closeBtn.setAttribute('aria-label', 'Dismiss error');
+        closeBtn.setAttribute('aria-label', __('dismissError', 'Dismiss error'));
 
         var span = document.createElement('span');
         span.textContent = message;
@@ -2064,7 +2250,8 @@
         if (typeof retryFn === 'function') {
             var retryBtn = document.createElement('button');
             retryBtn.className = 'ai-error-retry';
-            retryBtn.innerHTML = svgIcon('refresh') + ' Retry';
+            retryBtn.innerHTML = svgIcon('refresh') + ' ' + __('retry', 'Retry');
+            retryBtn.setAttribute('type', 'button');
             retryBtn.addEventListener('click', function () {
                 err.remove();
                 retryFn();
@@ -2129,16 +2316,13 @@
         }, 2000);
     }
 
-    function submitFeedback(content, type) {
-        if (!config.apiBaseUrl) return;
+    function submitFeedback(messageId, type) {
+        if (!config.apiBaseUrl || !messageId) return;
         var body = {
-            message: content,
-            feedback_type: type,
-            session_id: getSessionId(),
+            message_id: messageId,
+            rating: type === 'helpful' ? 5 : 1,
+            comment: null,
         };
-        if (STATE.currentConversationId) {
-            body.conversation_id = STATE.currentConversationId;
-        }
         fetch(config.apiBaseUrl + '/feedback', {
             method: 'POST',
             headers: {
@@ -2172,7 +2356,7 @@
             messagesEl.innerHTML = '';
             for (var i = 0; i < stored.length; i++) {
                 var sm = stored[i];
-                appendMessage(sm.role, sm.content, sm.timestamp || null);
+                appendMessage(sm.role, sm.content, sm.timestamp || null, sm.id || null);
             }
             scrollToBottom();
 
@@ -2194,19 +2378,11 @@
                     return response.json();
                 }).then(function (data) {
                     if (!data) return;
-                    var conversation = data.data || data;
-                    var msgList = conversation.messages || [];
-                    if (msgList.length > STATE.messages.length && msgList.length > 0) {
-                        STATE.messages = [];
-                        messagesEl.innerHTML = '';
-                        for (var j = 0; j < msgList.length; j++) {
-                            var m = msgList[j];
-                            var role = m.role === 'user' ? 'user' : 'assistant';
-                            appendMessage(role, m.content, m.created_at, m.id);
-                            STATE.messages.push({ role: role, content: m.content, timestamp: m.created_at });
-                        }
-                        saveMessages();
-                        scrollToBottom();
+                    var payload = data.data || data;
+                    var msgList = payload.messages || (payload.conversation && payload.conversation.messages) || [];
+                    var missingIds = STATE.messages.some(function (message) { return !message.id; });
+                    if (msgList.length > 0 && (msgList.length !== STATE.messages.length || missingIds)) {
+                        renderServerMessages(msgList);
                     }
                 }).catch(function () {});
             }
@@ -2245,8 +2421,8 @@
                 showEmptyState();
                 return;
             }
-            var conversation = data.data || data;
-            var msgList = conversation.messages || [];
+            var payload = data.data || data;
+            var msgList = payload.messages || (payload.conversation && payload.conversation.messages) || [];
             messagesEl.innerHTML = '';
 
             if (msgList.length === 0) {
@@ -2254,14 +2430,7 @@
                 return;
             }
 
-            for (var i = 0; i < msgList.length; i++) {
-                var m = msgList[i];
-                var role = m.role === 'user' ? 'user' : 'assistant';
-                appendMessage(role, m.content, m.created_at, m.id);
-                STATE.messages.push({ role: role, content: m.content, timestamp: m.created_at });
-            }
-            saveMessages();
-            scrollToBottom();
+            renderServerMessages(msgList);
         }).catch(function (error) {
             skeleton.remove();
             console.error('[AIChatWidget] Failed to load conversation:', error);
@@ -2270,6 +2439,47 @@
             clearStoredMessages();
             showEmptyState();
         });
+    }
+
+    function syncConversationMessages(attempt) {
+        if (!config.apiBaseUrl || !STATE.currentConversationId) return;
+        attempt = attempt || 0;
+
+        fetch(config.apiBaseUrl + '/conversations/' + encodeURIComponent(STATE.currentConversationId) + '?session_id=' + encodeURIComponent(getSessionId()), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        }).then(function (response) {
+            if (!response.ok) return null;
+            return response.json();
+        }).then(function (data) {
+            if (!data) return;
+            var conversation = data.data || data;
+            var msgList = conversation.messages || [];
+            if (msgList.length >= STATE.messages.length && msgList.length > 0) {
+                renderServerMessages(msgList);
+            } else if (attempt < 5) {
+                setTimeout(function () { syncConversationMessages(attempt + 1); }, 800);
+            }
+        }).catch(function () {});
+    }
+
+    function renderServerMessages(msgList) {
+        var messagesEl = windowEl.querySelector('.ai-chat-messages');
+        STATE.messages = [];
+        messagesEl.innerHTML = '';
+
+        for (var i = 0; i < msgList.length; i++) {
+            var m = msgList[i];
+            var role = m.role === 'user' ? 'user' : 'assistant';
+            appendMessage(role, m.content, m.created_at, m.id);
+            STATE.messages.push({ id: m.id, role: role, content: m.content, timestamp: m.created_at });
+        }
+
+        saveMessages();
+        scrollToBottom();
     }
 
     function resetConversation() {
@@ -2370,6 +2580,23 @@
         sendMessage();
     }
 
+    function removeLastUserMessage(content) {
+        for (var i = STATE.messages.length - 1; i >= 0; i--) {
+            if (STATE.messages[i].role === 'user' && STATE.messages[i].content === content) {
+                STATE.messages.splice(i, 1);
+                saveMessages();
+                break;
+            }
+        }
+
+        var messagesEl = windowEl.querySelector('.ai-chat-messages');
+        var userMessages = messagesEl.querySelectorAll('.ai-msg-user');
+        var lastUserEl = userMessages[userMessages.length - 1];
+        if (lastUserEl) {
+            lastUserEl.remove();
+        }
+    }
+
     function sendMessage() {
         var textarea = windowEl.querySelector('.ai-chat-textarea');
         var message = textarea.value.trim();
@@ -2399,7 +2626,6 @@
         }
 
         var lastMessageContent = '';
-        var assistantMsgEl = null;
         var thinkingEl = null;
         var stopBtn = null;
 
@@ -2416,8 +2642,15 @@
             signal: abortController.signal,
         }).then(function (response) {
             if (!response.ok) {
-                return response.json().then(function (data) {
-                    throw new Error(data.message || data.data?.message || 'Request failed: ' + response.status);
+                return response.text().then(function (rawBody) {
+                    var data = {};
+                    try {
+                        data = rawBody ? JSON.parse(rawBody) : {};
+                    } catch (e) {}
+
+                    var isHtml = rawBody && rawBody.trim().charAt(0) === '<';
+                    var message = data.message || (data.data && data.data.message) || (!isHtml && rawBody) || 'Request failed: ' + response.status;
+                    throw new Error(message);
                 });
             }
 
@@ -2446,6 +2679,7 @@
                 if (typeof config.onMessage === 'function') {
                     config.onMessage({ role: 'assistant', content: reply });
                 }
+                setTimeout(syncConversationMessages, 500);
             });
         }).catch(function (error) {
             if (error.name === 'AbortError') {
@@ -2459,8 +2693,8 @@
             var lastMsg = STATE.messages[STATE.messages.length - 1];
             if (lastMsg && lastMsg.role === 'user') {
                 showError(error.message || 'Failed to send message', function () {
-                    STATE.messages.pop();
-                    sendMessage();
+                    removeLastUserMessage(message);
+                    sendTextMessage(message);
                 });
             } else {
                 showError(error.message || 'Failed to send message', sendMessage);
@@ -2478,7 +2712,7 @@
             if (inputContainer && !inputContainer.querySelector('.ai-chat-stop-btn')) {
                 stopBtn = document.createElement('button');
                 stopBtn.className = 'ai-chat-stop-btn';
-                stopBtn.innerHTML = svgIcon('stop') + ' Stop generating';
+                stopBtn.innerHTML = svgIcon('stop') + ' ' + __('stopGenerating', 'Stop generating');
                 stopBtn.setAttribute('type', 'button');
                 stopBtn.addEventListener('click', function () {
                     if (abortController) {
@@ -2508,7 +2742,6 @@
             var decoder = new TextDecoder();
             var buffer = '';
             var currentEvent = '';
-            var hasContent = false;
             var finalizing = false;
 
             thinkingEl = appendThinkingIndicator();
@@ -2590,7 +2823,6 @@
                         if (parsed.type === 'text_delta' || parsed.type === 'text_start') {
                             var delta = parsed.delta || parsed.content || '';
                             if (delta) {
-                                hasContent = true;
                                 fullText += delta;
                                 lastMessageContent = fullText;
                                 if (thinkingEl) {
@@ -2628,7 +2860,6 @@
             }
 
                         if (parsed.text !== undefined) {
-                            hasContent = true;
                             fullText += parsed.text;
                             lastMessageContent = fullText;
                             if (thinkingEl) {
@@ -2640,7 +2871,6 @@
                         }
 
                         if (parsed.content !== undefined && !parsed.type) {
-                            hasContent = true;
                             fullText += parsed.content;
                             lastMessageContent = fullText;
                             if (thinkingEl) {
@@ -2651,7 +2881,6 @@
                         }
                     } catch (e) {
                         if (data && !data.startsWith('{') && !data.startsWith('[')) {
-                            hasContent = true;
                             fullText += data;
                             lastMessageContent = fullText;
                             updateLastAssistantMessage(fullText, true);
@@ -2676,6 +2905,7 @@
                     if (typeof config.onMessage === 'function') {
                         config.onMessage({ role: 'assistant', content: text });
                     }
+                    setTimeout(syncConversationMessages, 500);
                 }
                 setLoading(false);
             }
@@ -2690,6 +2920,7 @@
         if (!lastMsg) {
             lastMsg = appendMessage('assistant', '');
         }
+        lastMsg.classList.toggle('ai-msg-streaming', isStreaming);
         var bubble = lastMsg.querySelector('.ai-msg-bubble');
         if (!bubble) {
             bubble = document.createElement('div');
@@ -2719,15 +2950,13 @@
                 if (meta) {
                     var copyBtn = document.createElement('button');
                     copyBtn.className = 'ai-msg-action-btn ai-msg-copy';
-                    copyBtn.title = 'Copy reply';
-                    copyBtn.setAttribute('aria-label', 'Copy reply');
+                    copyBtn.title = __('copyReply', 'Copy reply');
+                    copyBtn.setAttribute('aria-label', __('copyReply', 'Copy reply'));
                     copyBtn.innerHTML = svgIcon('copy');
-                    copyBtn.addEventListener('click', function () {
-                        copyToClipboard(content, copyBtn);
-                    });
                     meta.insertBefore(copyBtn, meta.querySelector('.ai-msg-feedback'));
                 }
             }
+            bindAssistantActions(lastMsg, content);
         }
 
         var metaEl = lastMsg.querySelector('.ai-msg-meta');
@@ -2760,7 +2989,9 @@
 
         var storedLang = getStoredLanguage();
         var docLang = document.documentElement.getAttribute('lang') || '';
-        currentLang = storedLang || (docLang.startsWith('ar') ? 'ar' : 'ar');
+        currentLang = storedLang || (config.language === 'ar' || config.language === 'en'
+            ? config.language
+            : (docLang.startsWith('ar') ? 'ar' : 'en'));
         isRtl = currentLang === 'ar';
 
         var storedTheme = getStoredTheme();

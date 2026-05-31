@@ -7,7 +7,6 @@ use AiChat\Chat\HistorySelector;
 use AiChat\Contracts\HasProviderOptions;
 use AiChat\MCP\ToolAdapter;
 use AiChat\MCP\ToolRegistry;
-use AiChat\Middleware\ManageAnonymousConversation;
 use AiChat\Pipeline\ExecutionPlan;
 use AiChat\Storage\AnonymousConversationStore;
 use AiChat\Support\ArabicTextNormalizer;
@@ -27,7 +26,7 @@ use Laravel\Ai\Promptable;
 use Stringable;
 
 #[Provider('glm')]
-#[Model('glm-5.1')]
+#[Model('glm-4.5-flash')]
 #[MaxTokens(65536)]
 #[Temperature(1.0)]
 #[Timeout(300)]
@@ -54,6 +53,8 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
     protected ?string $storedContext = null;
 
     protected bool $contextPrepared = false;
+
+    protected array $toolContextPayload = [];
 
     public function __construct(?string $systemPrompt = null)
     {
@@ -114,6 +115,13 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
     public function withCurrentMessage(string $message): static
     {
         $this->currentMessage = $message;
+
+        return $this;
+    }
+
+    public function withToolContextPayload(array $payload): static
+    {
+        $this->toolContextPayload = $payload;
 
         return $this;
     }
@@ -199,7 +207,7 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
 
             foreach ($this->enabledTools as $name) {
                 if (isset($allTools[$name])) {
-                    $resolved[] = new ToolAdapter($allTools[$name]);
+                    $resolved[] = new ToolAdapter($allTools[$name], $this->toolContextPayload);
                 }
             }
 
@@ -221,9 +229,7 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
 
     public function middleware(): array
     {
-        return [
-            new ManageAnonymousConversation($this->conversationStore()),
-        ];
+        return [];
     }
 
     public function providerOptions(Lab|string $provider): array

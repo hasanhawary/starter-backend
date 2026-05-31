@@ -92,6 +92,9 @@ class HeuristicPlanner
         'continue what we discussed' => 'memory',
         'as we discussed' => 'memory',
         'we talked about' => 'memory',
+        'we discussed' => 'memory',
+        'discussed before' => 'memory',
+        'continue the report' => 'memory',
         'like before' => 'memory',
         'like we discussed' => 'memory',
         'from before' => 'memory',
@@ -99,6 +102,12 @@ class HeuristicPlanner
         'do you remember' => 'memory',
         'remember' => 'memory',
         'recall' => 'memory',
+        'my preferred' => 'memory',
+        'my preference' => 'memory',
+        'preferred report' => 'memory',
+        'preferred branch' => 'memory',
+        'favorite report' => 'memory',
+        'favourite report' => 'memory',
         'say my name' => 'memory',
         'what is my name' => 'memory',
         'المرة اللي فاتت' => 'memory',
@@ -312,12 +321,10 @@ class HeuristicPlanner
             $hasBusinessRule = $this->hasBusinessRuleIndicator($normalizedMessage);
             $plan->intent = 'mixed';
             $plan->tools = $matchedTools;
-            $plan->useRag = $hasBusinessRule;
+            $plan->useRag = true;
             $plan->historyMode = 'recent';
             $plan->historyLimit = 4;
-            if ($hasBusinessRule) {
-                $plan->ragQuery = $originalMessage;
-            }
+            $plan->ragQuery = $originalMessage;
             $plan->metadata['confidence'] = 0.80;
             $plan->metadata['reason'] = 'complex_analytics'.($hasBusinessRule ? '_with_business_rule' : '');
 
@@ -870,7 +877,7 @@ class HeuristicPlanner
 
         foreach ($this->greetingPatterns as $greeting) {
             $normGreeting = ArabicTextNormalizer::normalize($greeting);
-            if ($normGreeting !== '' && str_contains($normalizedMessage, $normGreeting)) {
+            if ($this->containsPattern($normalizedMessage, $normGreeting)) {
                 $hasGreetingWord = true;
 
                 break;
@@ -880,7 +887,7 @@ class HeuristicPlanner
         if (! $hasGreetingWord) {
             foreach ($dialectGreetings as $greeting) {
                 $normGreeting = ArabicTextNormalizer::normalize($greeting);
-                if ($normGreeting !== '' && str_contains($normalizedMessage, $normGreeting)) {
+                if ($this->containsPattern($normalizedMessage, $normGreeting)) {
                     $hasGreetingWord = true;
 
                     break;
@@ -925,6 +932,17 @@ class HeuristicPlanner
         return false;
     }
 
+    protected function containsPattern(string $message, string $pattern): bool
+    {
+        if ($pattern === '') {
+            return false;
+        }
+
+        $quotedPattern = preg_quote($pattern, '/');
+
+        return (bool) preg_match('/(^|[^\p{L}\p{N}])'.$quotedPattern.'($|[^\p{L}\p{N}])/u', $message);
+    }
+
     protected function checkMemory(ExecutionPlan $plan, string $normalizedMessage, string $originalMessage, array $matchedTools): void
     {
         if (! $this->isMemoryPattern($normalizedMessage)) {
@@ -932,13 +950,34 @@ class HeuristicPlanner
         }
 
         $plan->useMemory = true;
-        $plan->memoryQuery = $originalMessage;
+        $plan->memoryQuery = $this->buildMemoryQuery($normalizedMessage, $originalMessage);
         $plan->intent = 'memory';
 
         if (! empty($matchedTools)) {
             $plan->tools = $matchedTools;
             $plan->intent = 'mixed';
         }
+    }
+
+    protected function buildMemoryQuery(string $normalizedMessage, string $originalMessage): string
+    {
+        if (str_contains($normalizedMessage, 'اسمي') || str_contains($normalizedMessage, 'my name')) {
+            return 'user name';
+        }
+
+        if (str_contains($normalizedMessage, 'favorite') || str_contains($normalizedMessage, 'favourite')) {
+            if (preg_match('/my (?:favorite|favourite) ([^?!.]+)/i', $originalMessage, $matches)) {
+                return 'favorite '.trim($matches[1]);
+            }
+
+            return 'favorite preference';
+        }
+
+        if (str_contains($normalizedMessage, 'discussed') || str_contains($normalizedMessage, 'continue') || str_contains($normalizedMessage, 'before')) {
+            return 'previous discussion';
+        }
+
+        return $originalMessage;
     }
 
     protected function checkKnowledge(ExecutionPlan $plan, string $normalizedMessage, string $originalMessage, string $detectedIntent, array $matchedTools): void

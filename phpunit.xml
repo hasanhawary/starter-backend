@@ -15,6 +15,7 @@
     <source>
         <include>
             <directory>app</directory>
+            <directory>packages/ai-chat/src</directory>
         </include>
     </source>
     <php>

@@ -17,7 +17,7 @@ class AiChatRateLimit
 
         $key = 'ai-chat:'.md5($request->ip());
 
-        $maxRequests = config('ai-chat.rate_limiting.max_requests', 50);
+        $maxRequests = config('ai-chat.rate_limiting.max_requests', 300);
         $decayMinutes = config('ai-chat.rate_limiting.decay_minutes', 60);
 
         if (RateLimiter::tooManyAttempts($key, $maxRequests)) {

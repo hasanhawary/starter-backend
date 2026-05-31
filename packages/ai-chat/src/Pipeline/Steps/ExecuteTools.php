@@ -28,7 +28,7 @@ class ExecuteTools
         }
 
         $context = new ChatContext(
-            action: 'execute',
+            action: 'read',
             agent: $payload->agent,
             user: $payload->user,
             payload: [

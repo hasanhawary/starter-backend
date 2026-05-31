@@ -5,14 +5,19 @@ namespace AiChat\Tests\Memory;
 use AiChat\Memory\MemoryExtractor;
 use AiChat\Models\AiMemory;
 use AiChat\Vector\EmbeddingGenerator;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery as m;
 use Tests\TestCase;
 
 class MemoryExtractorTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function tearDown(): void
     {
         m::close();
+
+        parent::tearDown();
     }
 
     public function test_should_extract_based_on_message_count(): void
@@ -126,5 +131,121 @@ class MemoryExtractorTest extends TestCase
         ]);
 
         $this->assertNull($result);
+    }
+
+    public function test_extract_detects_arabic_name_declaration(): void
+    {
+        $embeddings = m::mock(EmbeddingGenerator::class);
+        $extractor = new MemoryExtractor($embeddings);
+
+        $messages = [
+            ['role' => 'user', 'content' => 'اسمي حسن'],
+            ['role' => 'assistant', 'content' => 'أهلاً حسن'],
+        ];
+
+        $result = $extractor->extract('conv-1', $messages);
+
+        $this->assertNotNull($result);
+        $this->assertSame('User name: حسن', $result['content']);
+        $this->assertSame('user_profile', $result['metadata']['type']);
+        $this->assertSame('name', $result['metadata']['key']);
+        $this->assertSame('حسن', $result['metadata']['value']);
+        $this->assertGreaterThanOrEqual(0.9, $result['importance']);
+    }
+
+    public function test_extract_detects_english_name_declaration(): void
+    {
+        $embeddings = m::mock(EmbeddingGenerator::class);
+        $extractor = new MemoryExtractor($embeddings);
+
+        $messages = [
+            ['role' => 'user', 'content' => 'my name is Ahmed'],
+            ['role' => 'assistant', 'content' => 'Hello Ahmed'],
+        ];
+
+        $result = $extractor->extract('conv-1', $messages);
+
+        $this->assertNotNull($result);
+        $this->assertSame('User name: Ahmed', $result['content']);
+        $this->assertSame('user_profile', $result['metadata']['type']);
+        $this->assertSame('name', $result['metadata']['key']);
+        $this->assertSame('Ahmed', $result['metadata']['value']);
+    }
+
+    public function test_extract_from_exchange_detects_arabic_name(): void
+    {
+        $embeddings = m::mock(EmbeddingGenerator::class);
+        $extractor = new MemoryExtractor($embeddings);
+
+        config(['ai-chat.memory.enabled' => true]);
+
+        $result = $extractor->extractFromExchange('conv-1', 'اسمي حسن', 'أهلاً حسن');
+
+        $this->assertNotNull($result);
+        $this->assertSame('User name: حسن', $result['content']);
+        $this->assertSame('user_profile', $result['metadata']['type']);
+    }
+
+    public function test_extract_from_exchange_detects_preference(): void
+    {
+        $embeddings = m::mock(EmbeddingGenerator::class);
+        $extractor = new MemoryExtractor($embeddings);
+
+        config(['ai-chat.memory.enabled' => true]);
+
+        $result = $extractor->extractFromExchange(
+            'conv-1',
+            'Remember that my favorite dashboard color is emerald green',
+            'I have noted your preference for emerald green dashboard color.',
+        );
+
+        $this->assertNotNull($result);
+        $this->assertStringContainsString('preference', $result['metadata']['type']);
+        $this->assertGreaterThanOrEqual(0.9, $result['importance']);
+    }
+
+    public function test_extract_from_exchange_returns_null_for_greeting(): void
+    {
+        $embeddings = m::mock(EmbeddingGenerator::class);
+        $extractor = new MemoryExtractor($embeddings);
+
+        config(['ai-chat.memory.enabled' => true]);
+
+        $result = $extractor->extractFromExchange('conv-1', 'ازيك', 'أهلاً! كيف يمكنني مساعدتك؟');
+
+        $this->assertNull($result);
+    }
+
+    public function test_extract_from_exchange_returns_null_when_memory_disabled(): void
+    {
+        $embeddings = m::mock(EmbeddingGenerator::class);
+        $extractor = new MemoryExtractor($embeddings);
+
+        config(['ai-chat.memory.enabled' => false]);
+
+        $result = $extractor->extractFromExchange('conv-1', 'اسمي حسن', 'أهلاً حسن');
+
+        $this->assertNull($result);
+    }
+
+    public function test_store_with_user_id(): void
+    {
+        $embeddings = m::mock(EmbeddingGenerator::class);
+        $embeddings->shouldReceive('generate')->once()->andReturn([0.1, 0.2, 0.3]);
+
+        $extractor = new MemoryExtractor($embeddings);
+
+        $memoryData = [
+            'conversation_id' => 'conv-1',
+            'content' => 'User name: Hassan',
+            'importance' => 0.95,
+            'metadata' => ['type' => 'user_profile', 'key' => 'name', 'value' => 'Hassan'],
+            'user_id' => 1,
+        ];
+
+        $memory = $extractor->store($memoryData);
+
+        $this->assertNotNull($memory);
+        $this->assertSame(1, $memory->user_id);
     }
 }

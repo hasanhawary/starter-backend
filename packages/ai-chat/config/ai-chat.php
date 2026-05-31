@@ -7,7 +7,7 @@ return [
     'model' => env('AI_CHAT_MODEL', 'gpt-5.4'),
 
     'thinking' => [
-        'enabled' => env('AI_CHAT_THINKING_ENABLED', true),
+        'enabled' => env('AI_CHAT_THINKING_ENABLED', false),
         'type' => env('AI_CHAT_THINKING_TYPE', 'enabled'),
     ],
 
@@ -91,7 +91,7 @@ return [
     ],
 
     'knowledge' => [
-        'enabled' => env('AI_CHAT_KNOWLEDGE_ENABLED', false),
+        'enabled' => env('AI_CHAT_KNOWLEDGE_ENABLED', true),
         'paths' => [
             app_path('AI/Knowledge'),
             base_path('README.md'),
@@ -126,15 +126,15 @@ return [
     ],
 
     'memory' => [
-        'enabled' => env('AI_CHAT_MEMORY_ENABLED', false),
-        'store_every_message' => env('AI_CHAT_STORE_EVERY_MESSAGE', false),
+        'enabled' => env('AI_CHAT_MEMORY_ENABLED', true),
+        'store_every_message' => env('AI_CHAT_STORE_EVERY_MESSAGE', true),
         'extract_after_messages' => (int) env('AI_CHAT_EXTRACT_AFTER_MESSAGES', 6),
         'min_importance' => (float) env('AI_CHAT_MIN_IMPORTANCE', 0.6),
-        'token_budget' => (int) env('AI_CHAT_MEMORY_TOKEN_BUDGET', 1000),
+        'token_budget' => (int) env('AI_CHAT_MEMORY_TOKEN_BUDGET', 10000),
     ],
 
     'planning' => [
-        'mode' => env('AI_CHAT_PLANNING_MODE', 'hybrid'),
+        'mode' => env('AI_CHAT_PLANNING_MODE', 'hybrid'), // Options: hybrid, llm, heuristic
         'use_llm_planner_for_complex_questions_only' => env('AI_CHAT_USE_LLM_PLANNER_COMPLEX_ONLY', true),
         'planner_model' => env('AI_CHAT_PLANNER_MODEL'),
         'cache_plans' => env('AI_CHAT_CACHE_PLANS', true),

@@ -1,0 +1,118 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: API ONLINE
+    - heading "Welcome" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: This endpoint serves a backend API.
+      - text: No web interface is provided.
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Host
+        - generic [ref=e10]: localhost
+      - generic [ref=e11]:
+        - generic [ref=e12]: Client IP
+        - generic [ref=e13]: 127.0.0.1
+      - generic [ref=e14]:
+        - generic [ref=e15]: Secure Connection
+        - generic [ref=e16]: "No"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Server Time (UTC)
+        - generic [ref=e19]: 2026-05-31 17:03:46
+    - generic [ref=e20]:
+      - generic [ref=e21]: AI Chat
+      - generic [ref=e22]:
+        - button "Open AI Chat" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Open AI Chat
+        - button "Start Demo" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Start Demo
+      - generic [ref=e29]:
+        - text: Use
+        - code [ref=e30]: AIChatWidget.open()
+        - text: /
+        - code [ref=e31]: .close()
+        - text: /
+        - code [ref=e32]: .toggle()
+        - text: /
+        - code [ref=e33]: .expand()
+        - text: /
+        - code [ref=e34]: .reset()
+        - text: in your browser console.
+  - generic [ref=e42]:
+    - button "تبديل التصغير" [ref=e43] [cursor=pointer]:
+      - generic [ref=e44]:
+        - img [ref=e46]
+        - generic [ref=e49]:
+          - heading "المساعد الذكي" [level=3] [ref=e50]
+          - paragraph [ref=e51]: متصل الآن
+      - generic [ref=e52]:
+        - button "English" [ref=e53]:
+          - img [ref=e54]
+          - generic [ref=e58]: EN
+        - generic [ref=e59]:
+          - button "خيارات إضافية" [ref=e60]:
+            - img [ref=e61]
+          - menu:
+            - menuitem "محادثة جديدة":
+              - img
+              - generic: محادثة جديدة
+            - menuitem "English":
+              - img
+              - generic: English
+            - menuitem "الإعدادات":
+              - img
+              - generic: الإعدادات
+            - menuitem "شاشة كاملة":
+              - img
+              - generic: شاشة كاملة
+            - menuitem "تصدير المحادثة":
+              - img
+              - generic: تصدير المحادثة
+            - menuitem "مسح المحادثة":
+              - img
+              - generic: مسح المحادثة
+        - button "تصغير" [ref=e65]:
+          - img [ref=e66]
+        - button "شاشة كاملة" [ref=e67]:
+          - img [ref=e68]
+        - button "إغلاق" [ref=e73]:
+          - img [ref=e74]
+    - log "رسائل المحادثة" [ref=e77]:
+      - generic [ref=e78]:
+        - generic [ref=e79]: Check system status
+        - generic [ref=e81]: 19:52
+      - generic [ref=e82]:
+        - generic [ref=e83]: ازيك
+        - generic [ref=e85]: 19:55
+      - generic [ref=e86]:
+        - generic [ref=e87]: Remember that my favorite dashboard color is cobalt teal
+        - generic [ref=e89]: 20:03
+      - generic [ref=e90]:
+        - generic [ref=e91]: Remember that my favorite dashboard color is cobalt teal
+        - generic [ref=e93]: 20:03
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - text: The user is reminding me that their favorite dashboard color is cobalt teal. They're asking me to remember this information, so I should acknowledge that I've recorded this preference and be helpful about it.
+          - text: "Based on the guidelines, I should:"
+          - text: 1. Be concise and direct
+          - text: 2. Use the same language as the user (which seems to be English in this case, though there's some Arabic earlier)
+          - text: 3. Not provide long generic disclaimers
+          - text: 4. If required app data is unavailable, say so briefly
+          - text: 5. Never guess live app data
+          - text: Since this is just a preference reminder, I should simply acknowledge that I've noted their preference for cobalt teal as their favorite dashboard color, and perhaps offer to help them with anything related to this preference if they need it.Noted! Your favorite dashboard color is cobalt teal. I'll keep that in mind for future color preferences or dashboard settings.
+        - generic [ref=e96]:
+          - generic [ref=e97]: 20:03
+          - button "Copy reply" [ref=e98] [cursor=pointer]:
+            - img [ref=e99]
+          - generic [ref=e102]:
+            - button "Mark as helpful" [ref=e103] [cursor=pointer]:
+              - img [ref=e104]
+            - button "Mark as not helpful" [ref=e107] [cursor=pointer]:
+              - img [ref=e108]
+    - generic [ref=e112]:
+      - textbox "إرسال" [ref=e113]:
+        - /placeholder: اكتب رسالتك...
+      - button "إرسال" [disabled] [ref=e114]:
+        - img [ref=e115]
+    - generic [ref=e117]: مدعوم من WaKeb AI

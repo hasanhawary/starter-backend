@@ -2,15 +2,18 @@
 
 namespace AiChat\Pipeline\Steps;
 
+use AiChat\Memory\MemoryRetriever;
 use AiChat\Pipeline\ChatPayload;
 use AiChat\Storage\AnonymousConversationStore;
 use AiChat\Support\TokenCounter;
 use Closure;
+use Illuminate\Support\Facades\Log;
 
 class RetrieveMemory
 {
     public function __construct(
         protected AnonymousConversationStore $conversationStore,
+        protected MemoryRetriever $memoryRetriever,
     ) {}
 
     public function handle(ChatPayload $payload, Closure $next): ChatPayload
@@ -23,14 +26,81 @@ class RetrieveMemory
             return $next($payload);
         }
 
-        $sessionId = $payload->metadata['session_id'] ?? null;
+        $plan = $payload->executionPlan;
+        $memoryQuery = $plan?->memoryQuery ?? $payload->message;
+        $limit = (int) ($plan?->memoryLimit ?? config('ai-chat.context.memory_limit', 3));
 
-        if (! $sessionId) {
-            return $next($payload);
+        if ($memoryQuery) {
+            $this->retrieveVectorMemories($payload, $memoryQuery, $limit);
         }
 
+        $sessionId = $payload->metadata['session_id'] ?? null;
+
+        if ($sessionId) {
+            $this->retrieveConversationHistory($payload, $sessionId, $limit);
+        }
+
+        return $next($payload);
+    }
+
+    protected function retrieveVectorMemories(ChatPayload $payload, string $query, int $limit): void
+    {
         try {
-            $limit = (int) ($payload->executionPlan?->memoryLimit ?? config('ai-chat.context.memory_limit', 3));
+            $scope = $this->buildMemoryScope($payload);
+
+            $memories = $this->memoryRetriever->retrieve(
+                $query,
+                $scope,
+                $limit,
+            );
+
+            if (! empty($memories)) {
+                foreach ($memories as $memory) {
+                    $payload->memory[] = $memory['content'];
+                }
+
+                Log::debug('Vector memories retrieved', [
+                    'memory_query' => mb_substr($query, 0, 100),
+                    'count' => count($memories),
+                    'scope' => $scope,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::debug('Vector memory retrieval failed, falling back to conversation history', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    protected function buildMemoryScope(ChatPayload $payload): array
+    {
+        $scope = [];
+
+        $userId = $payload->user?->getAuthIdentifier();
+        if ($userId !== null && $userId !== '') {
+            $scope['user_id'] = is_string($userId) ? $userId : (string) $userId;
+        }
+
+        if (isset($payload->metadata['guest_id'])) {
+            $scope['guest_id'] = (string) $payload->metadata['guest_id'];
+        } elseif (isset($payload->metadata['session_id'])) {
+            $scope['guest_id'] = (string) $payload->metadata['session_id'];
+        }
+
+        if (isset($payload->metadata['tenant_id'])) {
+            $scope['tenant_id'] = (string) $payload->metadata['tenant_id'];
+        }
+
+        if ($payload->agent !== null) {
+            $scope['agent_id'] = $payload->agent->name();
+        }
+
+        return $scope;
+    }
+
+    protected function retrieveConversationHistory(ChatPayload $payload, string $sessionId, int $limit): void
+    {
+        try {
             $historyLimit = (int) config('ai-chat.context.history_limit', 6);
 
             $conversations = $this->conversationStore->getRecentConversations($sessionId, $limit);
@@ -62,10 +132,8 @@ class RetrieveMemory
                 }
             }
         } catch (\Throwable) {
-            return $next($payload);
+            return;
         }
-
-        return $next($payload);
     }
 
     protected function extractContent(mixed $message): string

@@ -3,6 +3,7 @@
 namespace AiChat\Memory;
 
 use AiChat\Contracts\MemoryStoreInterface;
+use AiChat\Memory\Stores\DatabaseMemoryStore;
 use AiChat\Models\AiMemory;
 use AiChat\Vector\EmbeddingGenerator;
 use Illuminate\Support\Str;
@@ -21,7 +22,7 @@ class MemoryManager
             : app(MemoryStoreInterface::class);
     }
 
-    public function store(string $conversationId, string $content, ?string $userId = null): AiMemory
+    public function store(string $conversationId, string $content, ?string $userId = null, array $metadata = []): AiMemory
     {
         $embedding = $this->generateEmbedding($content);
 
@@ -29,15 +30,19 @@ class MemoryManager
             'id' => Str::uuid()->toString(),
             'conversation_id' => $conversationId,
             'user_id' => $userId,
+            'guest_id' => $metadata['guest_id'] ?? null,
+            'tenant_id' => $metadata['tenant_id'] ?? null,
+            'agent_id' => $metadata['agent_id'] ?? null,
             'content' => $content,
             'embedding' => $embedding,
-            'metadata' => [
-                'user_id' => $userId,
+            'metadata' => array_merge([
                 'stored_at' => now()->toIso8601String(),
-            ],
+            ], $metadata),
         ]);
 
-        $this->store->store($conversationId, $content, $embedding);
+        if (! $this->store instanceof DatabaseMemoryStore) {
+            $this->store->store($conversationId, $content, $embedding);
+        }
 
         return $memory;
     }

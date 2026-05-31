@@ -16,6 +16,7 @@ use AiChat\Http\Resources\FeedbackResource;
 use AiChat\Http\Resources\MessageResource;
 use AiChat\Models\AiChatConversation;
 use AiChat\Models\AiFeedback;
+use AiChat\Models\AiUsageLog;
 use AiChat\Pipeline\ChatPayload;
 use AiChat\Pipeline\ChatPipeline;
 use AiChat\Pipeline\ExecutionPlan;
@@ -32,6 +33,7 @@ use AiChat\Storage\AnonymousConversationStore;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AiChatController extends Controller
@@ -80,7 +82,7 @@ class AiChatController extends Controller
                 'content' => $payload->response ?? '',
                 'usage' => $payload->metadata['usage'] ?? null,
                 'created_at' => now()->toIso8601String(),
-                'tool_calls' => ! empty($payload->toolResults),
+                'tool_calls' => (bool) ($payload->metadata['tool_calls_used'] ?? false),
             ],
             'plan' => $payload->executionPlan?->toArray() ?? null,
         ]);
@@ -130,15 +132,24 @@ class AiChatController extends Controller
                 $fullContent = '';
 
                 foreach ($stream as $event) {
-                    $content = (string) ($event->text ?? '');
-                    $fullContent .= $content;
-
-                    echo 'data: '.((string) $event)."\n\n";
-
-                    if (ob_get_level() > 0) {
-                        ob_flush();
+                    $content = $this->extractStreamChunk($event);
+                    // Filter out internal reasoning phrases before appending
+                    if (! preg_match('/^(The user is|According to my guidelines|I should|I need to|I\'ll respond|I\'m thinking|I\'m planning)/i', $content)) {
+                        $fullContent .= $content;
                     }
-                    flush();
+
+                    if ($this->shouldEmitStreamEvent($event)) {
+                        // Ensure only final content is sent to client
+                        $cleanContent = preg_replace('/^(The user is|According to my guidelines|I should|I need to|I\'ll respond|I\'m thinking|I\'m planning).*\n?/mi', '', (string) $event);
+                        echo 'data: '.$cleanContent."\n\n";
+
+                        if (ob_get_level() > 0) {
+                            ob_flush();
+                        }
+                        flush();
+                    }
+
+                    $this->captureStreamUsage($payload, $event);
 
                     $this->streamManager->appendToStream($finalConversationId ?? 'unknown', $content);
                 }
@@ -288,6 +299,12 @@ class AiChatController extends Controller
             $agent->withTools($toolNames);
         }
 
+        $agent->withToolContextPayload([
+            'conversation_id' => $conversationId,
+            'session_id' => $sessionId,
+            'message' => $request->validated('message'),
+        ]);
+
         if ($plan) {
             $message = $request->validated('message');
             $agent->withExecutionPlan($plan);
@@ -352,11 +369,12 @@ class AiChatController extends Controller
 
         try {
             $userId = $payload->user?->getAuthIdentifier();
+            $sessionId = $payload->metadata['session_id'] ?? null;
 
             $this->messageManager->storeUserMessage(
                 $conversationId,
                 $payload->message,
-                is_string($userId) ? $userId : (string) ($userId ?? 'anonymous'),
+                is_string($sessionId) ? $sessionId : (is_string($userId) ? $userId : (string) ($userId ?? 'anonymous')),
                 $payload->metadata,
             );
 
@@ -371,7 +389,89 @@ class AiChatController extends Controller
                 $payload->response,
                 $metadata,
             );
+
+            $this->persistUsage($payload, $conversationId);
         } catch (\Throwable) {
         }
+    }
+
+    protected function extractStreamChunk(object $event): string
+    {
+        if (property_exists($event, 'delta') && is_string($event->delta)) {
+            return $event->delta;
+        }
+
+        if (property_exists($event, 'text') && is_string($event->text)) {
+            return $event->text;
+        }
+
+        if ($this->streamEventType($event) === 'text_delta') {
+            // Fallback to empty string if text_delta event has no delta/text property.
+            // This case is unlikely given the above checks.
+            return '';
+        }
+
+        return '';
+    }
+
+    protected function shouldEmitStreamEvent(object $event): bool
+    {
+        $type = $this->streamEventType($event);
+
+        if ($type === null) {
+            return true;
+        }
+
+        return in_array($type, ['stream_start', 'text_start', 'text_delta', 'text_end', 'stream_end'], true);
+    }
+
+    protected function captureStreamUsage(ChatPayload $payload, object $event): void
+    {
+        if ($this->streamEventType($event) !== 'stream_end') {
+            return;
+        }
+
+        if (property_exists($event, 'usage') && $event->usage !== null) {
+            $payload->setMetadata('usage', (array) $event->usage);
+        }
+    }
+
+    protected function streamEventType(object $event): ?string
+    {
+        $type = $event->type ?? null;
+
+        if (! is_string($type) && method_exists($event, '__toString')) {
+            $eventData = json_decode((string) $event, true);
+            $type = is_array($eventData) ? ($eventData['type'] ?? null) : null;
+        }
+
+        return is_string($type) ? $type : null;
+    }
+
+    protected function persistUsage(ChatPayload $payload, string $conversationId): void
+    {
+        $usage = $payload->metadata['usage'] ?? null;
+
+        if (! is_array($usage)) {
+            return;
+        }
+
+        $inputTokens = (int) ($usage['promptTokens'] ?? $usage['prompt_tokens'] ?? 0);
+        $outputTokens = (int) ($usage['completionTokens'] ?? $usage['completion_tokens'] ?? 0);
+
+        AiUsageLog::create([
+            'id' => (string) Str::uuid7(),
+            'user_id' => $payload->user?->getAuthIdentifier(),
+            'conversation_id' => $conversationId,
+            'provider' => (string) config('ai-chat.provider', 'openai'),
+            'model' => (string) config('ai-chat.model', 'unknown'),
+            'input_tokens' => $inputTokens,
+            'output_tokens' => $outputTokens,
+            'total_tokens' => $inputTokens + $outputTokens,
+            'cost' => 0,
+            'latency_ms' => null,
+            'status' => 'success',
+            'error' => null,
+        ]);
     }
 }

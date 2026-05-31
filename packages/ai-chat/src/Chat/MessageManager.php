@@ -33,6 +33,9 @@ class MessageManager
             'agent' => $metadata['agent'] ?? config('ai-chat.default_agent', 'project_assistant'),
             'role' => 'assistant',
             'content' => $content,
+            'tool_calls' => $metadata['tool_calls'] ?? null,
+            'tool_results' => $metadata['tool_results'] ?? null,
+            'usage' => $metadata['usage'] ?? null,
             'meta' => $metadata,
         ]);
 

@@ -60,21 +60,19 @@ class EmbeddingGenerator
 
             $aiManager = app(AiManager::class);
 
-            if (method_exists($aiManager, 'embeddingProvider')) {
-                try {
-                    $provider = $aiManager->embeddingProvider($driver);
+            try {
+                $provider = $aiManager->fakeableEmbeddingProvider($driver);
 
-                    $result = $provider->embed($text);
+                $result = $provider->embeddings([$text], $this->dimensions);
 
-                    if (is_array($result) && ! empty($result)) {
-                        return $result;
-                    }
-                } catch (\LogicException $e) {
-                    Log::debug('Embedding provider not available for driver, using fallback', [
-                        'driver' => $driver,
-                        'error' => $e->getMessage(),
-                    ]);
+                if ($result !== null) {
+                    return $result->first();
                 }
+            } catch (\LogicException $e) {
+                Log::debug('Embedding provider not available for driver, using fallback', [
+                    'driver' => $driver,
+                    'error' => $e->getMessage(),
+                ]);
             }
         } catch (\Throwable $e) {
             Log::debug('Embedding provider failed, using fallback', [

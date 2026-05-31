@@ -40,6 +40,7 @@ use AiChat\MCP\ToolSelector;
 use AiChat\Memory\MemoryExtractor;
 use AiChat\Memory\MemoryManager;
 use AiChat\Memory\MemoryRetriever;
+use AiChat\Memory\Stores\DatabaseMemoryStore;
 use AiChat\Pipeline\ChatPipeline;
 use AiChat\Planning\HeuristicPlanner;
 use AiChat\Planning\HybridPlanner;
@@ -70,6 +71,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Ai\AiManager;
 use Laravel\Ai\Contracts\ConversationStore;
+use Laravel\Ai\Gateway\OpenAi\OpenAiGateway;
 use Laravel\Ai\Providers\AnthropicProvider;
 use Laravel\Ai\Providers\AzureOpenAiProvider;
 use Laravel\Ai\Providers\BedrockProvider;
@@ -194,6 +196,10 @@ class AiChatServiceProvider extends ServiceProvider
 
             if ($storeClass && class_exists($storeClass)) {
                 return $app->make($storeClass);
+            }
+
+            if (config('ai-chat.memory.enabled', false)) {
+                return $app->make(DatabaseMemoryStore::class);
             }
 
             return new class implements MemoryStoreInterface
@@ -375,7 +381,7 @@ class AiChatServiceProvider extends ServiceProvider
             });
 
             $manager->extend('openai', function ($app, array $config) {
-                return new OpenAiProvider($config, $app->make('events'));
+                return new OpenAiProvider(new OpenAiGateway($app['events']), $config, $app->make('events'));
             });
 
             $manager->extend('openrouter', function ($app, array $config) {

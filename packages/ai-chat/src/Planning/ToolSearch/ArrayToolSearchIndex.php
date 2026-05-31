@@ -27,7 +27,7 @@ class ArrayToolSearchIndex implements ToolSearchIndex
 
     protected const SCORE_STRONG_TAG = 0.70;
 
-    protected const SCORE_DESCRIPTION = 0.45;
+    protected const SCORE_DESCRIPTION = 0.70;
 
     public function index(array $tools): void
     {
@@ -150,7 +150,7 @@ class ArrayToolSearchIndex implements ToolSearchIndex
         }
 
         if ($matches === 1) {
-            return self::SCORE_STRONG_TAG - 0.05;
+            return self::SCORE_STRONG_TAG;
         }
 
         return 0.0;

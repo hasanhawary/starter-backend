@@ -350,12 +350,12 @@ test.describe('AI Chat Widget — Visual & Behavioral Tests', () => {
         messages: sr.querySelector('.ai-chat-messages')?.getAttribute('aria-label'),
       };
     });
-    expect(r.launcher).toBe('إغلاق المحادثة');
-    expect(r.close).toBe('إغلاق');
-    expect(r.minimize).toBe('تصغير');
-    expect(r.textarea).toBe('إرسال');
-    expect(r.send).toBe('إرسال');
-    expect(r.messages).toBe('رسائل المحادثة');
+    expect(r.launcher).toBe('Close chat');
+    expect(r.close).toBe('Close');
+    expect(r.minimize).toBe('Minimize');
+    expect(r.textarea).toBe('Chat message');
+    expect(r.send).toBe('Send message');
+    expect(r.messages).toBe('Chat messages');
   });
 
   test('welcome page Open AI Chat button opens widget', async ({ page }) => {
@@ -529,24 +529,6 @@ test.describe('AI Chat Widget — Visual & Behavioral Tests', () => {
         btnText: sr.querySelector('.ai-chat-header-lang')?.textContent || '',
       };
     });
-    expect(lang.dir).toBe('rtl');
-    expect(lang.btnText).toBe('EN');
-
-    await clickSR(page, '.ai-chat-lang-btn');
-    await page.waitForTimeout(200);
-
-    lang = await page.evaluate(function () {
-      var sr = null;
-      for (var i = 0; i < document.body.children.length; i++) {
-        var el = document.body.children[i];
-        if (el.shadowRoot) { sr = el.shadowRoot; break; }
-      }
-      if (!sr) return { dir: '', btnText: '' };
-      return {
-        dir: sr.querySelector('.ai-chat-window').getAttribute('dir'),
-        btnText: sr.querySelector('.ai-chat-header-lang')?.textContent || '',
-      };
-    });
     expect(lang.dir).toBe('ltr');
     expect(lang.btnText).toBe('ع');
 
@@ -567,6 +549,169 @@ test.describe('AI Chat Widget — Visual & Behavioral Tests', () => {
     });
     expect(lang.dir).toBe('rtl');
     expect(lang.btnText).toBe('EN');
+
+    await clickSR(page, '.ai-chat-lang-btn');
+    await page.waitForTimeout(200);
+
+    lang = await page.evaluate(function () {
+      var sr = null;
+      for (var i = 0; i < document.body.children.length; i++) {
+        var el = document.body.children[i];
+        if (el.shadowRoot) { sr = el.shadowRoot; break; }
+      }
+      if (!sr) return { dir: '', btnText: '' };
+      return {
+        dir: sr.querySelector('.ai-chat-window').getAttribute('dir'),
+        btnText: sr.querySelector('.ai-chat-header-lang')?.textContent || '',
+      };
+    });
+    expect(lang.dir).toBe('ltr');
+    expect(lang.btnText).toBe('ع');
+  });
+
+  test('renders streamed markdown tables, lists, links, and code blocks', async ({ page }) => {
+    var markdown = '| Name | Age |\n| --- | --- |\n| Ada | 36 |\n\n- First item\n- Second item\n\n[Example](https://example.com)\n\n```js\nconsole.log("ok");\n```';
+
+    await page.route('**/api/ai-chat/messages', async function (route) {
+      await route.fulfill({
+        status: 200,
+        headers: { 'content-type': 'text/event-stream' },
+        body: [
+          'event: conversation_id',
+          'data: {"conversation_id":"conv_markdown"}',
+          '',
+          'data: ' + JSON.stringify({ type: 'text_delta', delta: markdown }),
+          '',
+          'data: [DONE]',
+          '',
+        ].join('\n'),
+      });
+    });
+
+    await page.evaluate(function () { window.AIChatWidget.open(); });
+    await page.waitForTimeout(300);
+    await page.evaluate(function () {
+      var sr = null;
+      for (var i = 0; i < document.body.children.length; i++) {
+        var el = document.body.children[i];
+        if (el.shadowRoot) { sr = el.shadowRoot; break; }
+      }
+      var ta = sr.querySelector('.ai-chat-textarea');
+      ta.value = 'Show markdown';
+      ta.dispatchEvent(new Event('input'));
+      sr.querySelector('.ai-chat-send').click();
+    });
+
+    await page.waitForFunction(function () {
+      return window.AIChatWidget.getState().isLoading === false
+        && window.AIChatWidget.getState().isStreaming === false;
+    });
+
+    var r = await page.evaluate(function () {
+      var sr = null;
+      for (var i = 0; i < document.body.children.length; i++) {
+        var el = document.body.children[i];
+        if (el.shadowRoot) { sr = el.shadowRoot; break; }
+      }
+      var bubble = sr.querySelector('.ai-msg-assistant .ai-msg-bubble');
+      return {
+        hasTable: !!bubble.querySelector('table'),
+        rows: bubble.querySelectorAll('tr').length,
+        listItems: bubble.querySelectorAll('li').length,
+        linkHref: bubble.querySelector('a')?.getAttribute('href'),
+        codeText: bubble.querySelector('.ai-code-block pre code')?.textContent || '',
+        codeCopy: !!bubble.querySelector('.ai-code-copy'),
+      };
+    });
+
+    expect(r.hasTable).toBe(true);
+    expect(r.rows).toBe(2);
+    expect(r.listItems).toBe(2);
+    expect(r.linkHref).toBe('https://example.com');
+    expect(r.codeText).toContain('console.log("ok");');
+    expect(r.codeCopy).toBe(true);
+  });
+
+  test('retry after API failure resends once without duplicating user message', async ({ page }) => {
+    var requestCount = 0;
+
+    await page.route('**/api/ai-chat/messages', async function (route) {
+      requestCount++;
+
+      if (requestCount === 1) {
+        await route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: 'Temporary AI service outage' }),
+        });
+
+        return;
+      }
+
+      await route.fulfill({
+        status: 200,
+        headers: { 'content-type': 'text/event-stream' },
+        body: [
+          'event: conversation_id',
+          'data: {"conversation_id":"conv_retry"}',
+          '',
+          'data: ' + JSON.stringify({ type: 'text_delta', delta: 'Recovered response' }),
+          '',
+          'data: [DONE]',
+          '',
+        ].join('\n'),
+      });
+    });
+
+    await page.evaluate(function () { window.AIChatWidget.open(); });
+    await page.waitForTimeout(300);
+    await page.evaluate(function () {
+      var sr = null;
+      for (var i = 0; i < document.body.children.length; i++) {
+        var el = document.body.children[i];
+        if (el.shadowRoot) { sr = el.shadowRoot; break; }
+      }
+      var ta = sr.querySelector('.ai-chat-textarea');
+      ta.value = 'Retry this message';
+      ta.dispatchEvent(new Event('input'));
+      sr.querySelector('.ai-chat-send').click();
+    });
+
+    await page.waitForSelector('css=body');
+    await page.waitForTimeout(400);
+
+    await page.evaluate(function () {
+      var sr = null;
+      for (var i = 0; i < document.body.children.length; i++) {
+        var el = document.body.children[i];
+        if (el.shadowRoot) { sr = el.shadowRoot; break; }
+      }
+      sr.querySelector('.ai-error-retry').click();
+    });
+
+    await page.waitForFunction(function () {
+      return window.AIChatWidget.getState().isLoading === false
+        && window.AIChatWidget.getState().isStreaming === false
+        && window.AIChatWidget.getState().messageCount === 2;
+    });
+
+    var r = await page.evaluate(function () {
+      var sr = null;
+      for (var i = 0; i < document.body.children.length; i++) {
+        var el = document.body.children[i];
+        if (el.shadowRoot) { sr = el.shadowRoot; break; }
+      }
+      return {
+        userMessages: sr.querySelectorAll('.ai-msg-user').length,
+        assistantText: sr.querySelector('.ai-msg-assistant .ai-msg-bubble')?.textContent || '',
+        hasError: !!sr.querySelector('.ai-error-state'),
+      };
+    });
+
+    expect(requestCount).toBe(2);
+    expect(r.userMessages).toBe(1);
+    expect(r.assistantText).toContain('Recovered response');
+    expect(r.hasError).toBe(false);
   });
 
 });

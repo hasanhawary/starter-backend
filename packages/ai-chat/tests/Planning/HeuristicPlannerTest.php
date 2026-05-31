@@ -60,6 +60,8 @@ class HeuristicPlannerTest extends TestCase
     protected function tearDown(): void
     {
         m::close();
+
+        parent::tearDown();
     }
 
     protected function createPlanner(array $tools = []): HeuristicPlanner

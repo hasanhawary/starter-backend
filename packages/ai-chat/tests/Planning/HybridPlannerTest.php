@@ -15,6 +15,8 @@ class HybridPlannerTest extends TestCase
     protected function tearDown(): void
     {
         m::close();
+
+        parent::tearDown();
     }
 
     public function test_hybrid_mode_uses_heuristic_when_possible(): void

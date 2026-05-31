@@ -10,7 +10,10 @@ use Laravel\Ai\Tools\Request;
 
 class ToolAdapter implements LaravelTool
 {
-    public function __construct(protected ToolInterface $tool) {}
+    public function __construct(
+        protected ToolInterface $tool,
+        protected array $contextPayload = [],
+    ) {}
 
     public function name(): string
     {
@@ -25,13 +28,15 @@ class ToolAdapter implements LaravelTool
     public function handle(Request $request): string
     {
         $context = new ChatContext(
-            action: 'execute',
-            payload: $request->all(),
+            action: 'read',
+            payload: array_merge($this->contextPayload, [
+                'arguments' => $request->all(),
+            ]),
         );
 
-        $result = $this->tool->execute($request->all(), $context);
+        $result = app(ToolExecutor::class)->execute($this->tool->name(), $request->all(), $context);
 
-        return is_string($result) ? $result : json_encode($result);
+        return json_encode($result->toArray());
     }
 
     public function schema(JsonSchema $schema): array
