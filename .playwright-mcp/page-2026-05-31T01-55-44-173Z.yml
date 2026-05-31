@@ -1,0 +1,120 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: API ONLINE
+    - heading "Welcome" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: This endpoint serves a backend API.
+      - text: No web interface is provided.
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Host
+        - generic [ref=e10]: localhost
+      - generic [ref=e11]:
+        - generic [ref=e12]: Client IP
+        - generic [ref=e13]: 127.0.0.1
+      - generic [ref=e14]:
+        - generic [ref=e15]: Secure Connection
+        - generic [ref=e16]: "No"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Server Time (UTC)
+        - generic [ref=e19]: 2026-05-31 01:55:07
+    - generic [ref=e20]:
+      - generic [ref=e21]: AI Chat
+      - generic [ref=e22]:
+        - button "Open AI Chat" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Open AI Chat
+        - button "Start Demo" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Start Demo
+      - generic [ref=e29]:
+        - text: Use
+        - code [ref=e30]: AIChatWidget.open()
+        - text: /
+        - code [ref=e31]: .close()
+        - text: /
+        - code [ref=e32]: .toggle()
+        - text: /
+        - code [ref=e33]: .expand()
+        - text: /
+        - code [ref=e34]: .reset()
+        - text: in your browser console.
+  - generic:
+    - button "فتح المحادثة" [ref=e35] [cursor=pointer]:
+      - img [ref=e37]
+      - generic: "1"
+    - generic:
+      - button "تبديل التصغير":
+        - generic:
+          - generic:
+            - img
+          - generic:
+            - heading "المساعد الذكي" [level=3]
+            - paragraph: متصل الآن
+        - generic:
+          - button "English":
+            - img
+            - generic: EN
+          - generic:
+            - button "خيارات إضافية":
+              - img
+            - menu:
+              - menuitem "محادثة جديدة":
+                - img
+                - generic: محادثة جديدة
+              - menuitem "English":
+                - img
+                - generic: English
+              - menuitem "الإعدادات":
+                - img
+                - generic: الإعدادات
+              - menuitem "شاشة كاملة":
+                - img
+                - generic: شاشة كاملة
+              - menuitem "تصدير المحادثة":
+                - img
+                - generic: تصدير المحادثة
+              - menuitem "مسح المحادثة":
+                - img
+                - generic: مسح المحادثة
+          - button "تصغير":
+            - img
+          - button "شاشة كاملة":
+            - img
+          - button "إغلاق":
+            - img
+      - log "رسائل المحادثة":
+        - generic:
+          - generic: اشرحلي يعني ايه RAG ببساطة
+          - generic:
+            - generic: 04:55
+        - generic:
+          - generic:
+            - text: "RAG (Retrieval-Augmented Generation) هو مصطلح في عالم الذكاء الاصطناعي يجمع بين نوعين من المعلومات:"
+            - text: "1."
+            - strong: الاسترجاع (Retrieval)
+            - text: ": البحث واستخراج معلومات محددة من قاعدة بيانات أو مجموعة كبيرة من النصوص"
+            - text: "2."
+            - strong: الإنشاء (Generation)
+            - text: ": استخدام نموذج لغوي مثل ChatGPT لإنشاء إجابات جديدة"
+            - text: "ببساطة، يعمل RAG على:"
+            - listitem: عند طرح سؤال، يبحث أولاً في مصادر معلومات موثوقة (مثل الكتب أو الإنترنت أو قواعد البيانات الداخلية)
+            - listitem: يستخرج المعلومات ذات الصلة بالسؤال
+            - listitem: يستخدم هذه المعلومات المحددة لبناء إجابة دقيقة وعملية
+            - text: هذا يجعل الإجابات أكثر دقة لأنها تعتمد على معلومات محددة بدلاً من الاعتماد فقط على المعرفة العامة للنموذج اللغوي.
+          - generic:
+            - generic: 04:55
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+      - generic:
+        - generic:
+          - textbox "إرسال":
+            - /placeholder: اكتب رسالتك...
+          - button "إرسال" [disabled]:
+            - img
+      - generic: مدعوم من WaKeb AI

@@ -100,14 +100,13 @@ class HistorySelectorTest extends TestCase
         $this->assertEquals('none', $policy->mode);
     }
 
-    public function test_shukran_returns_minimal_recent(): void
+    public function test_shukran_returns_no_history(): void
     {
         $plan = $this->planner->plan('شكرا');
         $policy = $this->selector->select($plan, 'شكرا');
 
-        $this->assertTrue($policy->useHistory);
-        $this->assertEquals('recent', $policy->mode);
-        $this->assertLessThanOrEqual(2, $policy->limit);
+        $this->assertFalse($policy->useHistory);
+        $this->assertEquals('none', $policy->mode);
     }
 
     public function test_identity_statement_returns_none(): void

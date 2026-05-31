@@ -21,7 +21,7 @@ class NotificationStatsTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [],
         ];
@@ -34,8 +34,9 @@ class NotificationStatsTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $total = Notification::count();
+                $total = Notification::count();
         $stats = ['total' => $total];
+
 
         if (Notification::usesTimestamps()) {
             $stats['latest_created'] = Notification::latest()->value('created_at');

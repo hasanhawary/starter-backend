@@ -98,12 +98,26 @@ class ArrayToolSearchIndex implements ToolSearchIndex
         $modelName = $parts[0] ?? '';
         $actionWord = $parts[1] ?? '';
 
-        if ($modelName !== '' && $actionWord !== '' && in_array($modelName, $queryWords)) {
-            $actionSynonyms = $this->getActionSynonyms($actionWord);
+        if ($modelName !== '' && $actionWord !== '') {
+            $modelSynonyms = $this->getModelSynonyms($modelName);
+            $modelMatched = false;
 
-            foreach ($actionSynonyms as $synonym) {
-                if (str_contains($normalizedQuery, $synonym)) {
-                    return self::SCORE_MODEL_ACTION;
+            foreach ($modelSynonyms as $synonym) {
+                $normSynonym = ArabicTextNormalizer::normalize($synonym);
+                if (str_contains($normalizedQuery, $normSynonym)) {
+                    $modelMatched = true;
+
+                    break;
+                }
+            }
+
+            if ($modelMatched) {
+                $actionSynonyms = $this->getActionSynonyms($actionWord);
+
+                foreach ($actionSynonyms as $synonym) {
+                    if (str_contains($normalizedQuery, $synonym)) {
+                        return self::SCORE_MODEL_ACTION;
+                    }
                 }
             }
         }
@@ -172,6 +186,27 @@ class ArrayToolSearchIndex implements ToolSearchIndex
         }
 
         return 0.0;
+    }
+
+    protected function getModelSynonyms(string $model): array
+    {
+        $dialectSynonyms = config('ai-chat-dialects.model_synonyms', []);
+
+        if (isset($dialectSynonyms[$model])) {
+            return $dialectSynonyms[$model];
+        }
+
+        $builtin = [
+            'user' => ['user', 'users', 'مستخدم', 'المستخدمين', 'مستخدمين'],
+            'role' => ['role', 'roles', 'دور', 'الادوار', 'ادوار', 'رول'],
+            'permission' => ['permission', 'permissions', 'صلاحية', 'الصلاحيات', 'صلاحيات'],
+            'setting' => ['setting', 'settings', 'اعداد', 'الاعدادات', 'اعدادات'],
+            'notification' => ['notification', 'notifications', 'اشعار', 'الاشعارات', 'اشعارات'],
+            'country' => ['country', 'countries', 'دولة', 'بلاد', 'دول'],
+            'order' => ['order', 'orders', 'طلب', 'الطلبات', 'طلبات'],
+        ];
+
+        return $builtin[$model] ?? [$model];
     }
 
     protected function getActionSynonyms(string $action): array

@@ -21,7 +21,7 @@ class UserSummaryTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [],
         ];
@@ -34,7 +34,7 @@ class UserSummaryTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $summary = [
+                $summary = [
             'id' => [
                 'avg' => User::avg('id'),
                 'min' => User::min('id'),

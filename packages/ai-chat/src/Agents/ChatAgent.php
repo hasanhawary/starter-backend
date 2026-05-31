@@ -130,22 +130,35 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
             $parts[] = $this->systemPrompt;
         }
 
-        $parts[] = 'Previous messages in this conversation have already been answered. Do not answer, revisit, summarize, or even mention any previous user messages or questions. The only exception: if the latest user message explicitly asks about a specific previous topic. Always answer only the latest user message. If old messages are shown below as context, they are only provided as background — never respond to them as if they are new questions.';
+        $parts[] = 'You are an AI assistant embedded inside a Laravel admin dashboard. Answer like a practical product assistant. Be concise, direct, and helpful. Use the same language as the user. Do not mention internal tool names unless the user asks for technical details. Do not provide long generic disclaimers. If required app data is unavailable, say so briefly. Never guess live app data.';
 
-        if (! $policy->useHistory) {
-            $parts[] = 'The user is not asking about any previous conversation topic. Reply naturally to their current message only. Ignore any previous conversation context entirely. Never mention or reference any previous questions, tool results, data sources, or any earlier conversation topics. Act as if this is a completely new interaction starting now.';
+        $parts[] = 'The latest user message is the only active request. Previous messages are only context and have already been answered. Do not answer, revisit, summarize, or even mention any previous user messages or questions unless the latest user message explicitly asks about a specific previous topic.';
+
+        $plan = $this->executionPlan;
+
+        if ($plan === null) {
+            $parts[] = 'The user is greeting, thanking, or asking about your identity. Reply naturally and very briefly — a friendly one-liner is enough. Do not use tools, RAG, or memory. Do not mention any previous conversation. If greeting in Arabic, respond in Arabic briefly. If the user thanks you, respond simply with "عفواً" or "you\'re welcome". If asking your name, say "أنا مساعدك الذكي" or "I am your AI assistant."';
+        } elseif ($plan->needsClarification) {
+            $parts[] = 'The user\'s intent is unclear. Ask a short clarifying question to understand what they need. Do not run tools, RAG, or memory. Do not guess their intent.';
+        } elseif ($plan->intent === 'summary') {
+            $parts[] = 'The user is asking for a conversation summary. Use the full conversation history to provide a brief summary of all key topics discussed. Cover the main points only. Do not re-answer any individual questions.';
+        } elseif ($plan->useMemory) {
+            $parts[] = 'The user is asking about a previously discussed fact, like their name or a past topic. Use the relevant context from previous conversation to answer. If you don\'t find the information in the context, say so briefly. Answer directly and concisely.';
+        } elseif ($plan->useRag) {
+            $parts[] = 'The user is asking about project documentation, business rules, or policies. Answer only from the retrieved knowledge context below. If the knowledge context doesn\'t contain the answer, say: "I don\'t have enough information about that in the project knowledge." Do not invent or guess policies. Do not use tools or general knowledge to answer project-specific questions.';
+        } elseif (! empty($plan->tools)) {
+            $parts[] = 'The user is asking about live application data. Use the available tools to get the data. Never guess or invent values. If a tool is available and authorized, use it. If no relevant tool is available, say briefly: "I don\'t have an available tool for that right now." Respond directly with the data — no disclaimers, no explanations about how the data was retrieved. Do not mention tool names.';
+        } elseif ($plan->intent === 'direct' && $plan->historyMode !== 'none') {
+            $parts[] = 'The user is continuing from the previous topic. Use the recent conversation history to continue naturally, but only answer the latest user message. Do not re-answer old questions. Keep the same context and format as the previous assistant response.';
+        } else {
+            $parts[] = 'The user is greeting, thanking, or asking about your identity. Reply naturally and very briefly — a friendly one-liner is enough. Do not use tools, RAG, or memory. Do not mention any previous conversation. If greeting in Arabic, respond in Arabic briefly. If the user thanks you, respond simply with "عفواً" or "you\'re welcome". If asking your name, say "أنا مساعدك الذكي" or "I am your AI assistant."';
         }
 
         if ($policy->mode === 'relevant' && $this->storedContext) {
             $parts[] = "Relevant context from previous conversation:\n{$this->storedContext}";
-            $parts[] = 'The user is asking about a specific previously discussed fact, such as their name or a previous topic. Use the relevant context above to answer. IMPORTANT: In Arabic dialect, phrases like "اسمي ايه", "اسمى اى", "اسمي اي", "انا اسمى اى", "اسمي مين" mean "what is my name?" — they are QUESTIONS, not name declarations. Similarly "فاكر اسمي" means "do you remember my name?". Answer the question directly from the context. If the context shows the user previously said their name, answer with that name. Do NOT treat a name recall question as a new name declaration.';
         }
 
-        if ($policy->mode === 'summary') {
-            $parts[] = 'The user is asking for a summary of the conversation. Provide a concise summary covering all key points discussed.';
-        }
-
-        return trim(implode("\n\n", $parts));
+        return trim(implode("\n\n", array_filter($parts)));
     }
 
     public function messages(): iterable

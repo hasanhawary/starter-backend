@@ -67,36 +67,6 @@ class SendToProvider
             $parts[] = $agentPrompt;
         }
 
-        $policy = null;
-        $historyLabel = '';
-        if ($plan) {
-            $selector = app(HistorySelector::class);
-            $policy = $selector->select($plan, $payload->message);
-            $historyLabel = $selector->buildHistoryLabel($policy);
-        }
-
-        if ($policy) {
-            if (! $policy->useHistory) {
-                $parts[] = "\n\nThis is a greeting, identity statement, or casual message. Reply naturally and briefly to the current message only. Do not summarize, repeat, or answer previous unrelated questions unless the user explicitly asks.";
-            } elseif ($policy->mode === 'summary') {
-                $parts[] = "\n\nThe user is asking for a conversation summary. Use the conversation history to provide a summary of all topics discussed. Do not re-answer any individual questions.";
-            } elseif ($policy->mode === 'relevant') {
-                $parts[] = "\n\nThe user is asking about something from a previous conversation (e.g. their name, a topic discussed earlier, something they told you). Relevant previous context is provided below. Directly answer their question using that context. Do NOT start with a greeting. Do NOT re-answer unrelated previous questions.";
-            } elseif ($plan) {
-                if ($plan->isSimpleLiveData()) {
-                    $parts[] = "\n\nUse the available tools to answer this live-data question. Do not invent values.";
-                } elseif ($plan->isKnowledgeRequest()) {
-                    $parts[] = "\n\nAnswer only from retrieved project knowledge. If missing, say you do not have enough information.";
-                } elseif ($plan->isMemoryRequest()) {
-                    $parts[] = "\n\nUse the conversation memory context to provide a relevant response.";
-                }
-            }
-        }
-
-        if ($historyLabel !== '') {
-            $parts[] = "\n\n{$historyLabel}";
-        }
-
         if (! empty($payload->context)) {
             $parts[] = "## Context\n".json_encode($payload->context, JSON_PRETTY_PRINT);
         }

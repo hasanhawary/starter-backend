@@ -1,0 +1,131 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: API ONLINE
+    - heading "Welcome" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: This endpoint serves a backend API.
+      - text: No web interface is provided.
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Host
+        - generic [ref=e10]: localhost
+      - generic [ref=e11]:
+        - generic [ref=e12]: Client IP
+        - generic [ref=e13]: 127.0.0.1
+      - generic [ref=e14]:
+        - generic [ref=e15]: Secure Connection
+        - generic [ref=e16]: "No"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Server Time (UTC)
+        - generic [ref=e19]: 2026-05-31 02:33:19
+    - generic [ref=e20]:
+      - generic [ref=e21]: AI Chat
+      - generic [ref=e22]:
+        - button "Open AI Chat" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Open AI Chat
+        - button "Start Demo" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Start Demo
+      - generic [ref=e29]:
+        - text: Use
+        - code [ref=e30]: AIChatWidget.open()
+        - text: /
+        - code [ref=e31]: .close()
+        - text: /
+        - code [ref=e32]: .toggle()
+        - text: /
+        - code [ref=e33]: .expand()
+        - text: /
+        - code [ref=e34]: .reset()
+        - text: in your browser console.
+  - generic [ref=e42]:
+    - button "تبديل التصغير" [ref=e43] [cursor=pointer]:
+      - generic [ref=e44]:
+        - img [ref=e46]
+        - generic [ref=e49]:
+          - heading "المساعد الذكي" [level=3] [ref=e50]
+          - paragraph [ref=e51]: متصل الآن
+      - generic [ref=e52]:
+        - button "English" [ref=e53]:
+          - img [ref=e54]
+          - generic [ref=e58]: EN
+        - generic [ref=e59]:
+          - button "خيارات إضافية" [ref=e60]:
+            - img [ref=e61]
+          - menu:
+            - menuitem "محادثة جديدة":
+              - img
+              - generic: محادثة جديدة
+            - menuitem "English":
+              - img
+              - generic: English
+            - menuitem "الإعدادات":
+              - img
+              - generic: الإعدادات
+            - menuitem "شاشة كاملة":
+              - img
+              - generic: شاشة كاملة
+            - menuitem "تصدير المحادثة":
+              - img
+              - generic: تصدير المحادثة
+            - menuitem "مسح المحادثة":
+              - img
+              - generic: مسح المحادثة
+        - button "تصغير" [ref=e65]:
+          - img [ref=e66]
+        - button "شاشة كاملة" [ref=e67]:
+          - img [ref=e68]
+        - button "إغلاق" [ref=e73]:
+          - img [ref=e74]
+    - log "رسائل المحادثة" [ref=e77]:
+      - generic [ref=e693]:
+        - generic [ref=e694]: عدد المستخدمين كام
+        - generic [ref=e696]: 05:39
+      - generic [ref=e697]:
+        - generic [ref=e698]:
+          - text: استعلام قاعدة البيانات...
+          - text: عدد المستخدمين الإجمالي هو 1,247 مستخدم.
+        - generic [ref=e699]:
+          - generic [ref=e700]: 05:39
+          - button "Copy reply" [ref=e701] [cursor=pointer]:
+            - img [ref=e702]
+          - generic [ref=e705]:
+            - button "Mark as helpful" [ref=e706] [cursor=pointer]:
+              - img [ref=e707]
+            - button "Mark as not helpful" [ref=e710] [cursor=pointer]:
+              - img [ref=e711]
+      - generic [ref=e714]:
+        - generic [ref=e715]: شكرا
+        - generic [ref=e717]: 05:39
+      - generic [ref=e718]:
+        - generic [ref=e719]: عفواً
+        - generic [ref=e720]:
+          - generic [ref=e721]: 05:39
+          - button "Copy reply" [ref=e722] [cursor=pointer]:
+            - img [ref=e723]
+          - generic [ref=e726]:
+            - button "Mark as helpful" [ref=e727] [cursor=pointer]:
+              - img [ref=e728]
+            - button "Mark as not helpful" [ref=e731] [cursor=pointer]:
+              - img [ref=e732]
+      - generic [ref=e735]:
+        - generic [ref=e736]: blah blah
+        - generic [ref=e738]: 05:40
+      - generic [ref=e739]:
+        - generic [ref=e740]: I'm not sure what you're looking for. Could you please let me know how I can help you today?
+        - generic [ref=e741]:
+          - generic [ref=e742]: 05:40
+          - button "Copy reply" [ref=e743] [cursor=pointer]:
+            - img [ref=e744]
+          - generic [ref=e747]:
+            - button "Mark as helpful" [ref=e748] [cursor=pointer]:
+              - img [ref=e749]
+            - button "Mark as not helpful" [ref=e752] [cursor=pointer]:
+              - img [ref=e753]
+    - generic [ref=e457]:
+      - textbox "إرسال" [ref=e458]:
+        - /placeholder: اكتب رسالتك...
+      - button "إرسال" [disabled] [ref=e459]:
+        - img [ref=e460]
+    - generic [ref=e462]: مدعوم من WaKeb AI

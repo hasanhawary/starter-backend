@@ -98,6 +98,8 @@ class HeuristicPlanner
         'do you remember' => 'memory',
         'remember' => 'memory',
         'recall' => 'memory',
+        'say my name' => 'memory',
+        'what is my name' => 'memory',
         'المرة اللي فاتت' => 'memory',
         'قبل كده' => 'memory',
         'كمل اللي فات' => 'memory',
@@ -118,6 +120,13 @@ class HeuristicPlanner
         'هل تذكر' => 'memory',
         'فاكرني' => 'memory',
         'تفتكرني' => 'memory',
+        'اسمي ايه' => 'memory',
+        'اسمي اي' => 'memory',
+        'اسمى اى' => 'memory',
+        'اسمي مين' => 'memory',
+        'مين اسمي' => 'memory',
+        'ايه اسمي' => 'memory',
+        'فاكر اسمي' => 'memory',
     ];
 
     protected array $greetingPatterns = [
@@ -140,6 +149,48 @@ class HeuristicPlanner
         'تمام', 'الحمد لله',
         'اخبارك ايه', 'ايه الاخبار',
         'الدنيا ايه',
+        'شكرا', 'thanks', 'thank you', 'thankyou',
+        'مشكور', 'تسلم', 'يسلمو',
+        'عفوا', 'youre welcome', 'welcome',
+        'اسمك ايه', 'اسمك اي', 'اسمك مين', 'ما اسمك',
+        'انت مين', 'مين انت', 'whats your name',
+        'what is your name', 'who are you',
+    ];
+
+    protected array $followUpPatterns = [
+        'continue', 'go on', 'carry on',
+        'وضح اكتر', 'اكمل', 'واستمر',
+        'why', 'ليه', 'ليه كده',
+        'explain more', 'tell me more', 'more details',
+        'تفاصيل اكتر', 'again', 'مرة تانية',
+        'repeat', 'كرر',
+        'و بعدين', 'طب ليه', 'و بعد كده',
+    ];
+
+    protected array $summaryPatterns = [
+        'summarize our conversation', 'summarize the conversation',
+        'لخص المحادثة', 'لخص المحادثه',
+        'لخص اللي حصل', 'لخص اللي اتكلمنا فيه',
+        'what did we discuss', 'what did we talk about',
+        'what have we covered', 'recap',
+        'ايه اللي اتكلمنا فيه', 'ايه اللي قلناه',
+        'ملخص المحادثة', 'خلاصة المحادثه',
+        'summary of conversation', 'conversation summary',
+        'summarize', 'لخص',
+    ];
+
+    protected array $generalKnowledgePatterns = [
+        'what is', 'what are', 'who is', 'who are',
+        'define', 'definition', 'meaning of',
+        'how many countries', 'how many planets',
+        'capital of', 'population of',
+        'what is the meaning', 'tell me about',
+        'ما هو', 'من هو', 'ما هي', 'من هي',
+        'معنى', 'تعريف', 'يعني ايه',
+    ];
+
+    protected array $nameDeclarationIndicators = [
+        'my name is', 'my names ', 'my name\'s ',
     ];
 
     protected array $complexAnalyticsIndicators = [
@@ -163,6 +214,13 @@ class HeuristicPlanner
 
     protected array $dialectCache = [];
 
+    protected array $questionWords = [
+        'ايه', 'اي', 'مين', 'اين', 'فين', 'امتى', 'ليه',
+        'ازاي', 'ايش', 'هل', 'كيف', 'ما', 'ماذا', 'من',
+        'what', 'who', 'where', 'when', 'why', 'how', 'is',
+        'do you', 'are you', 'can you',
+    ];
+
     public function __construct(
         protected ToolRegistry $toolRegistry,
     ) {}
@@ -174,16 +232,21 @@ class HeuristicPlanner
         $plan = new ExecutionPlan;
         $plan->planner = 'heuristic';
 
+        if ($this->isNameDeclaration($normalizedMessage)) {
+            return $this->directPlan($plan, 'name_declaration');
+        }
+
         $greetingMatch = $this->detectGreeting($normalizedMessage, $message);
         if ($greetingMatch !== null) {
-            $plan->intent = 'direct';
-            $plan->historyLimit = 0;
-            $plan->historyMode = 'none';
-            $plan->useRag = false;
-            $plan->useMemory = false;
-            $plan->tools = [];
-            $plan->metadata['confidence'] = $greetingMatch['confidence'];
-            $plan->metadata['reason'] = $greetingMatch['reason'];
+            return $this->directPlan($plan, $greetingMatch['reason'], $greetingMatch['confidence']);
+        }
+
+        if ($this->isSummary($normalizedMessage)) {
+            $plan->intent = 'summary';
+            $plan->historyMode = 'summary';
+            $plan->historyLimit = 20;
+            $plan->metadata['confidence'] = 0.90;
+            $plan->metadata['reason'] = 'summary_match';
 
             return $plan;
         }
@@ -195,14 +258,27 @@ class HeuristicPlanner
         $this->checkMemory($plan, $normalizedMessage, $originalMessage, $matchedTools);
         if ($plan->intent === 'memory') {
             $plan->historyMode = 'relevant';
+            $plan->historyLimit = 8;
             $plan->metadata['confidence'] = 0.90;
             $plan->metadata['reason'] = 'memory_phrase_match';
 
             return $plan;
         }
 
+        if ($this->isGeneralKnowledge($normalizedMessage)) {
+            $plan->intent = 'direct';
+            $plan->historyMode = 'none';
+            $plan->historyLimit = 0;
+            $plan->metadata['confidence'] = 0.85;
+            $plan->metadata['reason'] = 'general_knowledge_match';
+
+            return $plan;
+        }
+
         $this->checkKnowledge($plan, $normalizedMessage, $originalMessage, $detectedIntent, $matchedTools);
         if ($plan->intent === 'knowledge' || $plan->intent === 'project_structure') {
+            $plan->historyMode = 'recent';
+            $plan->historyLimit = 4;
             $plan->metadata['confidence'] = 0.80;
             $plan->metadata['reason'] = $plan->intent === 'project_structure' ? 'project_structure_match' : 'knowledge_pattern_match';
 
@@ -214,6 +290,8 @@ class HeuristicPlanner
             $plan->intent = 'mixed';
             $plan->tools = $matchedTools;
             $plan->useRag = $hasBusinessRule;
+            $plan->historyMode = 'recent';
+            $plan->historyLimit = 4;
             if ($hasBusinessRule) {
                 $plan->ragQuery = $originalMessage;
             }
@@ -224,8 +302,10 @@ class HeuristicPlanner
         }
 
         if (! empty($matchedTools) && $bestToolScore >= $this->toolMatchThreshold()) {
-            $plan->tools = $matchedTools;
             $plan->intent = in_array($detectedIntent, ['analytics', 'mixed']) ? $detectedIntent : 'live_data';
+            $plan->tools = $matchedTools;
+            $plan->historyMode = 'recent';
+            $plan->historyLimit = 4;
             $plan->metadata['confidence'] = max(0.80, $bestToolScore);
             $plan->metadata['reason'] = 'tool_match';
 
@@ -234,16 +314,45 @@ class HeuristicPlanner
 
         if (in_array($detectedIntent, ['live_data', 'analytics'])) {
             $plan->intent = $detectedIntent;
+            $plan->tools = $matchedTools;
+            $plan->historyMode = 'recent';
+            $plan->historyLimit = 4;
             $plan->metadata['confidence'] = 0.80;
             $plan->metadata['reason'] = 'live_data_pattern_match';
 
             return $plan;
         }
 
+        if ($this->isFollowUp($normalizedMessage)) {
+            $plan->intent = 'direct';
+            $plan->historyMode = 'recent';
+            $plan->historyLimit = 6;
+            $plan->metadata['confidence'] = 0.85;
+            $plan->metadata['reason'] = 'follow_up_match';
+
+            return $plan;
+        }
+
         $plan->intent = 'direct';
-        $plan->historyMode = 'recent';
+        $plan->needsClarification = true;
+        $plan->historyMode = 'none';
+        $plan->historyLimit = 0;
         $plan->metadata['confidence'] = 0.50;
-        $plan->metadata['reason'] = 'unknown_direct';
+        $plan->metadata['reason'] = 'unrecognized_message';
+
+        return $plan;
+    }
+
+    protected function directPlan(ExecutionPlan $plan, string $reason, float $confidence = 0.95): ExecutionPlan
+    {
+        $plan->intent = 'direct';
+        $plan->historyLimit = 0;
+        $plan->historyMode = 'none';
+        $plan->useRag = false;
+        $plan->useMemory = false;
+        $plan->tools = [];
+        $plan->metadata['confidence'] = $confidence;
+        $plan->metadata['reason'] = $reason;
 
         return $plan;
     }
@@ -252,15 +361,27 @@ class HeuristicPlanner
     {
         $normalized = ArabicTextNormalizer::normalize($message);
 
+        if ($this->isNameDeclaration($normalized)) {
+            return true;
+        }
+
         if ($this->detectGreeting($normalized, $message) !== null) {
             return true;
         }
 
-        foreach ($this->getMergedLiveDataPatterns() as $pattern => $type) {
+        if ($this->isSummary($normalized)) {
+            return true;
+        }
+
+        foreach ($this->memoryPatterns as $pattern => $type) {
             $normPattern = ArabicTextNormalizer::normalize($pattern);
             if (str_contains($normalized, $normPattern)) {
                 return true;
             }
+        }
+
+        if ($this->isGeneralKnowledge($normalized)) {
+            return true;
         }
 
         foreach ($this->getMergedKnowledgePatterns() as $pattern => $type) {
@@ -277,7 +398,7 @@ class HeuristicPlanner
             }
         }
 
-        foreach ($this->memoryPatterns as $pattern => $type) {
+        foreach ($this->getMergedLiveDataPatterns() as $pattern => $type) {
             $normPattern = ArabicTextNormalizer::normalize($pattern);
             if (str_contains($normalized, $normPattern)) {
                 return true;
@@ -297,6 +418,10 @@ class HeuristicPlanner
             return true;
         }
 
+        if ($this->isFollowUp($normalized)) {
+            return true;
+        }
+
         return false;
     }
 
@@ -307,6 +432,10 @@ class HeuristicPlanner
 
     public function shouldUseLlm(ExecutionPlan $plan): bool
     {
+        if ($plan->needsClarification) {
+            return false;
+        }
+
         $confidence = $this->getConfidence($plan);
         $threshold = (float) config('ai-chat.planning.heuristic_confidence_threshold', 0.75);
 
@@ -423,9 +552,19 @@ class HeuristicPlanner
             return 0.0;
         }
 
-        $normalizedModel = ArabicTextNormalizer::normalize($modelWord);
+        $modelSynonyms = $this->getModelSynonyms($modelWord);
+        $modelMatched = false;
 
-        if (! str_contains($normalizedMessage, $normalizedModel) && ! str_contains($normalizedMessage, $modelWord)) {
+        foreach ($modelSynonyms as $synonym) {
+            $normSynonym = ArabicTextNormalizer::normalize($synonym);
+            if (str_contains($normalizedMessage, $normSynonym)) {
+                $modelMatched = true;
+
+                break;
+            }
+        }
+
+        if (! $modelMatched) {
             return 0.0;
         }
 
@@ -521,6 +660,105 @@ class HeuristicPlanner
         }
 
         return $max;
+    }
+
+    protected function isNameDeclaration(string $normalized): bool
+    {
+        foreach ($this->nameDeclarationIndicators as $prefix) {
+            if (str_starts_with($normalized, $prefix) || str_starts_with(mb_strtolower(str_replace("'", '', $normalized)), $prefix)) {
+                $afterPrefix = trim(substr($normalized, strlen($prefix)));
+                if ($afterPrefix !== '' && ! $this->startsWithQuestionWord($afterPrefix)) {
+                    return true;
+                }
+            }
+        }
+
+        $namePrefixes = ['اسمي', 'اسمى'];
+        foreach ($namePrefixes as $prefix) {
+            $pos = mb_strpos($normalized, $prefix);
+            if ($pos === false) {
+                continue;
+            }
+
+            $afterName = trim(mb_substr($normalized, $pos + mb_strlen($prefix)));
+            if ($afterName === '') {
+                continue;
+            }
+
+            if (! $this->startsWithQuestionWord($afterName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function startsWithQuestionWord(string $text): bool
+    {
+        foreach ($this->questionWords as $qw) {
+            if (str_starts_with($text, $qw) || str_starts_with($text, mb_strtolower($qw))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function isFollowUp(string $normalized): bool
+    {
+        $wordCount = count(explode(' ', $normalized));
+
+        foreach ($this->followUpPatterns as $pattern) {
+            $normPattern = ArabicTextNormalizer::normalize($pattern);
+            if ($normPattern === '') {
+                continue;
+            }
+
+            if ($normalized === $normPattern) {
+                return true;
+            }
+
+            if ($wordCount <= 5 && str_starts_with($normalized, $normPattern.' ')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function isSummary(string $normalized): bool
+    {
+        foreach ($this->summaryPatterns as $pattern) {
+            $normPattern = ArabicTextNormalizer::normalize($pattern);
+            if ($normPattern !== '' && str_contains($normalized, $normPattern)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function isGeneralKnowledge(string $normalized): bool
+    {
+        foreach ($this->generalKnowledgePatterns as $pattern) {
+            $normPattern = ArabicTextNormalizer::normalize($pattern);
+
+            if ($normPattern === '') {
+                continue;
+            }
+
+            if (! str_contains($normalized, $normPattern)) {
+                continue;
+            }
+
+            if ($this->isKnowledgePattern($normalized)) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     protected function isKnowledgePattern(string $normalizedMessage): bool
@@ -779,6 +1017,27 @@ class HeuristicPlanner
         }
 
         return $this->dialectCache;
+    }
+
+    protected function getModelSynonyms(string $model): array
+    {
+        $dialectSynonyms = config('ai-chat-dialects.model_synonyms', []);
+
+        if (isset($dialectSynonyms[$model])) {
+            return $dialectSynonyms[$model];
+        }
+
+        $builtin = [
+            'user' => ['user', 'users', 'مستخدم', 'المستخدمين', 'مستخدمين'],
+            'role' => ['role', 'roles', 'دور', 'الادوار', 'ادوار', 'رول'],
+            'permission' => ['permission', 'permissions', 'صلاحية', 'الصلاحيات', 'صلاحيات'],
+            'setting' => ['setting', 'settings', 'اعداد', 'الاعدادات', 'اعدادات'],
+            'notification' => ['notification', 'notifications', 'اشعار', 'الاشعارات', 'اشعارات'],
+            'country' => ['country', 'countries', 'دولة', 'بلاد', 'دول'],
+            'order' => ['order', 'orders', 'طلب', 'الطلبات', 'طلبات'],
+        ];
+
+        return $builtin[$model] ?? [$model];
     }
 
     protected function getActionSynonyms(string $action): array

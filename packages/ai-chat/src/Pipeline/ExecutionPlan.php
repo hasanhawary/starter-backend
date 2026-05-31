@@ -6,6 +6,8 @@ class ExecutionPlan
 {
     public string $intent = 'direct';
 
+    public ?string $capability = null;
+
     public array $tools = [];
 
     public bool $useRag = false;
@@ -36,6 +38,7 @@ class ExecutionPlan
     {
         $plan = new self;
         $plan->intent = $data['intent'] ?? 'direct';
+        $plan->capability = $data['capability'] ?? null;
         $plan->tools = $data['tools'] ?? [];
         $plan->useRag = $data['use_rag'] ?? $data['useRag'] ?? false;
         $plan->ragQuery = $data['rag_query'] ?? $data['ragQuery'] ?? null;
@@ -57,6 +60,7 @@ class ExecutionPlan
     {
         return [
             'intent' => $this->intent,
+            'capability' => $this->capability,
             'tools' => $this->tools,
             'use_rag' => $this->useRag,
             'rag_query' => $this->ragQuery,

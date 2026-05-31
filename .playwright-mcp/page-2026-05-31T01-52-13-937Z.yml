@@ -1,0 +1,171 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: API ONLINE
+    - heading "Welcome" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: This endpoint serves a backend API.
+      - text: No web interface is provided.
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Host
+        - generic [ref=e10]: localhost
+      - generic [ref=e11]:
+        - generic [ref=e12]: Client IP
+        - generic [ref=e13]: 127.0.0.1
+      - generic [ref=e14]:
+        - generic [ref=e15]: Secure Connection
+        - generic [ref=e16]: "No"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Server Time (UTC)
+        - generic [ref=e19]: 2026-05-31 01:49:00
+    - generic [ref=e20]:
+      - generic [ref=e21]: AI Chat
+      - generic [ref=e22]:
+        - button "Open AI Chat" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Open AI Chat
+        - button "Start Demo" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Start Demo
+      - generic [ref=e29]:
+        - text: Use
+        - code [ref=e30]: AIChatWidget.open()
+        - text: /
+        - code [ref=e31]: .close()
+        - text: /
+        - code [ref=e32]: .toggle()
+        - text: /
+        - code [ref=e33]: .expand()
+        - text: /
+        - code [ref=e34]: .reset()
+        - text: in your browser console.
+  - generic:
+    - button "فتح المحادثة" [ref=e35] [cursor=pointer]:
+      - img [ref=e37]
+      - generic: "1"
+    - generic:
+      - button "تبديل التصغير":
+        - generic:
+          - generic:
+            - img
+          - generic:
+            - heading "المساعد الذكي" [level=3]
+            - paragraph: متصل الآن
+        - generic:
+          - button "English":
+            - img
+            - generic: EN
+          - generic:
+            - button "خيارات إضافية":
+              - img
+            - menu:
+              - menuitem "محادثة جديدة":
+                - img
+                - generic: محادثة جديدة
+              - menuitem "English":
+                - img
+                - generic: English
+              - menuitem "الإعدادات":
+                - img
+                - generic: الإعدادات
+              - menuitem "شاشة كاملة":
+                - img
+                - generic: شاشة كاملة
+              - menuitem "تصدير المحادثة":
+                - img
+                - generic: تصدير المحادثة
+              - menuitem "مسح المحادثة":
+                - img
+                - generic: مسح المحادثة
+          - button "تصغير":
+            - img
+          - button "شاشة كاملة":
+            - img
+          - button "إغلاق":
+            - img
+      - log "رسائل المحادثة":
+        - generic:
+          - generic: How many users do we have?
+          - generic:
+            - generic: 04:49
+        - generic:
+          - generic: I don't have access to your user data or systems, so I cannot provide the exact number of users you have. To get this information, you would need to check your user database, analytics platform, or user management system. If you provide me with access to the appropriate tools or data sources that contain your user information, I would be able to help you determine the user count.
+          - generic:
+            - generic: 04:49
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+        - generic:
+          - generic: What is the weather?
+          - generic:
+            - generic: 04:50
+        - generic:
+          - generic: I don't have information about the weather in the available project knowledge. The knowledge base contains information about refund policies and a project overview, but no weather data.
+          - generic:
+            - generic: 04:50
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+        - generic:
+          - generic: ازيك
+          - generic:
+            - generic: 04:50
+        - generic:
+          - generic: وعليكم السلام! أنا بخير، شكراً لسؤالك. كيف حالك أنت؟
+          - generic:
+            - generic: 04:51
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+        - generic:
+          - generic: انا اسمي حسن وانت
+          - generic:
+            - generic: 04:51
+        - generic:
+          - generic: أنا مساعد AI، يمكنني مساعدتك بالإجابة على أسئلتك وتقديم المعلومات التي تحتاجها. كيف يمكنني مساعدتك اليوم يا حسن؟
+          - generic:
+            - generic: 04:51
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+        - generic:
+          - generic: انا اسمى اى
+          - generic:
+            - generic: 04:52
+        - generic:
+          - generic: حسن، اسمك هو حسن. أنا أذكر أنك ذكرت اسمك في الر
+          - generic:
+            - generic: 04:52
+            - button "Copy reply":
+              - img
+            - generic:
+              - button "Mark as helpful":
+                - img
+              - button "Mark as not helpful":
+                - img
+      - generic:
+        - button "Stop generating":
+          - img
+          - text: Stop generating
+        - generic:
+          - textbox "إرسال" [disabled]:
+            - /placeholder: اكتب رسالتك...
+          - button "إرسال" [disabled]:
+            - img
+      - generic: مدعوم من WaKeb AI

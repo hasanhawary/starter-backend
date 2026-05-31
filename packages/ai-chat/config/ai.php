@@ -106,7 +106,6 @@ return [
             'use_default_credential_provider' => env('AWS_USE_DEFAULT_CREDENTIALS', true),
         ],
 
-
         'deepseek' => [
             'driver' => 'deepseek',
             'key' => env('DEEPSEEK_API_KEY'),

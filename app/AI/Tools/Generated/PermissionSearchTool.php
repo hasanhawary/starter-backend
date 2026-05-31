@@ -21,7 +21,7 @@ class PermissionSearchTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [
                 'search' => ['type' => 'string', 'description' => 'Search term'],
@@ -37,7 +37,7 @@ class PermissionSearchTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $limit = min((int) ($arguments['limit'] ?? 10), 100);
+                $limit = min((int) ($arguments['limit'] ?? 10), 100);
         $search = $arguments['search'] ?? '';
 
         $query = Permission::query();

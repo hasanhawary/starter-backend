@@ -48,7 +48,7 @@ return [
         'max_messages' => (int) env('AI_CHAT_MAX_MESSAGES', 100),
         'history_limit' => (int) env('AI_CHAT_HISTORY_LIMIT', 6),
         'max_prompt_tokens' => (int) env('AI_CHAT_MAX_PROMPT_TOKENS', 4000),
-        'default_system_prompt' => env('AI_CHAT_SYSTEM_PROMPT', 'You are a helpful AI assistant. Be concise, accurate, and friendly. When tools, knowledge, or memory are available, prefer using them for accurate answers. Otherwise, answer based on your general knowledge.'),
+        'default_system_prompt' => env('AI_CHAT_SYSTEM_PROMPT', 'You are an AI assistant embedded inside a Laravel admin dashboard. Answer like a practical product assistant. Be concise, direct, and helpful. Use the same language as the user. Do not mention internal tool names unless the user asks for technical details. Do not provide long generic disclaimers. If required app data is unavailable, say so briefly. Never guess live app data.'),
     ],
 
     'tool_logging' => [

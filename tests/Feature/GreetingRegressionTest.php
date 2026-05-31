@@ -127,8 +127,8 @@ class GreetingRegressionTest extends TestCase
 
         $instructions = (string) $agent->instructions();
 
-        $this->assertStringContainsString('not asking about any previous conversation topic', $instructions);
-        $this->assertStringContainsString('Reply naturally', $instructions);
+        $this->assertStringContainsString('greeting, thanking', $instructions);
+        $this->assertStringContainsString('direct, and helpful', $instructions);
         $this->assertStringContainsString('latest user message', $instructions);
     }
 
@@ -143,7 +143,7 @@ class GreetingRegressionTest extends TestCase
 
         $instructions = (string) $agent->instructions();
 
-        $this->assertStringNotContainsString('not asking about any previous conversation topic', $instructions);
+        $this->assertStringNotContainsString('greeting, thanking', $instructions);
     }
 
     public function test_system_prompt_for_memory_does_not_include_greeting_instruction(): void
@@ -157,7 +157,7 @@ class GreetingRegressionTest extends TestCase
 
         $instructions = (string) $agent->instructions();
 
-        $this->assertStringNotContainsString('not asking about any previous conversation topic', $instructions);
+        $this->assertStringNotContainsString('greeting, thanking', $instructions);
     }
 
     #[DataProvider('greetingProvider')]

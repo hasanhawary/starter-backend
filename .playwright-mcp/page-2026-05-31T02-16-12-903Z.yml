@@ -1,0 +1,185 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: API ONLINE
+    - heading "Welcome" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: This endpoint serves a backend API.
+      - text: No web interface is provided.
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Host
+        - generic [ref=e10]: localhost
+      - generic [ref=e11]:
+        - generic [ref=e12]: Client IP
+        - generic [ref=e13]: 127.0.0.1
+      - generic [ref=e14]:
+        - generic [ref=e15]: Secure Connection
+        - generic [ref=e16]: "No"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Server Time (UTC)
+        - generic [ref=e19]: 2026-05-31 02:12:25
+    - generic [ref=e20]:
+      - generic [ref=e21]: AI Chat
+      - generic [ref=e22]:
+        - button "Open AI Chat" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Open AI Chat
+        - button "Start Demo" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Start Demo
+      - generic [ref=e29]:
+        - text: Use
+        - code [ref=e30]: AIChatWidget.open()
+        - text: /
+        - code [ref=e31]: .close()
+        - text: /
+        - code [ref=e32]: .toggle()
+        - text: /
+        - code [ref=e33]: .expand()
+        - text: /
+        - code [ref=e34]: .reset()
+        - text: in your browser console.
+  - generic [ref=e42]:
+    - button "تبديل التصغير" [ref=e43] [cursor=pointer]:
+      - generic [ref=e44]:
+        - img [ref=e46]
+        - generic [ref=e49]:
+          - heading "المساعد الذكي" [level=3] [ref=e50]
+          - paragraph [ref=e51]: متصل الآن
+      - generic [ref=e52]:
+        - button "English" [ref=e53]:
+          - img [ref=e54]
+          - generic [ref=e58]: EN
+        - generic [ref=e59]:
+          - button "خيارات إضافية" [ref=e60]:
+            - img [ref=e61]
+          - menu:
+            - menuitem "محادثة جديدة":
+              - img
+              - generic: محادثة جديدة
+            - menuitem "English":
+              - img
+              - generic: English
+            - menuitem "الإعدادات":
+              - img
+              - generic: الإعدادات
+            - menuitem "شاشة كاملة":
+              - img
+              - generic: شاشة كاملة
+            - menuitem "تصدير المحادثة":
+              - img
+              - generic: تصدير المحادثة
+            - menuitem "مسح المحادثة":
+              - img
+              - generic: مسح المحادثة
+        - button "تصغير" [ref=e65]:
+          - img [ref=e66]
+        - button "شاشة كاملة" [ref=e67]:
+          - img [ref=e68]
+        - button "إغلاق" [ref=e73]:
+          - img [ref=e74]
+    - log "رسائل المحادثة" [ref=e77]:
+      - generic [ref=e78]:
+        - generic [ref=e79]: ازيك
+        - generic [ref=e81]: 05:12
+      - generic [ref=e82]:
+        - generic [ref=e83]: أنا بخير، شكراً!
+        - generic [ref=e84]:
+          - generic [ref=e85]: 05:12
+          - button "Copy reply" [ref=e86] [cursor=pointer]:
+            - img [ref=e87]
+          - generic [ref=e90]:
+            - button "Mark as helpful" [ref=e91] [cursor=pointer]:
+              - img [ref=e92]
+            - button "Mark as not helpful" [ref=e95] [cursor=pointer]:
+              - img [ref=e96]
+      - generic [ref=e99]:
+        - generic [ref=e100]: اسمك ايه
+        - generic [ref=e102]: 05:13
+      - generic [ref=e103]:
+        - generic [ref=e104]: أنا مساعدك الذكي
+        - generic [ref=e105]:
+          - generic [ref=e106]: 05:13
+          - button "Copy reply" [ref=e107] [cursor=pointer]:
+            - img [ref=e108]
+          - generic [ref=e111]:
+            - button "Mark as helpful" [ref=e112] [cursor=pointer]:
+              - img [ref=e113]
+            - button "Mark as not helpful" [ref=e116] [cursor=pointer]:
+              - img [ref=e117]
+      - generic [ref=e120]:
+        - generic [ref=e121]: hello
+        - generic [ref=e123]: 05:13
+      - generic [ref=e124]:
+        - generic [ref=e125]: Hello!
+        - generic [ref=e126]:
+          - generic [ref=e127]: 05:13
+          - button "Copy reply" [ref=e128] [cursor=pointer]:
+            - img [ref=e129]
+          - generic [ref=e132]:
+            - button "Mark as helpful" [ref=e133] [cursor=pointer]:
+              - img [ref=e134]
+            - button "Mark as not helpful" [ref=e137] [cursor=pointer]:
+              - img [ref=e138]
+      - generic [ref=e148]:
+        - generic [ref=e149]: how many users
+        - generic [ref=e151]: 05:14
+      - generic [ref=e152]:
+        - generic [ref=e153]: There are 32 users.
+        - generic [ref=e154]:
+          - generic [ref=e155]: 05:14
+          - button "Copy reply" [ref=e156] [cursor=pointer]:
+            - img [ref=e157]
+          - generic [ref=e160]:
+            - button "Mark as helpful" [ref=e161] [cursor=pointer]:
+              - img [ref=e162]
+            - button "Mark as not helpful" [ref=e165] [cursor=pointer]:
+              - img [ref=e166]
+      - generic [ref=e169]:
+        - generic [ref=e170]: عدد المستخدمين كام
+        - generic [ref=e172]: 05:14
+      - generic [ref=e173]:
+        - generic [ref=e174]: 32 مستخدم
+        - generic [ref=e175]:
+          - generic [ref=e176]: 05:14
+          - button "Copy reply" [ref=e177] [cursor=pointer]:
+            - img [ref=e178]
+          - generic [ref=e181]:
+            - button "Mark as helpful" [ref=e182] [cursor=pointer]:
+              - img [ref=e183]
+            - button "Mark as not helpful" [ref=e186] [cursor=pointer]:
+              - img [ref=e187]
+      - generic [ref=e190]:
+        - generic [ref=e191]: شكرا
+        - generic [ref=e193]: 05:15
+      - generic [ref=e194]:
+        - generic [ref=e195]: عفواً
+        - generic [ref=e196]:
+          - generic [ref=e197]: 05:15
+          - button "Copy reply" [ref=e198] [cursor=pointer]:
+            - img [ref=e199]
+          - generic [ref=e202]:
+            - button "Mark as helpful" [ref=e203] [cursor=pointer]:
+              - img [ref=e204]
+            - button "Mark as not helpful" [ref=e207] [cursor=pointer]:
+              - img [ref=e208]
+      - generic [ref=e211]:
+        - generic [ref=e212]: explain RAG
+        - generic [ref=e214]: 05:15
+      - generic [ref=e215]:
+        - generic [ref=e216]: RAG (Retrieval-Augmented Generation) is an AI approach that combines information retrieval with language generation. It works by first retrieving relevant documents or data from a knowledge base, then using this information to help generate more accurate and contextually appropriate responses. This method helps reduce hallucinations in AI responses and improves factual accuracy by grounding the model in external, up-to-date information.
+        - generic [ref=e217]:
+          - generic [ref=e218]: 05:15
+          - button "Copy reply" [ref=e219] [cursor=pointer]:
+            - img [ref=e220]
+          - generic [ref=e223]:
+            - button "Mark as helpful" [ref=e224] [cursor=pointer]:
+              - img [ref=e225]
+            - button "Mark as not helpful" [ref=e228] [cursor=pointer]:
+              - img [ref=e229]
+    - generic [ref=e142]:
+      - textbox "إرسال" [ref=e143]:
+        - /placeholder: اكتب رسالتك...
+      - button "إرسال" [disabled] [ref=e144]:
+        - img [ref=e145]
+    - generic [ref=e147]: مدعوم من WaKeb AI
