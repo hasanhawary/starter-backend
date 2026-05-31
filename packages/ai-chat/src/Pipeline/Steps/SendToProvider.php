@@ -6,10 +6,15 @@ use AiChat\Agents\ChatAgent;
 use AiChat\Chat\ConversationManager;
 use AiChat\Chat\HistorySelector;
 use AiChat\Pipeline\ChatPayload;
+use AiChat\Response\FinalResponseFormatter;
 use Closure;
 
 class SendToProvider
 {
+    public function __construct(
+        protected FinalResponseFormatter $formatter,
+    ) {}
+
     public function handle(ChatPayload $payload, Closure $next): ChatPayload
     {
         if (! $payload->agent) {
@@ -123,7 +128,11 @@ class SendToProvider
             return $payload;
         }
 
-        $payload->response = $response->text ?? (string) $response;
+        $payload->response = $this->formatter->format(
+            $response->text ?? (string) $response,
+            $payload->message,
+            $payload->executionPlan,
+        );
 
         if (isset($response->usage)) {
             $payload->setMetadata('usage', (array) $response->usage);
@@ -160,7 +169,11 @@ class SendToProvider
                 $fullContent .= $content;
             }
 
-            $payload->response = $fullContent;
+            $payload->response = $this->formatter->format(
+                $fullContent,
+                $payload->message,
+                $payload->executionPlan,
+            );
             $payload->setMetadata('streamed', true);
 
             return $next($payload);

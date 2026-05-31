@@ -7,6 +7,7 @@ use AiChat\Chat\MessageManager;
 use AiChat\Chat\StreamManager;
 use AiChat\Http\Controllers\AiChatController;
 use AiChat\Pipeline\ChatPipeline;
+use AiChat\Response\FinalResponseFormatter;
 use Laravel\Ai\Responses\Data\Usage;
 use Laravel\Ai\Streaming\Events\StreamEnd;
 use Laravel\Ai\Streaming\Events\TextDelta;
@@ -22,6 +23,7 @@ class AiChatControllerTest extends TestCase
             $this->mock(MessageManager::class),
             $this->mock(ChatPipeline::class),
             $this->mock(StreamManager::class),
+            app(FinalResponseFormatter::class),
         );
 
         $method = new ReflectionMethod($controller, 'extractStreamChunk');

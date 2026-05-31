@@ -29,6 +29,7 @@ use AiChat\Pipeline\Steps\ResolveUser;
 use AiChat\Pipeline\Steps\RetrieveKnowledge;
 use AiChat\Pipeline\Steps\RetrieveMemory;
 use AiChat\Pipeline\Steps\ValidateMessage;
+use AiChat\Response\FinalResponseFormatter;
 use AiChat\Storage\AnonymousConversationStore;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pipeline\Pipeline;
@@ -43,6 +44,7 @@ class AiChatController extends Controller
         private readonly MessageManager $messageManager,
         private readonly ChatPipeline $pipeline,
         private readonly StreamManager $streamManager,
+        private readonly FinalResponseFormatter $formatter,
     ) {}
 
     public function sendMessage(SendMessageRequest $request): JsonResponse|StreamedResponse
@@ -111,7 +113,7 @@ class AiChatController extends Controller
 
         $finalConversationId = $conversationId;
 
-        return new StreamedResponse(function () use ($agent, $request, $finalConversationId, $payload) {
+        return new StreamedResponse(function () use ($agent, $request, $finalConversationId, $payload, $planningPayload) {
             if ($finalConversationId) {
                 echo "event: conversation_id\n";
                 echo 'data: '.json_encode(['conversation_id' => $finalConversationId])."\n\n";
@@ -130,35 +132,53 @@ class AiChatController extends Controller
                 $stream = $agent->stream($message);
 
                 $fullContent = '';
+                $visibleContent = '';
+                $finalBuffer = '';
+                $insideFinal = false;
+                $streamedFinal = false;
 
                 foreach ($stream as $event) {
                     $content = $this->extractStreamChunk($event);
-                    // Filter out internal reasoning phrases before appending
-                    if (! preg_match('/^(The user is|According to my guidelines|I should|I need to|I\'ll respond|I\'m thinking|I\'m planning)/i', $content)) {
-                        $fullContent .= $content;
+                    $fullContent .= $content;
+                    $visibleChunk = $this->extractFinalVisibleStreamChunk($content, $finalBuffer, $insideFinal);
+
+                    if ($this->streamEventType($event) === 'text_end' && $insideFinal && $finalBuffer !== '') {
+                        $visibleChunk .= $finalBuffer;
+                        $finalBuffer = '';
+                    }
+
+                    $visibleChunk = str_ireplace(['<final>', '</final>'], '', $visibleChunk);
+                    $visibleContent .= $visibleChunk;
+
+                    if ($visibleChunk !== '') {
+                        $streamedFinal = true;
                     }
 
                     if ($this->shouldEmitStreamEvent($event)) {
-                        // Ensure only final content is sent to client
-                        $cleanContent = preg_replace('/^(The user is|According to my guidelines|I should|I need to|I\'ll respond|I\'m thinking|I\'m planning).*\n?/mi', '', (string) $event);
-                        echo 'data: '.$cleanContent."\n\n";
+                        $eventContent = $this->formatStreamEvent($event, $visibleChunk, $fullContent, $message, $planningPayload->executionPlan, $streamedFinal);
 
-                        if (ob_get_level() > 0) {
-                            ob_flush();
+                        if ($eventContent !== '') {
+                            echo 'data: '.$eventContent."\n\n";
+
+                            if (ob_get_level() > 0) {
+                                ob_flush();
+                            }
+                            flush();
                         }
-                        flush();
                     }
 
                     $this->captureStreamUsage($payload, $event);
 
-                    $this->streamManager->appendToStream($finalConversationId ?? 'unknown', $content);
+                    if ($visibleChunk !== '') {
+                        $this->streamManager->appendToStream($finalConversationId ?? 'unknown', $visibleChunk);
+                    }
                 }
 
-                $payload->response = $fullContent;
+                $payload->response = $this->formatter->format($fullContent, $message, $planningPayload->executionPlan);
 
                 $this->persistStreamResponse($payload, $finalConversationId);
 
-                $this->streamManager->endStream($finalConversationId ?? 'unknown', $fullContent);
+                $this->streamManager->endStream($finalConversationId ?? 'unknown', $payload->response ?: $visibleContent);
             } catch (\Throwable $e) {
                 $this->streamManager->abortStream($finalConversationId ?? 'unknown');
 
@@ -423,6 +443,82 @@ class AiChatController extends Controller
         }
 
         return in_array($type, ['stream_start', 'text_start', 'text_delta', 'text_end', 'stream_end'], true);
+    }
+
+    protected function extractFinalVisibleStreamChunk(string $chunk, string &$buffer, bool &$insideFinal): string
+    {
+        if ($chunk === '') {
+            return '';
+        }
+
+        $buffer .= $chunk;
+        $visible = '';
+
+        while ($buffer !== '') {
+            if (! $insideFinal) {
+                $start = stripos($buffer, '<final>');
+
+                if ($start === false) {
+                    $buffer = substr($buffer, max(0, strlen($buffer) - 7));
+
+                    return $visible;
+                }
+
+                $buffer = substr($buffer, $start + 7);
+                $insideFinal = true;
+            }
+
+            $end = stripos($buffer, '</final>');
+
+            if ($end === false) {
+                $bufferLength = mb_strlen($buffer);
+                $safeLength = max(0, $bufferLength - 8);
+
+                if ($safeLength === 0) {
+                    return $visible;
+                }
+
+                $visible .= mb_substr($buffer, 0, $safeLength);
+                $buffer = mb_substr($buffer, $safeLength);
+
+                return $visible;
+            }
+
+            $visible .= substr($buffer, 0, $end);
+            $buffer = substr($buffer, $end + 8);
+            $insideFinal = false;
+        }
+
+        return $visible;
+    }
+
+    protected function formatStreamEvent(object $event, string $visibleChunk, string $fullContent, string $message, ?ExecutionPlan $plan, bool $streamedFinal): string
+    {
+        $type = $this->streamEventType($event);
+
+        if ($type === 'text_delta') {
+            if ($visibleChunk === '') {
+                return '';
+            }
+
+            return (string) json_encode(['type' => 'text_delta', 'delta' => $visibleChunk]);
+        }
+
+        if ($type !== 'text_end') {
+            return (string) $event;
+        }
+
+        if ($streamedFinal) {
+            return (string) $event;
+        }
+
+        $content = $this->formatter->format($fullContent, $message, $plan);
+
+        if ($content === '') {
+            return '';
+        }
+
+        return (string) json_encode(['type' => 'text_delta', 'delta' => $content]);
     }
 
     protected function captureStreamUsage(ChatPayload $payload, object $event): void

@@ -140,6 +140,8 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
 
         $parts[] = 'You are an AI assistant embedded inside a Laravel admin dashboard. Answer like a practical product assistant. Be concise, direct, and helpful. Use the same language as the user. Do not mention internal tool names unless the user asks for technical details. Do not provide long generic disclaimers. If required app data is unavailable, say so briefly. Never guess live app data.';
 
+        $parts[] = 'Output protocol: return only the final user-facing answer inside <final>...</final>. Do not include analysis, reasoning, planning, guideline explanations, hidden thoughts, or draft text outside the final tag. The text inside <final> must be exactly what the user should see.';
+
         $parts[] = 'The latest user message is the only active request. Previous messages are only context and have already been answered. Do not answer, revisit, summarize, or even mention any previous user messages or questions unless the latest user message explicitly asks about a specific previous topic.';
 
         $plan = $this->executionPlan;

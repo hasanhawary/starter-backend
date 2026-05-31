@@ -140,7 +140,7 @@ class HeuristicPlanner
     ];
 
     protected array $greetingPatterns = [
-        'ازيك', 'ازايك',
+        'ازيك', 'ازايك', 'زيك',
         'صباح الخير', 'مساء الخير',
         'اهلا', 'مرحبا',
         'سلام', 'السلام عليكم',
@@ -266,6 +266,7 @@ class HeuristicPlanner
         $bestToolScore = $this->bestToolScore($matchedTools, $normalizedMessage);
 
         $this->checkMemory($plan, $normalizedMessage, $originalMessage, $matchedTools);
+
         if ($plan->intent === 'memory') {
             $plan->historyMode = 'relevant';
             $plan->historyLimit = 8;

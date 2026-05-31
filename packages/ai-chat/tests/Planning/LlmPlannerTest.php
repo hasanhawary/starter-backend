@@ -159,6 +159,20 @@ class LlmPlannerTest extends TestCase
         AnonymousAgent::assertPrompted(fn ($prompt) => str_contains($prompt->prompt, 'how many user'));
     }
 
+    public function test_known_arabic_greeting_is_direct_without_provider_call(): void
+    {
+        AnonymousAgent::fake()->preventStrayPrompts();
+
+        $plan = (new LlmPlanner)->plan('زيك');
+
+        $this->assertSame('direct', $plan->intent);
+        $this->assertSame('llm_guard', $plan->planner);
+        $this->assertSame('none', $plan->historyMode);
+        $this->assertSame('direct', $plan->metadata['response_mode']);
+
+        AnonymousAgent::assertNeverPrompted();
+    }
+
     public function test_plan_extracts_json_from_prose_response(): void
     {
         $planner = new class extends LlmPlanner

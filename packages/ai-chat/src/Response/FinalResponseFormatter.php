@@ -14,6 +14,8 @@ class FinalResponseFormatter
             return $response;
         }
 
+        $response = $this->extractFinalTaggedContent($response);
+        $response = $this->removeReasoningPreamble($response, $userMessage);
         $response = $this->removeBadPhrases($response);
         $response = $this->removeToolMentions($response);
 
@@ -22,6 +24,106 @@ class FinalResponseFormatter
         }
 
         return $this->normalizeWhitespace($response);
+    }
+
+    protected function extractFinalTaggedContent(string $response): string
+    {
+        if (preg_match('/<final>(.*?)<\/final>/isu', $response, $match) === 1) {
+            return trim($match[1]);
+        }
+
+        if (preg_match('/<final>(.*)$/isu', $response, $match) === 1) {
+            return trim($match[1]);
+        }
+
+        return $response;
+    }
+
+    protected function removeReasoningPreamble(string $response, string $userMessage): string
+    {
+        $segments = preg_split('/\n+|(?<=[.!؟?])\s+/u', $response, -1, PREG_SPLIT_NO_EMPTY);
+
+        if (! is_array($segments)) {
+            return $response;
+        }
+
+        $kept = [];
+
+        foreach ($segments as $segment) {
+            $segment = trim($segment);
+
+            if ($segment === '') {
+                continue;
+            }
+
+            if ($this->isReasoningSegment($segment)) {
+                $tail = $this->extractFinalAnswerTail($segment, $userMessage);
+
+                if ($tail !== '') {
+                    $kept[] = $tail;
+                }
+
+                continue;
+            }
+
+            $kept[] = $segment;
+        }
+
+        return trim(implode(' ', $kept));
+    }
+
+    protected function isReasoningSegment(string $segment): bool
+    {
+        $patterns = [
+            '/^the user\b/i',
+            '/^according to\b/i',
+            '/^since the user\b/i',
+            '/^this is a\b/i',
+            '/^the guidelines?\b/i',
+            '/^i should\b/i',
+            '/^i need to\b/i',
+            '/^i will\b/i',
+            '/^i\'ll\b/i',
+            '/^i am going to\b/i',
+            '/^so i\b/i',
+            '/^the function returned\b/i',
+            '/^the tool returned\b/i',
+            '/^in arabic\b/i',
+            '/^given the context\b/i',
+            '/^it can be\b/i',
+            '/^it might be\b/i',
+            '/is an arabic greeting/i',
+            '/similar to\s+["\']?(how are you|what\'s up)/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $segment) === 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function extractFinalAnswerTail(string $segment, string $userMessage): string
+    {
+        if ($this->isArabic($userMessage)) {
+            preg_match_all('/[\p{Arabic}][\p{Arabic}\s،؟!.]+/u', $segment, $matches);
+            $arabicParts = array_values(array_filter(
+                array_map('trim', $matches[0] ?? []),
+                fn (string $part): bool => mb_strlen($part) > 8,
+            ));
+
+            if (! empty($arabicParts)) {
+                return end($arabicParts) ?: '';
+            }
+        }
+
+        if (preg_match('/(?:^|[\s.])(`?Hello!|Hi!|Hey!|You\'re welcome[.!]?|I am your AI assistant\.?)(.*)$/u', $segment, $match) === 1) {
+            return trim($match[1].($match[2] ?? ''));
+        }
+
+        return '';
     }
 
     protected function applyPlanRules(string $response, ExecutionPlan $plan, string $userMessage): string

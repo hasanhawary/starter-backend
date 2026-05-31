@@ -134,7 +134,7 @@ return [
     ],
 
     'planning' => [
-        'mode' => env('AI_CHAT_PLANNING_MODE', 'hybrid'), // Options: hybrid, llm, heuristic
+        'mode' => env('AI_CHAT_PLANNING_MODE', 'heuristic'), // Options: hybrid, llm, heuristic
         'use_llm_planner_for_complex_questions_only' => env('AI_CHAT_USE_LLM_PLANNER_COMPLEX_ONLY', true),
         'planner_model' => env('AI_CHAT_PLANNER_MODEL'),
         'cache_plans' => env('AI_CHAT_CACHE_PLANS', true),
