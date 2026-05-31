@@ -65,6 +65,7 @@ class HeuristicPlanner
         'سياسة' => 'knowledge',
         'policy' => 'knowledge',
         'rules' => 'knowledge',
+        'tell me about' => 'knowledge',
         'how does' => 'knowledge',
         'how do' => 'knowledge',
         'ازاي' => 'knowledge',
@@ -184,7 +185,7 @@ class HeuristicPlanner
         'define', 'definition', 'meaning of',
         'how many countries', 'how many planets',
         'capital of', 'population of',
-        'what is the meaning', 'tell me about',
+        'what is the meaning',
         'ما هو', 'من هو', 'ما هي', 'من هي',
         'معنى', 'تعريف', 'يعني ايه',
     ];
@@ -265,12 +266,34 @@ class HeuristicPlanner
             return $plan;
         }
 
+        if ($this->matchesProjectStructurePattern($normalizedMessage)) {
+            $plan->intent = 'project_structure';
+            $plan->useRag = true;
+            $plan->ragQuery = $originalMessage;
+            $plan->historyMode = 'recent';
+            $plan->historyLimit = 4;
+            $plan->metadata['confidence'] = 0.80;
+            $plan->metadata['reason'] = 'project_structure_match';
+
+            return $plan;
+        }
+
         if ($this->isGeneralKnowledge($normalizedMessage)) {
             $plan->intent = 'direct';
             $plan->historyMode = 'none';
             $plan->historyLimit = 0;
             $plan->metadata['confidence'] = 0.85;
             $plan->metadata['reason'] = 'general_knowledge_match';
+
+            return $plan;
+        }
+
+        if ($this->isFollowUp($normalizedMessage)) {
+            $plan->intent = 'direct';
+            $plan->historyMode = 'recent';
+            $plan->historyLimit = 6;
+            $plan->metadata['confidence'] = 0.85;
+            $plan->metadata['reason'] = 'follow_up_match';
 
             return $plan;
         }
@@ -319,16 +342,6 @@ class HeuristicPlanner
             $plan->historyLimit = 4;
             $plan->metadata['confidence'] = 0.80;
             $plan->metadata['reason'] = 'live_data_pattern_match';
-
-            return $plan;
-        }
-
-        if ($this->isFollowUp($normalizedMessage)) {
-            $plan->intent = 'direct';
-            $plan->historyMode = 'recent';
-            $plan->historyLimit = 6;
-            $plan->metadata['confidence'] = 0.85;
-            $plan->metadata['reason'] = 'follow_up_match';
 
             return $plan;
         }
@@ -766,6 +779,18 @@ class HeuristicPlanner
         foreach ($this->getMergedKnowledgePatterns() as $pattern => $type) {
             $normPattern = ArabicTextNormalizer::normalize($pattern);
             if (str_contains($normalizedMessage, $normPattern)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function matchesProjectStructurePattern(string $normalizedMessage): bool
+    {
+        foreach ($this->projectStructurePatterns as $pattern => $type) {
+            $normPattern = ArabicTextNormalizer::normalize($pattern);
+            if ($normPattern !== '' && str_contains($normalizedMessage, $normPattern)) {
                 return true;
             }
         }

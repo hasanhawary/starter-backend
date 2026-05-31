@@ -21,7 +21,7 @@ class RoleLatestRecordsTool implements ToolInterface
 
     public function schema(): array
     {
-        return         [
+        return [
             'type' => 'object',
             'properties' => [
                 'limit' => ['type' => 'integer', 'description' => 'Number of records (max 100)'],
@@ -36,7 +36,7 @@ class RoleLatestRecordsTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-                $limit = min((int) ($arguments['limit'] ?? 10), 100);
+        $limit = min((int) ($arguments['limit'] ?? 10), 100);
 
         $records = Role::query()
             ->latest()

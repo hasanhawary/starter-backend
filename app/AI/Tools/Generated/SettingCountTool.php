@@ -21,7 +21,7 @@ class SettingCountTool implements ToolInterface
 
     public function schema(): array
     {
-        return         [
+        return [
             'type' => 'object',
             'properties' => [
                 'filters' => ['type' => 'object', 'description' => 'Key-value filters on fillable columns'],
@@ -36,9 +36,9 @@ class SettingCountTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-                $query = Setting::query();
+        $query = Setting::query();
 
-        if (!empty($arguments['filters'])) {
+        if (! empty($arguments['filters'])) {
             foreach ($arguments['filters'] as $column => $value) {
                 if (SafeQueryBuilder::isSafeColumn(new Setting, $column)) {
                     $query->where($column, $value);
