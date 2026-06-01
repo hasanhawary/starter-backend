@@ -5,6 +5,8 @@ namespace AiChat;
 use AiChat\Agents\AgentManager;
 use AiChat\Chat\ConversationManager;
 use AiChat\Chat\MessageManager;
+use AiChat\Contracts\ContextProviderInterface;
+use AiChat\MCP\ContextResolver;
 use AiChat\MCP\ToolDiscovery;
 use AiChat\MCP\ToolRegistry;
 use AiChat\Memory\MemoryManager;
@@ -26,6 +28,7 @@ class AiChatManager
         protected readonly KnowledgeIndexer $knowledgeIndexer,
         protected readonly ProjectScanner $projectScanner,
         protected readonly ToolDiscovery $toolDiscovery,
+        protected readonly ContextResolver $contextResolver,
     ) {}
 
     public function toolRegistry(): ToolRegistry
@@ -94,7 +97,30 @@ class AiChatManager
         }
     }
 
-    public function discoverContextProviders(string $path): void {}
+    /** @var array<string, class-string<ContextProviderInterface>> */
+    protected array $contextProviders = [];
+
+    public function discoverContextProviders(string $path): void
+    {
+        $classes = $this->toolDiscovery->discoverIn($path);
+
+        foreach ($classes as $class) {
+            if (class_exists($class) && is_subclass_of($class, ContextProviderInterface::class)) {
+                $provider = app($class);
+                $this->contextProviders[$provider->name()] = $class;
+            }
+        }
+    }
+
+    public function registeredContextProviders(): array
+    {
+        return array_keys($this->contextProviders);
+    }
+
+    public function contextProviderClasses(): array
+    {
+        return array_values($this->contextProviders);
+    }
 
     public function registeredTools(): array
     {

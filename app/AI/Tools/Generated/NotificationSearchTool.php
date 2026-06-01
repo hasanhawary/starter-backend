@@ -5,6 +5,7 @@ namespace App\AI\Tools\Generated;
 use AiChat\Contracts\ToolInterface;
 use AiChat\MCP\ToolResult;
 use AiChat\Policies\ChatContext;
+use AiChat\Support\SafeQueryBuilder;
 use App\Models\Notification;
 
 class NotificationSearchTool implements ToolInterface
@@ -21,7 +22,7 @@ class NotificationSearchTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [
                 'search' => ['type' => 'string', 'description' => 'Search term'],
@@ -37,7 +38,7 @@ class NotificationSearchTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $limit = min((int) ($arguments['limit'] ?? 10), 100);
+                $limit = min((int) ($arguments['limit'] ?? 10), 100);
         $search = $arguments['search'] ?? '';
 
         $query = Notification::query();

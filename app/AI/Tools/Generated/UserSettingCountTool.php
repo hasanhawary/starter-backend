@@ -5,6 +5,7 @@ namespace App\AI\Tools\Generated;
 use AiChat\Contracts\ToolInterface;
 use AiChat\MCP\ToolResult;
 use AiChat\Policies\ChatContext;
+use AiChat\Support\SafeQueryBuilder;
 use App\Models\UserSetting;
 
 class UserSettingCountTool implements ToolInterface
@@ -21,7 +22,7 @@ class UserSettingCountTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [
                 'filters' => ['type' => 'object', 'description' => 'Key-value filters on fillable columns'],
@@ -36,9 +37,9 @@ class UserSettingCountTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $query = UserSetting::query();
+                $query = UserSetting::query();
 
-        if (! empty($arguments['filters'])) {
+        if (!empty($arguments['filters'])) {
             foreach ($arguments['filters'] as $column => $value) {
                 if (SafeQueryBuilder::isSafeColumn(new UserSetting, $column)) {
                     $query->where($column, $value);

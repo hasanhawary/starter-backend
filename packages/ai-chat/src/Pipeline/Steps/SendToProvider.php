@@ -93,7 +93,6 @@ class SendToProvider
     {
         $parts = [];
         $agentPrompt = $payload->agent?->systemPrompt() ?? config('ai-chat.conversations.default_system_prompt', '');
-        $plan = $payload->executionPlan;
 
         if ($agentPrompt !== '') {
             $parts[] = $agentPrompt;
@@ -141,18 +140,12 @@ class SendToProvider
         $toolCalls = collect($response->toolCalls ?? []);
 
         if ($toolCalls->isNotEmpty()) {
-            $payload->setMetadata('tool_calls', $toolCalls->map(fn ($tc) => [
-                'id' => $tc->id,
-                'name' => $tc->name,
-                'arguments' => $tc->arguments,
-            ])->toArray());
+            $payload->setMetadata('tool_calls', $toolCalls
+                ->map(fn ($toolCall) => $this->normalizeToolCall($toolCall))
+                ->values()
+                ->toArray());
+
             $payload->setMetadata('tool_calls_used', true);
-        }
-
-        $toolResults = collect($response->toolResults ?? []);
-
-        if ($toolResults->isNotEmpty()) {
-            $payload->setMetadata('tool_results', $toolResults->values()->toArray());
         }
 
         return $next($payload);
@@ -182,5 +175,23 @@ class SendToProvider
 
             return $payload;
         }
+    }
+
+    protected function normalizeToolCall(mixed $toolCall): array
+    {
+        $arguments = data_get($toolCall, 'arguments', []);
+
+        if (is_string($arguments)) {
+            $decoded = json_decode($arguments, true);
+            $arguments = json_last_error() === JSON_ERROR_NONE ? $decoded : $arguments;
+        }
+
+        return [
+            'id' => data_get($toolCall, 'id'),
+            'name' => data_get($toolCall, 'name')
+                ?? data_get($toolCall, 'function.name')
+                ?? data_get($toolCall, 'toolName'),
+            'arguments' => $arguments,
+        ];
     }
 }

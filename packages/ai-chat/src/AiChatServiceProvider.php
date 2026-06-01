@@ -435,6 +435,7 @@ class AiChatServiceProvider extends ServiceProvider
                 match ($type) {
                     'tools' => $manager->discoverTools($path),
                     'agents' => $manager->discoverAgents($path),
+                    'context_providers' => $manager->discoverContextProviders($path),
                     default => null,
                 };
             }

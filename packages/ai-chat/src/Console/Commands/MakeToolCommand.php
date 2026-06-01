@@ -49,15 +49,13 @@ class MakeToolCommand extends Command
 
         $content = $stubManager->replace($stub, [
             'namespace' => 'App\\AI\\Tools\\Custom',
-            'class' => $className,
-            'name' => $toolName,
-            'description' => addslashes($description),
-            'model_class' => $modelClass ?: 'App\\Models\\Model',
-            'short_name' => $modelShort ?: 'Model',
-            'table' => $model ? Str::snake(Str::pluralStudly($model)) : 'table',
+            'class_name' => $className,
+            'tool_name' => $toolName,
+            'tool_description' => addslashes($description),
+            'model_import' => $modelClass ? "use {$modelClass};" : '',
             'schema' => $this->buildSchema(),
-            'body' => $body,
-            'imports' => 'use AiChat\\Contracts\\ToolInterface;'."\n".'use AiChat\\MCP\\ToolResult;'."\n".'use AiChat\\Policies\\ChatContext;',
+            'authorize_logic' => 'return $context->action === \'read\';',
+            'execute_logic' => $body,
         ]);
 
         File::put($filePath, $content);

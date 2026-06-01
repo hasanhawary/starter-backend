@@ -23,23 +23,18 @@ class PolicyGenerator
 
         $stub = $this->stubManager->get('policy');
 
-        $description = $options['description'] ?? "AI policy for {$name}";
-        $allowedActions = $this->buildAllowedActions($options['allowed_actions'] ?? ['read', 'search', 'count']);
-        $blockedModels = $this->buildBlockedModels($options['blocked_models'] ?? []);
-        $blockedFields = $this->buildBlockedFields($options['blocked_fields'] ?? []);
+        $allowedActions = $options['allowed_actions'] ?? ['read', 'search', 'count'];
+        $blockedModels = $options['blocked_models'] ?? [];
+        $blockedFields = $options['blocked_fields'] ?? [];
         $maxRecords = $options['max_records'] ?? 100;
-        $requireAuth = isset($options['require_auth']) ? ($options['require_auth'] ? 'true' : 'false') : 'true';
+        $requireAuth = isset($options['require_auth']) ? (bool) $options['require_auth'] : true;
+
+        $policyLogic = $this->buildPolicyLogic($allowedActions, $blockedModels, $blockedFields, $maxRecords, $requireAuth);
 
         $content = $this->stubManager->replace($stub, [
             'namespace' => 'App\\AI\\Policies',
-            'class' => $className,
-            'name' => Str::snake($name),
-            'description' => addslashes($description),
-            'allowed_actions' => $allowedActions,
-            'blocked_models' => $blockedModels,
-            'blocked_fields' => $blockedFields,
-            'max_records' => (string) $maxRecords,
-            'require_auth' => $requireAuth,
+            'class_name' => $className,
+            'policy_logic' => $policyLogic,
         ]);
 
         File::put($filePath, $content);
@@ -47,42 +42,48 @@ class PolicyGenerator
         return $filePath;
     }
 
-    protected function buildAllowedActions(array $actions): string
+    protected function buildPolicyLogic(array $allowedActions, array $blockedModels, array $blockedFields, int $maxRecords, bool $requireAuth): string
     {
-        $items = array_map(fn (string $action) => "            '{$action}',", $actions);
+        $allBlockedModels = array_merge(
+            ['App\\Models\\PersonalAccessToken', 'App\\Models\\PasswordResetToken'],
+            $blockedModels,
+        );
 
-        return "[\n".implode("\n", $items)."\n        ]";
-    }
+        $allBlockedFields = array_unique(array_merge(
+            ['password', 'remember_token', 'token', 'secret', 'api_key', 'two_factor_secret'],
+            $blockedFields,
+        ));
 
-    protected function buildBlockedModels(array $models): string
-    {
-        $defaults = [
-            "'App\\\\Models\\\\PersonalAccessToken'",
-            "'App\\\\Models\\\\PasswordResetToken'",
-        ];
+        $actionsLiteral = implode(', ', array_map(fn (string $a) => "'{$a}'", $allowedActions));
+        $modelsLiteral = implode(', ', array_map(fn (string $m) => "'".addslashes($m)."'", $allBlockedModels));
+        $fieldsLiteral = implode(', ', array_map(fn (string $f) => "'{$f}'", $allBlockedFields));
 
-        $all = array_merge($defaults, array_map(fn (string $m) => "'".addslashes($m)."'", $models));
+        $lines = [];
 
-        $items = array_map(fn (string $model) => "            {$model},", $all);
+        if ($requireAuth) {
+            $lines[] = '        if ($context->user === null) {';
+            $lines[] = "            return PolicyResult::denied('Authentication is required.', self::class);";
+            $lines[] = '        }';
+            $lines[] = '';
+        }
 
-        return "[\n".implode("\n", $items)."\n        ]";
-    }
+        $lines[] = "        if (! in_array(\$context->action, [{$actionsLiteral}], true)) {";
+        $lines[] = '            return PolicyResult::denied("The action [{$context->action}] is not allowed by this policy.", self::class);';
+        $lines[] = '        }';
+        $lines[] = '';
+        $lines[] = "        if (isset(\$context->payload['model']) && in_array(\$context->payload['model'], [{$modelsLiteral}], true)) {";
+        $lines[] = "            return PolicyResult::denied('Access to this model is blocked by policy.', self::class);";
+        $lines[] = '        }';
+        $lines[] = '';
+        $lines[] = "        if (isset(\$context->payload['fields'])) {";
+        $lines[] = "            \$blocked = array_intersect(\$context->payload['fields'], [{$fieldsLiteral}]);";
+        $lines[] = '            if (! empty($blocked)) {';
+        $lines[] = "                return PolicyResult::denied('Access to certain fields is blocked by policy.', self::class);";
+        $lines[] = '            }';
+        $lines[] = '        }';
+        $lines[] = '';
+        $lines[] = "        return PolicyResult::allowed('Action permitted by policy.', self::class);";
 
-    protected function buildBlockedFields(array $fields): string
-    {
-        $defaults = [
-            "'password'",
-            "'remember_token'",
-            "'token'",
-            "'secret'",
-            "'api_key'",
-            "'two_factor_secret'",
-        ];
-
-        $all = array_unique(array_merge($defaults, array_map(fn (string $f) => "'{$f}'", $fields)));
-
-        $items = array_map(fn (string $field) => "            {$field},", $all);
-
-        return "[\n".implode("\n", $items)."\n        ]";
+        return implode("\n", $lines);
     }
 }

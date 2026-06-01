@@ -5,6 +5,7 @@ namespace App\AI\Tools\Generated;
 use AiChat\Contracts\ToolInterface;
 use AiChat\MCP\ToolResult;
 use AiChat\Policies\ChatContext;
+use AiChat\Support\SafeQueryBuilder;
 use App\Models\Role;
 
 class RoleStatsTool implements ToolInterface
@@ -21,7 +22,7 @@ class RoleStatsTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [],
         ];
@@ -34,8 +35,9 @@ class RoleStatsTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $total = Role::count();
+                $total = Role::count();
         $stats = ['total' => $total];
+
 
         if (Role::usesTimestamps()) {
             $stats['latest_created'] = Role::latest()->value('created_at');

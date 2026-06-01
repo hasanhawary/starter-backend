@@ -1,0 +1,76 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: API ONLINE
+    - heading "Welcome" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: This endpoint serves a backend API.
+      - text: No web interface is provided.
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Host
+        - generic [ref=e10]: localhost
+      - generic [ref=e11]:
+        - generic [ref=e12]: Client IP
+        - generic [ref=e13]: 127.0.0.1
+      - generic [ref=e14]:
+        - generic [ref=e15]: Secure Connection
+        - generic [ref=e16]: "No"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Server Time (UTC)
+        - generic [ref=e19]: 2026-06-01 10:00:44
+    - generic [ref=e20]:
+      - generic [ref=e21]: AI Chat
+      - generic [ref=e22]:
+        - button "Open AI Chat" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Open AI Chat
+        - button "Start Demo" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Start Demo
+      - generic [ref=e29]:
+        - text: Use
+        - code [ref=e30]: AIChatWidget.open()
+        - text: /
+        - code [ref=e31]: .close()
+        - text: /
+        - code [ref=e32]: .toggle()
+        - text: /
+        - code [ref=e33]: .expand()
+        - text: /
+        - code [ref=e34]: .reset()
+        - text: in your browser console.
+  - generic [ref=e42]:
+    - button "تبديل التصغير" [ref=e43] [cursor=pointer]:
+      - generic [ref=e44]:
+        - img [ref=e46]
+        - generic [ref=e49]:
+          - heading "المساعد الذكي" [level=3] [ref=e50]
+          - paragraph [ref=e51]: متصل الآن
+      - generic [ref=e52]:
+        - button "English" [ref=e53]:
+          - img [ref=e54]
+          - generic [ref=e58]: EN
+        - button "خيارات إضافية" [ref=e60]:
+          - img [ref=e61]
+        - button "تصغير" [ref=e65]:
+          - img [ref=e66]
+        - button "شاشة كاملة" [ref=e67]:
+          - img [ref=e68]
+        - button "إغلاق" [ref=e73]:
+          - img [ref=e74]
+    - log "رسائل المحادثة" [ref=e77]:
+      - generic [ref=e210]:
+        - paragraph [ref=e212]: refund rules
+        - generic [ref=e214]: 13:10
+      - generic [ref=e215]:
+        - paragraph [ref=e217]: "Entry 1: - Refunds are allowed within 14 days from the payment date. - Refund requests must be approved by an admin. - Partial refunds are allowed up to the remaining balance. Entry 2: - Refunds are allowed within 14 days from the payment date. - Refund requests must be approved by an admin. - All refund requests require the original transaction ID. - Partial refunds are allowed up to the remaining balance. I have enough information to answer the user's question about refund rules. The refund rules are: 1. Refunds are allowed within 14 days from the payment date. 2. Refund requests must be approved by an admin. 3. All refund requests require the original transaction ID. 4. Partial refunds are allowed up to the remaining balance. All refund requests must be approved by an admin and require the original transaction ID. Partial refunds are allowed up to the remaining balance."
+        - generic [ref=e218]:
+          - generic [ref=e219]: 13:10
+          - button "نسخ الرد" [ref=e220] [cursor=pointer]:
+            - img [ref=e221]
+    - generic [ref=e125]:
+      - textbox "رسالة المحادثة" [ref=e126]:
+        - /placeholder: اكتب رسالتك...
+      - button "إرسال" [disabled] [ref=e127]:
+        - img [ref=e128]
+    - generic [ref=e130]: مدعوم من WaKeb AI

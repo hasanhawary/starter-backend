@@ -54,6 +54,7 @@
         currentConversationId: null,
         messages: [],
         error: null,
+        historyLoaded: false,
     };
 
     var config = {};
@@ -2360,7 +2361,8 @@
             }
             scrollToBottom();
 
-            if (conversationId) {
+            var missingIds = STATE.messages.some(function (message) { return !message.id; });
+            if (conversationId && missingIds && !STATE.historyLoaded) {
                 fetch(config.apiBaseUrl + '/conversations/' + encodeURIComponent(conversationId) + '?session_id=' + encodeURIComponent(getSessionId()), {
                     method: 'GET',
                     headers: {
@@ -2380,11 +2382,13 @@
                     if (!data) return;
                     var payload = data.data || data;
                     var msgList = payload.messages || (payload.conversation && payload.conversation.messages) || [];
-                    var missingIds = STATE.messages.some(function (message) { return !message.id; });
-                    if (msgList.length > 0 && (msgList.length !== STATE.messages.length || missingIds)) {
+                    if (msgList.length > 0 && msgList.length !== STATE.messages.length) {
                         renderServerMessages(msgList);
                     }
+                    STATE.historyLoaded = true;
                 }).catch(function () {});
+            } else {
+                STATE.historyLoaded = true;
             }
             return;
         }
@@ -2431,6 +2435,7 @@
             }
 
             renderServerMessages(msgList);
+            STATE.historyLoaded = true;
         }).catch(function (error) {
             skeleton.remove();
             console.error('[AIChatWidget] Failed to load conversation:', error);
@@ -2491,6 +2496,7 @@
         }
         STATE.messages = [];
         STATE.currentConversationId = null;
+        STATE.historyLoaded = false;
         setStoredConversationId(null);
         clearStoredMessages();
         STATE.isStreaming = false;
@@ -2679,7 +2685,6 @@
                 if (typeof config.onMessage === 'function') {
                     config.onMessage({ role: 'assistant', content: reply });
                 }
-                setTimeout(syncConversationMessages, 500);
             });
         }).catch(function (error) {
             if (error.name === 'AbortError') {
@@ -2905,7 +2910,6 @@
                     if (typeof config.onMessage === 'function') {
                         config.onMessage({ role: 'assistant', content: text });
                     }
-                    setTimeout(syncConversationMessages, 500);
                 }
                 setLoading(false);
             }

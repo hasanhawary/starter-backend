@@ -5,6 +5,7 @@ namespace App\AI\Tools\Generated;
 use AiChat\Contracts\ToolInterface;
 use AiChat\MCP\ToolResult;
 use AiChat\Policies\ChatContext;
+use AiChat\Support\SafeQueryBuilder;
 use App\Models\Setting;
 
 class SettingStatsTool implements ToolInterface
@@ -21,7 +22,7 @@ class SettingStatsTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [],
         ];
@@ -34,8 +35,9 @@ class SettingStatsTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $total = Setting::count();
+                $total = Setting::count();
         $stats = ['total' => $total];
+
 
         if (Setting::usesTimestamps()) {
             $stats['latest_created'] = Setting::latest()->value('created_at');

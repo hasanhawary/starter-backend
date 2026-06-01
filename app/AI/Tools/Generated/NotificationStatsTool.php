@@ -5,6 +5,7 @@ namespace App\AI\Tools\Generated;
 use AiChat\Contracts\ToolInterface;
 use AiChat\MCP\ToolResult;
 use AiChat\Policies\ChatContext;
+use AiChat\Support\SafeQueryBuilder;
 use App\Models\Notification;
 
 class NotificationStatsTool implements ToolInterface
@@ -21,7 +22,7 @@ class NotificationStatsTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [],
         ];
@@ -34,8 +35,9 @@ class NotificationStatsTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $total = Notification::count();
+                $total = Notification::count();
         $stats = ['total' => $total];
+
 
         if (Notification::usesTimestamps()) {
             $stats['latest_created'] = Notification::latest()->value('created_at');

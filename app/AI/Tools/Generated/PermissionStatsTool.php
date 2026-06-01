@@ -5,6 +5,7 @@ namespace App\AI\Tools\Generated;
 use AiChat\Contracts\ToolInterface;
 use AiChat\MCP\ToolResult;
 use AiChat\Policies\ChatContext;
+use AiChat\Support\SafeQueryBuilder;
 use App\Models\Permission;
 
 class PermissionStatsTool implements ToolInterface
@@ -21,7 +22,7 @@ class PermissionStatsTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [],
         ];
@@ -34,8 +35,9 @@ class PermissionStatsTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $total = Permission::count();
+                $total = Permission::count();
         $stats = ['total' => $total];
+
 
         if (Permission::usesTimestamps()) {
             $stats['latest_created'] = Permission::latest()->value('created_at');

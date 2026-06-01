@@ -5,7 +5,6 @@ namespace AiChat\Pipeline\Steps;
 use AiChat\Memory\MemoryRetriever;
 use AiChat\Pipeline\ChatPayload;
 use AiChat\Storage\AnonymousConversationStore;
-use AiChat\Support\TokenCounter;
 use Closure;
 use Illuminate\Support\Facades\Log;
 
@@ -34,10 +33,10 @@ class RetrieveMemory
             $this->retrieveVectorMemories($payload, $memoryQuery, $limit);
         }
 
-        $sessionId = $payload->metadata['session_id'] ?? null;
+        $conversationId = $payload->conversationId();
 
-        if ($sessionId) {
-            $this->retrieveConversationHistory($payload, $sessionId, $limit);
+        if ($conversationId) {
+            $this->retrieveConversationHistory($payload, $conversationId);
         }
 
         return $next($payload);
@@ -98,39 +97,26 @@ class RetrieveMemory
         return $scope;
     }
 
-    protected function retrieveConversationHistory(ChatPayload $payload, string $sessionId, int $limit): void
+    protected function retrieveConversationHistory(ChatPayload $payload, string $conversationId): void
     {
         try {
             $historyLimit = (int) config('ai-chat.context.history_limit', 6);
 
-            $conversations = $this->conversationStore->getRecentConversations($sessionId, $limit);
+            $messages = $this->conversationStore->getLatestConversationMessages(
+                $conversationId,
+                $historyLimit,
+            );
 
-            $budget = (int) config('ai-chat.memory.token_budget', 1000);
-            $used = 0;
+            foreach ($messages as $message) {
+                $content = $this->extractContent($message);
 
-            foreach ($conversations as $conversationId) {
-                $messages = $this->conversationStore->getLatestConversationMessages(
-                    $conversationId,
-                    $historyLimit,
-                );
-
-                foreach ($messages as $message) {
-                    $content = $this->extractContent($message);
-
-                    if (empty($content)) {
-                        continue;
-                    }
-
-                    $tokens = TokenCounter::estimate($content);
-
-                    if ($used + $tokens > $budget) {
-                        break 2;
-                    }
-
-                    $payload->memory[] = $content;
-                    $used += $tokens;
+                if (empty($content)) {
+                    continue;
                 }
+
+                $payload->memory[] = $content;
             }
+
         } catch (\Throwable) {
             return;
         }

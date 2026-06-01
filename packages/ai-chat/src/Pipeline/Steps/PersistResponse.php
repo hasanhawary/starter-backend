@@ -133,7 +133,7 @@ class PersistResponse
 
     protected function extractMemory(ChatPayload $payload, string $conversationId): void
     {
-        if (! config('ai-chat.memory.enabled', false)) {
+        if (! config('ai-chat.memory.enabled', true)) {
             return;
         }
 

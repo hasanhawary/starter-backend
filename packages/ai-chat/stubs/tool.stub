@@ -5,6 +5,7 @@ namespace {{NAMESPACE}};
 use AiChat\Contracts\ToolInterface;
 use AiChat\MCP\ToolResult;
 use AiChat\Policies\ChatContext;
+use AiChat\Support\SafeQueryBuilder;
 {{MODEL_IMPORT}}
 
 class {{CLASS_NAME}} implements ToolInterface

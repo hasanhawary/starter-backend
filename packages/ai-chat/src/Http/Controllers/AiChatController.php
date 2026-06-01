@@ -76,12 +76,20 @@ class AiChatController extends Controller
             return failResponse('Failed to create conversation.', [], 500);
         }
 
+        $response = $this->formatter->format(
+            $payload->response ?? '',
+            $payload->message,
+            $payload->executionPlan,
+        );
+
+        $payload->response = $response;
+
         return successResponse([
             'conversation_id' => $conversationId,
             'message' => [
                 'id' => null,
                 'role' => 'assistant',
-                'content' => $payload->response ?? '',
+                'content' => $response,
                 'usage' => $payload->metadata['usage'] ?? null,
                 'created_at' => now()->toIso8601String(),
                 'tool_calls' => (bool) ($payload->metadata['tool_calls_used'] ?? false),
@@ -132,53 +140,30 @@ class AiChatController extends Controller
                 $stream = $agent->stream($message);
 
                 $fullContent = '';
-                $visibleContent = '';
-                $finalBuffer = '';
-                $insideFinal = false;
-                $streamedFinal = false;
 
                 foreach ($stream as $event) {
                     $content = $this->extractStreamChunk($event);
                     $fullContent .= $content;
-                    $visibleChunk = $this->extractFinalVisibleStreamChunk($content, $finalBuffer, $insideFinal);
-
-                    if ($this->streamEventType($event) === 'text_end' && $insideFinal && $finalBuffer !== '') {
-                        $visibleChunk .= $finalBuffer;
-                        $finalBuffer = '';
-                    }
-
-                    $visibleChunk = str_ireplace(['<final>', '</final>'], '', $visibleChunk);
-                    $visibleContent .= $visibleChunk;
-
-                    if ($visibleChunk !== '') {
-                        $streamedFinal = true;
-                    }
-
-                    if ($this->shouldEmitStreamEvent($event)) {
-                        $eventContent = $this->formatStreamEvent($event, $visibleChunk, $fullContent, $message, $planningPayload->executionPlan, $streamedFinal);
-
-                        if ($eventContent !== '') {
-                            echo 'data: '.$eventContent."\n\n";
-
-                            if (ob_get_level() > 0) {
-                                ob_flush();
-                            }
-                            flush();
-                        }
-                    }
 
                     $this->captureStreamUsage($payload, $event);
-
-                    if ($visibleChunk !== '') {
-                        $this->streamManager->appendToStream($finalConversationId ?? 'unknown', $visibleChunk);
-                    }
                 }
 
                 $payload->response = $this->formatter->format($fullContent, $message, $planningPayload->executionPlan);
 
+                if ($payload->response !== '') {
+                    echo 'data: '.json_encode(['type' => 'text_delta', 'delta' => $payload->response])."\n\n";
+
+                    if (ob_get_level() > 0) {
+                        ob_flush();
+                    }
+                    flush();
+
+                    $this->streamManager->appendToStream($finalConversationId ?? 'unknown', $payload->response);
+                }
+
                 $this->persistStreamResponse($payload, $finalConversationId);
 
-                $this->streamManager->endStream($finalConversationId ?? 'unknown', $payload->response ?: $visibleContent);
+                $this->streamManager->endStream($finalConversationId ?? 'unknown', $payload->response);
             } catch (\Throwable $e) {
                 $this->streamManager->abortStream($finalConversationId ?? 'unknown');
 
@@ -506,6 +491,10 @@ class AiChatController extends Controller
 
         if ($type !== 'text_end') {
             return (string) $event;
+        }
+
+        if ($visibleChunk !== '') {
+            return (string) json_encode(['type' => 'text_delta', 'delta' => $visibleChunk]);
         }
 
         if ($streamedFinal) {

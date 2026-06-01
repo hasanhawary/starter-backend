@@ -32,9 +32,9 @@ class AgentGenerator
 
         $content = $this->stubManager->replace($stub, [
             'namespace' => 'App\\AI\\Agents',
-            'class' => $className,
-            'name' => Str::snake($name),
-            'description' => addslashes($description),
+            'class_name' => $className,
+            'agent_name' => Str::snake($name),
+            'agent_description' => addslashes($description),
             'system_prompt' => addslashes($systemPrompt),
             'read_only' => $readOnly,
             'tools' => $tools,
@@ -66,7 +66,7 @@ class AgentGenerator
     protected function buildPoliciesArray(array $policies): string
     {
         if (empty($policies)) {
-            return "[\n            \\AiChat\\AiChat\\Policies\\DefaultReadOnlyPolicy::class,\n        ]";
+            return "[\n            \\AiChat\\Policies\\DefaultReadOnlyPolicy::class,\n        ]";
         }
 
         $items = array_map(fn (string $policy) => "            {$policy}::class,", $policies);

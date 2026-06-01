@@ -5,6 +5,7 @@ namespace App\AI\Tools\Generated;
 use AiChat\Contracts\ToolInterface;
 use AiChat\MCP\ToolResult;
 use AiChat\Policies\ChatContext;
+use AiChat\Support\SafeQueryBuilder;
 use App\Models\User;
 
 class UserSummaryTool implements ToolInterface
@@ -21,7 +22,7 @@ class UserSummaryTool implements ToolInterface
 
     public function schema(): array
     {
-        return [
+        return         [
             'type' => 'object',
             'properties' => [],
         ];
@@ -34,7 +35,7 @@ class UserSummaryTool implements ToolInterface
 
     public function execute(array $arguments, ChatContext $context): ToolResult
     {
-        $summary = [
+                $summary = [
             'id' => [
                 'avg' => User::avg('id'),
                 'min' => User::min('id'),

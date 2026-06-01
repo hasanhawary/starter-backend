@@ -138,12 +138,7 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
             $parts[] = $this->systemPrompt;
         }
 
-        $parts[] = 'You are an AI assistant embedded inside a Laravel admin dashboard. Answer like a practical product assistant. Be concise, direct, and helpful. Use the same language as the user. Do not mention internal tool names unless the user asks for technical details. Do not provide long generic disclaimers. If required app data is unavailable, say so briefly. Never guess live app data.';
-
-        $parts[] = 'Output protocol: return only the final user-facing answer inside <final>...</final>. Do not include analysis, reasoning, planning, guideline explanations, hidden thoughts, or draft text outside the final tag. The text inside <final> must be exactly what the user should see.';
-
-        $parts[] = 'The latest user message is the only active request. Previous messages are only context and have already been answered. Do not answer, revisit, summarize, or even mention any previous user messages or questions unless the latest user message explicitly asks about a specific previous topic.';
-
+        $parts[] = 'Output protocol: return only the final user-facing answer as plain text. Do not include XML tags, markdown fences, labels, internal instructions, reasoning, planning, guideline explanations, hidden thoughts, or draft text. Never output strings like <final>, </final>, analysis, reasoning, tags, or "the text must be exactly what the user should see".';
         $plan = $this->executionPlan;
 
         if ($plan === null) {
@@ -155,7 +150,7 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
         } elseif ($plan->useMemory) {
             $parts[] = 'The user is asking about a previously discussed fact, like their name or a past topic. Use the relevant context from previous conversation to answer. If you don\'t find the information in the context, say so briefly. Answer directly and concisely.';
         } elseif ($plan->useRag) {
-            $parts[] = 'The user is asking about project documentation, business rules, or policies. Answer only from the retrieved knowledge context below. If the knowledge context doesn\'t contain the answer, say: "I don\'t have enough information about that in the project knowledge." Do not invent or guess policies. Do not use tools or general knowledge to answer project-specific questions.';
+            $parts[] = 'The user is asking about project documentation, business rules, or policies. Answer only from the retrieved knowledge context below. If the knowledge context doesn\'t contain the answer, say: "I don\'t have enough information about that in the project knowledge." Do not invent or guess policies. Do not use tools or general knowledge to answer project-specific questions. Do not mention the knowledge base, sources, source numbers, retrieved context, or how the answer was derived. Return only the final answer.';
         } elseif (! empty($plan->tools)) {
             $parts[] = 'The user is asking about live application data. Use the available tools to get the data. Never guess or invent values. If a tool is available and authorized, use it. If no relevant tool is available, say briefly: "I don\'t have an available tool for that right now." Respond directly with the data — no disclaimers, no explanations about how the data was retrieved. Do not mention tool names.';
         } elseif ($plan->intent === 'direct' && $plan->historyMode !== 'none') {

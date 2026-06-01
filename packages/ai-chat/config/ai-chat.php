@@ -171,7 +171,7 @@ return [
         'max_tools' => (int) env('AI_CHAT_MAX_TOOLS', 5),
         'rag_limit' => (int) env('AI_CHAT_RAG_LIMIT', 3),
         'memory_limit' => (int) env('AI_CHAT_MEMORY_LIMIT', 3),
-        'history_limit' => (int) env('AI_CHAT_HISTORY_LIMIT', 6),
+        'history_limit' => (int) env('AI_CHAT_HISTORY_LIMIT', 10),
         'max_tool_result_items' => (int) env('AI_CHAT_MAX_TOOL_RESULT_ITEMS', 10),
     ],
 
