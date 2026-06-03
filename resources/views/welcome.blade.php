@@ -222,25 +222,8 @@
             <span class="value">{{ now()->utc()->format('Y-m-d H:i:s') }}</span>
         </div>
     </div>
-
-    <div class="ai-demo">
-        <div class="ai-demo-title">AI Chat</div>
-        <div class="ai-demo-buttons">
-            <button class="ai-btn ai-btn-primary" onclick="window.AIChatWidget && AIChatWidget.open()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 6 6 0 0 0-9 9 6 6 0 0 0-9-9 6 6 0 0 0 9-9Z"/></svg>
-                Open AI Chat
-            </button>
-            <button class="ai-btn ai-btn-secondary" onclick="window.AIChatWidget && (AIChatWidget.open(), AIChatWidget.sendMessage('Welcome to WaKeb AI! How can we assist you today?'))">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                Start Demo
-            </button>
-        </div>
-        <div class="ai-hint">
-            Use <code>AIChatWidget.open()</code> / <code>.close()</code> / <code>.toggle()</code> / <code>.expand()</code> / <code>.reset()</code> in your browser console.
-        </div>
-    </div>
 </div>
 
-@aiChat
+
 </body>
 </html>

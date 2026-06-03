@@ -3,16 +3,15 @@
     "model": "openrouter/free",
     "provider": {
         "openrouter": {
-        "options": {
-            "timeout": 600000,
-            "chunkTimeout": 60000
-        }
+            "options": {
+                "timeout": 600000,
+                "chunkTimeout": 60000
+            }
         }
     },
-
     "skills": {
         "paths": [
-            ".ai/skills/generated"
+            ".ai/skills"
         ]
     },
     "mcp": {

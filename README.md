@@ -95,7 +95,7 @@ This starter is built on a suite of **production-grade custom packages**:
 
 ### ⚙️ Settings & Configuration
 - **Template-Based System** - Single source of truth for all settings
-- **Multi-Brand Support** - Isolated settings per brand (wakeb, jervis, elhawary)
+- **Multi-Brand Support** - Isolated settings per brand (wakeb, elhawary)
 - **Type-Aware Fields** - Text, textarea, image uploader, checkbox, radio, select
 - **Multi-Language Values** - Translatable settings (ar/en) with JSON storage
 - **Environment Sync** - Sync settings to .env file for runtime configuration
@@ -212,7 +212,7 @@ This command automatically handles everything:
 
 ```bash
 php artisan app:install \
-  --brand=jervis \
+  --brand=wakeb \
   --db-host=localhost \
   --db-port=3306 \
   --db-database=my_app_db \
