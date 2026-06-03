@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Global\Help;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\BaseFormRequest;
 
-class HelpConfigRequest extends FormRequest
+class HelpConfigRequest extends BaseFormRequest
 {
     public function rules(): array
     {

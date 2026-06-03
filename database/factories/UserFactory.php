@@ -17,7 +17,7 @@ class UserFactory extends Factory
         $firstName = $this->faker->firstName;
         $lastName = $this->faker->lastName;
         $domain = Str::snake(brandName());
-        $countryId = Country::first()->id;
+        $countryId = Country::query()->first()?->id ?? Country::factory()->create()->id;
 
         return [
             'name' => "$firstName $lastName",
@@ -28,8 +28,8 @@ class UserFactory extends Factory
             'password' => 123456,
             'phone_code_id' => $countryId,
             'gender' => $this->faker->randomElement([
-            UserGenderEnum::Male->value,
-            UserGenderEnum::Female->value,
+                UserGenderEnum::Male->value,
+                UserGenderEnum::Female->value,
             ]),
             'is_active' => true,
         ];

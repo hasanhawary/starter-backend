@@ -9,8 +9,8 @@ class HelpEnumRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'enums' => ['sometimes', 'required', 'array'],
-            'enums.*.name' => ['sometimes', 'required', 'string'],
+            'enums' => ['sometimes', 'array'],
+            'enums.*.name' => ['required_with:enums', 'string'],
             'enums.*.module' => ['sometimes', 'nullable', 'string'],
         ];
     }

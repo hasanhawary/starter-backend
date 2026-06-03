@@ -16,7 +16,7 @@ class HelpController extends BaseController
      */
     public function models(HelpModelRequest $request): JsonResponse
     {
-        $result = Lookup::getModels($request->all());
+        $result = Lookup::getModels($request->validated());
 
         return successResponse($result);
     }
@@ -26,7 +26,7 @@ class HelpController extends BaseController
      */
     public function enums(HelpEnumRequest $request): JsonResponse
     {
-        $result = Lookup::getEnums($request->all());
+        $result = Lookup::getEnums($request->validated());
 
         return successResponse($result);
     }
@@ -36,7 +36,7 @@ class HelpController extends BaseController
      */
     public function configs(HelpConfigRequest $request): JsonResponse
     {
-        $result = Lookup::getConfigs($request->all());
+        $result = Lookup::getConfigs($request->validated());
 
         return successResponse($result);
     }

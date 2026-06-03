@@ -33,7 +33,7 @@ class NotificationController extends BaseController
 
     public function update(NotificationRequest $request): JsonResponse
     {
-        $query = Notification::query();
+        $query = Notification::forCurrentUser();
 
         match ($request->action) {
             'open' => $query->whereNull('open_at')->update(['open_at' => now()]),
