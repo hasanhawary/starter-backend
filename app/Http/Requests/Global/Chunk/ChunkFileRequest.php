@@ -12,6 +12,7 @@ class ChunkFileRequest extends BaseFormRequest
             'file_name' => 'required|string',
             'chunk_number' => 'required|min:1',
             'chunk_file' => 'required|file',
+            'is_final' => 'required|in:0,1',
         ];
     }
 }
