@@ -92,7 +92,8 @@ class SendMessageTest extends TestCase
         $agent = new ChatAgent('Custom instructions');
 
         $this->assertStringContainsString('Custom instructions', (string) $agent->instructions());
-        $this->assertStringContainsString('latest user message', (string) $agent->instructions());
+        // Without an execution plan the agent uses the greeting/identity fallback path
+        $this->assertStringContainsString('Reply naturally and very briefly', (string) $agent->instructions());
     }
 
     public function test_chat_agent_session_binding(): void

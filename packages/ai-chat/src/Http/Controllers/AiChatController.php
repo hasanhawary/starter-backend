@@ -29,6 +29,7 @@ use AiChat\Pipeline\Steps\ResolveUser;
 use AiChat\Pipeline\Steps\RetrieveKnowledge;
 use AiChat\Pipeline\Steps\RetrieveMemory;
 use AiChat\Pipeline\Steps\ValidateMessage;
+use AiChat\Prompt\SystemPromptBuilder;
 use AiChat\Response\FinalResponseFormatter;
 use AiChat\Storage\AnonymousConversationStore;
 use Illuminate\Http\JsonResponse;
@@ -45,6 +46,7 @@ class AiChatController extends Controller
         private readonly ChatPipeline $pipeline,
         private readonly StreamManager $streamManager,
         private readonly FinalResponseFormatter $formatter,
+        private readonly SystemPromptBuilder $promptBuilder,
     ) {}
 
     public function sendMessage(SendMessageRequest $request): JsonResponse|StreamedResponse
@@ -115,7 +117,7 @@ class AiChatController extends Controller
             ->thenReturn();
 
         $selectedToolNames = array_keys($planningPayload->tools ?? []);
-        $systemPrompt = $this->buildSystemPrompt($planningPayload);
+        $systemPrompt = $this->promptBuilder->build($planningPayload);
 
         $agent = $this->buildChatAgent($request, $conversationId, $selectedToolNames, $systemPrompt, $planningPayload->executionPlan);
 
@@ -123,13 +125,7 @@ class AiChatController extends Controller
 
         return new StreamedResponse(function () use ($agent, $request, $finalConversationId, $payload, $planningPayload) {
             if ($finalConversationId) {
-                echo "event: conversation_id\n";
-                echo 'data: '.json_encode(['conversation_id' => $finalConversationId])."\n\n";
-
-                if (ob_get_level() > 0) {
-                    ob_flush();
-                }
-                flush();
+                $this->emitSse('data', ['conversation_id' => $finalConversationId], 'conversation_id');
             }
 
             $message = $request->validated('message');
@@ -151,12 +147,7 @@ class AiChatController extends Controller
                 $payload->response = $this->formatter->format($fullContent, $message, $planningPayload->executionPlan);
 
                 if ($payload->response !== '') {
-                    echo 'data: '.json_encode(['type' => 'text_delta', 'delta' => $payload->response])."\n\n";
-
-                    if (ob_get_level() > 0) {
-                        ob_flush();
-                    }
-                    flush();
+                    $this->emitSse('data', ['type' => 'text_delta', 'delta' => $payload->response]);
 
                     $this->streamManager->appendToStream($finalConversationId ?? 'unknown', $payload->response);
                 }
@@ -167,7 +158,7 @@ class AiChatController extends Controller
             } catch (\Throwable $e) {
                 $this->streamManager->abortStream($finalConversationId ?? 'unknown');
 
-                echo 'data: '.json_encode(['error' => $e->getMessage()])."\n\n";
+                $this->emitSse('data', ['error' => $e->getMessage()]);
             }
 
             echo "data: [DONE]\n\n";
@@ -321,35 +312,6 @@ class AiChatController extends Controller
         }
 
         return $agent;
-    }
-
-    protected function buildSystemPrompt(ChatPayload $payload): string
-    {
-        $parts = [];
-        $agentPrompt = $payload->agent?->systemPrompt() ?? config('ai-chat.conversations.default_system_prompt', '');
-        $plan = $payload->executionPlan;
-
-        if ($agentPrompt !== '') {
-            $parts[] = $agentPrompt;
-        }
-
-        if (! empty($payload->context)) {
-            $parts[] = "## Context\n".json_encode($payload->context, JSON_PRETTY_PRINT);
-        }
-
-        if (! empty($payload->knowledge)) {
-            $parts[] = "## Knowledge Base\n".collect($payload->knowledge)
-                ->map(fn ($k, $i) => '['.($i + 1).'] '.(is_array($k) ? json_encode($k) : (string) $k))
-                ->implode("\n");
-        }
-
-        if (! empty($payload->memory)) {
-            $parts[] = "## Conversation Memory\n".collect($payload->memory)
-                ->map(fn ($m) => is_array($m) ? json_encode($m) : (string) $m)
-                ->implode("\n");
-        }
-
-        return implode("\n\n", $parts);
     }
 
     protected function ensureConversation(SendMessageRequest $request): ?string
@@ -558,5 +520,27 @@ class AiChatController extends Controller
             'status' => 'success',
             'error' => null,
         ]);
+    }
+
+    /**
+     * Emit a single SSE frame and flush output buffers.
+     *
+     * @param  string  $field  SSE field name — usually "data" or "event"
+     * @param  array<string, mixed>  $payload
+     * @param  string|null  $event  Optional SSE event name (emits an "event:" line before "data:")
+     */
+    protected function emitSse(string $field, array $payload, ?string $event = null): void
+    {
+        if ($event !== null) {
+            echo "event: {$event}\n";
+        }
+
+        echo "{$field}: ".json_encode($payload)."\n\n";
+
+        if (ob_get_level() > 0) {
+            ob_flush();
+        }
+
+        flush();
     }
 }

@@ -788,7 +788,7 @@ return [
     ],
     'summary' => [
         'models_count' => 8,
-        'routes_count' => 63,
+        'routes_count' => 64,
         'controllers_count' => 0,
         'services_count' => 9,
         'policies_count' => 2,

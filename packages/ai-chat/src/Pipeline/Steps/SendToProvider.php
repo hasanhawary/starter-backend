@@ -6,6 +6,7 @@ use AiChat\Agents\ChatAgent;
 use AiChat\Chat\ConversationManager;
 use AiChat\Chat\HistorySelector;
 use AiChat\Pipeline\ChatPayload;
+use AiChat\Prompt\SystemPromptBuilder;
 use AiChat\Response\FinalResponseFormatter;
 use Closure;
 
@@ -13,6 +14,7 @@ class SendToProvider
 {
     public function __construct(
         protected FinalResponseFormatter $formatter,
+        protected SystemPromptBuilder $promptBuilder,
     ) {}
 
     public function handle(ChatPayload $payload, Closure $next): ChatPayload
@@ -36,7 +38,7 @@ class SendToProvider
     {
         $this->ensureConversation($payload);
 
-        $systemPrompt = $this->resolveSystemPrompt($payload);
+        $systemPrompt = $this->promptBuilder->build($payload);
 
         $agent = new ChatAgent($systemPrompt);
 
@@ -87,34 +89,6 @@ class SendToProvider
             $sessionId,
             'New Chat',
         );
-    }
-
-    protected function resolveSystemPrompt(ChatPayload $payload): string
-    {
-        $parts = [];
-        $agentPrompt = $payload->agent?->systemPrompt() ?? config('ai-chat.conversations.default_system_prompt', '');
-
-        if ($agentPrompt !== '') {
-            $parts[] = $agentPrompt;
-        }
-
-        if (! empty($payload->context)) {
-            $parts[] = "## Context\n".json_encode($payload->context, JSON_PRETTY_PRINT);
-        }
-
-        if (! empty($payload->knowledge)) {
-            $parts[] = "## Knowledge Base\n".collect($payload->knowledge)
-                ->map(fn ($k, $i) => '['.($i + 1).'] '.(is_array($k) ? json_encode($k) : (string) $k))
-                ->implode("\n");
-        }
-
-        if (! empty($payload->memory)) {
-            $parts[] = "## Conversation Memory\n".collect($payload->memory)
-                ->map(fn ($m) => is_array($m) ? json_encode($m) : (string) $m)
-                ->implode("\n");
-        }
-
-        return implode("\n\n", $parts);
     }
 
     protected function handleSync(ChatPayload $payload, ChatAgent $chatAgent, Closure $next): ChatPayload

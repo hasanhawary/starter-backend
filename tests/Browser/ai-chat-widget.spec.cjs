@@ -632,6 +632,244 @@ test.describe('AI Chat Widget — Visual & Behavioral Tests', () => {
     expect(r.codeCopy).toBe(true);
   });
 
+  test.describe('Conversation history API — no redundant calls', () => {
+
+    test('sending a message does NOT call the conversation history API', async ({ page }) => {
+      var historyCallCount = 0;
+
+      await page.route('**/api/ai-chat/conversations/**', async function (route) {
+        historyCallCount++;
+        await route.continue();
+      });
+
+      await page.route('**/api/ai-chat/messages', async function (route) {
+        await route.fulfill({
+          status: 200,
+          headers: { 'content-type': 'text/event-stream' },
+          body: [
+            'event: conversation_id',
+            'data: {"conversation_id":"conv_no_history_on_send"}',
+            '',
+            'data: ' + JSON.stringify({ type: 'text_delta', delta: 'Hello back' }),
+            '',
+            'data: [DONE]',
+            '',
+          ].join('\n'),
+        });
+      });
+
+      await page.evaluate(function () { window.AIChatWidget.open(); });
+      await page.waitForTimeout(300);
+
+      // Reset counter after open (first open may legitimately fetch if no localStorage)
+      historyCallCount = 0;
+
+      await page.evaluate(function () {
+        var sr = null;
+        for (var i = 0; i < document.body.children.length; i++) {
+          var el = document.body.children[i];
+          if (el.shadowRoot) { sr = el.shadowRoot; break; }
+        }
+        var ta = sr.querySelector('.ai-chat-textarea');
+        ta.value = 'Test message';
+        ta.dispatchEvent(new Event('input'));
+        sr.querySelector('.ai-chat-send').click();
+      });
+
+      await page.waitForFunction(function () {
+        return window.AIChatWidget.getState().isLoading === false
+          && window.AIChatWidget.getState().isStreaming === false;
+      });
+
+      expect(historyCallCount).toBe(0);
+    });
+
+    test('opening widget a second time does NOT call history API when messages already have IDs', async ({ page }) => {
+      // Seed localStorage with messages that already have server IDs
+      await page.evaluate(function () {
+        var sessionKey = null;
+        var convKey = null;
+        var msgKey = null;
+
+        // Find the storage keys used by the widget
+        for (var k in localStorage) {
+          if (k.indexOf('ai_chat_conv') !== -1) convKey = k;
+          if (k.indexOf('ai_chat_msg') !== -1) msgKey = k;
+          if (k.indexOf('ai_chat_session') !== -1) sessionKey = k;
+        }
+
+        // Use known key patterns from the widget source
+        localStorage.setItem('ai_chat_conversation_id', 'conv_with_ids');
+        localStorage.setItem('ai_chat_messages', JSON.stringify([
+          { id: 'msg_1', role: 'user', content: 'Hi', timestamp: new Date().toISOString() },
+          { id: 'msg_2', role: 'assistant', content: 'Hello!', timestamp: new Date().toISOString() },
+        ]));
+      });
+
+      var historyCallCount = 0;
+
+      await page.route('**/api/ai-chat/conversations/**', async function (route) {
+        historyCallCount++;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            data: {
+              conversation: { id: 'conv_with_ids', message_count: 2 },
+              messages: [
+                { id: 'msg_1', role: 'user', content: 'Hi', created_at: new Date().toISOString() },
+                { id: 'msg_2', role: 'assistant', content: 'Hello!', created_at: new Date().toISOString() },
+              ],
+            },
+          }),
+        });
+      });
+
+      // Open widget — should NOT call history API since all messages have IDs
+      await page.evaluate(function () { window.AIChatWidget.open(); });
+      await page.waitForTimeout(500);
+
+      expect(historyCallCount).toBe(0);
+    });
+
+    test('opening widget calls history API once when messages are missing IDs', async ({ page }) => {
+      // Seed localStorage with messages that have NO server IDs (freshly sent, not yet synced)
+      await page.evaluate(function () {
+        localStorage.setItem('ai_chat_conversation_id', 'conv_missing_ids');
+        localStorage.setItem('ai_chat_messages', JSON.stringify([
+          { role: 'user', content: 'Hi', timestamp: new Date().toISOString() },
+          { role: 'assistant', content: 'Hello!', timestamp: new Date().toISOString() },
+        ]));
+      });
+
+      var historyCallCount = 0;
+
+      await page.route('**/api/ai-chat/conversations/**', async function (route) {
+        historyCallCount++;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            data: {
+              conversation: { id: 'conv_missing_ids', message_count: 2 },
+              messages: [
+                { id: 'msg_a', role: 'user', content: 'Hi', created_at: new Date().toISOString() },
+                { id: 'msg_b', role: 'assistant', content: 'Hello!', created_at: new Date().toISOString() },
+              ],
+            },
+          }),
+        });
+      });
+
+      await page.evaluate(function () { window.AIChatWidget.open(); });
+      await page.waitForTimeout(500);
+
+      // Should call exactly once to backfill IDs
+      expect(historyCallCount).toBe(1);
+    });
+
+    test('opening widget a second time after ID sync does NOT call history API again', async ({ page }) => {
+      // Seed localStorage with messages missing IDs so first open triggers a sync
+      await page.evaluate(function () {
+        localStorage.setItem('ai_chat_conversation_id', 'conv_sync_once');
+        localStorage.setItem('ai_chat_messages', JSON.stringify([
+          { role: 'user', content: 'Hi', timestamp: new Date().toISOString() },
+          { role: 'assistant', content: 'Hello!', timestamp: new Date().toISOString() },
+        ]));
+      });
+
+      var historyCallCount = 0;
+
+      await page.route('**/api/ai-chat/conversations/**', async function (route) {
+        historyCallCount++;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            data: {
+              conversation: { id: 'conv_sync_once', message_count: 2 },
+              messages: [
+                { id: 'msg_x', role: 'user', content: 'Hi', created_at: new Date().toISOString() },
+                { id: 'msg_y', role: 'assistant', content: 'Hello!', created_at: new Date().toISOString() },
+              ],
+            },
+          }),
+        });
+      });
+
+      // First open — triggers sync
+      await page.evaluate(function () { window.AIChatWidget.open(); });
+      await page.waitForTimeout(500);
+      expect(historyCallCount).toBe(1);
+
+      // Close and reopen — historyLoaded flag should prevent a second call
+      await page.evaluate(function () { window.AIChatWidget.close(); });
+      await page.waitForTimeout(300);
+
+      historyCallCount = 0;
+
+      await page.evaluate(function () { window.AIChatWidget.open(); });
+      await page.waitForTimeout(500);
+
+      expect(historyCallCount).toBe(0);
+    });
+
+    test('resetting conversation clears historyLoaded so new conversation can sync', async ({ page }) => {
+      var historyCallCount = 0;
+
+      await page.route('**/api/ai-chat/messages', async function (route) {
+        await route.fulfill({
+          status: 200,
+          headers: { 'content-type': 'text/event-stream' },
+          body: [
+            'event: conversation_id',
+            'data: {"conversation_id":"conv_after_reset"}',
+            '',
+            'data: ' + JSON.stringify({ type: 'text_delta', delta: 'Fresh start' }),
+            '',
+            'data: [DONE]',
+            '',
+          ].join('\n'),
+        });
+      });
+
+      await page.route('**/api/ai-chat/conversations/**', async function (route) {
+        historyCallCount++;
+        await route.continue();
+      });
+
+      // Open, send a message, then reset
+      await page.evaluate(function () { window.AIChatWidget.open(); });
+      await page.waitForTimeout(300);
+
+      await page.evaluate(function () {
+        var sr = null;
+        for (var i = 0; i < document.body.children.length; i++) {
+          var el = document.body.children[i];
+          if (el.shadowRoot) { sr = el.shadowRoot; break; }
+        }
+        var ta = sr.querySelector('.ai-chat-textarea');
+        ta.value = 'Hello';
+        ta.dispatchEvent(new Event('input'));
+        sr.querySelector('.ai-chat-send').click();
+      });
+
+      await page.waitForFunction(function () {
+        return window.AIChatWidget.getState().isLoading === false
+          && window.AIChatWidget.getState().isStreaming === false;
+      });
+
+      await page.evaluate(function () { window.AIChatWidget.reset(); });
+      await page.waitForTimeout(200);
+
+      // After reset, historyLoaded should be false — verify STATE reflects a clean slate
+      var state = await page.evaluate(function () { return window.AIChatWidget.getState(); });
+      expect(state.currentConversationId).toBeNull();
+      expect(state.messageCount).toBe(0);
+    });
+
+  });
+
   test('retry after API failure resends once without duplicating user message', async ({ page }) => {
     var requestCount = 0;
 

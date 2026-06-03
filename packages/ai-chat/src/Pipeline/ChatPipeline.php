@@ -22,7 +22,7 @@ class ChatPipeline
         ValidateMessage::class,
         ResolveUser::class,
         ResolveAgent::class,
-        PlanStep::class,
+        PlanStep::class,//
         ApplyPolicies::class,
         ResolveContext::class,
         RetrieveKnowledge::class,

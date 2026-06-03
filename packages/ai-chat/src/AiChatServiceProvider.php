@@ -49,6 +49,7 @@ use AiChat\Planning\ToolSearch\ArrayToolSearchIndex;
 use AiChat\Planning\ToolSearch\ToolSearchIndex;
 use AiChat\Policies\DefaultReadOnlyPolicy;
 use AiChat\Policies\PolicyManager;
+use AiChat\Prompt\SystemPromptBuilder;
 use AiChat\Providers\GlmProvider;
 use AiChat\RAG\ContextBuilder;
 use AiChat\RAG\DocumentChunker;
@@ -265,6 +266,7 @@ class AiChatServiceProvider extends ServiceProvider
         $this->app->singleton(ToolSelector::class);
         $this->app->singleton(TokenBudgetManager::class);
         $this->app->singleton(MemoryExtractor::class);
+        $this->app->singleton(SystemPromptBuilder::class);
         $this->app->bind(ToolSearchIndex::class, function ($app) {
             $driver = config('ai-chat.planning.tool_search.driver', 'array');
 

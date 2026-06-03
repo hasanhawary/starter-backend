@@ -163,7 +163,7 @@ class FinalResponseFormatter
 
     protected function hasInternalReasoning(string $response): bool
     {
-        return preg_match('/\b(let me|conversation history|from the conversation|i can see|based on|the user|user\'s name|appears to be|most recent exchange|i should|i need to|i will|guidelines?|system seems|assistant responded|user said)\b/i', $response) === 1;
+        return preg_match('/\b(let me|conversation history|from the conversation|i can see|based on|the user|user\'s name|appears to be|most recent exchange|i should|i need to|i will|guidelines?|system seems|assistant responded|user said|one-liner|friendly one-liner|arabic greeting|means ")\b/i', $response) === 1;
     }
 
     protected function arabicNameAnswerFromReasoning(string $response): string
@@ -244,6 +244,7 @@ class FinalResponseFormatter
             '/^according to\b/i',
             '/^since the user\b/i',
             '/^since it\b/i',
+            '/^since no\b/i',
             '/^this is a\b/i',
             '/^the guidelines?\b/i',
             '/^let me\b/i',
@@ -254,8 +255,14 @@ class FinalResponseFormatter
             '/^i am going to\b/i',
             '/^so i\b/i',
             '/^so the\b/i',
-            '/^the function returned\b/i',
-            '/^the tool returned\b/i',
+            '/^the function (?:call )?(?:returned|was successful)\b/i',
+            '/^the tool (?:call )?(?:returned|was successful)\b/i',
+            '/^the (?:function|tool) call\b/i',
+            '/^the data shows?\b/i',
+            '/^the result shows?\b/i',
+            '/^i have (?:the|access to)\b/i',
+            '/^i can use the\b/i',
+            '/^with no errors?\b/i',
             '/^in arabic\b/i',
             '/^given the context\b/i',
             '/^given that\b/i',
@@ -263,6 +270,9 @@ class FinalResponseFormatter
             '/^it can be\b/i',
             '/^it might be\b/i',
             '/is an arabic greeting/i',
+            '/is (?:a |an )?(?:common |informal |formal )?(?:arabic |english )?(?:greeting|word|phrase|expression|salutation)/i',
+            '/\bmeans?\s+["\x{201c}\x{2018}]/iu',
+            '/\ba friendly one-liner is enough/i',
             '/similar to\s+["\']?(how are you|what\'s up)/i',
         ];
 
@@ -371,6 +381,14 @@ class FinalResponseFormatter
             '/\b(as an ai language model|as an ai assistant|as an ai|as a language model)\b[:,]?\s*/i',
             '/\b(i am an ai language model|i am an ai assistant)\b[:,]?\s*/i',
             '/\b(you can run|you could run|you can execute)\b[^.?!؟]*(select count|select \*|sql query)[^.?!؟]*[.?!؟]?/i',
+            // Echoed instruction phrases
+            '/\ba friendly one-liner is enough\.?\s*/i',
+            '/\breply naturally and very briefly\.?\s*/i',
+            '/\bdo not (?:use tools|mention any previous conversation|run tools|guess their intent)\.?\s*/i',
+            // Word/phrase definition explanations (model explaining the user's input to itself)
+            // Matches: "ازيك" (or "أهلاً") is a common Arabic greeting...
+            '/["\x{201c}\x{2018}][\p{Arabic}\w\s]+["\x{201d}\x{2019}]\s*(?:\(or\s+["\x{201c}\x{2018}][^"\x{201d}\x{2019}]+["\x{201d}\x{2019}]\)\s*)?is (?:a |an )?(?:common |informal |formal |standard )?(?:Arabic |English |French )?(?:greeting|word|phrase|expression|term|salutation)[^.!?؟]*[.!?؟]?\s*/iu',
+            '/\bmeans?\s+["\x{201c}\x{2018}][^"\x{201d}\x{2019}]+["\x{201d}\x{2019}][^.!?؟]*[.!?؟]?\s*/iu',
         ];
 
         return trim((string) preg_replace($patterns, '', $response));
@@ -379,17 +397,44 @@ class FinalResponseFormatter
     protected function removeToolMentions(string $response): string
     {
         $patterns = [
-            '/\busing the\s+[\w.\-:]+\s+(tool|function),?\s*/i',
-            '/\bi used the\s+[\w.\-:]+\s+(tool|function),?\s*/i',
-            '/\bi called the\s+[\w.\-:]+\s+(tool|function),?\s*/i',
-            '/\bafter running\s+[\w.\-:]+,?\s*/i',
-            '/\bbased on the\s+[\w.\-:]+\s+(tool|function),?\s*/i',
-            '/\baccording to the\s+[\w.\-:]+\s+(tool|function),?\s*/i',
-            '/\bthe result from\s+[\w.\-:]+\s+(shows?|returns?|gives?|indicates?)\s*/i',
-            '/باستخدام\s+(أداة|اداة|الدالة|دالة)\s+[\w.\-:]+،?\s*/u',
+            // Tool availability / access announcements
+            '/\bI have (?:the|access to(?: the)?)\s+[`\w.\-_:]+\s+(?:tool|function)\b[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bI can use the\s+[`\w.\-_:]+\s+(?:tool|function)[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bI\'ll use the\s+[`\w.\-_:]+\s+(?:tool|function)[^.!?؟]*[.!?؟]?\s*/i',
+            // Tool parameter / capability descriptions
+            '/\bThe\s+[`\w.\-_:]+\s+(?:tool|function)\s+(?:has|takes|accepts|supports|requires)[^.!?؟]*[.!?؟]?\s*/i',
+            '/\b(?:which|that)\s+can\s+\w+[^.!?؟]*(?:records?|data|results?|users?|count)[^.!?؟]*[.!?؟]?\s*/i',
+            // Call announcements
+            '/\bI\'ll call\b[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bI will call\b[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bI am going to call\b[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bI\'m going to call\b[^.!?؟]*[.!?؟]?\s*/i',
+            // Filter/parameter reasoning
+            '/\bSince (?:the user )?(?:hasn\'t|has not|didn\'t|did not) (?:specified|provided|mentioned)[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bSince no (?:specific )?filters? (?:are |were )?mentioned[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bSince no (?:specific )?(?:parameters?|arguments?) (?:are |were )?(?:provided|specified|mentioned)[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bthe (?:user )?hasn\'t specified (?:any )?filters?[^.!?؟]*[.!?؟]?\s*/i',
+            // Call success / result narration
+            '/\bThe function call was successful[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bThe (?:function|tool) call (?:was|is) (?:successful|complete)[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bThe call (?:was|is) (?:successful|complete)[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bThe (?:function|tool) (?:call )?(?:returned|returned that|shows?|indicates?)\b[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bThe data shows?\b[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bThe result shows?\b[^.!?؟]*[.!?؟]?\s*/i',
+            '/\bwith no errors?\b[^.!?؟]*[.!?؟]?\s*/i',
+            // Tool usage references
+            '/\busing the\s+[`\w.\-:]+\s+(?:tool|function),?\s*/i',
+            '/\bi used the\s+[`\w.\-:]+\s+(?:tool|function),?\s*/i',
+            '/\bi called the\s+[`\w.\-:]+\s+(?:tool|function),?\s*/i',
+            '/\bafter running\s+[`\w.\-:]+,?\s*/i',
+            '/\bbased on the\s+[`\w.\-:]+\s+(?:tool|function),?\s*/i',
+            '/\baccording to the\s+[`\w.\-:]+\s+(?:tool|function),?\s*/i',
+            '/\bthe result from\s+[`\w.\-:]+\s+(?:shows?|returns?|gives?|indicates?)\s*/i',
+            // Arabic equivalents
+            '/باستخدام\s+(?:أداة|اداة|الدالة|دالة)\s+[\w.\-:]+،?\s*/u',
             '/بعد\s+تشغيل\s+[\w.\-:]+،?\s*/u',
-            '/حسب\s+(أداة|اداة|الدالة|دالة)\s+[\w.\-:]+،?\s*/u',
-            '/بناءً?\s+على\s+(أداة|اداة|الدالة|دالة)\s+[\w.\-:]+،?\s*/u',
+            '/حسب\s+(?:أداة|اداة|الدالة|دالة)\s+[\w.\-:]+،?\s*/u',
+            '/بناءً?\s+على\s+(?:أداة|اداة|الدالة|دالة)\s+[\w.\-:]+،?\s*/u',
         ];
 
         return trim((string) preg_replace($patterns, '', $response));

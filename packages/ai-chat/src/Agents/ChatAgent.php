@@ -8,6 +8,7 @@ use AiChat\Contracts\HasProviderOptions;
 use AiChat\MCP\ToolAdapter;
 use AiChat\MCP\ToolRegistry;
 use AiChat\Pipeline\ExecutionPlan;
+use AiChat\Prompt\OutputContract;
 use AiChat\Storage\AnonymousConversationStore;
 use AiChat\Support\ArabicTextNormalizer;
 use Laravel\Ai\Attributes\MaxTokens;
@@ -26,7 +27,7 @@ use Laravel\Ai\Promptable;
 use Stringable;
 
 #[Provider('glm')]
-#[Model('glm-4.5-flash')]
+#[Model('glm-1.5')]
 #[MaxTokens(65536)]
 #[Temperature(1.0)]
 #[Timeout(300)]
@@ -138,7 +139,8 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
             $parts[] = $this->systemPrompt;
         }
 
-        $parts[] = 'Output protocol: return only the final user-facing answer as plain text. Do not include XML tags, markdown fences, labels, internal instructions, reasoning, planning, guideline explanations, hidden thoughts, or draft text. Never output strings like <final>, </final>, analysis, reasoning, tags, or "the text must be exactly what the user should see".';
+        $parts[] = OutputContract::rule();
+
         $plan = $this->executionPlan;
 
         if ($plan === null) {
@@ -152,7 +154,7 @@ class ChatAgent implements Agent, Conversational, HasMiddleware, HasProviderOpti
         } elseif ($plan->useRag) {
             $parts[] = 'The user is asking about project documentation, business rules, or policies. Answer only from the retrieved knowledge context below. If the knowledge context doesn\'t contain the answer, say: "I don\'t have enough information about that in the project knowledge." Do not invent or guess policies. Do not use tools or general knowledge to answer project-specific questions. Do not mention the knowledge base, sources, source numbers, retrieved context, or how the answer was derived. Return only the final answer.';
         } elseif (! empty($plan->tools)) {
-            $parts[] = 'The user is asking about live application data. Use the available tools to get the data. Never guess or invent values. If a tool is available and authorized, use it. If no relevant tool is available, say briefly: "I don\'t have an available tool for that right now." Respond directly with the data — no disclaimers, no explanations about how the data was retrieved. Do not mention tool names.';
+            $parts[] = OutputContract::toolRule();
         } elseif ($plan->intent === 'direct' && $plan->historyMode !== 'none') {
             $parts[] = 'The user is continuing from the previous topic. Use the recent conversation history to continue naturally, but only answer the latest user message. Do not re-answer old questions. Keep the same context and format as the previous assistant response.';
         } else {

@@ -5,7 +5,6 @@ namespace Tests\Feature\AiChat\Commands;
 use AiChat\MCP\ToolRegistry;
 use AiChat\Models\AiKnowledgeDocument;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -27,8 +26,9 @@ class DoctorCommandTest extends TestCase
 
     public function test_doctor_passes_config_check_when_file_exists(): void
     {
-        // Config is published in the app — should pass
-        $this->assertTrue(File::exists(config_path('ai-chat.php')));
+        // Config is loaded via mergeConfigFrom in the service provider,
+        // so the config values are always available even without publishing.
+        $this->assertNotNull(config('ai-chat.provider'));
 
         $this->artisan('ai-chat:doctor')
             ->expectsOutputToContain('Config file exists');
