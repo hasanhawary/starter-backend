@@ -16,7 +16,6 @@
         "hasanhawary/media-manager": "*",
         "hasanhawary/permission-manager": "*",
         "hasanhawary/report-builder": "*",
-        "laravel/ai": "^0.7.0",
         "laravel/framework": "^13.0",
         "laravel/reverb": "@beta",
         "laravel/sanctum": "^4.0",

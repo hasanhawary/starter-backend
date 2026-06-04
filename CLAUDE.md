@@ -1,222 +1,173 @@
-# CLAUDE.md — Starter Backend
+<laravel-boost-guidelines>
+=== foundation rules ===
 
-## Project Overview
+# Laravel Boost Guidelines
 
-Laravel 12 REST API with two auth guards (`admin`, `user`), Spatie permissions, LDAP support, media management, activity logging, OTP, export/report builders, and a custom lookup manager.
+The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to ensure the best experience when building Laravel applications.
 
-PHP 8.3+ · Laravel 12 · Sanctum · Spatie Permission · Spatie Translatable · Spatie ActivityLog · LdapRecord
+## Foundational Context
 
----
+This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-## Essential Commands
+- php - 8.4
+- laravel/framework (LARAVEL) - v13
+- laravel/prompts (PROMPTS) - v0
+- laravel/reverb (REVERB) - v1
+- laravel/sanctum (SANCTUM) - v4
+- laravel/boost (BOOST) - v2
+- laravel/mcp (MCP) - v0
+- laravel/pail (PAIL) - v1
+- laravel/pint (PINT) - v1
+- laravel/sail (SAIL) - v1
+- phpunit/phpunit (PHPUNIT) - v12
+- tailwindcss (TAILWINDCSS) - v4
 
-```bash
-# Dev (server + queue + logs + vite concurrently)
-composer dev
+## Skills Activation
 
-# Run tests
-composer test
+This project has domain-specific skills available in `**/skills/**`. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
-# Setup fresh project
-composer setup
+## Conventions
 
-# Artisan shortcuts
-php artisan migrate
-php artisan migrate:fresh --seed
-php artisan queue:listen --tries=1
-php artisan reverb:start          # WebSocket (Laravel Reverb)
-```
+- You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
+- Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
+- Check for existing components to reuse before writing a new one.
 
----
+## Verification Scripts
 
-## Directory Structure
+- Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.
 
-```
-app/
-├── Enum/                         # PHP backed string/int enums
-│   ├── Global/                   # Shared enums (ActiveTypeEnum, OtpTypeEnum, …)
-│   └── {Domain}/                 # Domain-specific enums
-├── Filters/
-│   ├── Global/                   # Reusable filters (ActiveFilter, OrderByFilter, …)
-│   └── {Guard}/{Domain}/         # Resource-specific filters
-├── Http/
-│   ├── Controllers/API/
-│   │   ├── BaseController.php    # Detects guard, sets Auth::shouldUse()
-│   │   ├── Admin/                # Admin-guard controllers
-│   │   └── Landing/              # User-guard controllers
-│   ├── Requests/
-│   │   ├── BaseFormRequest.php   # Normalizes empty→null, formats 422
-│   │   ├── Admin/
-│   │   └── Global/
-│   └── Resources/                # JsonResource classes
-├── Models/
-│   ├── BaseModel.php             # Extend this for all models
-│   └── *.php
-├── Rules/                        # Invokable validation rules
-├── Scopes/                       # Eloquent scope traits per model
-├── Services/                     # Business logic (no HTTP concerns)
-│   ├── Auth/                     # Login, OTP, ResetPassword services
-│   └── Global/                   # Notification, Setting, QueryHelper
-└── Trait/
-    └── Global/
-        ├── HasDeleteMethods.php      # destroy / restore / forceDelete (bulk)
-        ├── HasToggleActiveMethods.php # toggleActive (bulk)
-        ├── HasOrder.php              # changeOrder
-        ├── LogsActivityOptions.php   # Spatie activity log defaults
-        ├── CreatedByObserver.php     # Auto-sets created_by on create
-        └── ApplyNotification.php     # sendNotification(data, types[])
+## Application Structure & Architecture
 
-Modules/                          # Optional module namespace (Modules\Export\…)
-database/
-├── factories/                    # All models must have a factory
-└── migrations/
-```
+- Stick to existing directory structure; don't create new base folders without approval.
+- Do not change the application's dependencies without approval.
 
----
+## Frontend Bundling
 
-## Auth & Guards
+- If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
 
-Two guards: `admin` (Admin model) and `user` (User model). Guard is auto-detected via `detectGuard()` based on route prefix (`api/admin/*` → admin, `api/*` → user).
+## Documentation Files
 
-```php
-// BaseController boots this automatically — never set guard manually in controllers
-Auth::shouldUse($this->guard);
+- You must only create documentation files if explicitly requested by the user.
 
-// Route middleware
-Route::middleware(['auth:admin', 'ability:admin'])->group(...)
-Route::middleware(['auth:user',  'ability:user'])->group(...)
-```
+## Replies
 
----
+- Be concise in your explanations - focus on what's important rather than explaining obvious details.
 
-## Packages & Their Usage
+=== boost rules ===
 
-| Package | Purpose | Key API |
-|---|---|---|
-| `hasanhawary/media-manager` | File upload/delete/URL | `Media::replace($old)->upload($file, 'folder')` · `Media::url($path)` · `Media::delete($path)` |
-| `hasanhawary/permission-manager` | Registers permissions from model flags | `$model->inPermission = true` · `$model->specialOperations = [...]` |
-| `hasanhawary/lookup-manager` | Enum-to-frontend metadata | `EnumMethods` trait on enums · `keyName()` for custom key |
-| `hasanhawary/export-builder` | Excel/CSV export | `ExportController` via `GET /export?model=X` |
-| `hasanhawary/report-builder` | Dynamic chart reports | `ReportController` |
-| `spatie/laravel-permission` | RBAC | `HasRoles` on models · `PermissionMiddleware::using(...)` |
-| `spatie/laravel-translatable` | JSON-column translations | `HasTranslations` · `$translatable = ['name']` |
-| `spatie/laravel-activitylog` | Audit log | `LogsActivityOptions` trait |
-| `directorytree/ldaprecord-laravel` | LDAP/AD auth | Configured in `config/project.php` → `ldap` |
-| `laravel/reverb` | WebSocket broadcasting | `php artisan reverb:start` |
-| `maatwebsite/excel` | Excel export | Used internally by export-builder |
+# Laravel Boost
 
----
+## Tools
 
-## Conventions (Non-Negotiable)
+- Laravel Boost is an MCP server with tools designed specifically for this application. Prefer Boost tools over manual alternatives like shell commands or file reads.
+- Use `database-query` to run read-only queries against the database instead of writing raw SQL in tinker.
+- Use `database-schema` to inspect table structure before writing migrations or models.
+- Use `get-absolute-url` to resolve the correct scheme, domain, and port for project URLs. Always use this before sharing a URL with the user.
+- Use `browser-logs` to read browser logs, errors, and exceptions. Only recent logs are useful, ignore old entries.
 
-### Enums
-- PHP backed string enum in `app/Enum/{Domain}/XxxEnum.php`
-- Always use `EnumMethods` trait from `hasanhawary/lookup-manager`
-- Migration column type is **`string`** (never `enum`)
-- Cast in model `$casts`, validate via `Rule::enum(XxxEnum::class)`
+## Searching Documentation (IMPORTANT)
 
-### Controllers
-- Extend `BaseController` (handles guard detection automatically)
-- Thin: only HTTP concerns — delegate everything to Service or use `Pipeline`
-- `index()` always uses `Illuminate\Pipeline\Pipeline` with filter classes
-- Use traits `HasDeleteMethods` + `HasToggleActiveMethods` for standard operations
-- Set `$this->model = ModelClass::class` in constructor when using traits
-- Use `Gate::authorize()` for policy checks; `PermissionMiddleware::using()` for route-level
-- Permissions middleware goes in `static function middleware(): array` (implements `HasMiddleware`)
+- Always use `search-docs` before making code changes. Do not skip this step. It returns version-specific docs based on installed packages automatically.
+- Pass a `packages` array to scope results when you know which packages are relevant.
+- Use multiple broad, topic-based queries: `['rate limiting', 'routing rate limiting', 'routing']`. Expect the most relevant results first.
+- Do not add package names to queries because package info is already shared. Use `test resource table`, not `filament 4 test resource table`.
 
-### Requests
-- Always extend `BaseFormRequest` (not `FormRequest`)
-- `prepareForValidation()` auto-normalizes empty strings → null
-- Custom rules as invokable classes in `app/Rules/`
-- Translatable fields: use `TranslatableRequired` or `TranslatableNullable` rules
-- Unique translatable: use `UniqueCheck` rule
+### Search Syntax
 
-### Models
-- Extend `BaseModel`
-- Always declare `$fillable` (never `$guarded`)
-- Always declare `$casts` for all non-string columns and enums
-- Return-typed relationships
-- Scopes in separate `Scopes/{Domain}/XxxScopes.php` trait — prefix `scope`
-- Media: use custom `Attribute::make()` getter with `Media::url()` + mutator setter
-- Traits to use: `LogsActivityOptions`, `CreatedByObserver`, `ApplyNotification` as needed
-- `$model->inPermission = true` registers the model with permission-manager
-- `$model->specialOperations = ['restore', 'force-delete', 'toggle-active']` for extra permissions
+1. Use words for auto-stemmed AND logic: `rate limit` matches both "rate" AND "limit".
+2. Use `"quoted phrases"` for exact position matching: `"infinite scroll"` requires adjacent words in order.
+3. Combine words and phrases for mixed queries: `middleware "rate limit"`.
+4. Use multiple queries for OR logic: `queries=["authentication", "middleware"]`.
 
-### Migrations
-- Additive and reversible
-- Column type for enums: **`string`**
-- Index every FK and every column used in filter/sort/search
-- Use `foreignIdFor(ModelClass::class)` for FKs
-- Always include `softDeletes()` for resources with delete/restore
-- Always include `timestamps()`
+## Artisan
 
-### Services
-- Own all business logic
-- Wrap multi-step writes in `DB::transaction()`
-- Use `DB::afterCommit()` for side-effects (notifications, jobs)
-- Return Eloquent models (not arrays)
-- Dispatch events/jobs from service, not controller
+- Run Artisan commands directly via the command line (e.g., `php artisan route:list`). Use `php artisan list` to discover available commands and `php artisan [command] --help` to check parameters.
+- Inspect routes with `php artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
+- Read configuration values using dot notation: `php artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
 
-### Filters
-- One responsibility per filter class
-- Signature: `handle($query, Closure $next)` — receives the **query builder**, not the request
-- Access request params via `request()` helper inside the filter
-- Place reusable filters in `app/Filters/Global/`
-- Place resource-specific filters in `app/Filters/{Guard}/{Domain}/`
+## Tinker
 
-### Resources
-- Standard `JsonResource` in `app/Http/Resources/{Guard}/{Domain}/XxxResource.php`
-- Always expose `id`, `created_at`, and relevant translated fields
+- Execute PHP in app context for debugging and testing code. Do not create models without user approval, prefer tests with factories instead. Prefer existing Artisan commands over custom tinker code.
+- Always use single quotes to prevent shell expansion: `php artisan tinker --execute 'Your::code();'`
+  - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
 
-### Factories
-- Required for every model
-- Use realistic Faker data
-- Use `state()` methods for variants (e.g. `->inactive()`, `->withAvatar()`)
+=== php rules ===
 
-### Responses (Global Helpers)
-```php
-successResponse($data, $msg, $code = 200)   // { status, code, message, data }
-failResponse($msg, $data, $code = 400)       // { status, code, message, data }
-wrapPaginate($query, ResourceClass::class)   // respects ?per_page=-1 (all) or per_page=N
-abort403($condition)                          // conditional 403
-```
+# PHP
 
-### Routes
-```php
-// Standard pattern for a resource with soft-delete and toggle:
-Route::prefix('items')->group(function () {
-    Route::delete('force-delete', [ItemController::class, 'forceDelete']);
-    Route::delete('delete',       [ItemController::class, 'destroy']);
-    Route::post('restore',        [ItemController::class, 'restore']);
-    Route::put('toggle-active',   [ItemController::class, 'toggleActive']);
-    Route::apiResource('/', ItemController::class)
-        ->parameters(['' => 'item'])
-        ->except(['destroy']);
-});
-```
+- Always use curly braces for control structures, even for single-line bodies.
+- Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
+- Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
+- Use TitleCase for Enum keys: `FavoritePerson`, `BestLake`, `Monthly`.
+- Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
+- Use array shape type definitions in PHPDoc blocks.
 
----
+=== deployments rules ===
 
-## Skills — Read Before Acting
+# Deployment
 
-| Task | Skill file |
-|---|---|
-| Creating a new API resource (CRUD) | `.claude/skills/crud-resource.md` |
-| Adding a filter class | `.claude/skills/filters.md` |
-| Adding media to a model | `.claude/skills/media.md` |
-| Working with translatable fields | `.claude/skills/translatable.md` |
-| Adding permissions to a resource | `.claude/skills/permissions.md` |
-| Writing or fixing a migration | `.claude/skills/migrations.md` |
+- Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
 
----
+=== tests rules ===
 
-## Hard Rules
+# Test Enforcement
 
-- No `enum` column type in migrations
-- No business logic in controllers or models
-- No inline validation — always `FormRequest`
-- No `$guarded = []` — always explicit `$fillable`
-- No raw SQL where Eloquent works
-- No `provide/inject` for shared state (use Service classes or Laravel container)
-- Filters receive the **query builder** (not the request) as the first pipe argument
-- `BaseFormRequest` always — never plain `FormRequest`
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+
+=== laravel/core rules ===
+
+# Do Things the Laravel Way
+
+- Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available Artisan commands using `php artisan list` and check their parameters with `php artisan [command] --help`.
+- If you're creating a generic PHP class, use `php artisan make:class`.
+- Pass `--no-interaction` to all Artisan commands to ensure they work without user input. You should also pass the correct `--options` to ensure correct behavior.
+
+### Model Creation
+
+- When creating new models, create useful factories and seeders for them too. Ask the user if they need any other things, using `php artisan make:model --help` to check the available options.
+
+## APIs & Eloquent Resources
+
+- For APIs, default to using Eloquent API Resources and API versioning unless existing API routes do not, then you should follow existing application convention.
+
+## URL Generation
+
+- When generating links to other pages, prefer named routes and the `route()` function.
+
+## Testing
+
+- When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
+- Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
+- When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
+
+## Vite Error
+
+- If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
+
+=== pint/core rules ===
+
+# Laravel Pint Code Formatter
+
+- If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
+- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
+
+=== phpunit/core rules ===
+
+# PHPUnit
+
+- This application uses PHPUnit for testing. All tests must be written as PHPUnit classes. Use `php artisan make:test --phpunit {name}` to create a new test.
+- If you see a test using "Pest", convert it to PHPUnit.
+- Every time a test has been updated, run that singular test.
+- When the tests relating to your feature are passing, ask the user if they would like to also run the entire test suite to make sure everything is still passing.
+- Tests should cover all happy paths, failure paths, and edge cases.
+- You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files; these are core to the application.
+
+## Running Tests
+
+- Run the minimal number of tests, using an appropriate filter, before finalizing.
+- To run all tests: `php artisan test --compact`.
+- To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
+- To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
+
+</laravel-boost-guidelines>

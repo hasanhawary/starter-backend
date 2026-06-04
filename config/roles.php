@@ -42,7 +42,7 @@ return [
      | Example: 'web', 'api', 'admin'
      |
      */
-    'default_guard' => 'sanctum',
+    'default_guard' => 'api',
 
     /*
      |--------------------------------------------------------------------------
@@ -108,13 +108,13 @@ return [
      */
     'additional_operations' => [
         [
-            'name' => 'Home',
-            'operations' => ['report'],
+            'name' => 'Report',
+            'operations' => ['home'],
         ],
         [
             'name' => 'Log',
             'operations' => ['read'],
-        ],
+        ]
     ],
     /*
     |--------------------------------------------------------------------------

@@ -29,7 +29,7 @@ Sets the default brand when no specific brand is selected.
 $brand = config('brands.default_brand'); // 'default'
 
 // Override in .env
-DEFAULT_BRAND=jervis
+DEFAULT_BRAND=wakeb
 ```
 
 ---
@@ -292,7 +292,7 @@ Each brand has its own seeder file with brand-specific values.
 
 **Location:** `database/seeders/brands/{brand}.php`
 
-### Example: Jervis Brand
+### Example: Wakeb Brand
 
 ```php
 <?php
@@ -300,23 +300,23 @@ Each brand has its own seeder file with brand-specific values.
 return [
     'general' => [
         'info' => [
-            'name' => ['en' => 'Jervis', 'ar' => 'جيرفيس'],
-            'copyright_name' => ['en' => '© 2024 Jervis', 'ar' => '© 2024 جيرفيس'],
-            'website_address' => 'https://jervis.com',
-            'website_description' => ['en' => 'Jervis Platform', 'ar' => 'منصة جيرفيس'],
-            'meta_description' => ['en' => 'Jervis - Enterprise Platform', 'ar' => 'جيرفيس - منصة المؤسسات'],
+            'name' => ['en' => 'Wakeb', 'ar' => 'واكب'],
+            'copyright_name' => ['en' => '© 2024 Wakeb', 'ar' => '© 2024 واكب'],
+            'website_address' => 'https://wakeb.tech',
+            'website_description' => ['en' => 'Wakeb Platform', 'ar' => 'منصة واكب'],
+            'meta_description' => ['en' => 'Wakeb - Enterprise Platform', 'ar' => 'واكب - منصة المؤسسات'],
         ],
         'contact' => [
-            'contact_email' => 'support@jervis.com',
+            'contact_email' => 'support@wakeb.com',
             'contact_phone' => '+966 (12) 3456-789',
             'contact_address' => ['en' => 'Riyadh, Saudi Arabia', 'ar' => 'الرياض، المملكة العربية السعودية'],
         ],
         'social' => [
-            'instagram' => 'https://instagram.com/jervis',
-            'facebook' => 'https://facebook.com/jervis',
-            'linkedin' => 'https://linkedin.com/company/jervis',
-            'twitter' => 'https://twitter.com/jervis',
-            'youtube' => 'https://youtube.com/jervis',
+            'instagram' => 'https://instagram.com/wakeb',
+            'facebook' => 'https://facebook.com/wakeb',
+            'linkedin' => 'https://linkedin.com/company/wakeb',
+            'twitter' => 'https://twitter.com/wakeb',
+            'youtube' => 'https://youtube.com/wakeb',
         ],
     ],
     'theme' => [
@@ -396,7 +396,7 @@ public function getSettings()
         "key": "name",
         "type": "text",
         "label": "Company name",
-        "value": "Jervis",
+        "value": "Wakeb",
         "is_multi_lang": true
       }
     ],
@@ -420,7 +420,7 @@ public function getSettings()
 ### In Environment
 
 ```env
-DEFAULT_BRAND=jervis
+DEFAULT_BRAND=wakeb
 ```
 
 ---

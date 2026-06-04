@@ -26,7 +26,7 @@ class ActivityLogController extends BaseController implements HasMiddleware
     public function index(Request $request): JsonResponse
     {
         $query = app(Pipeline::class)
-            ->send(Activity::query())
+            ->send(Activity::query()->with(['causer', 'subject']))
             ->through([
                 ActivityLogFilter::class,
                 OrderByFilter::class,
@@ -38,6 +38,6 @@ class ActivityLogController extends BaseController implements HasMiddleware
 
     public function show(Activity $activity): JsonResponse
     {
-        return successResponse(new ActivityLogResource($activity));
+        return successResponse(new ActivityLogResource($activity->load(['causer', 'subject'])));
     }
 }

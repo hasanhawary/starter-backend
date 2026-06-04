@@ -1,5 +1,6 @@
 {
     "agents": [
+        "claude_code",
         "opencode"
     ],
     "cloud": false,
@@ -9,6 +10,7 @@
     "sail": false,
     "skills": [
         "laravel-best-practices",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "starter-kit"
     ]
 }

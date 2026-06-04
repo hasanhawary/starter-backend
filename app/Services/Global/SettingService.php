@@ -90,11 +90,11 @@ class SettingService
 
     /**
      * Update multiple settings with media handling and env sync
+     *
+     * @throws \JsonException
      */
     public function updateSettings(array $settings): void
     {
-        $payload = [];
-
         foreach ($settings as $item) {
             $setting = Setting::where('key', $item['key'])
                 ->where('group', $item['group'])
@@ -104,22 +104,13 @@ class SettingService
                 continue;
             }
 
-            $payload[] = [
-                'key' => $item['key'],
-                'group' => $item['group'],
-                'value' => $this->normalizeValue($item['value'], $setting->type),
-            ];
+            $setting->value = $this->normalizeValue($item['value'], $setting->type);
+            $setting->save();
 
             if ($setting->is_env) {
                 $this->syncEnv($item['value']);
             }
         }
-
-        Setting::upsert(
-            $payload,
-            ['key', 'group'], // unique columns
-            ['value']         // columns to update
-        );
 
         $this->clearCache();
     }

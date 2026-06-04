@@ -8,8 +8,14 @@ trait CreatedByObserver
 {
     public static function bootCreatedByObserver(): void
     {
-        if (auth()->check()) {
-            static::creating(static fn (Model $model) => $model->created_by = auth()?->id());
-        }
+        $column = property_exists(static::class, 'createdByColumn')
+            ? static::$createdByColumn
+            : 'created_by';
+
+        static::creating(static function (Model $model) use ($column): void {
+            if (auth()->check()) {
+                $model->{$column} = auth()->id();
+            }
+        });
     }
 }
