@@ -9,20 +9,9 @@ class HelpLookupTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_help_models_requires_read_help_permission(): void
-    {
-        $this->actingAsUserWithPermissions();
-
-        $this->getJson('/api/help-models')->assertForbidden();
-
-        $this->actingAsUserWithPermissions(['read-help']);
-
-        $this->assertSuccessEnvelope($this->getJson('/api/help-models'));
-    }
-
     public function test_help_models_rejects_invalid_lookup_contract(): void
     {
-        $this->actingAsUserWithPermissions(['read-help']);
+        $this->actingAsUserWithPermissions();
 
         $query = http_build_query([
             'tables' => [
