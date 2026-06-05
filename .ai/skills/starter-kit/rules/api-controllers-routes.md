@@ -26,6 +26,8 @@ Do not return raw resources directly from controllers unless the same area alrea
 
 This is the current `CountryController` style. Use it for simple data-entry resources where create/update are protected by action middleware and delete/restore/toggle are delegated to traits.
 
+**No service class is needed.** The controller handles `store`/`update` directly with `Model::create()` and `$model->update()` because there is no complex logic, relation syncing, notifications, or transactions.
+
 ```php
 <?php
 
@@ -101,6 +103,8 @@ class ProductController extends BaseController implements HasMiddleware
 ## Controller: Ownership/Service CRUD
 
 This is the current `UserController` style. Use it when ownership, root protection, relation syncing, or notifications require policies/services.
+
+**A service class is required** because the controller has complex logic: relation syncing, `DB::transaction()`, side effects like credential emails, or ownership authorization via `Gate::authorize()`.
 
 ```php
 class AdminController extends BaseController
