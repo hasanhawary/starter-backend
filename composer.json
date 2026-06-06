@@ -6,23 +6,22 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.3|^8.4|^8.5",
+        "php": "^8.4|^8.5",
         "ext-fileinfo": "*",
         "ext-openssl": "*",
         "ext-pdo": "*",
-        "directorytree/ldaprecord-laravel": "^3.4",
+        "directorytree/ldaprecord-laravel": "^4.0",
         "hasanhawary/export-builder": "*",
         "hasanhawary/lookup-manager": "*",
         "hasanhawary/media-manager": "*",
         "hasanhawary/permission-manager": "*",
         "hasanhawary/report-builder": "*",
         "laravel/framework": "^13.0",
-        "laravel/reverb": "@beta",
+        "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "maatwebsite/excel": "^3.1",
-        "pusher/pusher-php-server": "^7.2",
-        "spatie/laravel-activitylog": "^4.10",
+        "spatie/laravel-activitylog": "^5.0",
         "spatie/laravel-ignition": "^2.10",
         "spatie/laravel-permission": "^6.24",
         "spatie/laravel-translatable": "^6.12"
@@ -35,7 +34,7 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^12.0"
+        "phpunit/phpunit": "^13.0"
     },
     "autoload": {
         "files": [
