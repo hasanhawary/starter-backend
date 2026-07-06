@@ -6,6 +6,23 @@ Use this rule when creating or modifying business services, transactions, relati
 
 Controllers stay thin. Extract non-trivial writes, relation syncing, notifications, exports, imports, settings logic, and multi-step operations into services.
 
+## When To Use A Service
+
+**Use a service when** the controller has complex logic such as:
+- Relation syncing (roles, permissions, tags, categories).
+- Multi-step writes requiring `DB::transaction()`.
+- Side effects like notifications, credential emails, or event dispatches.
+- Ownership or root-protection authorization via `Gate::authorize()`/Policies.
+- Settings, caching, or import/export orchestration.
+
+**Do NOT use a service when** the controller is simple CRUD:
+- `store` is just `Model::create($request->validated())`.
+- `update` is just `$model->update($request->validated())`.
+- No relation syncing, no notifications, no transactions needed.
+- A basic data-entry resource (e.g., Country, City, Product, Category) with permission-middleware-only authorization.
+
+For simple CRUD, the controller handles the write directly — no service class is needed. Adding a service to a simple CRUD controller adds unnecessary indirection with no benefit.
+
 ## Service Template
 
 ```php

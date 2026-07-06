@@ -19,7 +19,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
 use LdapRecord\Laravel\Auth\LdapAuthenticatable;
-use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements LdapAuthenticatable

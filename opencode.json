@@ -1,14 +1,5 @@
 {
     "$schema": "https://opencode.ai/config.json",
-    "model": "openrouter/free",
-    "provider": {
-        "openrouter": {
-            "options": {
-                "timeout": 600000,
-                "chunkTimeout": 60000
-            }
-        }
-    },
     "skills": {
         "paths": [
             ".ai/skills"
@@ -23,22 +14,6 @@
                 "artisan",
                 "boost:mcp"
             ]
-        },
-        "github": {
-            "type": "local",
-            "command": [
-                "docker",
-                "run",
-                "-i",
-                "--rm",
-                "-e",
-                "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",
-                "ghcr.io/github/github-mcp-server"
-            ],
-            "enabled": true,
-            "environment": {
-                "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_TOKEN"
-            }
         },
         "filesystem": {
             "type": "local",
@@ -55,15 +30,6 @@
             "command": [
                 "npx",
                 "@playwright/mcp@latest"
-            ]
-        },
-        "terminal": {
-            "type": "local",
-            "enabled": true,
-            "command": [
-                "npx",
-                "-y",
-                "@modelcontextprotocol/server-shell"
             ]
         }
     }
