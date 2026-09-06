@@ -115,3 +115,76 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('/', UserController::class)->parameters(['' => 'user'])->except(['destroy']);
     });
 });
+
+
+use App\Http\Controllers\API\Commercial\CommercialCustomerController;
+use App\Http\Controllers\API\Commercial\DeploymentController;
+use App\Http\Controllers\API\Commercial\FleetController;
+use App\Http\Controllers\API\Commercial\LicenseManagementController;
+use App\Http\Controllers\API\Commercial\PlanController;
+use App\Http\Controllers\API\Commercial\ProvisioningController;
+use App\Http\Controllers\API\Commercial\ReleaseController;
+use App\Http\Controllers\API\Bootstrap\ProvisioningBootstrapController;
+use App\Http\Middleware\PermissionMiddleware;
+use App\Http\Middleware\ResolvePosContext;
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Commercial Customers / Organizations Administration
+    Route::prefix('v1/commercial/organizations')->middleware(PermissionMiddleware::using('manage-commercial-license|manage-commercial-organizations'))->group(function (): void {
+        Route::get('/', [CommercialCustomerController::class, 'index']);
+        Route::post('/', [CommercialCustomerController::class, 'store']);
+        Route::get('{organization}', [CommercialCustomerController::class, 'show']);
+        Route::post('{organization}/licenses', [CommercialCustomerController::class, 'issueLicense']);
+        Route::get('{organization}/audit-events', [CommercialCustomerController::class, 'auditEvents']);
+    });
+
+    // Commercial Plans Administration
+    Route::prefix('v1/commercial/plans')->middleware(PermissionMiddleware::using('manage-commercial-plans|manage-commercial-license'))->group(function (): void {
+        Route::get('catalog', [PlanController::class, 'catalog']);
+        Route::get('/', [PlanController::class, 'index']);
+        Route::post('/', [PlanController::class, 'store']);
+        Route::get('{plan}', [PlanController::class, 'show']);
+        Route::put('{plan}', [PlanController::class, 'update']);
+        Route::post('{plan}/archive', [PlanController::class, 'archive']);
+        Route::post('{plan}/restore', [PlanController::class, 'restore']);
+        Route::delete('{plan}', [PlanController::class, 'destroy']);
+    });
+
+    // Commercial License Authority Management
+    Route::prefix('v1/commercial/licenses')->middleware([ResolvePosContext::class, PermissionMiddleware::using('manage-commercial-license')])->group(function (): void {
+        Route::post('{license}/preview-plan', [LicenseManagementController::class, 'previewPlan']);
+        Route::post('{license}/change-plan', [LicenseManagementController::class, 'changePlan']);
+        Route::put('{license}/entitlements', [LicenseManagementController::class, 'updateEntitlements']);
+        Route::put('{license}/limits', [LicenseManagementController::class, 'updateLimits']);
+        Route::post('{license}/status', [LicenseManagementController::class, 'updateStatus']);
+        Route::post('{license}/renew', [LicenseManagementController::class, 'renew']);
+    });
+
+    Route::prefix('v1/commercial/releases')->middleware(PermissionMiddleware::using('publish-release'))->group(function (): void {
+        Route::get('/', [ReleaseController::class, 'index']);
+        Route::post('/', [ReleaseController::class, 'store']);
+        Route::post('/{release}/publish', [ReleaseController::class, 'publish']);
+        Route::post('/{release}/pause', [ReleaseController::class, 'pause']);
+        Route::post('/{release}/revoke', [ReleaseController::class, 'revoke']);
+    });
+
+    // Deployments
+    Route::prefix('v1/commercial/deployments')->middleware(PermissionMiddleware::using('manage-deployments|manage-commercial-license'))->group(function (): void {
+        Route::get('/', [DeploymentController::class, 'index']);
+    });
+
+    // Provisioning
+    Route::prefix('v1/commercial/provisioning')->middleware(PermissionMiddleware::using('provision-clients|manage-commercial-organizations'))->group(function (): void {
+        Route::post('/', [ProvisioningController::class, 'provision']);
+    });
+
+    // Fleet Management
+    Route::prefix('v1/commercial/fleet')->middleware(PermissionMiddleware::using('view-fleet|manage-commercial-license'))->group(function (): void {
+        Route::get('overview', [FleetController::class, 'overview']);
+    });
+});
+
+// Unauthenticated Machine Bootstrap
+Route::prefix('v1/bootstrap')->group(function (): void {
+    Route::post('provision', [ProvisioningBootstrapController::class, 'consumeToken']);
+});
