@@ -3,6 +3,8 @@
 namespace Tests\Feature\Global;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Reverb\Pulse\Recorders\ReverbConnections;
+use Laravel\Reverb\Pulse\Recorders\ReverbMessages;
 use Tests\TestCase;
 
 /**
@@ -20,6 +22,11 @@ class PackageEndpointsTest extends TestCase
     */
     public function test_the_report_endpoint_renders_the_user_page(): void
     {
+        // UserReport groups by DATE_FORMAT(), which only MySQL provides.
+        if (config('database.default') !== 'mysql') {
+            $this->markTestSkipped('The user report is MySQL-only (DATE_FORMAT).');
+        }
+
         $this->actingAsUserWithPermissions();
 
         $response = $this->getJson('/api/report?page=user');
@@ -48,10 +55,35 @@ class PackageEndpointsTest extends TestCase
         $this->actingAsUserWithPermissions();
         $this->createUser(['name' => 'Exported User']);
 
-        $response = $this->get('/api/export-direct?page=user&type=xlsx');
+        // The spreadsheet writer streams through its own output buffers, so the
+        // request is run inside one of ours and the body is discarded.
+        $level = ob_get_level();
+        ob_start();
+
+        try {
+            $response = $this->get('/api/export-direct?page=user&type=xlsx');
+            $response->streamedContent();
+        } finally {
+            while (ob_get_level() > $level) {
+                ob_end_clean();
+            }
+        }
 
         $response->assertOk();
-        $this->assertNotSame('', $response->headers->get('content-disposition'));
+        $this->assertStringContainsString('attachment', (string) $response->headers->get('content-disposition'));
+        $this->assertStringContainsString('spreadsheet', (string) $response->headers->get('content-type'));
+    }
+
+    public function test_the_export_module_routes_are_registered(): void
+    {
+        $this->assertTrue(config('export.module.enabled'));
+        $this->assertTrue(config('export.module.routes.enabled'));
+
+        $uris = collect(app('router')->getRoutes())->map->uri();
+
+        foreach (['api/export', 'api/export-direct', 'api/export-log'] as $uri) {
+            $this->assertContains($uri, $uris);
+        }
     }
 
     public function test_export_column_headings_resolve_from_the_export_lang_file(): void
@@ -124,8 +156,8 @@ class PackageEndpointsTest extends TestCase
     {
         $recorders = array_keys(config('pulse.recorders'));
 
-        $this->assertContains(\Laravel\Reverb\Pulse\Recorders\ReverbConnections::class, $recorders);
-        $this->assertContains(\Laravel\Reverb\Pulse\Recorders\ReverbMessages::class, $recorders);
+        $this->assertContains(ReverbConnections::class, $recorders);
+        $this->assertContains(ReverbMessages::class, $recorders);
     }
 
     public function test_the_log_viewer_is_mounted_under_the_api_prefix(): void
