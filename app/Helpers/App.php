@@ -623,6 +623,47 @@ if (! function_exists('setting')) {
     }
 }
 
+if (! function_exists('settingBool')) {
+    /**
+     * Read a boolean (switchbox) setting, correctly handling explicit false.
+     */
+    function settingBool(string $path, bool $default = true): bool
+    {
+        return app(SettingService::class)->bool($path, $default);
+    }
+}
+
+if (! function_exists('notificationChannelEnabled')) {
+    /**
+     * Check whether a notification channel is globally enabled via the
+     * "Notifications" settings sub-module (mail/sms/push/realtime master switches).
+     *
+     * Channels with no master switch (e.g. reminder, calendar) are always allowed.
+     * Defaults to enabled when the switch has not been configured, so existing
+     * behaviour is preserved until an admin explicitly turns a channel off.
+     */
+    function notificationChannelEnabled(string $channel): bool
+    {
+        $map = [
+            'email' => 'mail_support',
+            'mail' => 'mail_support',
+            'sms' => 'sms_support',
+            'push' => 'push_support',
+            'notification' => 'real_time_support',
+            'notify' => 'real_time_support',
+            'realtime' => 'real_time_support',
+        ];
+
+        $key = $map[strtolower($channel)] ?? null;
+
+        if (! $key) {
+            return true;
+        }
+
+        return settingBool("notifications.$key", true);
+    }
+}
+
 if (! function_exists('brandSettings')) {
     /**
      * Get all brand settings as an associative array.

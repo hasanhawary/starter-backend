@@ -168,4 +168,58 @@ return [
         'ldap' => 'LDAP',
         'reverb' => 'الاشعارات اللحظية',
     ],
+    /*
+    |--------------------------------------------------------------------------
+    | Global action messages
+    |--------------------------------------------------------------------------
+    | Used with an :item placeholder, e.g. __('api.global.deleted', ['item' => __('api.action_modules.user')]).
+    */
+    'global' => [
+        'created' => 'تم إنشاء :item بنجاح.',
+        'updated' => 'تم تحديث :item بنجاح.',
+        'deleted' => 'تم حذف :item بنجاح.',
+        'restored' => 'تمت استعادة :item بنجاح.',
+        'force_deleted' => 'تم حذف :item نهائياً.',
+        'added' => 'تمت إضافة :item بنجاح.',
+        'replaced' => 'تم استبدال :item بنجاح.',
+        'pinned' => 'تم تثبيت :item بنجاح.',
+        'unpinned' => 'تم إلغاء تثبيت :item بنجاح.',
+    ],
+
+    'action_modules' => [
+        'user' => 'المستخدم',
+        'role' => 'الدور',
+        'setting' => 'الإعداد',
+        'country' => 'الدولة',
+    ],
+
+    'not_allowed_to_force' => 'غير مسموح لك بحذف هذا السجل نهائياً (:id).',
+    'not_allowed_to_replace' => 'غير مسموح لك باستبدال هذا الملف (:id).',
+    'replaced_success' => 'تم الاستبدال بنجاح.',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Discovery filter labels
+    |--------------------------------------------------------------------------
+    | Referenced as translation keys from config/discovery.php and resolved per
+    | request by App\Services\Global\DiscoveryConfigResolver.
+    */
+    'filter' => [
+        'global' => [
+            'advanced' => 'نوع التصفية',
+            'search' => 'بحث',
+            'created_at' => 'النطاق الزمني لتاريخ الإنشاء',
+            'created_by' => 'أنشئ بواسطة',
+            'is_active' => 'الحالة',
+        ],
+        'user' => [
+            'gender' => 'الجنس',
+            'role' => 'الدور',
+            'last_login' => 'النطاق الزمني لآخر دخول',
+        ],
+    ],
+
+    'action_not_available' => 'هذا الإجراء غير متاح.',
+    'permission_not_found' => 'لم يتم العثور على الصلاحية.',
+    'invalid_credentials' => 'بيانات الدخول غير صحيحة.',
 ];

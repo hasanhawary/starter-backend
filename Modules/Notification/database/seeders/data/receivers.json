@@ -1,0 +1,658 @@
+{
+    "cause": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "assigner",
+                "name": {
+                    "en": "Assigner",
+                    "ar": "المكلف بالقضية"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "team",
+                "name": {
+                    "en": "Team Members",
+                    "ar": "فريق العمل"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "department.users",
+                "name": {
+                    "en": "Department Users",
+                    "ar": "مستخدمي الإدارة"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            }
+        ]
+    },
+    "cause_request": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "reviewer",
+                "name": {
+                    "en": "Reviewer",
+                    "ar": "المراجع"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "cause.assigner",
+                "name": {
+                    "en": "Cause Assigner",
+                    "ar": "المكلف بالقضية"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "cause.team",
+                "name": {
+                    "en": "Cause Team",
+                    "ar": "فريق القضية"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            }
+        ]
+    },
+    "contract": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "reviewer",
+                "name": {
+                    "en": "Reviewer",
+                    "ar": "المراجع"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "users",
+                "name": {
+                    "en": "Assigned Users",
+                    "ar": "المستخدمين المعينين"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "mainUser",
+                "name": {
+                    "en": "Main Assigned User",
+                    "ar": "المستخدم الرئيسي"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "department.users",
+                "name": {
+                    "en": "Department Users",
+                    "ar": "مستخدمي الإدارة"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            }
+        ]
+    },
+    "annexes_contract": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "reviewer",
+                "name": {
+                    "en": "Reviewer",
+                    "ar": "المراجع"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "users",
+                "name": {
+                    "en": "Assigned Users",
+                    "ar": "المستخدمين المعينين"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "mainUser",
+                "name": {
+                    "en": "Main Assigned User",
+                    "ar": "المستخدم الرئيسي"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "department.users",
+                "name": {
+                    "en": "Department Users",
+                    "ar": "مستخدمي الإدارة"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            }
+        ]
+    },
+    "consultation": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "users",
+                "name": {
+                    "en": "Assigned Users",
+                    "ar": "المستخدمين المعينين"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "mainUser",
+                "name": {
+                    "en": "Main Assigned User",
+                    "ar": "المستخدم الرئيسي"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "department.users",
+                "name": {
+                    "en": "Department Users",
+                    "ar": "مستخدمي الإدارة"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "reviewer",
+                "name": {
+                    "en": "Reviewer",
+                    "ar": "المراجع"
+                }
+            }
+        ]
+    },
+    "legal_study": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "users",
+                "name": {
+                    "en": "Assigned Users",
+                    "ar": "المستخدمين المعينين"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "mainUser",
+                "name": {
+                    "en": "Main Assigned User",
+                    "ar": "المستخدم الرئيسي"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "department.users",
+                "name": {
+                    "en": "Department Users",
+                    "ar": "مستخدمي الإدارة"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "reviewer",
+                "name": {
+                    "en": "Reviewer",
+                    "ar": "المراجع"
+                }
+            }
+        ]
+    },
+    "contractual_consultation": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "users",
+                "name": {
+                    "en": "Assigned Users",
+                    "ar": "المستخدمين المعينين"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "mainUser",
+                "name": {
+                    "en": "Main Assigned User",
+                    "ar": "المستخدم الرئيسي"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "department.users",
+                "name": {
+                    "en": "Department Users",
+                    "ar": "مستخدمي الإدارة"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "reviewer",
+                "name": {
+                    "en": "Reviewer",
+                    "ar": "المراجع"
+                }
+            }
+        ]
+    },
+    "intellectual_property_consultation": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "users",
+                "name": {
+                    "en": "Assigned Users",
+                    "ar": "المستخدمين المعينين"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "mainUser",
+                "name": {
+                    "en": "Main Assigned User",
+                    "ar": "المستخدم الرئيسي"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "department.users",
+                "name": {
+                    "en": "Department Users",
+                    "ar": "مستخدمي الإدارة"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "reviewer",
+                "name": {
+                    "en": "Reviewer",
+                    "ar": "المراجع"
+                }
+            }
+        ]
+    },
+    "task": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "assigner",
+                "name": {
+                    "en": "Assigner",
+                    "ar": "المكلف"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "department.users",
+                "name": {
+                    "en": "Department Users",
+                    "ar": "مستخدمي الإدارة"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            }
+        ]
+    },
+    "project": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "users",
+                "name": {
+                    "en": "Team Members",
+                    "ar": "أعضاء الفريق"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            }
+        ]
+    },
+    "document": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            }
+        ]
+    },
+    "help_request": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "questioner",
+                "name": {
+                    "en": "Questioner",
+                    "ar": "السائل"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "respondent",
+                "name": {
+                    "en": "Respondent",
+                    "ar": "المجيب"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            }
+        ]
+    },
+    "user": {
+        "receivers": [
+            {
+                "type": "self",
+                "relation": null,
+                "name": {
+                    "en": "User Himself",
+                    "ar": "المستخدم نفسه"
+                }
+            },
+            {
+                "type": "role",
+                "relation": null,
+                "name": {
+                    "en": "By Role",
+                    "ar": "حسب الدور"
+                }
+            }
+        ]
+    },
+    "cause_judgment": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "cause.creator",
+                "name": {
+                    "en": "Cause Creator",
+                    "ar": "منشئ القضية"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "cause.assigner",
+                "name": {
+                    "en": "Cause Assigner",
+                    "ar": "مكلف القضية"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "cause.team",
+                "name": {
+                    "en": "Cause Team",
+                    "ar": "فريق القضية"
+                }
+            }
+        ]
+    },
+    "cause_session": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "cause.creator",
+                "name": {
+                    "en": "Cause Creator",
+                    "ar": "منشئ القضية"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "cause.assigner",
+                "name": {
+                    "en": "Cause Assigner",
+                    "ar": "مكلف القضية"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "cause.team",
+                "name": {
+                    "en": "Cause Team",
+                    "ar": "فريق القضية"
+                }
+            }
+        ]
+    },
+    "cause_compensation": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "cause.creator",
+                "name": {
+                    "en": "Cause Creator",
+                    "ar": "منشئ القضية"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "cause.assigner",
+                "name": {
+                    "en": "Cause Assigner",
+                    "ar": "مكلف القضية"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "cause.team",
+                "name": {
+                    "en": "Cause Team",
+                    "ar": "فريق القضية"
+                }
+            }
+        ]
+    },
+    "project_task": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "users",
+                "name": {
+                    "en": "Task Assignees",
+                    "ar": "مكلفو المهمة"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "project.users",
+                "name": {
+                    "en": "Project Team",
+                    "ar": "فريق المشروع"
+                }
+            },
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            }
+        ]
+    },
+    "document_section": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Creator",
+                    "ar": "المنشئ"
+                }
+            }
+        ]
+    }
+}

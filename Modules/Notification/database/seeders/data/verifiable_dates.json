@@ -1,0 +1,476 @@
+{
+    "cause": {
+        "models": {
+            "App\\Models\\Cause": [
+                {
+                    "access_key": "date",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Cause Date",
+                        "ar": "تاريخ القضية"
+                    }
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    },
+    "cause_session": {
+        "models": {
+            "App\\Models\\CauseSession": [
+                {
+                    "access_key": "date",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Session Date",
+                        "ar": "موعد الجلسة"
+                    },
+                    "module": "cause_session"
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "cause_session"
+                }
+            ]
+        }
+    },
+    "cause_request": {
+        "models": {
+            "App\\Models\\CauseRequest": [
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    },
+    "contract": {
+        "models": {
+            "App\\Models\\Contract": [
+                {
+                    "access_key": "effective_date",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Effective Date",
+                        "ar": "تاريخ السريان"
+                    }
+                },
+                {
+                    "access_key": "deadline",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Deadline",
+                        "ar": "تاريخ الانتهاء"
+                    }
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    },
+    "annexes_contract": {
+        "models": {
+            "App\\Models\\AnnexesContract": [
+                {
+                    "access_key": "effective_date",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Effective Date",
+                        "ar": "تاريخ السريان"
+                    }
+                },
+                {
+                    "access_key": "deadline",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Deadline",
+                        "ar": "تاريخ الانتهاء"
+                    }
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    },
+    "consultation": {
+        "models": {
+            "App\\Models\\Consultation": [
+                {
+                    "access_key": "deadline",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Deadline",
+                        "ar": "الموعد النهائي"
+                    }
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    },
+    "legal_study": {
+        "models": {
+            "App\\Models\\LegalStudy": [
+                {
+                    "access_key": "deadline",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Deadline",
+                        "ar": "الموعد النهائي"
+                    }
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    },
+    "contractual_consultation": {
+        "models": {
+            "App\\Models\\ContractualConsultation": [
+                {
+                    "access_key": "deadline",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Deadline",
+                        "ar": "الموعد النهائي"
+                    }
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    },
+    "intellectual_property_consultation": {
+        "models": {
+            "App\\Models\\IntellectualPropertyConsultation": [
+                {
+                    "access_key": "deadline",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Deadline",
+                        "ar": "الموعد النهائي"
+                    }
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    },
+    "task": {
+        "models": {
+            "Modules\\Task\\app\\Models\\Task": [
+                {
+                    "access_key": "due_date",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Due Date",
+                        "ar": "تاريخ الاستحقاق"
+                    },
+                    "module": "task"
+                },
+                {
+                    "access_key": "completed_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Completed At",
+                        "ar": "تاريخ الإنجاز"
+                    },
+                    "module": "task"
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "task"
+                }
+            ]
+        }
+    },
+    "project": {
+        "models": {
+            "Modules\\Project\\app\\Models\\Project": [
+                {
+                    "access_key": "start",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Start Date",
+                        "ar": "تاريخ البداية"
+                    },
+                    "module": "project"
+                },
+                {
+                    "access_key": "end",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "End Date",
+                        "ar": "تاريخ النهاية"
+                    },
+                    "module": "project"
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "project"
+                }
+            ],
+            "Modules\\Project\\app\\Models\\ProjectComment": [
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "project"
+                }
+            ],
+            "Modules\\Project\\app\\Models\\ProjectStage": [
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "project"
+                }
+            ]
+        }
+    },
+    "document": {
+        "models": {
+            "App\\Models\\Document": [
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "document"
+                }
+            ]
+        }
+    },
+    "help_request": {
+        "models": {
+            "App\\Models\\HelpRequest": [
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    },
+    "user": {
+        "models": {
+            "App\\Models\\User": [
+                {
+                    "access_key": "last_login",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Last Login",
+                        "ar": "آخر تسجيل دخول"
+                    },
+                    "module": "user"
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "user"
+                }
+            ]
+        }
+    },
+    "cause_judgment": {
+        "models": {
+            "App\\Models\\CauseJudgment": [
+                {
+                    "access_key": "release_date",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Release Date",
+                        "ar": "تاريخ إصدار الحكم"
+                    },
+                    "module": "cause_judgment"
+                },
+                {
+                    "access_key": "receiving_date",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Receiving Date",
+                        "ar": "تاريخ استلام الحكم"
+                    },
+                    "module": "cause_judgment"
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "cause_judgment"
+                }
+            ]
+        }
+    },
+    "cause_compensation": {
+        "models": {
+            "App\\Models\\CauseCompensation": [
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "cause_compensation"
+                }
+            ]
+        }
+    },
+    "project_task": {
+        "models": {
+            "Modules\\Project\\app\\Models\\ProjectTask": [
+                {
+                    "access_key": "due_date",
+                    "type": "date",
+                    "relation": null,
+                    "name": {
+                        "en": "Due Date",
+                        "ar": "تاريخ الاستحقاق"
+                    },
+                    "module": "project_task"
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "project_task"
+                }
+            ]
+        }
+    },
+    "document_section": {
+        "models": {
+            "App\\Models\\DocumentSection": [
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    },
+                    "module": "document_section"
+                }
+            ]
+        }
+    }
+}

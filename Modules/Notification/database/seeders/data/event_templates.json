@@ -1,0 +1,126 @@
+{
+    "create_cause_request": {
+        "notification": {
+            "title": {
+                "ar": "نموذج جديد على القضية {{cause.cause_number}}",
+                "en": "New form on cause {{cause.cause_number}}"
+            },
+            "body": {
+                "ar": "أضاف {{creator.name}} النموذج {{name}} على القضية رقم {{cause.cause_number}}.",
+                "en": "{{creator.name}} added the form {{name}} to cause {{cause.cause_number}}."
+            }
+        },
+        "email": {
+            "title": {
+                "ar": "نموذج جديد على القضية {{cause.cause_number}} — القضية {{cause.cause_number}}",
+                "en": "New form on cause {{cause.cause_number}} — cause {{cause.cause_number}}"
+            },
+            "body": {
+                "ar": "مرحباً،\nتمت إضافة نموذج جديد على القضية:\n\nاسم النموذج: {{name}}\nنوع النموذج: {{form.name}}\nرقم القضية: {{cause.cause_number}}\nنوع القضية: {{cause.type}}\nالحالة الحالية: {{stage.name}}\nمنشئ النموذج: {{creator.name}}\nتاريخ الإنشاء: {{created_at}}\n\nيمكنك متابعة النموذج من خلال النظام.",
+                "en": "Hello,\nA new form has been added to the cause:\n\nForm name: {{name}}\nForm type: {{form.name}}\nCause number: {{cause.cause_number}}\nCause type: {{cause.type}}\nCurrent stage: {{stage.name}}\nCreated by: {{creator.name}}\nCreated at: {{created_at}}\n\nYou can follow up on the form in the system."
+            }
+        },
+        "push": {
+            "title": {
+                "ar": "نموذج جديد على القضية {{cause.cause_number}}",
+                "en": "New form on cause {{cause.cause_number}}"
+            },
+            "body": {
+                "ar": "القضية {{cause.cause_number}} — الحالة: {{stage.name}}",
+                "en": "Cause {{cause.cause_number}} — stage: {{stage.name}}"
+            }
+        },
+        "sms": {
+            "title": {
+                "ar": "نموذج جديد على القضية {{cause.cause_number}}",
+                "en": "New form on cause {{cause.cause_number}}"
+            },
+            "body": {
+                "ar": "أضاف {{creator.name}} النموذج {{name}} على القضية رقم {{cause.cause_number}}.",
+                "en": "{{creator.name}} added the form {{name}} to cause {{cause.cause_number}}."
+            }
+        },
+        "reminder": {
+            "title": {
+                "ar": "متابعة النموذج {{name}} — القضية {{cause.cause_number}}",
+                "en": "Follow up on form {{name}} — cause {{cause.cause_number}}"
+            },
+            "body": {
+                "ar": "أضاف {{creator.name}} النموذج {{name}} على القضية رقم {{cause.cause_number}}.\n\nالحالة الحالية: {{stage.name}}\nتاريخ الإنشاء: {{created_at}}",
+                "en": "{{creator.name}} added the form {{name}} to cause {{cause.cause_number}}.\n\nCurrent stage: {{stage.name}}\nCreated at: {{created_at}}"
+            }
+        },
+        "calendar": {
+            "title": {
+                "ar": "{{name}} — القضية {{cause.cause_number}}",
+                "en": "{{name}} — cause {{cause.cause_number}}"
+            },
+            "body": {
+                "ar": "أضاف {{creator.name}} النموذج {{name}} على القضية رقم {{cause.cause_number}}.\n\nنوع النموذج: {{form.name}}\nالحالة الحالية: {{stage.name}}\nمنشئ النموذج: {{creator.name}}",
+                "en": "{{creator.name}} added the form {{name}} to cause {{cause.cause_number}}.\n\nForm type: {{form.name}}\nCurrent stage: {{stage.name}}\nCreated by: {{creator.name}}"
+            }
+        }
+    },
+    "update_cause_request_status": {
+        "notification": {
+            "title": {
+                "ar": "تغيير حالة النموذج {{name}}",
+                "en": "Form {{name}} changed stage"
+            },
+            "body": {
+                "ar": "انتقل النموذج {{name}} على القضية رقم {{cause.cause_number}} من مرحلة {{previousStage.name}} إلى مرحلة {{stage.name}}.",
+                "en": "The form {{name}} on cause {{cause.cause_number}} moved from {{previousStage.name}} to {{stage.name}}."
+            }
+        },
+        "email": {
+            "title": {
+                "ar": "تغيير حالة النموذج {{name}} — القضية {{cause.cause_number}}",
+                "en": "Form {{name}} changed stage — cause {{cause.cause_number}}"
+            },
+            "body": {
+                "ar": "مرحباً،\nتم تغيير حالة النموذج التالي:\n\nاسم النموذج: {{name}}\nنوع النموذج: {{form.name}}\nرقم القضية: {{cause.cause_number}}\nنوع القضية: {{cause.type}}\nالحالة السابقة: {{previousStage.name}}\nالحالة الحالية: {{stage.name}}\nمنشئ النموذج: {{creator.name}}\nتاريخ الإنشاء: {{created_at}}\n\nيمكنك متابعة النموذج من خلال النظام.",
+                "en": "Hello,\nThe following form changed stage:\n\nForm name: {{name}}\nForm type: {{form.name}}\nCause number: {{cause.cause_number}}\nCause type: {{cause.type}}\nPrevious stage: {{previousStage.name}}\nCurrent stage: {{stage.name}}\nCreated by: {{creator.name}}\nCreated at: {{created_at}}\n\nYou can follow up on the form in the system."
+            }
+        },
+        "push": {
+            "title": {
+                "ar": "تغيير حالة النموذج {{name}}",
+                "en": "Form {{name}} changed stage"
+            },
+            "body": {
+                "ar": "القضية {{cause.cause_number}} — من {{previousStage.name}} إلى {{stage.name}}",
+                "en": "Cause {{cause.cause_number}} — {{previousStage.name}} to {{stage.name}}"
+            }
+        },
+        "sms": {
+            "title": {
+                "ar": "تغيير حالة النموذج {{name}}",
+                "en": "Form {{name}} changed stage"
+            },
+            "body": {
+                "ar": "انتقل النموذج {{name}} على القضية رقم {{cause.cause_number}} من مرحلة {{previousStage.name}} إلى مرحلة {{stage.name}}.",
+                "en": "The form {{name}} on cause {{cause.cause_number}} moved from {{previousStage.name}} to {{stage.name}}."
+            }
+        },
+        "reminder": {
+            "title": {
+                "ar": "متابعة النموذج {{name}} — القضية {{cause.cause_number}}",
+                "en": "Follow up on form {{name}} — cause {{cause.cause_number}}"
+            },
+            "body": {
+                "ar": "انتقل النموذج {{name}} على القضية رقم {{cause.cause_number}} من مرحلة {{previousStage.name}} إلى مرحلة {{stage.name}}.\n\nالحالة السابقة: {{previousStage.name}}\nالحالة الحالية: {{stage.name}}\nتاريخ الإنشاء: {{created_at}}",
+                "en": "The form {{name}} on cause {{cause.cause_number}} moved from {{previousStage.name}} to {{stage.name}}.\n\nPrevious stage: {{previousStage.name}}\nCurrent stage: {{stage.name}}\nCreated at: {{created_at}}"
+            }
+        },
+        "calendar": {
+            "title": {
+                "ar": "{{name}} — القضية {{cause.cause_number}}",
+                "en": "{{name}} — cause {{cause.cause_number}}"
+            },
+            "body": {
+                "ar": "انتقل النموذج {{name}} على القضية رقم {{cause.cause_number}} من مرحلة {{previousStage.name}} إلى مرحلة {{stage.name}}.\n\nنوع النموذج: {{form.name}}\nالحالة السابقة: {{previousStage.name}}\nالحالة الحالية: {{stage.name}}\nمنشئ النموذج: {{creator.name}}",
+                "en": "The form {{name}} on cause {{cause.cause_number}} moved from {{previousStage.name}} to {{stage.name}}.\n\nForm type: {{form.name}}\nPrevious stage: {{previousStage.name}}\nCurrent stage: {{stage.name}}\nCreated by: {{creator.name}}"
+            }
+        }
+    }
+}

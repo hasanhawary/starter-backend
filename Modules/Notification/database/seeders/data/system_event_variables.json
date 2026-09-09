@@ -1,0 +1,529 @@
+{
+    "global": {
+        "note": "Variables kept in the catalogue but never attached to an event. `*` applies to every module; a module key applies to that module only, which is how the session keeps its own `main_location` (the hearing link or the court it is held in) while every other module drops the record URL. Free-text bodies (remarks, request content, hearing minutes, descriptions, the statement question and its response) are never notification variables: a notification carries the record’s identity, its people and its dates, not a paragraph the user typed. A contract only fills the detail table of its own type, so the per-type fields are dropped as well and contracts expose the fields every type shares. A cause request drops its reviewer: `reviewer_id` is never written by the stage actions the request actually goes through, so the field printed an empty line in every message that named it.",
+        "exclude": {
+            "*": [
+                "notes",
+                "content",
+                "details",
+                "description",
+                "adjust",
+                "lawsuit",
+                "subject",
+                "purpose",
+                "question",
+                "answer",
+                "answers.answer",
+                "comment",
+                "parent.comment",
+                "parent.cause_number",
+                "department.manager.name",
+                "cause.link",
+                "causeRequest.cause.link"
+            ],
+            "cause": [
+                "link"
+            ],
+            "help_request": [
+                "respondent.name",
+                "respondent.email",
+                "respondent.phone"
+            ],
+            "contract": [
+                "link",
+                "governmentProcurement.purpose",
+                "governmentProcurement.amount",
+                "governmentProcurement.duration",
+                "governmentProcurement.contractor.name",
+                "governmentProcurement.currency.name",
+                "researchDevelopment.purpose",
+                "researchDevelopment.amount",
+                "researchDevelopment.duration",
+                "researchDevelopment.contractor.name",
+                "researchDevelopment.currency.name",
+                "understandingCooperation.purpose",
+                "understandingCooperation.fields",
+                "understandingCooperation.implementation_mechanism",
+                "understandingCooperation.duration",
+                "understandingCooperation.sec_part_name",
+                "understandingCooperation.sec_part_email",
+                "understandingCooperation.sec_part_phone",
+                "understandingCooperation.sec_part_represent_name",
+                "understandingCooperation.sec_part_represent_email",
+                "understandingCooperation.sec_part_represent_phone",
+                "otherContract.contract_name",
+                "otherContract.purpose",
+                "otherContract.amount",
+                "otherContract.duration",
+                "otherContract.contractor.name",
+                "otherContract.currency.name",
+                "otherContract.sec_part_name",
+                "otherContract.sec_part_email",
+                "otherContract.sec_part_phone",
+                "agreementAnnexes.contract_number"
+            ],
+            "annexes_contract": [
+                "link",
+                "sec_part_email",
+                "sec_part_phone",
+                "sec_part_cr_number",
+                "sec_part_address",
+                "sec_part_signatory_name",
+                "sec_part_represent_name",
+                "sec_part_represent_email",
+                "sec_part_represent_phone"
+            ],
+            "consultation": [
+                "link",
+                "mainDraft.status"
+            ],
+            "contractual_consultation": [
+                "link",
+                "mainDraft.status"
+            ],
+            "intellectual_property_consultation": [
+                "link",
+                "mainDraft.status"
+            ],
+            "legal_study": [
+                "link",
+                "mainDraft.status"
+            ],
+            "task": [
+                "link"
+            ],
+            "document": [
+                "path",
+                "file_status"
+            ],
+            "project": [
+                "key"
+            ],
+            "cause_request": [
+                "file",
+                "reviewer.name",
+                "reviewer.email",
+                "reviewer.phone"
+            ]
+        }
+    },
+    "events": {
+        "create_cause_request": {
+            "note": "A form that is only now being added to the cause has never left a stage, so it has no previous one to report.",
+            "exclude": [
+                "previousStage.name"
+            ]
+        },
+        "create_cause": {
+            "note": "No actor is attached while the cause is being created; the designated employee and the team are assigned by a later action. A brand new cause carries no sub status either.",
+            "exclude": [
+                "assigner.name",
+                "assigner.email",
+                "assigner.phone",
+                "team.name",
+                "team.email",
+                "team.phone",
+                "sub_status"
+            ]
+        },
+        "close_cause": {
+            "note": "Closing or reopening a cause only announces the record's identity, its dates, its court/department and who created it — the people working it (assigner, team), the parties, and the internal status/sub_status are noise on this notification, so only the logical fields are kept.",
+            "exclude": [
+                "assigner.name",
+                "assigner.email",
+                "assigner.phone",
+                "team.name",
+                "team.email",
+                "team.phone",
+                "circuit.name",
+                "claimants.participant.name",
+                "respondents.participant.name",
+                "specialization.name",
+                "subject.name",
+                "status",
+                "sub_status"
+            ]
+        },
+        "reopen_cause": {
+            "note": "Same logical field set as close_cause: identity, dates, court/department and creator only.",
+            "exclude": [
+                "assigner.name",
+                "assigner.email",
+                "assigner.phone",
+                "team.name",
+                "team.email",
+                "team.phone",
+                "circuit.name",
+                "claimants.participant.name",
+                "respondents.participant.name",
+                "specialization.name",
+                "subject.name",
+                "status",
+                "sub_status"
+            ]
+        },
+        "create_cause_session": {
+            "note": "The adjournment note is written when the session is adjusted, never while it is being created. The competent employee of the session is only stamped then too: at creation assigner_id is copied from the cause, so it names the cause's employee rather than the one who will attend the hearing.",
+            "exclude": [
+                "adjust",
+                "assigner.name",
+                "assigner.email",
+                "assigner.phone"
+            ]
+        },
+        "create_cause_judgment": {
+            "note": "The receiving date is only stamped by the \"receive judgment\" action.",
+            "exclude": [
+                "receiving_date"
+            ]
+        },
+        "create_help_request": {
+            "note": "The statement has no answer until it is answered. The legacy `answer` column is never written; answers live in the answers relation.",
+            "exclude": [
+                "answer",
+                "answers.answer"
+            ]
+        },
+        "answer_help_request": {
+            "note": "The legacy `answer` column is never written; the answer text comes from the answers relation.",
+            "exclude": [
+                "answer"
+            ]
+        },
+        "create_consultation": {
+            "note": "Neither the assigned employees nor a draft exist while the request is being created.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone",
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "assign_department_consultation": {
+            "note": "Only the department is set at this point; employees are assigned later and no draft exists yet.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone",
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "assign_users_consultation": {
+            "note": "The employees are just being assigned; the draft is written afterwards.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "create_draft_consultation": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "update_draft_consultation": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "return_to_requester_consultation": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "return_draft_to_employee_consultation": {
+            "note": "The draft is sent back for rework, so it has no reviewer yet.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "create_contractual_consultation": {
+            "note": "Neither the assigned employees nor a draft exist while the request is being created.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone",
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "assign_department_contractual_consultation": {
+            "note": "Only the department is set at this point; employees are assigned later and no draft exists yet.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone",
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "assign_users_contractual_consultation": {
+            "note": "The employees are just being assigned; the draft is written afterwards.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "create_draft_contractual_consultation": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "update_draft_contractual_consultation": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "return_to_requester_contractual_consultation": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "return_draft_to_employee_contractual_consultation": {
+            "note": "The draft is sent back for rework, so it has no reviewer yet.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "create_intellectual_property_consultation": {
+            "note": "Neither the assigned employees nor a draft exist while the request is being created.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone",
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "assign_department_intellectual_property_consultation": {
+            "note": "Only the department is set at this point; employees are assigned later and no draft exists yet.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone",
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "assign_users_intellectual_property_consultation": {
+            "note": "The employees are just being assigned; the draft is written afterwards.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "create_draft_intellectual_property_consultation": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "update_draft_intellectual_property_consultation": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "return_to_requester_intellectual_property_consultation": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "return_draft_to_employee_intellectual_property_consultation": {
+            "note": "The draft is sent back for rework, so it has no reviewer yet.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "create_legal_study": {
+            "note": "Neither the assigned employees nor a draft exist while the request is being created.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone",
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "assign_department_legal_study": {
+            "note": "Only the department is set at this point; employees are assigned later and no draft exists yet.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone",
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "assign_users_legal_study": {
+            "note": "The employees are just being assigned; the draft is written afterwards.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "create_draft_legal_study": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "update_draft_legal_study": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "return_to_requester_legal_study": {
+            "note": "The draft reviewer is only recorded when the draft is approved.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "return_draft_to_employee_legal_study": {
+            "note": "The draft is sent back for rework, so it has no reviewer yet.",
+            "exclude": [
+                "mainDraft.reviewer.name",
+                "mainDraft.reviewer.email"
+            ]
+        },
+        "create_contract": {
+            "note": "The contract is still pending; no employee has been assigned to it yet.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone"
+            ]
+        },
+        "create_annexes_contract": {
+            "note": "The contract is still pending: no employee is assigned and the reviewer is only stamped on approval.",
+            "exclude": [
+                "mainUser.name",
+                "mainUser.email",
+                "mainUser.phone",
+                "users.name",
+                "users.email",
+                "users.phone",
+                "reviewer.name",
+                "reviewer.email",
+                "reviewer.phone"
+            ]
+        },
+        "assign_annexes_contract_user": {
+            "note": "The reviewer is only stamped when the contract is approved.",
+            "exclude": [
+                "reviewer.name",
+                "reviewer.email",
+                "reviewer.phone"
+            ]
+        },
+        "prepare_annexes_contract": {
+            "note": "The reviewer is only stamped when the contract is approved.",
+            "exclude": [
+                "reviewer.name",
+                "reviewer.email",
+                "reviewer.phone"
+            ]
+        },
+        "update_annexes_contract": {
+            "note": "The reviewer is only stamped when the contract is approved.",
+            "exclude": [
+                "reviewer.name",
+                "reviewer.email",
+                "reviewer.phone"
+            ]
+        },
+        "return_annexes_contract_to_requester": {
+            "note": "The reviewer is only stamped when the contract is approved.",
+            "exclude": [
+                "reviewer.name",
+                "reviewer.email",
+                "reviewer.phone"
+            ]
+        },
+        "return_annexes_contract_to_employee": {
+            "note": "The reviewer is only stamped when the contract is approved.",
+            "exclude": [
+                "reviewer.name",
+                "reviewer.email",
+                "reviewer.phone"
+            ]
+        },
+        "not_specialized_annexes_contract": {
+            "note": "The reviewer is only stamped when the contract is approved.",
+            "exclude": [
+                "reviewer.name",
+                "reviewer.email",
+                "reviewer.phone"
+            ]
+        },
+        "create_task": {
+            "note": "A brand new task cannot be completed.",
+            "exclude": [
+                "completed_at"
+            ]
+        },
+        "create_project": {
+            "note": "A brand new project has no achievement progress yet.",
+            "exclude": [
+                "achievement"
+            ]
+        },
+        "create_project_task": {
+            "note": "A brand new task is never finished.",
+            "exclude": [
+                "finished"
+            ]
+        }
+    }
+}
