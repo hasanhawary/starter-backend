@@ -4,22 +4,38 @@ use App\Helpers\DelimiterParamValue;
 use App\Models\User;
 use App\Services\Global\SettingService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Jenssegers\Date\Date;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /*
 |--------------------------------------------------------------------------
 | Responses Methods
 |--------------------------------------------------------------------------
 */
+if (! function_exists('currnetLogo')) {
+    function currnetLogo(): ?string
+    {
+        $logo = public_path('wakeb.png');
+
+        return file_exists($logo) ? $logo : null;
+    }
+}
+
 if (! function_exists('successResponse')) {
     function successResponse($data = [], $msg = null, $code = 200): JsonResponse
     {
@@ -43,22 +59,21 @@ if (! function_exists('failResponse')) {
         ], $code);
     }
 }
-
 if (! function_exists('abort403')) {
     function abort403($condition = true): void
     {
         if ($condition) {
-            abort(403, trans('api.unauthorized'));
+            abort(403, trans('api.no_required_permissions'));
         }
     }
 }
 if (! function_exists('unKnownError')) {
     function unKnownError($message = null): JsonResponse|RedirectResponse
     {
-        $message = trans('api.something_error').''.(config('debug') ? " : $message" : '');
+        $message = trans('dashboard.something_error').''.(config('debug') ? " : $message" : '');
 
         return request()?->expectsJson()
-            ? failResponse($message)
+            ? response()->json(['message' => $message], 400)
             : redirect()->back()->with(['status' => 'error', 'message' => $message]);
     }
 }
@@ -111,9 +126,7 @@ if (! function_exists('isBase64')) {
 if (! function_exists('isRoot')) {
     function isRoot($user = null): bool
     {
-        $user = $user ?? auth()->user();
-
-        return $user->hasRole('root');
+        return (bool) $user?->hasRole('root');
     }
 }
 
@@ -156,7 +169,7 @@ if (! function_exists('resolvePhoto')) {
     function resolvePhoto($image = null, $type = 'user')
     {
         $result = ($type === 'user'
-            ? asset('media/avatar.png')
+            ? asset('media/avatar.svg')
             : asset('media/blank.png'));
 
         if (is_null($image)) {
@@ -237,17 +250,44 @@ if (! function_exists('resolveEmptyToNull')) {
 | App Global Methods
 |--------------------------------------------------------------------------
 */
+if (! function_exists('dateFormat')) {
+    function dateFormat($date, $format = 'j F Y'): string
+    {
+        return ! is_numeric($date)
+            ? Date::parse('2024-01-01')
+            : '----';
+    }
+}
+
+if (! function_exists('timeFormat')) {
+    function timeFormat($time): ?string
+    {
+        if ($time === null) {
+            return null;
+        }
+
+        return Date::parse($time)->format('h:i a');
+    }
+}
+
 if (! function_exists('getModelKey')) {
-    function getModelKey(?string $className = null, $trans = false): ?string
+    function getModelKey($className = null, $case = 'snake'): ?string
     {
         if (! $className) {
             return null;
         }
 
-        $shortName = class_basename($className);
-        $snaked = Str::snake($shortName);
+        if (is_object($className)) {
+            $className = get_class($className);
+        }
 
-        return $trans ? resolveTrans($snaked, snaked: false) : $snaked;
+        $shortName = class_basename($className);
+
+        $delimiter = $case === 'slug' ? '-' : '';
+        $caseType = (method_exists(Str::class, $case) && $case != 'slug') ? $case : 'snake';
+
+        return strtolower($delimiter ? Str::{$caseType}($shortName, $delimiter) : Str::{$caseType}($shortName));
+
     }
 }
 
@@ -258,27 +298,31 @@ if (! function_exists('detectModelPath')) {
     }
 }
 
-// Old Way
 if (! function_exists('fetchData')) {
-    function fetchData(Builder $query, string|int|null $pageSize = null, $resource = null, $meta = [])
+    /**
+     * Fetch query results through an API resource, merging the sortable state of
+     * the resource keys into the pagination payload.
+     *
+     * Only paginated results gain a `sorting` entry alongside the pagination
+     * entries; non paginated results carry no sorting. The keys are read from the
+     * first record, so an empty page has none.
+     *
+     * A custom `$pageName` lets several paginators live in the same response
+     * without sharing a page cursor, e.g. one per kanban column. `$page` forces
+     * the page to resolve to, instead of reading `$pageName` off the request.
+     */
+    function fetchData(Builder $query, string|int|null $pageSize = null, $resource = null, $meta = [], string $pageName = 'page', ?int $page = null)
     {
-        return wrapPaginate($query, $resource, $meta);
-    }
-}
+        $paginated = $pageSize && (int) $pageSize !== -1;
 
-if (! function_exists('wrapPaginate')) {
-    function wrapPaginate(Builder $query, $resource = null, $meta = [])
-    {
-        $perPage = request('per_page', config('project.pagination.per_page'));
+        $data = $paginated ? $query->paginate($pageSize, ['*'], $pageName, $page) : $query->get();
 
-        if ($perPage && (int) $perPage !== -1) {
-            $data = $query->paginate($perPage);
+        if ($resource) {
+            $collection = $resource::collection($data);
 
-            if ($resource) {
-                $data->data = $resource::collection($data);
-            }
-        } else {
-            $data = $resource ? $resource::collection($query->get()) : $query->get();
+            $data = $paginated
+                ? [...$data->toArray(), 'sorting' => resourceSorting($collection, getModelKey($query->getModel()))]
+                : $collection;
         }
 
         if (count($meta)) {
@@ -292,10 +336,126 @@ if (! function_exists('wrapPaginate')) {
     }
 }
 
+if (! function_exists('wrapPaginate')) {
+    /**
+     * Fetch query results through an API resource using the configured page size.
+     *
+     * When paginated, the sortable state of the resource keys is merged into the
+     * pagination payload as a `sorting` entry; non paginated results carry no
+     * sorting. The keys are read from the first record, so an empty page has none.
+     */
+    function wrapPaginate(Builder $query, $resource = null, $meta = [])
+    {
+        $perPage = request('per_page', config('project.pagination.per_page'));
+
+        $paginated = $perPage && (int) $perPage !== -1;
+
+        $data = $paginated ? $query->paginate($perPage) : $query->get();
+
+        if ($resource) {
+            $collection = $resource::collection($data);
+
+            $data = $paginated
+                ? [...$data->toArray(), 'sorting' => resourceSorting($collection, getModelKey($query->getModel()))]
+                : $collection;
+        }
+
+        if (count($meta)) {
+            $data = [
+                'data' => $data,
+                ...$meta,
+            ];
+        }
+
+        return $data;
+    }
+}
+
+if (! function_exists('resourceKeys')) {
+    /**
+     * Resolve the list of keys an API resource exposes.
+     *
+     * Accepts a resource instance, a resource collection (the first item defines
+     * the shape, an empty collection has no keys), or a resource class name
+     * together with the model to hydrate it.
+     *
+     * @param  JsonResource|class-string<JsonResource>  $resource
+     * @param  Model|null  $model  Model used to hydrate the resource when a class name is passed.
+     * @return array<int, string>
+     */
+    function resourceKeys(JsonResource|string $resource, ?Model $model = null): array
+    {
+        if (is_string($resource)) {
+            if (! is_subclass_of($resource, JsonResource::class)) {
+                throw new InvalidArgumentException("[$resource] is not a valid API resource class.");
+            }
+
+            $resource = new $resource($model);
+        }
+
+        if ($resource instanceof ResourceCollection) {
+            $resource = $resource->collection->first();
+
+            if (! $resource) {
+                return [];
+            }
+        }
+
+        $resolved = $resource->resolve(request());
+
+        if (isArrayIndex($resolved)) {
+            $resolved = Arr::first($resolved) ?? [];
+        }
+
+        return array_keys($resolved);
+    }
+}
+
+if (! function_exists('resourceSorting')) {
+    /**
+     * Map the keys an API resource exposes to the `sortColumn` the frontend
+     * must submit to sort by them, based on the module's `discovery.sorting`
+     * configuration.
+     *
+     * Each resource key maps to its sorting key: the key itself for plain
+     * sortable columns, the declared column for aliased entries (e.g.
+     * `display_status` => `status`), and `null` when the key is not sortable.
+     *
+     * @param  JsonResource|class-string<JsonResource>  $resource
+     * @param  string|null  $module  Discovery module key, e.g. `legal_study`.
+     * @param  Model|null  $model  Model used to hydrate the resource when a class name is passed.
+     * @return array<string, string|null> Empty when the module has no sorting configured.
+     */
+    function resourceSorting(JsonResource|string $resource, ?string $module, ?Model $model = null): array
+    {
+        $sortable = config("discovery.sorting.$module");
+
+        if (! is_array($sortable)) {
+            return [];
+        }
+
+        // Normalize the config: a plain entry sorts by itself, a
+        // `'key' => 'sorting_key'` entry sorts by the declared column.
+        $sortingKeys = collect($sortable)
+            ->mapWithKeys(fn ($value, $key) => is_int($key) ? [$value => $value] : [$key => $value]);
+
+        return collect(resourceKeys($resource, $model))
+            ->mapWithKeys(fn (string $key): array => [$key => $sortingKeys[$key] ?? null])
+            ->all();
+    }
+}
+
 if (! function_exists('imageExtensions')) {
     function imageExtensions(): array
     {
-        return ['jpg', 'png', 'jpeg', 'png', 'gif'];
+        return ['jpg', 'png', 'jpeg', 'png', 'gif', 'svg'];
+    }
+}
+
+if (! function_exists('vImage')) {
+    function vImage($ext = null): string
+    {
+        return ($ext === null) ? 'mimes:jpg,png,jpeg,png,gif,bmp,svg' : 'mimes:'.$ext;
     }
 }
 
@@ -373,6 +533,55 @@ if (! function_exists('when')) {
     }
 }
 
+if (! function_exists('parseKeyValueString')) {
+    function parseKeyValueString($data = null, string $page = 'api'): ?string
+    {
+        if (is_null($data)) {
+            return null;
+        }
+
+        if (is_array($data)) {
+            $locale = app()->getLocale();
+            if (isset($data[$locale])) {
+                return $data[$locale];
+            }
+
+            $key = $data['id'] ?? null;
+            $params = $data['parameters'] ?? [];
+
+            return $key ? __("$page.$key", $params) : null;
+        }
+
+        // Split the string into key-value pairs
+        $pairs = explode('|', $data);
+
+        // Extract the first key (the primary identifier or title)
+        $firstPair = array_shift($pairs);
+        // Return translation directly if there are no additional pairs
+        if (empty($pairs)) {
+            return __("$page.$firstPair");
+        }
+
+        // Parse key-value pairs into an associative array
+        $result = array_reduce($pairs, static function (array $carry, string $pair) {
+            if (! str_contains($pair, '=')) {
+                return $carry; // Skip invalid pairs
+            }
+
+            [$key, $value] = explode('=', $pair, 2);
+
+            if ($key !== 'prefix') {
+                $carry[trim($key)] = trim($value);
+            }
+
+            return $carry;
+        }, []);
+
+        // Return the translation with parameters
+        return __("$page.$firstPair", $result);
+    }
+}
+
 if (! function_exists('buildDelimiterMessage')) {
     /**
      * Build the packed message string.
@@ -428,8 +637,8 @@ if (! function_exists('transWithParams')) {
                 $paramKey = substr($k, 5); // strip "enum_"
                 [$fqn, $case] = explode('@', $v, 2);
                 $params[$paramKey] = enum_exists($fqn)
-                    ? $fqn::resolve($case)   // e.g. SettingTypeEnum::resolve('Active')
-                    : $case;                 // fallback to raw case name
+                    ? $fqn::resolve($case)
+                    : $case;
 
                 continue;
             }
@@ -438,7 +647,6 @@ if (! function_exists('transWithParams')) {
             if (str_starts_with($v, '{') || str_starts_with($v, '[')) {
                 $decoded = json_decode($v, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
-                    // Use the locale key if available, fallback to full array
                     $params[$k] = $decoded[app()->getLocale()]
                         ?? $decoded['en']
                         ?? $v;
@@ -507,10 +715,17 @@ if (! function_exists('safeExecute')) {
     }
 }
 
-if (! function_exists('prepareModelType')) {
-    function prepareModelType($model): string
+if (! function_exists('findSoftDeletedModel')) {
+    function findSoftDeletedModel(string $modelClass, array $conditions): ?Model
     {
-        return strtolower(Arr::last(explode('\\', $model)));
+        return $modelClass::onlyTrashed()
+            ->where(function (Builder $query) use ($conditions) {
+                foreach ($conditions as $column => $value) {
+                    $query->orWhereRaw("JSON_EXTRACT($column, '$.en') = ?", [$value['en']])
+                        ->orWhereRaw("JSON_EXTRACT($column, '$.ar') = ?", [$value['ar']]);
+                }
+            })
+            ->first();
     }
 }
 
@@ -538,10 +753,10 @@ if (! function_exists('allAttributesFillableModels')) {
             ->map(function ($file) {
                 $namespace = 'App\\Models\\';
                 $class = $namespace.str_replace(
-                    ['/', '.php'],
-                    ['\\', ''],
-                    $file->getRelativePathname()
-                );
+                        ['/', '.php'],
+                        ['\\', ''],
+                        $file->getRelativePathname()
+                    );
 
                 return new $class;
             });
@@ -567,6 +782,86 @@ function getCurrentGuard(): int|string|null
     return null; // No guard is currently authenticated
 }
 
+if (! function_exists('toggleBooleanAttribute')) {
+    function toggleBooleanAttribute(Model $model, string $attribute): Model
+    {
+        if (! array_key_exists($attribute, $model->getAttributes())) {
+            throw new InvalidArgumentException("Attribute '{$attribute}' does not exist on model ".get_class($model));
+        }
+
+        if (! is_bool($model->{$attribute})) {
+            throw new InvalidArgumentException("Attribute '{$attribute}' column must be a boolean.");
+        }
+
+        $model->{$attribute} = ! $model->{$attribute};
+        $model->save();
+
+        return $model;
+    }
+}
+
+if (! function_exists('canDelete')) {
+    function canDelete($object)
+    {
+        if (isset($object->can_delete) && ! $object->can_delete) {
+            throw new NotFoundHttpException;
+        }
+    }
+}
+
+if (! function_exists('checkFromPath')) {
+    function checkFromPath(string|array $path, array $rules = []): void
+    {
+        $paths = Arr::wrap($path);
+
+        foreach ($paths as $path) {
+            $filePath = str_starts_with(parse_url($path, PHP_URL_PATH), '/storage/')
+                ? str_replace('/storage/', '', parse_url($path, PHP_URL_PATH))
+                : Storage::path($path);
+
+            $fileExists = file_exists($filePath);
+
+            if (! $fileExists && ! Storage::exists($filePath)) {
+                throw new Exception(resolveTrans('file_not_found'));
+            }
+
+            $uploadedFilePath = $fileExists ? $filePath : Storage::path($filePath);
+            $uploadedFileMime = $fileExists ? mime_content_type($filePath) : Storage::mimeType($filePath);
+
+            $file = new UploadedFile(path: $uploadedFilePath, originalName: 'sample.jpg', mimeType: $uploadedFileMime, test: true);
+
+            if (Validator::make(['file' => $file], ['file' => $rules])->fails()) {
+                throw new InvalidArgumentException(resolveTrans('file_not_match_rules'));
+            }
+        }
+    }
+}
+
+if (! function_exists('rulesBasedOnFlag')) {
+    function rulesBasedOnFlag(array $rules, bool $flag): array
+    {
+        $updatedRules = [];
+        foreach ($rules as $key => $ruleConditions) {
+            $updatedRules[$key] = $flag
+                ? array_filter($ruleConditions, fn ($rule) => $rule !== 'required')
+                : $ruleConditions;
+        }
+
+        return $updatedRules;
+    }
+
+    if (! function_exists('shouldVerifyOtp')) {
+        function shouldVerifyOtp(): bool
+        {
+            $default = config('auth.defaults.guard');
+            $guard = $default === 'api' ? 'user' : $default;
+
+            return config('project.auth.login_methods.otp')
+                && config("project.auth.otp.required_for.{$guard}");
+        }
+    }
+}
+
 if (! function_exists('encryptCode')) {
     function encryptCode(array $data): array
     {
@@ -589,17 +884,6 @@ if (! function_exists('encryptCode')) {
         } catch (Error|Exception $e) {
             return $data;
         }
-    }
-}
-
-if (! function_exists('shouldVerifyOtp')) {
-    function shouldVerifyOtp(): bool
-    {
-        $default = config('auth.defaults.guard');
-        $guard = $default === 'api' ? 'user' : $default;
-
-        return config('project.auth.login_methods.otp')
-            && config("project.auth.otp.required_for.{$guard}");
     }
 }
 
@@ -679,6 +963,7 @@ if (! function_exists('brandSettings')) {
 
         return [
             'name' => setting('general.info.name', $lang),
+            'website' => setting('general.info.website_address'),
             'logo' => [
                 'lg' => setting('properties.logos.website_logo_large'),
                 'lg_dark' => setting('properties.logos.website_dark_logo_large'),
@@ -691,13 +976,25 @@ if (! function_exists('brandSettings')) {
                 'text' => setting('theme.colors.text_color'),
                 'muted' => setting('theme.colors.muted_color'),
             ],
-            'background' => setting('mail_templates.generate.header_image'),
+            'font' => [
+                'family' => setting($lang === 'ar' ? 'theme.font.font_family_ar' : 'theme.font.font_family_en', $lang),
+                'size' => setting('theme.font.font_size'),
+            ],
+            'background' => setting('mail_templates.theme.header_image'),
             'mail_otp_style' => [
                 'otp_bg' => setting('mail_templates.otp.otp_bg'),
                 'otp_border_color' => setting('mail_templates.otp.otp_border_color'),
                 'otp_font_size' => setting('mail_templates.otp.otp_font_size'),
                 'otp_letter_spacing' => setting('mail_templates.otp.otp_letter_spacing'),
                 'otp_text_color' => setting('mail_templates.otp.otp_text_color'),
+            ],
+            'mail_theme' => [
+                'button_bg_color' => setting('mail_templates.theme.button_bg_color'),
+                'button_text_color' => setting('mail_templates.theme.button_text_color'),
+                'header_image' => setting('mail_templates.theme.header_image'),
+                'header_text' => setting('mail_templates.theme.header_text', $lang),
+                'footer_image' => setting('mail_templates.theme.footer_image'),
+                'footer_text' => setting('mail_templates.theme.footer_text', $lang),
             ],
             'contact' => [
                 'email' => setting('general.contact.contact_email'),

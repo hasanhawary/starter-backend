@@ -213,6 +213,8 @@ return [
 
         /* ========= Content & Text ========= */
         'description' => 'Description',
+        'description.ar' => 'Description in Arabic',
+        'description.en' => 'Description in English',
         'content' => 'Content',
         'answers' => 'Answers',
         'event' => 'Event',
@@ -250,6 +252,8 @@ return [
         'length' => 'Length',
         'department_id' => 'Department',
         'country' => 'Country',
+        'country_id' => 'Country',
+        'city' => 'City',
         'notifiable' => 'Notifiable',
         'data' => 'Data',
         'token' => 'Token',

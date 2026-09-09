@@ -213,6 +213,8 @@ return [
 
         /* ========= Content & Text ========= */
         'description' => 'الوصف',
+        'description.ar' => 'الوصف بالعربية',
+        'description.en' => 'الوصف بالإنجليزية',
         'content' => 'المحتوى',
         'answers' => 'الاجابات',
         'event' => 'الحدث',
@@ -250,6 +252,8 @@ return [
         'length' => 'الطول',
         'department_id' => 'القسم',
         'country' => 'الدولة',
+        'country_id' => 'الدولة',
+        'city' => 'المدينة',
         'notifiable' => 'يمكن الإشعار',
         'data' => 'البيانات',
         'token' => 'التوكن',

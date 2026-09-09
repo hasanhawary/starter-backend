@@ -1,173 +1,123 @@
-<laravel-boost-guidelines>
-=== foundation rules ===
+# Agent Control Plane
 
-# Laravel Boost Guidelines
+This repository is a standalone Laravel API backend, and it is the base template every new project here is generated from. There is no frontend in this repository and no cross-project scope to negotiate: everything below applies to all of it.
 
-The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to ensure the best experience when building Laravel applications.
+This file is the entry point. Read it before any work, then follow its routing into `.agents/skills/`.
 
-## Foundational Context
+## Skills
 
-This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
+`.agents/skills/` is this repository's skill registry. It is the primary source for every convention, pattern, structure, and workflow decision in this project. Consult it before writing code and before falling back to general knowledge.
 
-- php - 8.4
-- laravel/framework (LARAVEL) - v13
-- laravel/prompts (PROMPTS) - v0
-- laravel/reverb (REVERB) - v1
-- laravel/sanctum (SANCTUM) - v4
-- laravel/boost (BOOST) - v2
-- laravel/mcp (MCP) - v0
-- laravel/pail (PAIL) - v1
-- laravel/pint (PINT) - v1
-- laravel/sail (SAIL) - v1
-- phpunit/phpunit (PHPUNIT) - v12
-- tailwindcss (TAILWINDCSS) - v4
+### Resolution order
 
-## Skills Activation
+Resolve any question about how something should be built in this order, stopping at the first source that answers it:
 
-This project has domain-specific skills available in `**/skills/**`. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
+1. **`.agents/skills/<name>/SKILL.md`** — authoritative. What it says wins over general framework advice, over habit, and over how a similar project does it.
+2. **Files that a loaded skill points at** — its own `rules/` and `references/` directories, and any other skill it tells you to read.
+3. **`.claude/skills/`** — the fallback layer: topic notes (`crud-resource.md`, `filters.md`, `media.md`, `migrations.md`, `permissions.md`, `translatable.md`) plus copies of registry skills. Use it only for a topic the registry does not cover.
+4. **The agent's own general skills and framework knowledge** — last, and only for what none of the above addresses.
 
-## Conventions
+A registry entry never loses to a lower layer. When `.claude/skills/` and `.agents/skills/` both describe the same thing, the registry is correct and the other copy is stale.
 
-- You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
-- Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
-- Check for existing components to reuse before writing a new one.
+### Loading rules
 
-## Verification Scripts
+- **Open the file by path.** The registry is a directory of Markdown files, not a plugin index. An agent whose native skill discovery scans only its own directory will not list these, so read `.agents/skills/<name>/SKILL.md` directly instead of waiting for it to be offered.
+- **Start here, then route.** This file is the entry point; the table below says which skill a given kind of change requires.
+- **A skill's own routing lines are binding.** When a loaded skill says to read another skill before editing a given kind of file, read it before that edit, not after.
+- **Load what the task needs, not the whole registry.** Read this file plus the skills it routes you to.
+- **A directory with no `SKILL.md` is not a skill.** Treat it as absent, continue down the resolution order, and say which one was missing rather than inventing its contents.
+- **Do not restate a skill back to the user as if it were your own analysis.** Follow it, and cite it when it drove a decision.
 
-- Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.
+### Registry maintenance
 
-## Application Structure & Architecture
+- A convention that outlives the current task belongs in `.agents/skills/`, not in a code comment or a chat message.
+- Update the skill in the registry when its rule changes. Do not fork it into `.claude/skills/` or into this file.
+- This is the base project. A rule only belongs in the registry if a brand-new project would want it on day one; keep project-specific domain rules in the project that has that domain.
 
-- Stick to existing directory structure; don't create new base folders without approval.
-- Do not change the application's dependencies without approval.
+### One copy, linked
 
-## Frontend Bundling
+The registry holds the only real copy of every skill. Where another tool needs a skill in its own directory, that entry is a **relative symlink into `.agents/skills/`**, so there is nothing to keep in sync:
 
-- If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
+```
+.claude/skills/starter-kit             -> ../../.agents/skills/starter-kit
+.claude/skills/laravel-best-practices  -> ../../.agents/skills/laravel-best-practices
+.claude/skills/tailwindcss-development -> ../../.agents/skills/tailwindcss-development
+.ai/skills/starter-kit                 -> ../../.agents/skills/starter-kit
+```
 
-## Documentation Files
+- Edit the file under `.agents/skills/`. Never replace one of these links with a copy.
+- `php artisan boost:install` republishes the skills listed in `boost.json` into `.claude/skills/` and `.ai/skills/`, which overwrites these links with real directories. After running it, restore the links and keep `.agents/skills/` as the source.
+- Git stores them as symlinks (mode `120000`). A Windows checkout needs `core.symlinks=true`, or they arrive as plain text files holding a path.
 
-- You must only create documentation files if explicitly requested by the user.
+## Routing
 
-## Replies
+Read the listed skill **before** making the change, not after.
 
-- Be concise in your explanations - focus on what's important rather than explaining obvious details.
+| When you are… | Read first |
+| --- | --- |
+| Writing or reviewing any Laravel PHP | `.agents/skills/laravel-best-practices/SKILL.md` and `.agents/skills/starter-kit/SKILL.md` |
+| Creating or changing an API controller or endpoint orchestration | `.agents/skills/laravel-controller-development/SKILL.md` |
+| Changing an API route contract | `.agents/skills/laravel-route-development/SKILL.md` |
+| Creating or changing an API Resource or its JSON projection | `.agents/skills/laravel-resource-development/SKILL.md` |
+| Creating or structurally changing an Eloquent model | `.agents/skills/laravel-model-development/SKILL.md` |
+| Treating a column as an enum | `.agents/skills/laravel-enum-development/SKILL.md` |
+| Creating or materially changing a Form Request or custom rule | `.agents/skills/laravel-form-request-development/SKILL.md` |
+| Creating a module, or changing its structure, providers, or discovery | `.agents/skills/laravel-module-development/SKILL.md` |
+| Building a Strategy/`Tools/Status/Context/Factory/Strategies` module | `.agents/skills/laravel-strategy-module-development/SKILL.md` |
+| Adding or changing a Report Builder report | `.agents/skills/laravel-report-development/SKILL.md` |
+| Adding or changing an Export Builder export | `.agents/skills/laravel-export-development/SKILL.md` |
+| Adding or changing a notification event, its variables, recipients, or templates | `.agents/skills/laravel-notification-event-development/SKILL.md` |
+| Changing the dynamic Form module's schemas, fields, versions, or submissions | `.agents/skills/dynamic-form-development/SKILL.md` |
+| Adding or changing Laravel MCP servers or tools | `.agents/skills/laravel-mcp-tool-development/SKILL.md` |
+| Testing a status, step, or other module workflow | `.agents/skills/laravel-workflow-testing/SKILL.md` |
+| Writing Blade or Tailwind markup | `.agents/skills/tailwindcss-development/SKILL.md` |
 
-=== boost rules ===
+Topic notes with no registry skill live in `.claude/skills/`: `crud-resource.md`, `filters.md`, `media.md`, `migrations.md`, `permissions.md`, `translatable.md`.
 
-# Laravel Boost
+## Repository Layout
 
-## Tools
+- Shared, reusable behavior lives under `app/` in singular-named namespaces: `app/Enum/Global`, `app/Filters/Global`, `app/Trait/Global`, `app/Scopes`, `app/Rules`, `app/Services/Global`, `app/Helpers/App.php`.
+- Reference and lookup data (countries and similar) lives under `DataEntry` in every layer it touches: `app/Http/Controllers/API/DataEntry`, `app/Http/Requests/DataEntry`, `app/Http/Resources/DataEntry`, `app/Filters/DataEntry`, and its own block in `routes/api.php`.
+- Cross-cutting endpoints (settings, notifications, activity log, help lookups, reports, chunked uploads, captcha) live under `app/Http/Controllers/API/Global/{Feature}`.
+- Models stay flat in `app/Models` and extend `App\Models\BaseModel` unless they intentionally extend a vendor or auth base class. Only the layers above them are grouped by feature.
+- Export and report definitions live in `app/Tools/Export` and `app/Tools/Report`, resolved by page name through `config/export.php` and `config/report.php`.
+- Feature modules live in `Modules/{Name}` (nwidart), mirroring the root layout inside `app/`. Module paths and generators are configured in `config/modules.php`; this is an API-only backend, so modules ship no Blade views or frontend assets.
+- Put a new reference-data resource next to its siblings in `DataEntry`. Do not open a new top-level namespace for one entity, and do not split one domain across two namespaces.
 
-- Laravel Boost is an MCP server with tools designed specifically for this application. Prefer Boost tools over manual alternatives like shell commands or file reads.
-- Use `database-query` to run read-only queries against the database instead of writing raw SQL in tinker.
-- Use `database-schema` to inspect table structure before writing migrations or models.
-- Use `get-absolute-url` to resolve the correct scheme, domain, and port for project URLs. Always use this before sharing a URL with the user.
-- Use `browser-logs` to read browser logs, errors, and exceptions. Only recent logs are useful, ignore old entries.
+## Before Editing
 
-## Searching Documentation (IMPORTANT)
+- Inspect the working tree and current diff before planning a change. Preserve unrelated and in-progress user work.
+- Locate the nearest analogous implementation and trace the affected behavior through its entry points, validation, domain logic, persistence, representations, side effects, and tests as applicable.
+- Search for every relevant definition and consumer so the change does not create contradictory rules, duplicate sources of truth, incompatible payloads, or divergent behavior.
+- Editing a migration that has already run changes nothing in a live database. When a column's shape must change, add a new `ALTER`-style migration; only edit the original when the table is provably not deployed anywhere, and say so.
+- Before changing an API contract, inspect its consumers and preserve compatibility unless the task explicitly requires the contract to change.
+- Treat the existing implementation and runtime configuration as the source of truth. Reuse established contracts and abstractions when they remain appropriate.
 
-- Always use `search-docs` before making code changes. Do not skip this step. It returns version-specific docs based on installed packages automatically.
-- Pass a `packages` array to scope results when you know which packages are relevant.
-- Use multiple broad, topic-based queries: `['rate limiting', 'routing rate limiting', 'routing']`. Expect the most relevant results first.
-- Do not add package names to queries because package info is already shared. Use `test resource table`, not `filament 4 test resource table`.
+## Solution Selection
 
-### Search Syntax
+- Do not implement the first viable approach without evaluating whether it fits the existing architecture.
+- For non-trivial changes, consider the realistic alternatives and select the simplest robust design based on ownership, cohesion, coupling, compatibility, failure handling, testability, and change surface.
+- Prefer extending an established abstraction when it remains coherent. Prefer a focused local change when a new abstraction would serve only the current case.
+- Keep responsibilities explicit and dependencies directed. Avoid duplicated business rules, hidden coupling, generic layers without a present use, and speculative extension points.
+- Challenge a proposed implementation when a materially cleaner or safer approach exists, and explain the decision concisely.
 
-1. Use words for auto-stemmed AND logic: `rate limit` matches both "rate" AND "limit".
-2. Use `"quoted phrases"` for exact position matching: `"infinite scroll"` requires adjacent words in order.
-3. Combine words and phrases for mixed queries: `middleware "rate limit"`.
-4. Use multiple queries for OR logic: `queries=["authentication", "middleware"]`.
+## Change Discipline
 
-## Artisan
+- Make the smallest coherent change that fully satisfies the task.
+- Avoid speculative abstractions, duplicate abstractions, unrelated refactors, opportunistic cleanup, silent scope expansion, and unnecessary public-contract changes.
+- Preserve useful existing behavior and follow the nearest applicable conventions.
+- Do not add documentation files unless the user asks for them.
+- Do not change dependencies without approval.
 
-- Run Artisan commands directly via the command line (e.g., `php artisan route:list`). Use `php artisan list` to discover available commands and `php artisan [command] --help` to check parameters.
-- Inspect routes with `php artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
-- Read configuration values using dot notation: `php artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
+## Verification
 
-## Tinker
-
-- Execute PHP in app context for debugging and testing code. Do not create models without user approval, prefer tests with factories instead. Prefer existing Artisan commands over custom tinker code.
-- Always use single quotes to prevent shell expansion: `php artisan tinker --execute 'Your::code();'`
-  - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
-
-=== php rules ===
-
-# PHP
-
-- Always use curly braces for control structures, even for single-line bodies.
-- Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
-- Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
-- Use TitleCase for Enum keys: `FavoritePerson`, `BestLake`, `Monthly`.
-- Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
-- Use array shape type definitions in PHPDoc blocks.
-
-=== deployments rules ===
-
-# Deployment
-
-- Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
-
-=== tests rules ===
-
-# Test Enforcement
-
-- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
-
-=== laravel/core rules ===
-
-# Do Things the Laravel Way
-
-- Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available Artisan commands using `php artisan list` and check their parameters with `php artisan [command] --help`.
-- If you're creating a generic PHP class, use `php artisan make:class`.
-- Pass `--no-interaction` to all Artisan commands to ensure they work without user input. You should also pass the correct `--options` to ensure correct behavior.
-
-### Model Creation
-
-- When creating new models, create useful factories and seeders for them too. Ask the user if they need any other things, using `php artisan make:model --help` to check the available options.
-
-## APIs & Eloquent Resources
-
-- For APIs, default to using Eloquent API Resources and API versioning unless existing API routes do not, then you should follow existing application convention.
-
-## URL Generation
-
-- When generating links to other pages, prefer named routes and the `route()` function.
-
-## Testing
-
-- When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
-- Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
-- When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
-
-## Vite Error
-
-- If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
-
-=== pint/core rules ===
-
-# Laravel Pint Code Formatter
-
-- If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
-- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
-
-=== phpunit/core rules ===
-
-# PHPUnit
-
-- This application uses PHPUnit for testing. All tests must be written as PHPUnit classes. Use `php artisan make:test --phpunit {name}` to create a new test.
-- If you see a test using "Pest", convert it to PHPUnit.
-- Every time a test has been updated, run that singular test.
-- When the tests relating to your feature are passing, ask the user if they would like to also run the entire test suite to make sure everything is still passing.
-- Tests should cover all happy paths, failure paths, and edge cases.
-- You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files; these are core to the application.
-
-## Running Tests
-
-- Run the minimal number of tests, using an appropriate filter, before finalizing.
-- To run all tests: `php artisan test --compact`.
-- To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
-- To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
-
-</laravel-boost-guidelines>
+- Every change needs programmatic coverage: write or update a test, then run it. `php artisan test --compact` runs everything; pass a file path or `--filter` to run less.
+- **The suite runs on SQLite; the application runs on MySQL.** `phpunit.xml` pins `DB_CONNECTION=sqlite`, but PHPUnit does not override a variable already set in the environment, so `DB_CONNECTION=mysql DB_DATABASE=<throwaway> php artisan test` runs the same suite against MySQL. Do that for anything touching raw SQL — `App\Tools\Report\UserReport` uses `DATE_FORMAT()` and JSON search helpers emit MySQL JSON functions, none of which SQLite can run. Create a throwaway database rather than pointing tests at the development one.
+- Treat that split as an environment limitation, not a defect to engineer around. Report it instead of rewriting shared query helpers to suit the test driver, and prefer covering such behavior where it can actually run.
+- After changing PHP, run `vendor/bin/pint --dirty --format agent` only when every dirty PHP file belongs to the current task; otherwise pass the exact changed paths so unrelated user work is not reformatted.
+- Run PhpStorm inspections, including the installed EA Extended inspections, on every changed PHP file when that integration is available. Resolve errors and relevant warnings without applying semantic quick fixes blindly, then re-run them. If EA inspections are unavailable, say so rather than claiming they passed.
+- A package upgrade can break a subclass without any syntax error — a base method changing visibility is the recurring case. After one, load the affected classes, not just `php -l` them.
+- Stale gitignored files under `bootstrap/cache/` have crashed boot after a package was added. Check that directory directly when a boot failure names a class that should not exist.
+- Re-scan definitions, consumers, contracts, and configuration after editing to detect conflicts or missed counterparts.
+- Review the complete final diff and confirm unrelated user changes were preserved.
+- Report the verification performed, unresolved risks or constraints, and the final changed-file list before completion.
