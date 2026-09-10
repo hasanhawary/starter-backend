@@ -107,11 +107,11 @@ trait AdvancedFilter
                     $morphTypes = data_get($relationMap[$key], 'morph_types', []);
 
                     if ($morph && ! empty($morphTypes)) {
-                        $query->whereHas($relation, fn ($q) => $q->whereHasMorph($morph, $morphTypes, fn ($q2) => $q2->whereIn($column, $value)
+                        $query->whereHas($relation, fn ($q) => $q->whereHasMorph($morph, $morphTypes, fn ($q2) => $q2->whereIn($this->qualifyRelationColumn($q2, $column), $value)
                         )
                         );
                     } else {
-                        $query->whereHas($relation, fn ($q) => $q->whereIn($column, $value));
+                        $query->whereHas($relation, fn ($q) => $q->whereIn($this->qualifyRelationColumn($q, $column), $value));
                     }
 
                 } else {
@@ -131,5 +131,15 @@ trait AdvancedFilter
         return $query->getConnection()
             ->getSchemaBuilder()
             ->getColumnListing($query->getModel()->getTable());
+    }
+
+    /**
+     * Qualify a relation column with its table name to avoid ambiguity when the
+     * relation (e.g. BelongsToMany) joins a pivot table that shares column names
+     * such as `id`. Already-qualified columns are returned untouched.
+     */
+    private function qualifyRelationColumn(Builder $query, string $column): string
+    {
+        return str_contains($column, '.') ? $column : $query->getModel()->getTable().'.'.$column;
     }
 }

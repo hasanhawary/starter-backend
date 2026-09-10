@@ -4,12 +4,14 @@ namespace App\Trait\Global;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
 trait HasPinMethods
 {
     public function pin(): JsonResponse
     {
         $model = $this->resolvePinModel();
+        //        Gate::authorize('pin', $model);
 
         $pivotData = property_exists($model, 'pinPivotData') ? $model->pinPivotData : [];
         $result = $model->pinUsers()->toggle([auth()->id() => $pivotData]);
