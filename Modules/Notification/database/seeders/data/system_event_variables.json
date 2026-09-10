@@ -1,0 +1,12 @@
+{
+    "global": {
+        "note": "Variables kept in the catalogue but never attached to an event. `*` applies to every module; a module key applies to that module only. A country's flag is an uploaded image path, not message text, so it never enters a notification body.",
+        "exclude": {
+            "*": [],
+            "country": [
+                "flag"
+            ]
+        }
+    },
+    "events": {}
+}

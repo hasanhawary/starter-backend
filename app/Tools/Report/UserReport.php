@@ -6,7 +6,6 @@ use App\Enum\User\UserGenderEnum;
 use App\Models\User;
 use HasanHawary\ReportBuilder\BaseReport;
 use Illuminate\Contracts\Database\Query\Expression;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class UserReport extends BaseReport
@@ -78,19 +77,6 @@ class UserReport extends BaseReport
         $this->checkSoftDelete($q);
         $this->applyDateFilter($q);
         $this->applyAdvancedFilters($q);
-    }
-
-    private function applyAdvancedFilters($q): void
-    {
-        if (! empty($this->filter['advanced'])) {
-            collect($this->filter['advanced'])->each(function ($filter) use ($q) {
-                try {
-                    $q->whereIn($filter->key, Arr::wrap($filter->value));
-                } catch (\Exception $e) {
-                    logError($e);
-                }
-            });
-        }
     }
 
     private function getUserRoleRaw(string $role): Expression

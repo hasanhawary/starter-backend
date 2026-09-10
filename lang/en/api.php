@@ -140,6 +140,7 @@ return [
     'email' => 'Email',
     'phone' => 'Phone',
     'type' => 'Type',
+    'countries' => 'Countries',
 
     /*
     |--------------------------------------------------------------------------
@@ -167,4 +168,58 @@ return [
         'ldap' => 'LDAP',
         'reverb' => 'Instant Notifications',
     ],
+    /*
+    |--------------------------------------------------------------------------
+    | Global action messages
+    |--------------------------------------------------------------------------
+    | Used with an :item placeholder, e.g. __('api.global.deleted', ['item' => __('api.action_modules.user')]).
+    */
+    'global' => [
+        'created' => ':item created successfully.',
+        'updated' => ':item updated successfully.',
+        'deleted' => ':item deleted successfully.',
+        'restored' => ':item restored successfully.',
+        'force_deleted' => ':item permanently deleted.',
+        'added' => ':item added successfully.',
+        'replaced' => ':item replaced successfully.',
+        'pinned' => ':item pinned successfully.',
+        'unpinned' => ':item unpinned successfully.',
+    ],
+
+    'action_modules' => [
+        'user' => 'User',
+        'role' => 'Role',
+        'setting' => 'Setting',
+        'country' => 'Country',
+    ],
+
+    'not_allowed_to_force' => 'You are not allowed to permanently delete this record (:id).',
+    'not_allowed_to_replace' => 'You are not allowed to replace this file (:id).',
+    'replaced_success' => 'Replaced successfully.',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Discovery filter labels
+    |--------------------------------------------------------------------------
+    | Referenced as translation keys from config/discovery.php and resolved per
+    | request by App\Services\Global\DiscoveryConfigResolver.
+    */
+    'filter' => [
+        'global' => [
+            'advanced' => 'Filter Type',
+            'search' => 'Search',
+            'created_at' => 'Creation Date Range',
+            'created_by' => 'Created By',
+            'is_active' => 'Status',
+        ],
+        'user' => [
+            'gender' => 'Gender',
+            'role' => 'Role',
+            'last_login' => 'Last Login Date Range',
+        ],
+    ],
+
+    'action_not_available' => 'This action is not available.',
+    'permission_not_found' => 'Permission not found.',
+    'invalid_credentials' => 'Invalid credentials.',
 ];

@@ -1,0 +1,224 @@
+{
+  "info": {
+    "_postman_id": "c3f2e1a0-4b5d-4e6f-8a9b-formmodule001",
+    "name": "wakeb-Legal / Form Module",
+    "description": "Endpoints for the Form module.\n\nUsage:\n1. Run 'Auth / login' first — it saves the token automatically in {{token}}.\n2. All other requests use Bearer {{token}} at the collection level.\n3. Update {{form_id}} after creating a form to use update/show/delete requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "url", "value": "http://127.0.0.1:8000/api/admin", "type": "string" },
+    { "key": "base_url", "value": "http://127.0.0.1:8000/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "form_id", "value": "1", "type": "string" },
+    { "key": "cause_request_id", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Auth / login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();",
+                  "if (response.data && response.data.token) {",
+                  "    pm.collectionVariables.set(\"token\", response.data.token);",
+                  "    pm.environment.set(\"token\", response.data.token);",
+                  "    console.log(\"token saved\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "email", "value": "root@wakeb.com", "type": "text" },
+                { "key": "password", "value": "KZMTIzNDU2HM", "type": "text", "description": "123456" }
+              ]
+            },
+            "url": { "raw": "{{url}}/login", "host": ["{{url}}"], "path": ["login"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Forms - With Steps",
+      "item": [
+        {
+          "name": "Forms / store (with steps)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();",
+                  "if (response.data && response.data.id) {",
+                  "    pm.collectionVariables.set(\"form_id\", response.data.id);",
+                  "    console.log(\"form_id saved: \" + response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"en\": \"User Registration Form\",\n    \"ar\": \"نموذج تسجيل المستخدم\"\n  },\n  \"description\": {\n    \"en\": \"Complete registration process with multiple steps\",\n    \"ar\": \"عملية التسجيل الكاملة بخطوات متعددة\"\n  },\n  \"has_steps\": true,\n  \"steps\": [\n    {\n      \"name\": {\n        \"en\": \"Personal Information\",\n        \"ar\": \"المعلومات الشخصية\"\n      },\n      \"sorting_order\": 1,\n      \"fields\": [\n        {\n          \"name\": { \"en\": \"First Name\", \"ar\": \"الاسم الأول\" },\n          \"scheme\": {\n            \"input_type\": \"text\",\n            \"rules\": [\"required\", \"string\", \"min:2\", \"max:50\"]\n          }\n        },\n        {\n          \"name\": { \"en\": \"Last Name\", \"ar\": \"اسم العائلة\" },\n          \"scheme\": {\n            \"input_type\": \"text\",\n            \"rules\": [\"required\", \"string\", \"min:2\", \"max:50\"]\n          }\n        },\n        {\n          \"name\": { \"en\": \"Date of Birth\", \"ar\": \"تاريخ الميلاد\" },\n          \"scheme\": {\n            \"input_type\": \"date\",\n            \"rules\": [\"required\", \"date\", \"before:today\"]\n          }\n        },\n        {\n          \"name\": { \"en\": \"Gender\", \"ar\": \"الجنس\" },\n          \"scheme\": {\n            \"input_type\": \"select\",\n            \"rules\": [\"required\", \"in:male,female,other\"],\n            \"reference\": {\n              \"type\": \"enum\",\n              \"options\": [\n                { \"value\": \"male\",   \"label\": { \"en\": \"Male\",   \"ar\": \"ذكر\" } },\n                { \"value\": \"female\", \"label\": { \"en\": \"Female\", \"ar\": \"أنثى\" } },\n                { \"value\": \"other\",  \"label\": { \"en\": \"Other\",  \"ar\": \"آخر\" } }\n              ]\n            }\n          }\n        }\n      ]\n    },\n    {\n      \"name\": {\n        \"en\": \"Contact Information\",\n        \"ar\": \"معلومات الاتصال\"\n      },\n      \"sorting_order\": 2,\n      \"fields\": [\n        {\n          \"name\": { \"en\": \"Email Address\", \"ar\": \"البريد الإلكتروني\" },\n          \"scheme\": {\n            \"input_type\": \"email\",\n            \"rules\": [\"required\", \"email\", \"unique:users,email\", \"max:255\"]\n          }\n        },\n        {\n          \"name\": { \"en\": \"Phone Number\", \"ar\": \"رقم الهاتف\" },\n          \"scheme\": {\n            \"input_type\": \"tel\",\n            \"rules\": [\"required\", \"regex:/^[0-9]{10,15}$/\", \"unique:users,phone\"]\n          }\n        },\n        {\n          \"name\": { \"en\": \"Country\", \"ar\": \"الدولة\" },\n          \"scheme\": {\n            \"input_type\": \"select\",\n            \"rules\": [\"required\", \"string\"],\n            \"reference\": { \"type\": \"enum\", \"source\": \"enum_name\" }\n          }\n        },\n        {\n          \"name\": { \"en\": \"City\", \"ar\": \"المدينة\" },\n          \"scheme\": {\n            \"input_type\": \"text\",\n            \"rules\": [\"required\", \"string\", \"min:2\", \"max:100\"]\n          }\n        }\n      ]\n    },\n    {\n      \"name\": {\n        \"en\": \"Account Security\",\n        \"ar\": \"أمان الحساب\"\n      },\n      \"sorting_order\": 3,\n      \"fields\": [\n        {\n          \"name\": { \"en\": \"Username\", \"ar\": \"اسم المستخدم\" },\n          \"scheme\": {\n            \"input_type\": \"text\",\n            \"rules\": [\"required\", \"string\", \"min:4\", \"max:30\", \"unique:users,username\", \"regex:/^[a-zA-Z0-9_]+$/\"]\n          }\n        },\n        {\n          \"name\": { \"en\": \"Password\", \"ar\": \"كلمة المرور\" },\n          \"scheme\": {\n            \"input_type\": \"password\",\n            \"rules\": [\"required\", \"string\", \"min:8\", \"max:255\", \"regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d)(?=.*[@$!%*?&])[A-Za-z\\\\d@$!%*?&]/\"]\n          }\n        },\n        {\n          \"name\": { \"en\": \"Confirm Password\", \"ar\": \"تأكيد كلمة المرور\" },\n          \"scheme\": {\n            \"input_type\": \"password\",\n            \"rules\": [\"required\", \"string\", \"same:password\"]\n          }\n        }\n      ]\n    },\n    {\n      \"name\": {\n        \"en\": \"Additional Information\",\n        \"ar\": \"معلومات إضافية\"\n      },\n      \"sorting_order\": 4,\n      \"fields\": [\n        {\n          \"name\": { \"en\": \"Profile Picture\", \"ar\": \"صورة الملف الشخصي\" },\n          \"scheme\": {\n            \"input_type\": \"file\",\n            \"rules\": [\"nullable\", \"image\", \"mimes:jpeg,png,jpg,gif\", \"max:2048\"],\n            \"html_attributes\": { \"accept\": \"image/*\" }\n          }\n        },\n        {\n          \"name\": { \"en\": \"Bio\", \"ar\": \"نبذة تعريفية\" },\n          \"scheme\": {\n            \"input_type\": \"textarea\",\n            \"rules\": [\"nullable\", \"string\", \"max:500\"]\n          }\n        },\n        {\n          \"name\": { \"en\": \"Terms and Conditions\", \"ar\": \"الشروط والأحكام\" },\n          \"scheme\": {\n            \"input_type\": \"checkbox\",\n            \"rules\": [\"required\", \"accepted\"],\n            \"reference\": { \"type\": \"boolean\" }\n          }\n        },\n        {\n          \"name\": { \"en\": \"Newsletter Subscription\", \"ar\": \"الاشتراك في النشرة الإخبارية\" },\n          \"scheme\": {\n            \"input_type\": \"checkbox\",\n            \"rules\": [\"nullable\", \"boolean\"],\n            \"reference\": { \"type\": \"boolean\" }\n          }\n        }\n      ]\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{url}}/forms",
+              "host": ["{{url}}"],
+              "path": ["forms"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forms / update (with steps)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"en\": \"User Registration Form (Updated)\",\n    \"ar\": \"نموذج تسجيل المستخدم (محدّث)\"\n  },\n  \"description\": {\n    \"en\": \"Complete registration process with multiple steps\",\n    \"ar\": \"عملية التسجيل الكاملة بخطوات متعددة\"\n  },\n  \"has_steps\": true,\n  \"steps\": [\n    {\n      \"id\": null,\n      \"name\": {\n        \"en\": \"Personal Information\",\n        \"ar\": \"المعلومات الشخصية\"\n      },\n      \"sorting_order\": 1,\n      \"fields\": [\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"First Name\", \"ar\": \"الاسم الأول\" },\n          \"scheme\": {\n            \"input_type\": \"text\",\n            \"rules\": [\"required\", \"string\", \"min:2\", \"max:50\"]\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Last Name\", \"ar\": \"اسم العائلة\" },\n          \"scheme\": {\n            \"input_type\": \"text\",\n            \"rules\": [\"required\", \"string\", \"min:2\", \"max:50\"]\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Date of Birth\", \"ar\": \"تاريخ الميلاد\" },\n          \"scheme\": {\n            \"input_type\": \"date\",\n            \"rules\": [\"required\", \"date\", \"before:today\"]\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Gender\", \"ar\": \"الجنس\" },\n          \"scheme\": {\n            \"input_type\": \"select\",\n            \"rules\": [\"required\", \"in:male,female,other\"],\n            \"reference\": {\n              \"type\": \"enum\",\n              \"options\": [\n                { \"value\": \"male\",   \"label\": { \"en\": \"Male\",   \"ar\": \"ذكر\" } },\n                { \"value\": \"female\", \"label\": { \"en\": \"Female\", \"ar\": \"أنثى\" } },\n                { \"value\": \"other\",  \"label\": { \"en\": \"Other\",  \"ar\": \"آخر\" } }\n              ]\n            }\n          }\n        }\n      ]\n    },\n    {\n      \"id\": null,\n      \"name\": {\n        \"en\": \"Contact Information\",\n        \"ar\": \"معلومات الاتصال\"\n      },\n      \"sorting_order\": 2,\n      \"fields\": [\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Email Address\", \"ar\": \"البريد الإلكتروني\" },\n          \"scheme\": {\n            \"input_type\": \"email\",\n            \"rules\": [\"required\", \"email\", \"unique:users,email\", \"max:255\"]\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Phone Number\", \"ar\": \"رقم الهاتف\" },\n          \"scheme\": {\n            \"input_type\": \"tel\",\n            \"rules\": [\"required\", \"regex:/^[0-9]{10,15}$/\", \"unique:users,phone\"]\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Country\", \"ar\": \"الدولة\" },\n          \"scheme\": {\n            \"input_type\": \"select\",\n            \"rules\": [\"required\", \"string\"],\n            \"reference\": { \"type\": \"enum\", \"source\": \"enum_name\" }\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"City\", \"ar\": \"المدينة\" },\n          \"scheme\": {\n            \"input_type\": \"text\",\n            \"rules\": [\"required\", \"string\", \"min:2\", \"max:100\"]\n          }\n        }\n      ]\n    },\n    {\n      \"id\": null,\n      \"name\": {\n        \"en\": \"Account Security\",\n        \"ar\": \"أمان الحساب\"\n      },\n      \"sorting_order\": 3,\n      \"fields\": [\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Username\", \"ar\": \"اسم المستخدم\" },\n          \"scheme\": {\n            \"input_type\": \"text\",\n            \"rules\": [\"required\", \"string\", \"min:4\", \"max:30\", \"unique:users,username\", \"regex:/^[a-zA-Z0-9_]+$/\"]\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Password\", \"ar\": \"كلمة المرور\" },\n          \"scheme\": {\n            \"input_type\": \"password\",\n            \"rules\": [\"required\", \"string\", \"min:8\", \"max:255\", \"regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d)(?=.*[@$!%*?&])[A-Za-z\\\\d@$!%*?&]/\"]\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Confirm Password\", \"ar\": \"تأكيد كلمة المرور\" },\n          \"scheme\": {\n            \"input_type\": \"password\",\n            \"rules\": [\"required\", \"string\", \"same:password\"]\n          }\n        }\n      ]\n    },\n    {\n      \"id\": null,\n      \"name\": {\n        \"en\": \"Additional Information\",\n        \"ar\": \"معلومات إضافية\"\n      },\n      \"sorting_order\": 4,\n      \"fields\": [\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Profile Picture\", \"ar\": \"صورة الملف الشخصي\" },\n          \"scheme\": {\n            \"input_type\": \"file\",\n            \"rules\": [\"nullable\", \"image\", \"mimes:jpeg,png,jpg,gif\", \"max:2048\"],\n            \"html_attributes\": { \"accept\": \"image/*\" }\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Bio\", \"ar\": \"نبذة تعريفية\" },\n          \"scheme\": {\n            \"input_type\": \"textarea\",\n            \"rules\": [\"nullable\", \"string\", \"max:500\"]\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Terms and Conditions\", \"ar\": \"الشروط والأحكام\" },\n          \"scheme\": {\n            \"input_type\": \"checkbox\",\n            \"rules\": [\"required\", \"accepted\"],\n            \"reference\": { \"type\": \"boolean\" }\n          }\n        },\n        {\n          \"id\": null,\n          \"name\": { \"en\": \"Newsletter Subscription\", \"ar\": \"الاشتراك في النشرة الإخبارية\" },\n          \"scheme\": {\n            \"input_type\": \"checkbox\",\n            \"rules\": [\"nullable\", \"boolean\"],\n            \"reference\": { \"type\": \"boolean\" }\n          }\n        }\n      ]\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{url}}/forms/{{form_id}}",
+              "host": ["{{url}}"],
+              "path": ["forms", "{{form_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Form Submissions",
+      "item": [
+        {
+          "name": "Form Submissions / submit (cause request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();",
+                  "console.log(\"form submissions created:\", response);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": [\n    {\n      \"form_field_id\": 1,\n      \"value\": \"John\"\n    },\n    {\n      \"form_field_id\": 2,\n      \"value\": \"Doe\"\n    },\n    {\n      \"form_field_id\": 3,\n      \"value\": \"1990-05-15\"\n    },\n    {\n      \"form_field_id\": 4,\n      \"value\": \"male\"\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/cause-requests/{{cause_request_id}}/form-submissions",
+              "host": ["{{base_url}}"],
+              "path": ["cause-requests", "{{cause_request_id}}", "form-submissions"]
+            },
+            "description": "Submit form field values for a cause request.\n\n**Route:** `POST /api/cause-requests/{causeRequest}/form-submissions`\n\n**Source:** CauseRequest (identified by `cause_request_id` variable)\n**Submission:** Authenticated user (resolved from Bearer token)\n\n**Body fields:**\n- `fields` (required, array) — list of field answers\n  - `form_field_id` (required, integer) — ID of the FormField from the form\n  - `value` (nullable) — the submitted value; validated dynamically against that field's `scheme.rules`\n\n**Steps:**\n1. Set `cause_request_id` variable to an existing CauseRequest ID.\n2. Fetch the form's fields to get the correct `form_field_id` values.\n3. Send the request with the Bearer token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Forms - Without Steps",
+      "item": [
+        {
+          "name": "Forms / store (without steps)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();",
+                  "if (response.data && response.data.id) {",
+                  "    pm.collectionVariables.set(\"form_id\", response.data.id);",
+                  "    console.log(\"form_id saved: \" + response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"en\": \"Contact Us Form\",\n    \"ar\": \"نموذج تواصل معنا\"\n  },\n  \"description\": {\n    \"en\": \"Simple contact form without steps\",\n    \"ar\": \"نموذج تواصل بسيط بدون خطوات\"\n  },\n  \"has_steps\": false,\n  \"fields\": [\n    {\n      \"name\": { \"en\": \"Full Name\", \"ar\": \"الاسم الكامل\" },\n      \"scheme\": {\n        \"input_type\": \"text\",\n        \"rules\": [\"required\", \"string\", \"min:2\", \"max:100\"]\n      }\n    },\n    {\n      \"name\": { \"en\": \"Email Address\", \"ar\": \"البريد الإلكتروني\" },\n      \"scheme\": {\n        \"input_type\": \"email\",\n        \"rules\": [\"required\", \"email\", \"max:255\"]\n      }\n    },\n    {\n      \"name\": { \"en\": \"Phone Number\", \"ar\": \"رقم الهاتف\" },\n      \"scheme\": {\n        \"input_type\": \"tel\",\n        \"rules\": [\"nullable\", \"regex:/^[0-9]{10,15}$/\"]\n      }\n    },\n    {\n      \"name\": { \"en\": \"Subject\", \"ar\": \"الموضوع\" },\n      \"scheme\": {\n        \"input_type\": \"select\",\n        \"rules\": [\"required\", \"in:general,support,billing,other\"],\n        \"reference\": {\n          \"type\": \"enum\",\n          \"options\": [\n            { \"value\": \"general\",  \"label\": { \"en\": \"General Inquiry\", \"ar\": \"استفسار عام\" } },\n            { \"value\": \"support\",  \"label\": { \"en\": \"Technical Support\", \"ar\": \"دعم فني\" } },\n            { \"value\": \"billing\",  \"label\": { \"en\": \"Billing\", \"ar\": \"الفوترة\" } },\n            { \"value\": \"other\",    \"label\": { \"en\": \"Other\", \"ar\": \"أخرى\" } }\n          ]\n        }\n      }\n    },\n    {\n      \"name\": { \"en\": \"Message\", \"ar\": \"الرسالة\" },\n      \"scheme\": {\n        \"input_type\": \"textarea\",\n        \"rules\": [\"required\", \"string\", \"min:10\", \"max:1000\"]\n      }\n    },\n    {\n      \"name\": { \"en\": \"Attachment\", \"ar\": \"مرفق\" },\n      \"scheme\": {\n        \"input_type\": \"file\",\n        \"rules\": [\"nullable\", \"file\", \"mimes:pdf,doc,docx,jpg,png\", \"max:5120\"],\n        \"html_attributes\": { \"accept\": \".pdf,.doc,.docx,.jpg,.png\" }\n      }\n    },\n    {\n      \"name\": { \"en\": \"Subscribe to Newsletter\", \"ar\": \"الاشتراك في النشرة الإخبارية\" },\n      \"scheme\": {\n        \"input_type\": \"checkbox\",\n        \"rules\": [\"nullable\", \"boolean\"],\n        \"reference\": { \"type\": \"boolean\" }\n      }\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{url}}/forms",
+              "host": ["{{url}}"],
+              "path": ["forms"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forms / update (without steps)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"en\": \"Contact Us Form (Updated)\",\n    \"ar\": \"نموذج تواصل معنا (محدّث)\"\n  },\n  \"description\": {\n    \"en\": \"Simple contact form without steps\",\n    \"ar\": \"نموذج تواصل بسيط بدون خطوات\"\n  },\n  \"has_steps\": false,\n  \"fields\": [\n    {\n      \"id\": null,\n      \"name\": { \"en\": \"Full Name\", \"ar\": \"الاسم الكامل\" },\n      \"scheme\": {\n        \"input_type\": \"text\",\n        \"rules\": [\"required\", \"string\", \"min:2\", \"max:100\"]\n      }\n    },\n    {\n      \"id\": null,\n      \"name\": { \"en\": \"Email Address\", \"ar\": \"البريد الإلكتروني\" },\n      \"scheme\": {\n        \"input_type\": \"email\",\n        \"rules\": [\"required\", \"email\", \"max:255\"]\n      }\n    },\n    {\n      \"id\": null,\n      \"name\": { \"en\": \"Phone Number\", \"ar\": \"رقم الهاتف\" },\n      \"scheme\": {\n        \"input_type\": \"tel\",\n        \"rules\": [\"nullable\", \"regex:/^[0-9]{10,15}$/\"]\n      }\n    },\n    {\n      \"id\": null,\n      \"name\": { \"en\": \"Subject\", \"ar\": \"الموضوع\" },\n      \"scheme\": {\n        \"input_type\": \"select\",\n        \"rules\": [\"required\", \"in:general,support,billing,other\"],\n        \"reference\": {\n          \"type\": \"enum\",\n          \"options\": [\n            { \"value\": \"general\",  \"label\": { \"en\": \"General Inquiry\", \"ar\": \"استفسار عام\" } },\n            { \"value\": \"support\",  \"label\": { \"en\": \"Technical Support\", \"ar\": \"دعم فني\" } },\n            { \"value\": \"billing\",  \"label\": { \"en\": \"Billing\", \"ar\": \"الفوترة\" } },\n            { \"value\": \"other\",    \"label\": { \"en\": \"Other\", \"ar\": \"أخرى\" } }\n          ]\n        }\n      }\n    },\n    {\n      \"id\": null,\n      \"name\": { \"en\": \"Message\", \"ar\": \"الرسالة\" },\n      \"scheme\": {\n        \"input_type\": \"textarea\",\n        \"rules\": [\"required\", \"string\", \"min:10\", \"max:1000\"]\n      }\n    },\n    {\n      \"id\": null,\n      \"name\": { \"en\": \"Attachment\", \"ar\": \"مرفق\" },\n      \"scheme\": {\n        \"input_type\": \"file\",\n        \"rules\": [\"nullable\", \"file\", \"mimes:pdf,doc,docx,jpg,png\", \"max:5120\"],\n        \"html_attributes\": { \"accept\": \".pdf,.doc,.docx,.jpg,.png\" }\n      }\n    },\n    {\n      \"id\": null,\n      \"name\": { \"en\": \"Subscribe to Newsletter\", \"ar\": \"الاشتراك في النشرة الإخبارية\" },\n      \"scheme\": {\n        \"input_type\": \"checkbox\",\n        \"rules\": [\"nullable\", \"boolean\"],\n        \"reference\": { \"type\": \"boolean\" }\n      }\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{url}}/forms/{{form_id}}",
+              "host": ["{{url}}"],
+              "path": ["forms", "{{form_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

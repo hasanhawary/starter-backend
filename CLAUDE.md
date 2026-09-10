@@ -1,3 +1,22 @@
+# Project Instructions
+
+**Read `AGENTS.md` first.** It is the control plane for this repository: the skill registry and its resolution order, the routing table saying which skill each kind of change requires, the repository layout, change discipline, and verification.
+
+## Skills
+
+`.agents/skills/` is this repository's skill registry and the primary source for every convention, pattern, and workflow decision here. `AGENTS.md` holds the full contract; the short version:
+
+1. `.agents/skills/<name>/SKILL.md` — authoritative.
+2. Whatever a loaded skill points at (`rules/`, `references/`, other skills).
+3. `.claude/skills/` — fallback only, for topics the registry does not cover.
+4. General framework knowledge — last.
+
+Your native skill discovery scans `.claude/skills/` and will not list the registry, so **read `.agents/skills/<name>/SKILL.md` directly with Read** rather than waiting for the Skill tool to offer it. `AGENTS.md` carries the routing table saying which skill each kind of change requires.
+
+Where `.claude/skills/` and `.agents/skills/` describe the same thing, the registry is correct and the other copy is stale. This supersedes the "Skills Activation" line in the generated block below.
+
+---
+
 <laravel-boost-guidelines>
 === foundation rules ===
 

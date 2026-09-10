@@ -1,0 +1,88 @@
+{
+    "country": {
+        "models": {
+            "App\\Models\\Country": [
+                {
+                    "module": "country",
+                    "access_key": "name",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Country Name",
+                        "ar": "اسم الدولة"
+                    }
+                },
+                {
+                    "module": "country",
+                    "access_key": "nationality",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Nationality",
+                        "ar": "الجنسية"
+                    }
+                },
+                {
+                    "module": "country",
+                    "access_key": "code",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Country Code",
+                        "ar": "رمز الدولة"
+                    }
+                },
+                {
+                    "module": "country",
+                    "access_key": "phone_code",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Phone Code",
+                        "ar": "مفتاح الاتصال"
+                    }
+                },
+                {
+                    "module": "country",
+                    "access_key": "phone_length",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Phone Number Length",
+                        "ar": "عدد أرقام الهاتف"
+                    }
+                },
+                {
+                    "module": "country",
+                    "access_key": "is_active",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Active",
+                        "ar": "مفعّلة"
+                    }
+                },
+                {
+                    "module": "country",
+                    "access_key": "flag",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Flag",
+                        "ar": "العلم"
+                    }
+                },
+                {
+                    "module": "country",
+                    "access_key": "created_at",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    }
+}

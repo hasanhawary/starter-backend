@@ -11,7 +11,8 @@ use Illuminate\Support\Str;
 
 trait HasToggleActiveMethods
 {
-    public string $model;
+    /** Kept `protected` so the trait composes with HasDeleteMethods and HasFileActionsMethods, which declare the same property. */
+    protected string $model;
 
     protected bool $useTogglePolicy = true;
 

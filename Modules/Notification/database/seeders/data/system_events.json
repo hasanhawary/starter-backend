@@ -1,0 +1,29 @@
+[
+    {
+        "module": "country",
+        "event_slug": "create_country",
+        "model_type": "App\\Models\\Country",
+        "name": {
+            "en": "Create Country",
+            "ar": "إضافة دولة"
+        }
+    },
+    {
+        "module": "country",
+        "event_slug": "update_country",
+        "model_type": "App\\Models\\Country",
+        "name": {
+            "en": "Update Country",
+            "ar": "تعديل بيانات دولة"
+        }
+    },
+    {
+        "module": "country",
+        "event_slug": "toggle_active_country",
+        "model_type": "App\\Models\\Country",
+        "name": {
+            "en": "Change Country Activation",
+            "ar": "تغيير تفعيل الدولة"
+        }
+    }
+]

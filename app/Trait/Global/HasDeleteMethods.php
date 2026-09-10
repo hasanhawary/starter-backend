@@ -12,7 +12,8 @@ use Illuminate\Support\Str;
 
 trait HasDeleteMethods
 {
-    public string $model;
+    /** Kept `protected` so the trait composes with HasFileActionsMethods, which declares the same property. */
+    protected string $model;
 
     /**
      * Action guards (delete|restore|force)
@@ -106,6 +107,8 @@ trait HasDeleteMethods
             return failResponse(__('api.record_not_found'));
         }
 
+        $handled = [];
+
         foreach ($models as $model) {
             // Policy
             if ($this->useDeletePolicy) {
@@ -117,6 +120,11 @@ trait HasDeleteMethods
                 abort(403, __("api.not_allowed_to_{$action}", ['id' => $model->getKey()]));
             }
 
+            // Model-declared relation guard (delete/force only)
+            if (in_array($action, ['delete', 'force'], true)) {
+                $this->guardLinkedRelations($model);
+            }
+
             // Before callbacks
             $this->runDeleteCallbacks($this->beforeDeleteCallbacks[$action] ?? [], $model);
 
@@ -125,18 +133,43 @@ trait HasDeleteMethods
 
             // After callbacks
             $this->runDeleteCallbacks($this->afterDeleteCallbacks[$action] ?? [], $model);
+
+            if ($action === 'restore') {
+                $handled[] = $model->refresh();
+            }
         }
 
-        return successResponse(msg: __('api.'.
-            match ($action) {
-                'restore' => 'restored_success',
-                default => 'deleted_success'
-            }
-        ));
+        return successResponse(
+            data: $action === 'restore' ? $this->restoredData($handled) : [],
+            msg: __('api.'.
+                match ($action) {
+                    'restore' => 'restored_success',
+                    default => 'deleted_success'
+                }
+            )
+        );
+    }
+
+    /**
+     * Restored records returned in the response payload: a single object when
+     * one record was restored, otherwise the list of restored objects.
+     *
+     * @param  array<int, Model>  $models
+     */
+    protected function restoredData(array $models): mixed
+    {
+        return count($models) === 1 ? $models[0] : $models;
     }
 
     protected function applyDeleteAuthorize(string $action, Model $model): void
     {
+        $user = auth()->user();
+
+        // Root bypasses every delete check (parity with the legacy trait).
+        if (isRoot($user)) {
+            return;
+        }
+
         $ability = match ($action) {
             'force' => 'force-delete',
             default => $action,
@@ -145,10 +178,12 @@ trait HasDeleteMethods
         if (Gate::getPolicyFor($model)) {
             Gate::authorize($ability, $model);
         } else {
-            // If Gate fails, fallback to Spatie permission in case not have policy only.
+            // Fallback to the Spatie permission when the model has no policy.
+            // Use can() (not hasPermissionTo) so an undefined permission fails
+            // gracefully with a 403 instead of throwing.
             $permission = $ability.'-'.Str::snake(class_basename($model), '-');
 
-            if (! auth()->user()?->hasPermissionTo($permission)) {
+            if (! $user?->can($permission)) {
                 abort(403, __("api.not_allowed_to_{$action}", ['id' => $model->getKey()]));
             }
         }
@@ -163,6 +198,38 @@ trait HasDeleteMethods
         }
 
         return true;
+    }
+
+    /**
+     * Prevent deleting a record while it is still referenced by any of the
+     * relations the model itself declares as delete-blocking.
+     *
+     * A model opts in by defining `preventDeleteRelations(): array`. Two shapes
+     * are supported:
+     *   - a plain list of relation names:  ['causeParticipants', 'contracts']
+     *   - a map of relation => validation message key, to override the message:
+     *       ['causes' => 'not_allowed_to_delete_linked_cause']
+     *
+     * When any listed relation still has records, the request is rejected with
+     * the matching (or default) message. Models without the method are
+     * unaffected.
+     */
+    protected function guardLinkedRelations(Model $model): void
+    {
+        if (! method_exists($model, 'preventDeleteRelations')) {
+            return;
+        }
+
+        foreach ($model->preventDeleteRelations() as $relation => $messageKey) {
+            if (is_int($relation)) {
+                $relation = $messageKey;
+                $messageKey = 'not_allowed_to_delete_linked';
+            }
+
+            if ($model->{$relation}()->exists()) {
+                abort(403, resolveTrans($messageKey, 'validation'));
+            }
+        }
     }
 
     protected function executeDelete(Model $model, string $action): void
@@ -206,6 +273,11 @@ trait HasDeleteMethods
             if (! empty($routeParams)) {
                 $ids = array_values($routeParams)[0]; // take the first parameter
             }
+        }
+
+        // A route-model-bound parameter arrives as a Model instance; unwrap it.
+        if ($ids instanceof Model) {
+            $ids = $ids->getKey();
         }
 
         return Arr::wrap($ids); // always return as array

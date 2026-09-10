@@ -147,7 +147,10 @@ return [
     'password_no_personal_info' => 'يجب ألا تحتوي :attribute على أجزاء من اسمك.',
     'password_no_dictionary' => 'يجب ألا تحتوي :attribute على كلمات شائعة أو متوقعة.',
     'at_least_one_language' => 'يجب تقديم لغة واحدة على الأقل (العربية أو الإنجليزية)',
-    'already_exists' => 'هذا العنصر موجود بالفعل',
+    'already_exists' => ':attribute موجود بالفعل',
+    'already_exists_deleted' => 'هذا العنصر موجود بالفعل',
+    'empty_file' => 'الملف المحدد فارغ. يرجى تحميل ملف صالح.',
+    'not_allowed_to_delete_linked' => 'لا يمكن حذف هذا السجل لأنه مرتبط حالياً بسجلات أخرى.',
 
     'custom' => [
         'attribute-name' => [
@@ -210,6 +213,8 @@ return [
 
         /* ========= Content & Text ========= */
         'description' => 'الوصف',
+        'description.ar' => 'الوصف بالعربية',
+        'description.en' => 'الوصف بالإنجليزية',
         'content' => 'المحتوى',
         'answers' => 'الاجابات',
         'event' => 'الحدث',
@@ -247,6 +252,8 @@ return [
         'length' => 'الطول',
         'department_id' => 'القسم',
         'country' => 'الدولة',
+        'country_id' => 'الدولة',
+        'city' => 'المدينة',
         'notifiable' => 'يمكن الإشعار',
         'data' => 'البيانات',
         'token' => 'التوكن',

@@ -1,0 +1,17 @@
+{
+    "country": {
+        "models": {
+            "App\\Models\\Country": [
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
+    }
+}

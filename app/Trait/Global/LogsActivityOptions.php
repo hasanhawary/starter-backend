@@ -16,7 +16,7 @@ trait LogsActivityOptions
      * - Logging all attributes.
      * - Logging only the attributes that have been changed.
      * - Using the class name as the log name.
-     * - Preventing the submission of empty logs.*
+     * - Preventing the submission of empty logs.
      */
     public function getActivitylogOptions(): LogOptions
     {
@@ -24,7 +24,7 @@ trait LogsActivityOptions
             ->logAll()
             ->logOnlyDirty()
             ->useLogName(class_basename($this))
-            ->dontSubmitEmptyLogs();
+            ->dontLogEmptyChanges();
 
         if (property_exists($this, 'logExceptAttributes')) {
             $logOptions->logExcept($this->logExceptAttributes);

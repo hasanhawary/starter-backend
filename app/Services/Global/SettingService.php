@@ -80,6 +80,39 @@ class SettingService
     }
 
     /**
+     * Get a boolean setting by group.key path.
+     *
+     * Unlike get(), this correctly distinguishes an explicit falsy value
+     * ('0'/false) from an unset value, so switchbox settings work as toggles.
+     */
+    public function bool(string $path, bool $default = true): bool
+    {
+        $settings = $this->all();
+        $keys = explode('.', $path);
+        $current = $settings;
+
+        foreach ($keys as $key) {
+            if (! is_array($current) || ! isset($current[$key])) {
+                return $default;
+            }
+
+            $current = $current[$key];
+        }
+
+        if (! is_array($current) || ! array_key_exists('value', $current)) {
+            return $default;
+        }
+
+        $value = $current['value'];
+
+        if ($value === null || $value === '') {
+            return $default;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
      * Clear settings cache
      */
     public function clearCache(): void

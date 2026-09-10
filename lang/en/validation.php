@@ -147,7 +147,10 @@ return [
     'password_no_personal_info' => 'The :attribute must not contain parts of your name.',
     'password_no_dictionary' => 'The :attribute must not contain common or predictable words.',
     'at_least_one_language' => 'At least one language must be provided (Arabic or English)',
-    'already_exists' => 'This item already exists',
+    'already_exists' => 'The :attribute already exists',
+    'already_exists_deleted' => 'This item already exists',
+    'empty_file' => 'The selected file is empty. Please upload a valid file.',
+    'not_allowed_to_delete_linked' => 'This record cannot be deleted because it is currently linked to other records.',
 
     'custom' => [
         'attribute-name' => [
@@ -210,6 +213,8 @@ return [
 
         /* ========= Content & Text ========= */
         'description' => 'Description',
+        'description.ar' => 'Description in Arabic',
+        'description.en' => 'Description in English',
         'content' => 'Content',
         'answers' => 'Answers',
         'event' => 'Event',
@@ -247,6 +252,8 @@ return [
         'length' => 'Length',
         'department_id' => 'Department',
         'country' => 'Country',
+        'country_id' => 'Country',
+        'city' => 'City',
         'notifiable' => 'Notifiable',
         'data' => 'Data',
         'token' => 'Token',
