@@ -5,16 +5,21 @@ namespace App\Services\Global;
 use App\Events\NotificationEvent;
 use App\Jobs\SendSmsJob;
 use App\Mail\BasicMail;
+use App\Models\User;
 use App\Notifications\UserNotify;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
-    public static function resolve(Authenticatable $user, array $data, ?array $types = ['notify', 'realtime']): void
+    public static function resolve(User $user, array $data, ?array $types = ['notify', 'realtime']): void
     {
         foreach ($types as $type) {
             try {
+                // Respect the global notification master switches (Settings > Notifications).
+                if (! notificationChannelEnabled($type)) {
+                    continue;
+                }
+
                 match ($type) {
                     'realtime' => self::sendRealtimeNotification($user, $data),
                     'notify' => self::sendNotify($user, $data),
@@ -22,18 +27,19 @@ class NotificationService
                     'sms' => self::sendSMS($user, $data),
                     default => null,
                 };
+
             } catch (\Exception|\Error $exception) {
-                logError($exception);
+                info('Error => '.$exception?->getMessage());
             }
         }
     }
 
-    private static function sendNotify(Authenticatable $user, array $data): void
+    private static function sendNotify(User $user, array $data): void
     {
         $user->notify(new UserNotify($data));
     }
 
-    private static function sendSMS(Authenticatable $user, array $data): void
+    private static function sendSMS(User $user, array $data): void
     {
         $message = self::resolveMessageContent($data);
 
@@ -42,21 +48,24 @@ class NotificationService
         }
     }
 
-    public static function sendEmail(Authenticatable $user, array $data): void
+    public static function sendEmail(User $user, array $data): void
     {
-        Mail::to($user->email)->send(new BasicMail($user, $data));
+        // TODO::HANDLE_IN_SETTING;
+        Mail::to($user->email)
+            ->locale('ar')
+            ->send(new BasicMail($user, $data));
     }
 
-    private static function sendRealtimeNotification(Authenticatable $user, array $data): void
+    private static function sendRealtimeNotification(User $user, array $data): void
     {
-        if (config('project.realtime.enabled')) {
+        if (config('services.realtime.enable')) {
             event(new NotificationEvent($user->id, $data));
         }
     }
 
     private static function resolveMessageContent(array $data): string
     {
-        $message = transWithParams($data['msg'], 'notifications.sms').PHP_EOL;
+        $message = $data['msg'].PHP_EOL;
 
         if (isset($data['urlText'])) {
             $message .= $data['urlText'].PHP_EOL;
