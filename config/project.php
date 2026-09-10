@@ -36,7 +36,7 @@ return [
 
             // Incoming data from frontend
             'incoming' => [
-                'password' => false,
+                'password' => true,
                 'otp' => false,
             ],
 
