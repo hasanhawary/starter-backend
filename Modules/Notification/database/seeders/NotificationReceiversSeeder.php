@@ -19,7 +19,7 @@ class NotificationReceiversSeeder extends Seeder
         }
 
         DB::transaction(function () use ($data) {
-            $this->dropCauseActorsReceiver();
+            $this->dropReceiversOutsideCatalogue();
 
             foreach ($data as $module => $moduleData) {
                 $unique = collect($moduleData['receivers'] ?? [])
@@ -45,16 +45,15 @@ class NotificationReceiversSeeder extends Seeder
     }
 
     /**
-     * The cause `actors` receiver is the union of the assigner and the team, both of
-     * which are receivers of their own, so it can only widen an audience the sender
-     * already picked deliberately. Its recipients go with it: a rule that pointed at
-     * it keeps the receivers it was configured with.
+     * Drop the receivers of every module the catalogue no longer carries. Their
+     * recipients go with them: a notification rule cannot keep pointing at an
+     * audience whose module has no system event left to fire.
      */
-    private function dropCauseActorsReceiver(): void
+    private function dropReceiversOutsideCatalogue(): void
     {
         $receiverIds = NotificationReceiver::query()
-            ->where('module', 'cause')
-            ->where('relation', 'actors')
+            ->whereNotIn('module', $this->catalogueModules())
+            ->orWhereNull('module')
             ->pluck('id');
 
         if ($receiverIds->isEmpty()) {
@@ -80,98 +79,35 @@ class NotificationReceiversSeeder extends Seeder
         return json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
     }
 
+    /**
+     * Every module can address its audience by role. Anything module-specific — the
+     * relations a record exposes as recipients — is data, and comes from
+     * `data/receivers.json` instead of being hard-coded here.
+     */
     private function getDefaultReceivers(): array
     {
         $defaults = [];
 
         foreach (SystemEventModuleEnum::cases() as $module) {
             $defaults[$module->value] = [
-                'receivers' => $this->receiversForModule($module->value),
+                'receivers' => [$this->roleReceiver()],
             ];
         }
 
         return $defaults;
     }
 
-    private function receiversForModule(string $module): array
+    /**
+     * The modules the catalogue currently carries.
+     *
+     * @return array<int, string>
+     */
+    private function catalogueModules(): array
     {
-        $receivers = [
-            $this->roleReceiver(),
-        ];
-
-        if ($module === 'user') {
-            array_unshift($receivers, $this->selfReceiver('User Himself', 'المستخدم نفسه'));
-        }
-
-        foreach ($this->moduleSpecificRelations($module) as $relation => $labels) {
-            array_unshift($receivers, $this->relationReceiver($relation, $labels['en'], $labels['ar']));
-        }
-
-        return $receivers;
-    }
-
-    private function moduleSpecificRelations(string $module): array
-    {
-        return match ($module) {
-            'cause' => [
-                'creator' => ['en' => 'Creator', 'ar' => 'المنشئ'],
-                'assigner' => ['en' => 'Assigner', 'ar' => 'المكلف'],
-                'team' => ['en' => 'Cause Team', 'ar' => 'فريق القضية'],
-                'department.users' => ['en' => 'Department Users', 'ar' => 'مستخدمو الإدارة'],
-            ],
-            'cause_judgment', 'cause_session', 'cause_compensation', 'cause_file' => [
-                'cause.creator' => ['en' => 'Cause Creator', 'ar' => 'منشئ القضية'],
-                'cause.assigner' => ['en' => 'Cause Assigner', 'ar' => 'مكلف القضية'],
-                'cause.team' => ['en' => 'Cause Team', 'ar' => 'فريق القضية'],
-            ],
-            'cause_request' => [
-                'creator' => ['en' => 'Creator', 'ar' => 'المنشئ'],
-                'reviewer' => ['en' => 'Reviewer', 'ar' => 'المراجع'],
-                'cause.assigner' => ['en' => 'Cause Assigner', 'ar' => 'مكلف القضية'],
-                'cause.team' => ['en' => 'Cause Team', 'ar' => 'فريق القضية'],
-            ],
-            'cause_request_form' => [
-                'department.users' => ['en' => 'Department Users', 'ar' => 'مستخدمو الإدارة'],
-            ],
-            'contract', 'annexes_contract', 'consultation', 'legal_study', 'contractual_consultation', 'intellectual_property_consultation' => [
-                'creator' => ['en' => 'Creator', 'ar' => 'المنشئ'],
-                'reviewer' => ['en' => 'Reviewer', 'ar' => 'المراجع'],
-                'mainUser' => ['en' => 'Main User', 'ar' => 'المستخدم الرئيسي'],
-                'users' => ['en' => 'Assigned Users', 'ar' => 'المستخدمون المعينون'],
-                'department.users' => ['en' => 'Department Users', 'ar' => 'مستخدمو الإدارة'],
-            ],
-            'task' => [
-                'creator' => ['en' => 'Creator', 'ar' => 'المنشئ'],
-                'assigner' => ['en' => 'Assigner', 'ar' => 'المكلف'],
-                'department.users' => ['en' => 'Department Users', 'ar' => 'مستخدمو الإدارة'],
-            ],
-            'project' => [
-                'creator' => ['en' => 'Creator', 'ar' => 'المنشئ'],
-                'users' => ['en' => 'Team Members', 'ar' => 'أعضاء الفريق'],
-            ],
-            'project_task' => [
-                'users' => ['en' => 'Task Assignees', 'ar' => 'مكلفو المهمة'],
-                'project.users' => ['en' => 'Project Team', 'ar' => 'فريق المشروع'],
-                'creator' => ['en' => 'Creator', 'ar' => 'المنشئ'],
-            ],
-            'project_comment' => [
-                'task.users' => ['en' => 'Task Assignees', 'ar' => 'مكلفو المهمة'],
-                'project.users' => ['en' => 'Project Team', 'ar' => 'فريق المشروع'],
-                'creator' => ['en' => 'Creator', 'ar' => 'المنشئ'],
-            ],
-            'project_file' => [
-                'fileable.users' => ['en' => 'Related Users', 'ar' => 'المستخدمون المرتبطون'],
-                'project.users' => ['en' => 'Project Team', 'ar' => 'فريق المشروع'],
-            ],
-            'document', 'document_section' => [
-                'creator' => ['en' => 'Creator', 'ar' => 'المنشئ'],
-            ],
-            'help_request' => [
-                'questioner' => ['en' => 'Questioner', 'ar' => 'السائل'],
-                'respondent' => ['en' => 'Respondent', 'ar' => 'المجيب'],
-            ],
-            default => [],
-        };
+        return array_map(
+            fn (SystemEventModuleEnum $module): string => $module->value,
+            SystemEventModuleEnum::cases()
+        );
     }
 
     private function roleReceiver(): array
@@ -180,24 +116,6 @@ class NotificationReceiversSeeder extends Seeder
             'type' => 'role',
             'relation' => null,
             'name' => ['en' => 'By Role', 'ar' => 'حسب الدور'],
-        ];
-    }
-
-    private function selfReceiver(string $en, string $ar): array
-    {
-        return [
-            'type' => 'self',
-            'relation' => null,
-            'name' => ['en' => $en, 'ar' => $ar],
-        ];
-    }
-
-    private function relationReceiver(string $relation, string $en, string $ar): array
-    {
-        return [
-            'type' => 'relation',
-            'relation' => $relation,
-            'name' => ['en' => $en, 'ar' => $ar],
         ];
     }
 }

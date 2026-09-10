@@ -63,41 +63,26 @@ class DefaultNotificationEventTemplatesSeeder extends Seeder
      * Access keys that best identify a record, most specific first.
      */
     private const IDENTITY_KEYS = [
-        'cause_number', 'contract_number', 'consultation_number', 'request_number',
-        'name', 'title', 'subject', 'question',
+        'name',
     ];
 
     /**
      * Access keys worth naming inside a message body, in reading order: the
-     * record's own reference, the parent it belongs to, what it is, where it
-     * stands, who is involved, the figures, then the dates. Keys absent here
-     * (emails, phones, links, free text, file paths) never enter a generated
-     * body — they don't read as a message a person would send.
+     * record's own reference, what it is, where it stands, then the dates. Keys
+     * absent here (emails, phones, links, free text, file paths) never enter a
+     * generated body — they don't read as a message a person would send.
      */
     private const DETAIL_KEYS = [
-        'cause_number', 'contract_number', 'consultation_number', 'request_number',
-        'name', 'title', 'subject', 'question',
-        'cause.cause_number', 'causeRequest.cause.cause_number', 'parent.cause_number',
-        'project.name', 'document.name', 'task.name', 'agreementAnnexes.contract_number',
-        'type', 'type.name', 'form.name', 'contractType.name', 'mainContractType.name',
-        'subject.name', 'specialization.name', 'purpose.name',
-        'status', 'stage.name', 'previousStage.name', 'sub_status', 'step',
-        'file_status', 'finished', 'priority', 'achievement', 'for', 'direction',
-        'creator.name', 'assigner.name', 'mainUser.name', 'team.name', 'reviewer.name',
-        'questioner.name', 'respondent.name', 'department.name', 'court.name',
-        'circuit.name', 'contractor.name',
-        'amount', 'loss_percentage',
-        'date', 'due_date', 'deadline', 'effective_date', 'release_date',
-        'receiving_date', 'completed_at', 'start', 'end', 'main_location', 'created_at',
+        'name', 'nationality', 'code', 'phone_code', 'phone_length',
+        'is_active', 'created_at',
     ];
 
     /**
-     * Date columns worth reminding about, most meaningful first.
+     * Date columns worth reminding about, most meaningful first. A country carries
+     * no business date of its own, so its reminders hang off the `created_at`
+     * fallback in verifiableDateFor().
      */
-    private const DATE_KEYS = [
-        'deadline', 'due_date', 'date', 'effective_date', 'end', 'start',
-        'completed_at', 'receiving_date', 'release_date', 'sent_at', 'last_login',
-    ];
+    private const DATE_KEYS = [];
 
     private ?int $roleId = null;
 

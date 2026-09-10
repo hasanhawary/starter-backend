@@ -1,125 +1,67 @@
 {
-    "create_cause_request": {
+    "create_country": {
         "notification": {
             "title": {
-                "ar": "نموذج جديد على القضية {{cause.cause_number}}",
-                "en": "New form on cause {{cause.cause_number}}"
+                "ar": "إضافة دولة جديدة: {{name}}",
+                "en": "New country added: {{name}}"
             },
             "body": {
-                "ar": "أضاف {{creator.name}} النموذج {{name}} على القضية رقم {{cause.cause_number}}.",
-                "en": "{{creator.name}} added the form {{name}} to cause {{cause.cause_number}}."
+                "ar": "تمت إضافة الدولة {{name}} إلى قائمة الدول برمز {{code}} ومفتاح اتصال {{phone_code}}.",
+                "en": "The country {{name}} was added to the countries list with code {{code}} and phone code {{phone_code}}."
             }
         },
         "email": {
             "title": {
-                "ar": "نموذج جديد على القضية {{cause.cause_number}} — القضية {{cause.cause_number}}",
-                "en": "New form on cause {{cause.cause_number}} — cause {{cause.cause_number}}"
+                "ar": "إضافة دولة جديدة: {{name}}",
+                "en": "New country added: {{name}}"
             },
             "body": {
-                "ar": "مرحباً،\nتمت إضافة نموذج جديد على القضية:\n\nاسم النموذج: {{name}}\nنوع النموذج: {{form.name}}\nرقم القضية: {{cause.cause_number}}\nنوع القضية: {{cause.type}}\nالحالة الحالية: {{stage.name}}\nمنشئ النموذج: {{creator.name}}\nتاريخ الإنشاء: {{created_at}}\n\nيمكنك متابعة النموذج من خلال النظام.",
-                "en": "Hello,\nA new form has been added to the cause:\n\nForm name: {{name}}\nForm type: {{form.name}}\nCause number: {{cause.cause_number}}\nCause type: {{cause.type}}\nCurrent stage: {{stage.name}}\nCreated by: {{creator.name}}\nCreated at: {{created_at}}\n\nYou can follow up on the form in the system."
-            }
-        },
-        "push": {
-            "title": {
-                "ar": "نموذج جديد على القضية {{cause.cause_number}}",
-                "en": "New form on cause {{cause.cause_number}}"
-            },
-            "body": {
-                "ar": "القضية {{cause.cause_number}} — الحالة: {{stage.name}}",
-                "en": "Cause {{cause.cause_number}} — stage: {{stage.name}}"
-            }
-        },
-        "sms": {
-            "title": {
-                "ar": "نموذج جديد على القضية {{cause.cause_number}}",
-                "en": "New form on cause {{cause.cause_number}}"
-            },
-            "body": {
-                "ar": "أضاف {{creator.name}} النموذج {{name}} على القضية رقم {{cause.cause_number}}.",
-                "en": "{{creator.name}} added the form {{name}} to cause {{cause.cause_number}}."
-            }
-        },
-        "reminder": {
-            "title": {
-                "ar": "متابعة النموذج {{name}} — القضية {{cause.cause_number}}",
-                "en": "Follow up on form {{name}} — cause {{cause.cause_number}}"
-            },
-            "body": {
-                "ar": "أضاف {{creator.name}} النموذج {{name}} على القضية رقم {{cause.cause_number}}.\n\nالحالة الحالية: {{stage.name}}\nتاريخ الإنشاء: {{created_at}}",
-                "en": "{{creator.name}} added the form {{name}} to cause {{cause.cause_number}}.\n\nCurrent stage: {{stage.name}}\nCreated at: {{created_at}}"
-            }
-        },
-        "calendar": {
-            "title": {
-                "ar": "{{name}} — القضية {{cause.cause_number}}",
-                "en": "{{name}} — cause {{cause.cause_number}}"
-            },
-            "body": {
-                "ar": "أضاف {{creator.name}} النموذج {{name}} على القضية رقم {{cause.cause_number}}.\n\nنوع النموذج: {{form.name}}\nالحالة الحالية: {{stage.name}}\nمنشئ النموذج: {{creator.name}}",
-                "en": "{{creator.name}} added the form {{name}} to cause {{cause.cause_number}}.\n\nForm type: {{form.name}}\nCurrent stage: {{stage.name}}\nCreated by: {{creator.name}}"
+                "ar": "تمت إضافة دولة جديدة إلى قائمة الدول.\n\nاسم الدولة: {{name}}\nالجنسية: {{nationality}}\nرمز الدولة: {{code}}\nمفتاح الاتصال: {{phone_code}}\nعدد أرقام الهاتف: {{phone_length}}\nمفعّلة: {{is_active}}\nتاريخ الإنشاء: {{created_at}}",
+                "en": "A new country was added to the countries list.\n\nCountry name: {{name}}\nNationality: {{nationality}}\nCountry code: {{code}}\nPhone code: {{phone_code}}\nPhone number length: {{phone_length}}\nActive: {{is_active}}\nCreated at: {{created_at}}"
             }
         }
     },
-    "update_cause_request_status": {
+    "update_country": {
         "notification": {
             "title": {
-                "ar": "تغيير حالة النموذج {{name}}",
-                "en": "Form {{name}} changed stage"
+                "ar": "تعديل بيانات الدولة {{name}}",
+                "en": "Country {{name}} updated"
             },
             "body": {
-                "ar": "انتقل النموذج {{name}} على القضية رقم {{cause.cause_number}} من مرحلة {{previousStage.name}} إلى مرحلة {{stage.name}}.",
-                "en": "The form {{name}} on cause {{cause.cause_number}} moved from {{previousStage.name}} to {{stage.name}}."
+                "ar": "تم تعديل بيانات الدولة {{name}} ({{code}}). المفتاح الحالي {{phone_code}} وعدد أرقام الهاتف {{phone_length}}.",
+                "en": "The details of {{name}} ({{code}}) were updated. Its phone code is now {{phone_code}} and its phone number length {{phone_length}}."
             }
         },
         "email": {
             "title": {
-                "ar": "تغيير حالة النموذج {{name}} — القضية {{cause.cause_number}}",
-                "en": "Form {{name}} changed stage — cause {{cause.cause_number}}"
+                "ar": "تعديل بيانات الدولة {{name}}",
+                "en": "Country {{name}} updated"
             },
             "body": {
-                "ar": "مرحباً،\nتم تغيير حالة النموذج التالي:\n\nاسم النموذج: {{name}}\nنوع النموذج: {{form.name}}\nرقم القضية: {{cause.cause_number}}\nنوع القضية: {{cause.type}}\nالحالة السابقة: {{previousStage.name}}\nالحالة الحالية: {{stage.name}}\nمنشئ النموذج: {{creator.name}}\nتاريخ الإنشاء: {{created_at}}\n\nيمكنك متابعة النموذج من خلال النظام.",
-                "en": "Hello,\nThe following form changed stage:\n\nForm name: {{name}}\nForm type: {{form.name}}\nCause number: {{cause.cause_number}}\nCause type: {{cause.type}}\nPrevious stage: {{previousStage.name}}\nCurrent stage: {{stage.name}}\nCreated by: {{creator.name}}\nCreated at: {{created_at}}\n\nYou can follow up on the form in the system."
+                "ar": "تم تعديل بيانات دولة في قائمة الدول. هذه بياناتها بعد التعديل.\n\nاسم الدولة: {{name}}\nالجنسية: {{nationality}}\nرمز الدولة: {{code}}\nمفتاح الاتصال: {{phone_code}}\nعدد أرقام الهاتف: {{phone_length}}\nمفعّلة: {{is_active}}",
+                "en": "A country in the countries list was updated. These are its details after the change.\n\nCountry name: {{name}}\nNationality: {{nationality}}\nCountry code: {{code}}\nPhone code: {{phone_code}}\nPhone number length: {{phone_length}}\nActive: {{is_active}}"
+            }
+        }
+    },
+    "toggle_active_country": {
+        "notification": {
+            "title": {
+                "ar": "تغيير تفعيل الدولة {{name}}",
+                "en": "Activation changed for {{name}}"
+            },
+            "body": {
+                "ar": "تغيّرت حالة تفعيل الدولة {{name}} ({{code}}). مفعّلة الآن: {{is_active}}.",
+                "en": "The activation of {{name}} ({{code}}) changed. Active now: {{is_active}}."
             }
         },
-        "push": {
+        "email": {
             "title": {
-                "ar": "تغيير حالة النموذج {{name}}",
-                "en": "Form {{name}} changed stage"
+                "ar": "تغيير تفعيل الدولة {{name}}",
+                "en": "Activation changed for {{name}}"
             },
             "body": {
-                "ar": "القضية {{cause.cause_number}} — من {{previousStage.name}} إلى {{stage.name}}",
-                "en": "Cause {{cause.cause_number}} — {{previousStage.name}} to {{stage.name}}"
-            }
-        },
-        "sms": {
-            "title": {
-                "ar": "تغيير حالة النموذج {{name}}",
-                "en": "Form {{name}} changed stage"
-            },
-            "body": {
-                "ar": "انتقل النموذج {{name}} على القضية رقم {{cause.cause_number}} من مرحلة {{previousStage.name}} إلى مرحلة {{stage.name}}.",
-                "en": "The form {{name}} on cause {{cause.cause_number}} moved from {{previousStage.name}} to {{stage.name}}."
-            }
-        },
-        "reminder": {
-            "title": {
-                "ar": "متابعة النموذج {{name}} — القضية {{cause.cause_number}}",
-                "en": "Follow up on form {{name}} — cause {{cause.cause_number}}"
-            },
-            "body": {
-                "ar": "انتقل النموذج {{name}} على القضية رقم {{cause.cause_number}} من مرحلة {{previousStage.name}} إلى مرحلة {{stage.name}}.\n\nالحالة السابقة: {{previousStage.name}}\nالحالة الحالية: {{stage.name}}\nتاريخ الإنشاء: {{created_at}}",
-                "en": "The form {{name}} on cause {{cause.cause_number}} moved from {{previousStage.name}} to {{stage.name}}.\n\nPrevious stage: {{previousStage.name}}\nCurrent stage: {{stage.name}}\nCreated at: {{created_at}}"
-            }
-        },
-        "calendar": {
-            "title": {
-                "ar": "{{name}} — القضية {{cause.cause_number}}",
-                "en": "{{name}} — cause {{cause.cause_number}}"
-            },
-            "body": {
-                "ar": "انتقل النموذج {{name}} على القضية رقم {{cause.cause_number}} من مرحلة {{previousStage.name}} إلى مرحلة {{stage.name}}.\n\nنوع النموذج: {{form.name}}\nالحالة السابقة: {{previousStage.name}}\nالحالة الحالية: {{stage.name}}\nمنشئ النموذج: {{creator.name}}",
-                "en": "The form {{name}} on cause {{cause.cause_number}} moved from {{previousStage.name}} to {{stage.name}}.\n\nForm type: {{form.name}}\nPrevious stage: {{previousStage.name}}\nCurrent stage: {{stage.name}}\nCreated by: {{creator.name}}"
+                "ar": "تغيّرت حالة تفعيل دولة في قائمة الدول. الدولة غير المفعّلة لا تظهر في قوائم الاختيار.\n\nاسم الدولة: {{name}}\nرمز الدولة: {{code}}\nمفتاح الاتصال: {{phone_code}}\nمفعّلة: {{is_active}}",
+                "en": "The activation of a country in the countries list changed. An inactive country is hidden from selection lists.\n\nCountry name: {{name}}\nCountry code: {{code}}\nPhone code: {{phone_code}}\nActive: {{is_active}}"
             }
         }
     }

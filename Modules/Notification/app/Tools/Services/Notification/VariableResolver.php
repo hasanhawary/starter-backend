@@ -68,13 +68,6 @@ class VariableResolver
             return ['ar' => $fallback, 'en' => $fallback];
         }
 
-        // Identity numbers without a physical column fall back to the record id.
-        if (in_array($variable->access_key, ['consultation_number', 'contract_number'], true)) {
-            $val = (string) ($context->{$variable->access_key} ?? $context->id ?? '');
-
-            return ['ar' => $val, 'en' => $val];
-        }
-
         $keys = explode('.', $variable->access_key);
         $current = $context;
 

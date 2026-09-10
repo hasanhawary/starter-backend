@@ -4,6 +4,7 @@ namespace Modules\Notification\database\seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Modules\Notification\app\Enum\SystemEventModuleEnum;
 use Modules\Notification\app\Models\NotificationVerifiableDate;
 
 class NotificationVerifiableDatesSeeder extends Seeder
@@ -14,31 +15,51 @@ class NotificationVerifiableDatesSeeder extends Seeder
 
         DB::transaction(function () use ($data) {
             foreach ($data as $module => $moduleData) {
-            foreach ($moduleData['models'] ?? [] as $modelType => $columns) {
-                $unique = collect($columns)->unique('access_key')->values();
+                foreach ($moduleData['models'] ?? [] as $modelType => $columns) {
+                    $unique = collect($columns)->unique('access_key')->values();
 
-                foreach ($unique as $col) {
-                    NotificationVerifiableDate::updateOrCreate(
-                        [
-                            'model_type' => $modelType,
-                            'access_key' => $col['access_key'],
-                        ],
-                        [
-                            'module' => $module,
-                            'type' => $col['type'] ?? 'date',
-                            'relation' => $col['relation'] ?? null,
-                            'name' => $col['name'] ?? null,
-                        ]
-                    );
+                    foreach ($unique as $col) {
+                        NotificationVerifiableDate::updateOrCreate(
+                            [
+                                'model_type' => $modelType,
+                                'access_key' => $col['access_key'],
+                            ],
+                            [
+                                'module' => $module,
+                                'type' => $col['type'] ?? 'date',
+                                'relation' => $col['relation'] ?? null,
+                                'name' => $col['name'] ?? null,
+                            ]
+                        );
+                    }
                 }
             }
-        }
+
+            // A date is only reminded about through the events of its own module, so
+            // the modules that left the catalogue take their dates with them.
+            NotificationVerifiableDate::query()
+                ->whereNotIn('module', $this->catalogueModules())
+                ->orWhereNull('module')
+                ->delete();
         });
+    }
+
+    /**
+     * The modules the catalogue currently carries.
+     *
+     * @return array<int, string>
+     */
+    private function catalogueModules(): array
+    {
+        return array_map(
+            fn (SystemEventModuleEnum $module): string => $module->value,
+            SystemEventModuleEnum::cases()
+        );
     }
 
     private function loadJson(string $filename): array
     {
-        $path = __DIR__ . '/data/' . $filename;
+        $path = __DIR__.'/data/'.$filename;
 
         if (! file_exists($path)) {
             return [];

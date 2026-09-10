@@ -28,42 +28,12 @@ class NotificationSystemEventSeeder extends Seeder
         $events = $events->reject(fn ($event, $slug) => $this->isDeleteEvent((string) $slug));
 
         DB::transaction(function () use ($events) {
-            // Drop any delete-type events seeded previously; the FK cascade removes
-            // their notification events, templates, reminder settings and schedule events.
-            SystemEvent::where('event_slug', 'like', '%delete%')->delete();
-
-            // Delete redundant assign events
-            SystemEvent::whereIn('event_slug', [
-                'assign_draft_user_consultation',
-                'assign_draft_user_contractual_consultation',
-                'assign_draft_user_intellectual_property_consultation',
-                'assign_legislative_support_user_legal_study',
-            ])->delete();
-
-            // The per-stage cause request events were folded into
-            // `update_cause_request_status`: they exposed an identical variable set
-            // and differed only in wording, which the `stage.name` and
-            // `previousStage.name` variables now carry on the single event.
-            SystemEvent::whereIn('event_slug', [
-                'prepare_cause_request',
-                'review_cause_request',
-                'review_high_cause_request',
-                'approval_cause_request',
-                'approval_high_cause_request',
-                'concerned_department_cause_request',
-                'approve_cause_request',
-                'final_approve_cause_request',
-                'move_stage_cause_request',
-                'assign_employee_cause_request',
-            ])->delete();
-
-            // A project task notifies when it is added and when it changes stage,
-            // and on nothing else: editing its fields and toggling it finished
-            // were dropped.
-            SystemEvent::whereIn('event_slug', [
-                'update_project_task',
-                'finish_project_task',
-            ])->delete();
+            // Everything outside the current catalogue goes: the delete-type events
+            // above, and every event left behind by a slug or a module the enums no
+            // longer carry. The FK cascade takes their notification events, templates,
+            // reminder settings and schedule events with them, so a module can be
+            // dropped from the catalogue without leaving configuration pointing at it.
+            SystemEvent::whereNotIn('event_slug', $events->keys()->all())->delete();
 
             foreach ($events as $event) {
                 SystemEvent::updateOrCreate(
@@ -130,10 +100,7 @@ class NotificationSystemEventSeeder extends Seeder
             }
         }
 
-        return match (true) {
-            str_contains($slug, 'help_request') => SystemEventModuleEnum::HelpRequest->value,
-            default => null,
-        };
+        return null;
     }
 
     /**
