@@ -163,49 +163,158 @@ The predicate and translation key above are placeholders for a real, inspected d
 
 The paired route contract is documented in `.agents/skills/laravel-route-development/references/routes-example.md`. It uses explicit `delete`, `restore`, and `force-delete` endpoints and excludes `destroy` from `apiResource`.
 
-## Transactional Service When Justified
+## Service-Backed Module: The Statement Shape
 
-When the operation grows past one or two extra lines — coordinated writes, state rules, media, notifications, or reuse from a command or job — inject `ExampleService`, replace the direct write with `$this->exampleService->store(...)` or `$this->exampleService->update(...)`, and let the service own the complete transaction. The service still delegates the relation write to the model's `syncMembers()`; it does not build the relation payload itself. Keep only operations required by the feature.
+When the operation grows past one or two extra lines — coordinated writes, state rules, media, notifications, or reuse from a command or job — inject a service. The house shape is `Modules/Statement`, repeated by `Modules/Lawsuit` and `Modules/Delegation`: the controller keeps `DB::transaction()` and lines up the steps, and the service owns what each step does. Read those modules before writing a new service.
+
+### Controller
 
 ```php
-<?php
-
-namespace App\Services\Example;
-
-use App\Models\Example;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
-
-class ExampleService
+class ExampleController extends Controller
 {
-    public function store(array $data): Example
-    {
-        return DB::transaction(function () use ($data) {
-            $memberIds = Arr::pull($data, 'member_ids', []);
-            $example = Example::query()->create($data);
-            $example->syncMembers($memberIds);
+    use HasDeleteMethods;
 
-            return $example->refresh();
+    public function __construct(protected ExampleService $service)
+    {
+        $this->model = Example::class;
+    }
+
+    public function store(ExampleRequest $request): JsonResponse
+    {
+        Gate::authorize('create', $this->model);
+
+        return DB::transaction(function () use ($request) {
+            $data = $request->validated();
+            $example = $this->service->saveExample($data);
+            $this->service->syncExampleFile($data, $example);
+
+            return successResponse(new ExampleResource($example), __('api.created_success'));
         });
     }
 
-    public function update(Example $example, array $data): Example
+    public function update(ExampleRequest $request, Example $example): JsonResponse
     {
-        return DB::transaction(function () use ($example, $data) {
-            $memberIds = Arr::pull($data, 'member_ids');
-            $example->update($data);
+        Gate::authorize('update', $example);
 
-            if ($memberIds !== null) {
-                $example->syncMembers($memberIds);
-            }
+        return DB::transaction(function () use ($request, $example) {
+            $data = $request->validated();
+            $example = $this->service->saveExample($data, $example);
+            $this->service->syncExampleFile($data, $example);
 
-            return $example->refresh();
+            return successResponse(new ExampleResource($example->refresh()), __('api.updated_success'));
         });
     }
 }
 ```
 
-If notification, mail, storage, or another external effect depends on this transaction, schedule it with `DB::afterCommit()` or dispatch an after-commit job instead of holding the database transaction open.
+The service is injected by constructor property promotion and called as `$this->service`. `Gate::authorize()` runs before the transaction. `$request->validated()` is taken once inside the closure and passed to each service call. `successResponse()` is returned from inside the closure, and the controller is the only place that touches Resources.
+
+### Service
+
+```php
+<?php
+
+namespace Modules\Example\App\Services;
+
+use Modules\Example\App\Enum\ExampleLogTypeEnum;
+use Modules\Example\App\Enum\ExampleStatusEnum;
+use Modules\Example\App\Models\Example;
+use Modules\Example\App\Models\ExampleLog;
+use Modules\Example\App\Tools\Status\ExampleStatusFactory;
+
+class ExampleService
+{
+    public function saveExample(array $data, ?Example $example = null): Example
+    {
+        $isDraft = $data['is_draft'] ?? false;
+
+        $attributes = [
+            'subject' => $data['subject'],
+            'description' => $data['description'],
+        ];
+
+        if ($example) {
+            $example->update($attributes);
+            $this->logExample($example, ExampleLogTypeEnum::Updated);
+
+            $wasDraft = $example->is_draft;
+            $this->syncMembers($data, $example);
+
+            if ($wasDraft && ! $isDraft) {
+                $this->enterLifeCycle($example, $isDraft);
+            }
+
+            return $example;
+        }
+
+        $example = Example::create([
+            ...$attributes,
+            'is_draft' => $isDraft,
+            'status' => $isDraft ? ExampleStatusEnum::Draft : ExampleStatusEnum::SentPending,
+        ]);
+
+        $this->logExample($example, $isDraft ? ExampleLogTypeEnum::CreatedDraft : ExampleLogTypeEnum::Created);
+        $this->syncMembers($data, $example);
+        $this->enterLifeCycle($example, $isDraft);
+
+        return $example;
+    }
+
+    public function syncMembers(array $data, Example $example): void
+    {
+        if (! isset($data['member_ids'])) {
+            return;
+        }
+
+        $now = now();
+        $pivotData = collect($data['member_ids'])->mapWithKeys(fn ($id) => [
+            $id => [
+                'created_by' => auth()->id(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ])->toArray();
+
+        $example->members()->sync($pivotData);
+    }
+
+    private function logExample(Example $example, ExampleLogTypeEnum $type): ExampleLog
+    {
+        return $example->logs()->create([
+            'type' => $type->value,
+            'message' => buildDelimiterMessage(Str::snake($type->name), ['name' => auth()->user()->name]),
+        ]);
+    }
+
+    private function enterLifeCycle(Example $example, bool $isDraft): void
+    {
+        if ($isDraft) {
+            return;
+        }
+
+        ExampleStatusFactory::guess(ExampleStatusEnum::SentPending->value, $example)->handle();
+    }
+}
+```
+
+What makes this the house shape:
+
+- **No `DB::transaction()` anywhere in the service.** The controller owns the boundary. None of the three real services in this backend contains one.
+- **`saveX(array $data, ?X $model = null)` covers create and update in one method.** Do not add `store()` and `update()` methods that mirror the controller's actions; a service built one-method-per-endpoint has no responsibility of its own.
+- **Public methods are the steps the controller composes** — `saveX()`, `syncX()`, `syncXFile()`, `manageX()`, `handleX()`. Helpers only called from inside — `logX()`, `enterLifeCycle()` — are private.
+- **`array $data` first, model second.** Each `syncX()` guards its own key with `isset()` and returns early, so an omitted key leaves the relation untouched.
+- **`saveX()` returns the model; sync and manage methods return `void`.** The service never returns a Resource or an HTTP response, never calls `Gate`, and never reads the `Request`. `auth()->id()` for attribution and `auth()->user()->name` in log messages is established and fine.
+- **A domain precondition that must abort throws from inside the service**, and the controller's open transaction rolls back with it:
+
+```php
+if (! $relatedExample) {
+    throw new HttpResponseException(
+        failResponse(trans('example::messages.related_example_not_found'), 400)
+    );
+}
+```
+
+- **Collaborators stay behind their own classes**: status transitions through `XStatusFactory`, notifications through the `Notification` facade, uploads through `UploadService`, permission grants through `AssignmentPermissionService`. External effects that must only follow a successful commit go through `DB::afterCommit()` or an after-commit job.
 
 ## Visibility Scope
 

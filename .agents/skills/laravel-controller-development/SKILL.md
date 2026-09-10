@@ -12,10 +12,11 @@ Keep controllers as HTTP orchestration boundaries. Put query policy, domain beha
 - Follow the root `AGENTS.md` before this skill.
 - Read the root `AGENTS.md`, the nearest controller, request, resource, model scopes, filters, policy, service, routes, and feature tests before editing.
 - Read [the canonical controller example](references/controller-example.md) before creating a controller or materially changing its structure.
-- For a user-requested Delegation-style Strategy Pattern module, also apply `.agents/skills/laravel-strategy-module-development/SKILL.md`.
+- For a user-requested Statement-style Strategy Pattern module, also apply `.agents/skills/laravel-strategy-module-development/SKILL.md`.
 - For CRUD work, also read `.claude/skills/crud-resource.md` and its controller reference. For list filtering or authorization, read `.claude/skills/filters.md` or `.claude/skills/permissions.md`.
 - For route work, apply `.agents/skills/laravel-route-development/SKILL.md`; treat `.agents/skills/laravel-route-development/SKILL.md` as secondary project evidence when it is relevant.
-- Treat large legacy controllers as behavioral evidence, not as structural templates. Use the current simple CRUD controllers as references for direct single-model writes, and service-backed modules such as Delegation only when the target operation has comparable domain complexity.
+- Before writing or changing a service, read `Modules/Statement/app/Http/Controllers/StatementController.php` and `Modules/Statement/app/Services/StatementService.php` together. That pair is the house shape for a service-backed module; `Modules/Lawsuit` and `Modules/Delegation` follow it.
+- Treat large legacy controllers as behavioral evidence, not as structural templates. Use the current simple CRUD controllers as references for direct single-model writes, and service-backed modules such as Statement only when the target operation has comparable domain complexity.
 
 ## Controller Boundary
 
@@ -96,31 +97,124 @@ public function store(SectorRequest $request): JsonResponse
 - Decide per operation whether a service has real ownership. A service is not the default for every `store()` or `update()`, and reducing two clear controller lines to a pass-through service is over-engineering.
 - Leave ordinary code exactly as it is. When the action is one validated `create()` or `update()` with no extra write, no domain branching, no workflow transition, and no reusable business rule, keep it inline in the controller with no service and no transaction.
 - When that write is accompanied by only one or two additional write lines — a model `syncX()` call, a log entry, a counter, one dependent create — keep them in the controller action but wrap the whole group in `DB::transaction()` so the action commits or rolls back as one unit. A partial commit there is a correctness bug, not a style preference.
-- Move `store()` or `update()` into a cohesive domain service when the operation carries substantial internal detail: several coordinated writes, non-trivial invariants or state transitions, media handling, notifications, after-commit work, or reuse from another entry point such as a command, job, or MCP tool. The service then owns `DB::transaction()` for the complete atomic change, including relation sync, logs, counters, and dependent writes.
+- Move `store()` or `update()` into a cohesive domain service when the operation carries substantial internal detail: several coordinated writes, non-trivial invariants or state transitions, media handling, notifications, after-commit work, or reuse from another entry point such as a command, job, or MCP tool.
+- `DB::transaction()` stays in the controller action in both cases. It never moves into the service. `Modules/Statement`, `Modules/Lawsuit`, and `Modules/Delegation` are the three service-backed modules in this backend and not one of their services contains a single `DB::transaction()` call; the controller opens the boundary and the service supplies the steps that run inside it.
 - Established model observers, casts, activity logging, and Resource formatting do not by themselves justify a service; they already belong to their existing layers.
 - Line count is a signal, not the decision rule. A short domain-sensitive operation can require a service, while a straightforward controller action can remain direct. Base the decision on responsibility, atomicity, reuse, and testability.
 - Reuse an existing cohesive service when it is already the authoritative owner of the operation's invariants. Do not bypass it to save a method call, and do not create a new service that merely mirrors `Model::create()` or `$model->update()`.
-- Pass validated data or explicit values into the service. A service must not authorize, validate, read the global request, or return an HTTP response.
-- Return the affected model or a purpose-specific result to the controller; the controller loads Resource relations and formats the response.
-- Keep transactions short. Perform external I/O after commit with `DB::afterCommit()` when it must only run after a successful commit.
 - Do not add transactions to `index`, `show`, or other read-only actions. Do not split one resource into generic repositories, DTOs, separate action classes, or other layers without a demonstrated current need.
-- Existing batch lifecycle traits are not automatically atomic. If callbacks or multiple records must succeed or fail together, use a service or an authorized shared-trait change that supplies one transaction boundary.
+- Existing batch lifecycle traits are not automatically atomic. If callbacks or multiple records must succeed or fail together, use an authorized shared-trait change that supplies one transaction boundary.
+
+## The Service-Backed Shape: Follow `Modules/Statement`
+
+`Modules/Statement/app/Http/Controllers/StatementController.php` with `Modules/Statement/app/Services/StatementService.php` is the canonical service-backed module. `Modules/Lawsuit` and `Modules/Delegation` repeat it line for line. Copy this shape; read those three before writing a new service.
+
+### Controller side
+
+```php
+class StatementController extends Controller
+{
+    use HasDeleteMethods;
+
+    public function __construct(protected StatementService $service)
+    {
+        $this->model = Statement::class;
+    }
+
+    public function store(StatementRequest $request): JsonResponse
+    {
+        Gate::authorize('create', $this->model);
+
+        return DB::transaction(function () use ($request) {
+            $data = $request->validated();
+            $statement = $this->service->saveStatement($data);
+            $this->service->syncStatementFile($data, $statement);
+            $this->service->handleClosedRelated($data, $statement);
+
+            return successResponse(new StatementResource($statement), __('api.created_success'));
+        });
+    }
+
+    public function update(StatementRequest $request, Statement $statement): JsonResponse
+    {
+        Gate::authorize('assignOrUpdate', $statement);
+
+        return DB::transaction(function () use ($request, $statement) {
+            $data = $request->validated();
+            $statement = $this->service->saveStatement($data, $statement);
+            $this->service->syncStatementFile($data, $statement);
+
+            return successResponse(new StatementResource($statement->refresh()), __('api.updated_success'));
+        });
+    }
+}
+```
+
+- Inject the service with constructor property promotion as `protected XService $service` and call it as `$this->service`. Do not name it `$statementService`, resolve it with `app()`, or instantiate it in the action. The constructor keeps its other wiring — `$this->model`, delete callbacks, the parent constructor when the base controller requires it.
+- `Gate::authorize()` runs in the controller before the transaction opens. Authorization is never a service concern.
+- The action body is `return DB::transaction(function () use (...) { ... });` with `successResponse()` returned from inside the closure, exactly as the surrounding modules write it.
+- `$data = $request->validated()` is taken once at the top of the closure and passed to every service call. Never hand the service the `Request` object.
+- The controller lines up the steps; the service owns what each step does. Several sequential `$this->service->...()` calls in one closure is the intended shape, not a smell.
+- The controller loads or refreshes relations for the response and builds the Resource. `$statement->refresh()` after an update, and `new XResource($model, 'details')` where the module uses a details variant.
+
+### Service side
+
+```php
+class StatementService
+{
+    public function saveStatement(array $data, ?Statement $statement = null): Statement
+    {
+        // update-or-create the record, log it, sync its relations, enter the lifecycle
+    }
+
+    public function syncUsers(array $data, Statement $statement): void
+    {
+        if (! isset($data['user_ids'])) {
+            return;
+        }
+        // ...
+    }
+
+    public function syncStatementFile(array $data, Model $model, bool $isUpdate = false): void { /* ... */ }
+
+    public function manageUsers(Statement $statement, array $assignIds = [], array $removeIds = []): void { /* ... */ }
+
+    private function logStatement(Statement $statement, StatementLogTypeEnum $type): StatementLog { /* ... */ }
+
+    private function enterLifeCycle(Statement $statement, bool $isDraft): void { /* ... */ }
+}
+```
+
+- One service per module, named `XService`, living in `Modules/X/app/Services/`.
+- Method names describe the domain operation, never the endpoint. There is no `store()`, `update()`, or `changeStep()` on these services. A service written as one method per controller action has no responsibility of its own and is the pass-through layer this skill rejects.
+- The create/update pair is a single `saveX(array $data, ?X $model = null): X`: the null model means create, a passed model means update. Both branches log, sync, and enter the lifecycle through the same private helpers. Do not split it into two public methods to mirror `store()` and `update()`.
+- Signature order is `array $data` first, then the model — `syncX(array $data, X $model): void`. Methods that operate on explicit id lists instead of the payload take the model first, as `manageUsers(Statement $statement, array $assignIds = [], array $removeIds = [])` does.
+- Each `syncX()` guards its own key and returns early when it is absent (`if (! isset($data['user_ids'])) { return; }`), so a payload that omits the key leaves the relation untouched instead of clearing it. Keep that guard in the service; do not re-check the key in the controller.
+- Public methods are the composable steps the controller lines up. Anything only called from inside the service — `logX()`, `enterLifeCycle()`, `assignUsers()`, `removeUsers()`, `grantViewOwnPermission()` — stays private.
+- `saveX()` returns the model. Sync and manage methods return `void`. Nothing in the service returns an HTTP response or a Resource.
+- No `DB::transaction()`, no `Gate`, no `$request`, no validation. Reading `auth()->id()` for `created_by` attribution and `auth()->user()->name` for log messages is the established convention and is fine.
+- A domain precondition that must abort the request throws `HttpResponseException(failResponse(trans('statement::messages.some_key'), 400))` from inside the service, as `handleClosedRelated()` does. The controller's open transaction rolls back with it. Use a module translation key, not a literal string.
+- Cross-cutting work stays behind its own collaborator: status transitions through the `XStatusFactory`, notifications through the `Notification` facade, uploads through `UploadService`, permission grants through `AssignmentPermissionService`. The service coordinates them; it does not reimplement them.
+- External I/O that must only run after a successful commit belongs in `DB::afterCommit()` or an after-commit job, not inline in the service.
+- A read-only helper the controller needs for a decision — `hasConflictingActiveDelegation(int $userId): bool` in `DelegationService` — is legitimate service surface and needs no transaction around its call site.
 
 ## Relation Synchronization Belongs to the Model
 
-- Every relation write — `syncData`, `sync()`, attach/detach, replace-children, file or participant synchronization — lives in a method on the model that owns the relation. Follow the established project convention of named model methods such as `syncFiles()` and `syncParticipants()` in `app/Models/Cause.php`.
-- The controller or service only calls `$model->syncX($validatedPart)` inside the transaction boundary. It must not build pivot payloads, delete children, or map request arrays into relation rows itself.
+- In a controller-only action, every relation write — `syncData`, `sync()`, attach/detach, replace-children, file or participant synchronization — lives in a method on the model that owns the relation. Follow the established project convention of named model methods such as `syncFiles()` and `syncParticipants()` in `app/Models/Cause.php`.
+- The controller then only calls `$model->syncX($validatedPart)` inside the transaction boundary. It must not build pivot payloads, delete children, or map request arrays into relation rows itself.
+- In a service-backed module the sync step lives on the service next to the save it belongs to — `syncUsers()`, `syncDepartments()`, `syncStatementFile()` in `StatementService`, `syncDefendants()` in `LawsuitService` — because the pivot rows carry domain data such as assignment type, attribution, and status. Follow the module you are in; do not move an established service sync onto the model, and do not pull a plain model `syncX()` into a service to match this shape.
 - Keep the model method self-contained: it accepts already-validated data, guards empty input, and performs the full replace or merge for that relation. It must not authorize, validate, read the global request, or return an HTTP response.
 - Reuse an existing `syncX()` method instead of adding a second path for the same relation. When several models share one sync rule, put it in the established shared trait, such as `Modules/IntellectualProperty/app/Traits/SyncIntellectualPropertyFiles.php`, rather than duplicating it.
-- Adding a relation sync to an action means that action now performs more than one write, so it must run inside a transaction: `DB::transaction()` in the controller for one or two lines, or in the service when the operation is larger.
+- Adding a relation sync to an action means that action now performs more than one write, so it must run inside the controller's `DB::transaction()`. That is true whether the sync sits on the model or on the service — the transaction boundary does not move.
 - Apply `.agents/skills/laravel-model-development/SKILL.md` when adding or changing these model methods.
 
 ## Verification
 
 - Test authentication, each permission path, Policy ownership or state boundaries, and agreement between the index visibility scope and record-level access.
 - Test index filters individually and in combination, eager-loaded Resource output, pagination, trashed behavior, and stable ordering.
-- Test successful mutations and validation failures. For any multi-write action, service-backed or wrapped in a controller `DB::transaction()`, also test rollback after a later write fails and after-commit side effects when present.
-- Test relation synchronization through the model method: full replace, empty input, and the resulting relation state after a rolled-back transaction.
+- Test successful mutations and validation failures. Every multi-write action is wrapped in a controller `DB::transaction()`, service-backed or not, so also test rollback after a later write fails — including a service method that throws `HttpResponseException` mid-sequence — and after-commit side effects when present.
+- Test relation synchronization through whichever method owns it, model or service: full replace, an omitted key leaving the relation untouched, and the resulting relation state after a rolled-back transaction.
 - For deletable resources, test single and batch IDs, authorization, domain guards, soft delete, restore, force delete, and protected-relation failures as applicable. Confirm `DELETE /{model}` is not exposed when the dedicated delete endpoint is canonical.
-- Re-scan the controller for business logic, unnecessary pass-through services, raw request data, unscoped list queries, duplicated authorization, hidden N+1 queries, relation sync written inline instead of on the model, multi-write sequences left outside a transaction, and transactions at the wrong layer.
+- Re-scan the controller for business logic, raw request data, unscoped list queries, duplicated authorization, hidden N+1 queries, relation sync written inline in the action, and multi-write sequences left outside a transaction.
+- Re-scan any service for the shapes this skill rejects: a `DB::transaction()` opened inside it, a `Gate` check or `Request` access, an HTTP response or Resource returned, or public methods named after controller actions instead of domain operations.
 - Run the smallest relevant PHPUnit feature tests, route inspection when routes change, and the backend-required formatter after PHP edits.

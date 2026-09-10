@@ -30,7 +30,7 @@ Build the smallest coherent module that follows the repository's current module 
 - Register the real service provider in `module.json`, keep PSR-4 discovery coherent, and enable a new module in `modules_statuses.json` only after its runtime wiring exists.
 - The provider registers only responsibilities the module owns: bindings, configuration, routes, migrations, translations, policies, observers, events, commands, schedules, report/export integration, or morph maps as applicable.
 - Create only the directories and extension points the current feature needs. Do not copy empty providers, views, assets, commands, reports, exports, schedules, or registries for visual parity.
-- Keep controllers as HTTP orchestration and delegate atomic mutations to cohesive services under the controller skill.
+- Keep controllers as HTTP orchestration and delegate atomic mutations to cohesive services under the controller skill. When the module needs a service, follow the Statement shape documented there: one `XService` per module, `DB::transaction()` in the controller action, domain-named service methods rather than one method per endpoint.
 - Keep configuration declarative. Do not place request-dependent business logic or mutable runtime state in config files.
 - Register scheduled work and side effects deliberately: make repeatable commands idempotent, prevent unsafe overlap where required, and dispatch external effects after commit.
 
