@@ -2,9 +2,11 @@
 
 namespace App\Services\Global;
 
+use App\Enum\Global\SettingTypeEnum;
 use App\Models\Setting;
 use HasanHawary\MediaManager\Facades\Media;
 use Illuminate\Support\Facades\Cache;
+use JsonException;
 
 class SettingService
 {
@@ -124,7 +126,7 @@ class SettingService
     /**
      * Update multiple settings with media handling and env sync
      *
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function updateSettings(array $settings): void
     {
@@ -137,7 +139,7 @@ class SettingService
                 continue;
             }
 
-            $setting->value = $this->normalizeValue($item['value'], $setting->type);
+            $setting->value = $this->normalizeValue($item['value'], $setting->type, $setting->getRawOriginal('value'));
             $setting->save();
 
             if ($setting->is_env) {
@@ -151,10 +153,10 @@ class SettingService
     /**
      * Normalize setting value based on type
      */
-    protected function normalizeValue(mixed $value, $type): mixed
+    protected function normalizeValue(mixed $value, $type, ?string $oldPath = null): mixed
     {
-        if ($value && \in_array($type, ['imageUploader', 'file'], true)) {
-            return Media::replace($value)->upload($value, 'settings');
+        if ($value && \in_array($type, [SettingTypeEnum::ImageUploader, SettingTypeEnum::File], true)) {
+            return Media::replace($oldPath)->upload($value, 'settings');
         }
 
         return $value;
