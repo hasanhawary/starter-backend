@@ -64,5 +64,93 @@
                 "en": "The activation of a country in the countries list changed. An inactive country is hidden from selection lists.\n\nCountry name: {{name}}\nCountry code: {{code}}\nPhone code: {{phone_code}}\nActive: {{is_active}}"
             }
         }
+    },
+    "create_showcase": {
+        "notification": {
+            "title": {
+                "en": "New showcase created: {{name}}",
+                "ar": "تم إنشاء عرض جديد: {{name}}"
+            },
+            "body": {
+                "en": "The showcase {{name}} ({{reference}}) was created under {{category.name}} with {{priority}} priority.",
+                "ar": "تم إنشاء العرض {{name}} ({{reference}}) ضمن التصنيف {{category.name}} بأولوية {{priority}}."
+            }
+        },
+        "email": {
+            "title": {
+                "en": "New showcase created: {{name}}",
+                "ar": "تم إنشاء عرض جديد: {{name}}"
+            },
+            "body": {
+                "en": "Hello,\nA new showcase was created and is waiting for review.\n\nReference: {{reference}}\nName: {{name}}\nCategory: {{category.name}}\nStatus: {{status}}\nPriority: {{priority}}\nVisibility: {{visibility}}\nOwner: {{owner.name}}\nCreated by: {{creator.name}}\nExpires at: {{expires_at}}\n\nYou can view the full details in the system.\nBest regards.",
+                "ar": "مرحباً،\nتم إنشاء عرض جديد وهو في انتظار المراجعة.\n\nالرقم المرجعي: {{reference}}\nالاسم: {{name}}\nالتصنيف: {{category.name}}\nالحالة: {{status}}\nالأولوية: {{priority}}\nمستوى الظهور: {{visibility}}\nالمسؤول: {{owner.name}}\nأنشئ بواسطة: {{creator.name}}\nتاريخ الانتهاء: {{expires_at}}\n\nيمكنكم الاطلاع على كامل التفاصيل من خلال النظام.\nمع خالص التحية."
+            }
+        }
+    },
+    "update_showcase": {
+        "notification": {
+            "title": {
+                "en": "Showcase {{name}} updated",
+                "ar": "تم تعديل العرض {{name}}"
+            },
+            "body": {
+                "en": "The showcase {{name}} ({{reference}}) was updated. It now stands at {{status}} with {{priority}} priority.",
+                "ar": "تم تعديل العرض {{name}} ({{reference}}). حالته الآن {{status}} بأولوية {{priority}}."
+            }
+        },
+        "email": {
+            "title": {
+                "en": "Showcase {{name}} updated",
+                "ar": "تم تعديل العرض {{name}}"
+            },
+            "body": {
+                "en": "Hello,\nThe details of a showcase were updated. These are its details after the change.\n\nReference: {{reference}}\nName: {{name}}\nCategory: {{category.name}}\nStatus: {{status}}\nPriority: {{priority}}\nVisibility: {{visibility}}\nOwner: {{owner.name}}\nExpires at: {{expires_at}}\n\nYou can view the full details in the system.\nBest regards.",
+                "ar": "مرحباً،\nتم تعديل بيانات أحد العروض. هذه بياناته بعد التعديل.\n\nالرقم المرجعي: {{reference}}\nالاسم: {{name}}\nالتصنيف: {{category.name}}\nالحالة: {{status}}\nالأولوية: {{priority}}\nمستوى الظهور: {{visibility}}\nالمسؤول: {{owner.name}}\nتاريخ الانتهاء: {{expires_at}}\n\nيمكنكم الاطلاع على كامل التفاصيل من خلال النظام.\nمع خالص التحية."
+            }
+        }
+    },
+    "publish_showcase": {
+        "notification": {
+            "title": {
+                "en": "Showcase published: {{name}}",
+                "ar": "تم نشر العرض: {{name}}"
+            },
+            "body": {
+                "en": "The showcase {{name}} ({{reference}}) was published on {{published_at}} and is now visible as {{visibility}}.",
+                "ar": "تم نشر العرض {{name}} ({{reference}}) بتاريخ {{published_at}} وأصبح ظاهراً بمستوى {{visibility}}."
+            }
+        },
+        "email": {
+            "title": {
+                "en": "Showcase published: {{name}}",
+                "ar": "تم نشر العرض: {{name}}"
+            },
+            "body": {
+                "en": "Hello,\nA showcase you follow has been published.\n\nReference: {{reference}}\nName: {{name}}\nCategory: {{category.name}}\nPublished at: {{published_at}}\nVisibility: {{visibility}}\nOwner: {{owner.name}}\nExpires at: {{expires_at}}\n\nYou can view the full details in the system.\nBest regards.",
+                "ar": "مرحباً،\nتم نشر أحد العروض التي تتابعونها.\n\nالرقم المرجعي: {{reference}}\nالاسم: {{name}}\nالتصنيف: {{category.name}}\nتاريخ النشر: {{published_at}}\nمستوى الظهور: {{visibility}}\nالمسؤول: {{owner.name}}\nتاريخ الانتهاء: {{expires_at}}\n\nيمكنكم الاطلاع على كامل التفاصيل من خلال النظام.\nمع خالص التحية."
+            }
+        }
+    },
+    "toggle_active_showcase": {
+        "notification": {
+            "title": {
+                "en": "Activation changed for {{name}}",
+                "ar": "تغيير تفعيل العرض {{name}}"
+            },
+            "body": {
+                "en": "The activation state of {{name}} ({{reference}}) changed. Active: {{is_active}}.",
+                "ar": "تم تغيير حالة تفعيل العرض {{name}} ({{reference}}). مفعّل: {{is_active}}."
+            }
+        },
+        "email": {
+            "title": {
+                "en": "Activation changed for {{name}}",
+                "ar": "تغيير تفعيل العرض {{name}}"
+            },
+            "body": {
+                "en": "Hello,\nThe activation state of a showcase was changed.\n\nReference: {{reference}}\nName: {{name}}\nCategory: {{category.name}}\nActive: {{is_active}}\nStatus: {{status}}\nOwner: {{owner.name}}\n\nYou can view the full details in the system.\nBest regards.",
+                "ar": "مرحباً،\nتم تغيير حالة تفعيل أحد العروض.\n\nالرقم المرجعي: {{reference}}\nالاسم: {{name}}\nالتصنيف: {{category.name}}\nمفعّل: {{is_active}}\nالحالة: {{status}}\nالمسؤول: {{owner.name}}\n\nيمكنكم الاطلاع على كامل التفاصيل من خلال النظام.\nمع خالص التحية."
+            }
+        }
     }
 }

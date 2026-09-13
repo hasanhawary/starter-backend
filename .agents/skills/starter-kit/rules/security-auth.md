@@ -13,8 +13,10 @@ Use this rule when implementing authentication, Sanctum tokens, OTP, LDAP, polic
 ## Authorization Patterns
 
 - Use `PermissionMiddleware` for simple action-level permissions like create/update on data-entry CRUD.
-- Use `Gate::authorize()` and Policies when ownership, root-user protection, current-user protection, or resource-specific checks are needed.
-- Avoid raw `$user->can()` controller branching when `Gate::authorize()` or policies express the rule.
+- Use Policies when ownership, root-user protection, current-user protection, or resource-specific checks are needed, and call `Gate::authorize()` as the **first line of the action** that needs it — the class for collection and create checks (`viewAny`, `create`), the route-bound model for record checks.
+- Use middleware only when the rule is genuinely flat: a bare action permission with no model and no context (`PermissionMiddleware::using('create-country')`), or an action supplied by a shared trait, which has no body of yours to hold the call. A `middleware()` block with one `can:` entry per action is the shape to avoid.
+- Avoid raw `$user->can()` controller branching when a Policy expresses the rule.
+- A rule that can only be resolved from the request payload — a workflow transition's eligibility — belongs inside the collaborator that owns the decision (the status Context), so every caller is gated and none can skip it.
 - Protect root users from modification/deletion and prevent self-deletion where user policy rules require it.
 - Do not place project authorization in Form Request `authorize()` unless sibling code does.
 

@@ -28,4 +28,27 @@ return [
     'notification_group' => [
         'global' => 'عام',
     ],
+    'showcase_status' => [
+        'draft' => 'مسودة',
+        'in_review' => 'قيد المراجعة',
+        'published' => 'منشور',
+        'archived' => 'مؤرشف',
+    ],
+    'showcase_priority' => [
+        'low' => 'منخفضة',
+        'medium' => 'متوسطة',
+        'high' => 'عالية',
+        'critical' => 'حرجة',
+    ],
+    'showcase_visibility' => [
+        'private' => 'خاص',
+        'internal' => 'داخلي',
+        'public' => 'عام',
+    ],
+    'showcase_note_type' => [
+        'comment' => 'تعليق',
+        'decision' => 'قرار',
+        'risk' => 'مخاطرة',
+        'status_change' => 'تغيير الحالة',
+    ],
 ];

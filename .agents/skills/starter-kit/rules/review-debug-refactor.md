@@ -20,7 +20,7 @@ Use this rule when reviewing code, diagnosing bugs, refactoring, or doing final 
 
 - 404: route prefix, route model binding name, module route loading.
 - 401: Sanctum token, guard, middleware, token expiry.
-- 403: `Gate::authorize()`, policy method, permission name, root/current-user protection.
+- 403: the action's `Gate::authorize()` line or the `middleware()` entry, the policy method behind it, the permission name, root/current-user protection.
 - 422: Form Request rules vs payload key/type.
 - 500: logs, missing class/namespace/import, DB schema mismatch, enum/cast issue.
 - Empty list: Pipeline filters, `related()` scope, soft deletes, pagination, eager loading, auth ownership scope.
@@ -69,7 +69,8 @@ Severity:
 - Inline validation in controllers.
 - `$request->all()` for create/update.
 - Raw `response()->json()` for normal API responses.
-- Missing authorization through `PermissionMiddleware`, `Gate::authorize()`, or policy checks on protected operations.
+- Missing authorization: a protected action with no `Gate::authorize()` line and no `PermissionMiddleware` entry covering it.
+- Inline comments inside a controller action. Either they restate the code, or they hold a rationale that belongs in the docblock of the scope/model method/collaborator being called.
 - Services returning `JsonResponse` or calling `response()`, `request()`, or `Gate::authorize()`.
 - `new SomeService()` in controllers; use dependency injection.
 - `$guarded = []`.

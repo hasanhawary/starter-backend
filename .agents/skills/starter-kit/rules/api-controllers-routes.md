@@ -104,14 +104,14 @@ class ProductController extends BaseController implements HasMiddleware
 
 This is the current `UserController` style. Use it when ownership, root protection, relation syncing, or notifications require policies/services.
 
-**A service class is required** because the controller has complex logic: relation syncing, `DB::transaction()`, side effects like credential emails, or ownership authorization via `Gate::authorize()`.
+**A service class is required** because the controller has complex logic: relation syncing, `DB::transaction()`, or side effects like credential emails. Ownership rules are a Policy, declared through `can:` middleware — they are not a reason for a service and never an inline check in an action.
 
 ```php
 class AdminController extends BaseController
 {
     use HasDeleteMethods, HasToggleActiveMethods;
 
-    public function __construct(private readonly AdminService $adminService)
+    public function __construct(protected AdminService $service)
     {
         parent::__construct();
         $this->model = Admin::class;
@@ -122,10 +122,10 @@ class AdminController extends BaseController
 
     public function index(PageRequest $request): JsonResponse
     {
-        Gate::authorize('view', Admin::class);
+        Gate::authorize('viewAny', Admin::class);
 
         $query = app(Pipeline::class)
-            ->send(Admin::with('roles')->related())
+            ->send(Admin::query()->related()->withListingData())
             ->through([UserFilter::class, ActiveFilter::class, TrashedFilter::class, OrderByFilter::class])
             ->thenReturn();
 
@@ -139,9 +139,14 @@ class AdminController extends BaseController
     {
         Gate::authorize('create', Admin::class);
 
-        $admin = $this->adminService->store($request);
+        return DB::transaction(function () use ($request) {
+            $data = $request->validated();
 
-        return successResponse(new AdminResource($admin), __('api.created_success'));
+            $admin = $this->service->store($data);
+            $admin->syncAccess($data['roles'] ?? [], $data['permissions'] ?? []);
+
+            return successResponse(new AdminResource($admin->loadDetailData()), __('api.created_success'));
+        });
     }
 
     /**
@@ -151,19 +156,28 @@ class AdminController extends BaseController
     {
         Gate::authorize('update', $admin);
 
-        $admin = $this->adminService->update($admin, $request);
+        return DB::transaction(function () use ($request, $admin) {
+            $data = $request->validated();
 
-        return successResponse(new AdminResource($admin), __('api.updated_success'));
+            $admin = $this->service->update($admin, $data);
+            $admin->syncAccess($data['roles'] ?? [], $data['permissions'] ?? []);
+
+            return successResponse(new AdminResource($admin->loadDetailData()), __('api.updated_success'));
+        });
     }
 
     public function show(Admin $admin): JsonResponse
     {
         Gate::authorize('view', $admin);
 
-        return successResponse(new AdminResource($admin->load('roles')));
+        return successResponse(new AdminResource($admin->loadDetailData()));
     }
 }
 ```
+
+`Gate::authorize()` is the first line of each action, next to the model it guards. Middleware is kept for flat action permissions only — the `CountryController` style above, where the rule needs no model.
+
+Notice what is *not* in the actions: no inline `with()`/`load()` list, no pivot building, and no comments. The query shape is a model scope and the relation write is the model's; each name says what it does, so nothing is left to narrate.
 
 ## Routes
 

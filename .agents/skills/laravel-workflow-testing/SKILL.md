@@ -21,7 +21,9 @@ Prove the workflow's public and domain invariants without coupling tests to inci
 - Assert the complete atomic result: main state, related writes, active/inactive pivots, lifecycle logs, timestamps, assignments, and counters that belong to the transition.
 - Force a failure after an earlier write when practical and assert rollback. Cover row locking or duplicate-action protection where concurrent requests could race.
 - Verify resource buttons/next actions agree with transition policy; do not allow the API to advertise a transition that the service rejects or hide one it accepts.
-- For notifications, jobs, events, mail, or external I/O, assert dispatch only after a successful commit and no dispatch after rollback. Test scheduled/system actors separately from authenticated actors.
+- For notifications, jobs, events, mail, or external I/O, assert the effect is dispatched with the right payload, and that a rolled-back transaction persists nothing. Test scheduled/system actors separately from authenticated actors.
+- **Do not try to prove the after-commit deferral with a fake.** `Bus::fake()` intercepts in the dispatcher, and `QueueFake::push()` records the job directly without reaching `Queue::enqueueUsing()`, where the after-commit handling lives — so both report a job as dispatched inside an open transaction and after a rollback. A test that seems to prove the deferral is really only proving that the code wrapped the dispatch in a userland `DB::afterCommit()` closure, and it will "fail" the moment that redundant wrapper is removed.
+- Assert instead what the application owns: that the job declares `afterCommit` (`fn (SendNotificationJob $job) => $job->afterCommit === true`), and that the rolled-back write left no rows. The framework honours the flag; the test should not re-implement a proof of it.
 - For commands and schedules, cover idempotent re-runs, date boundaries, overlap/deduplication mechanisms, batch iteration, and the same service entry point used by HTTP when applicable.
 
 ## Fixtures and Assertions

@@ -25,5 +25,41 @@
             "en": "Change Country Activation",
             "ar": "تغيير تفعيل الدولة"
         }
+    },
+    {
+        "module": "showcase",
+        "event_slug": "create_showcase",
+        "model_type": "Modules\\Showcase\\app\\Models\\Showcase",
+        "name": {
+            "en": "Create Showcase",
+            "ar": "إنشاء عرض"
+        }
+    },
+    {
+        "module": "showcase",
+        "event_slug": "update_showcase",
+        "model_type": "Modules\\Showcase\\app\\Models\\Showcase",
+        "name": {
+            "en": "Update Showcase",
+            "ar": "تعديل بيانات عرض"
+        }
+    },
+    {
+        "module": "showcase",
+        "event_slug": "publish_showcase",
+        "model_type": "Modules\\Showcase\\app\\Models\\Showcase",
+        "name": {
+            "en": "Publish Showcase",
+            "ar": "نشر عرض"
+        }
+    },
+    {
+        "module": "showcase",
+        "event_slug": "toggle_active_showcase",
+        "model_type": "Modules\\Showcase\\app\\Models\\Showcase",
+        "name": {
+            "en": "Change Showcase Activation",
+            "ar": "تغيير تفعيل العرض"
+        }
     }
 ]

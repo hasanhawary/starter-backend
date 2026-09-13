@@ -97,7 +97,7 @@ routes/console.php              Scheduled commands/tasks
 - Responses use `successResponse()` or `failResponse()`, never raw `response()->json()` for normal endpoints.
 - Lists use `wrapPaginate($query, ResourceClass::class)`.
 - Writes use `$request->validated()`, never `$request->all()`.
-- Authorization follows sibling pattern: `PermissionMiddleware` for simple action permissions, `Gate::authorize()`/Policies for resource ownership rules.
+- Authorization: `Gate::authorize()` as the first line of the action for Policy rules such as resource ownership; `PermissionMiddleware` in `middleware()` only for flat action permissions and trait-supplied actions.
 - Services never return `JsonResponse`, call `response()`, call `request()`, validate input, or authorize users.
 - Multi-step writes use `DB::transaction()`.
 - Side effects inside transactions use `DB::afterCommit()`.

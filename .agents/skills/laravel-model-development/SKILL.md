@@ -53,6 +53,14 @@ Build models from the live repository conventions, including the complete schema
 - Use `preventDeleteRelations()` only when deletion must be blocked by demonstrated related records; return the same array shape used by the nearest feature.
 - Do not copy relationships, permission operations, traits, casts, or helpers that the model does not need.
 
+## Query Shape Belongs to the Model
+
+- The model owns not only which records a caller may select, but which related data a representation needs. Both are scopes; neither is a private helper on a controller.
+- Keep the model's scopes in its scope trait (`app/Scopes/{Domain}/`, or `Modules/X/app/Scopes/`), split into two groups with their own section comments: the selection scopes (`active()`, `published()`, `visibleTo()`, `ownedBy()`) and the representation scopes.
+- A representation scope names the view it serves and resolves everything that view shows in SQL: `scopeWithListingData(Builder $query, ?int $viewerId = null)` carrying `with()`, `withCount()`, and any `withExists()` flag the Resource reads.
+- Give it the `load*` counterpart for a route-bound record — `loadDetailData()` beside `scopeWithListingData()` — mirroring Laravel's own `with`/`load`, `withCount`/`loadCount`, `withExists`/`loadExists` pairs. Share the relation list and each `withExists` constraint between the two through one protected helper, so the query form and the instance form can never drift.
+- Every scope needs a named consumer. Do not add a scope reachable only through `HasDynamicScopes` or another generic dispatcher; see `.agents/skills/laravel-controller-development/SKILL.md`.
+
 ## Relation Synchronization Methods
 
 - The model that owns a relation owns its writes. Every `syncData`, `sync()`, attach/detach, replace-children, file, or participant synchronization lives in a named method on that model, never inline in a controller, request, or resource.

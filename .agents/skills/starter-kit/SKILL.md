@@ -85,7 +85,7 @@ Starter-kit rules always win when they conflict with generic Laravel best practi
 ### Security And Authorization → `rules/security-auth.md`
 
 - Sanctum, OTP, LDAP, throttling.
-- `PermissionMiddleware` vs `Gate::authorize()`/Policies.
+- `PermissionMiddleware` (flat permissions, in `middleware()`) vs `Gate::authorize()`/Policies (contextual rules, in the action).
 - Policy template.
 - Sensitive data, upload, SQL injection, and mass-assignment rules.
 
@@ -126,7 +126,7 @@ Starter-kit rules always win when they conflict with generic Laravel best practi
 Starter-kit conventions override generic Laravel conventions in these areas:
 
 - Project response helpers beat generic resource/JSON response styles.
-- Controller/middleware authorization beats generic Form Request `authorize()` as the default project authorization location.
+- `Gate::authorize()` in the action, plus `PermissionMiddleware` for flat permissions, is the project's authorization location — ahead of Form Request `authorize()`.
 - Services accepting Form Requests are allowed because this starter uses that convention.
 - Pipeline filters beat ad-hoc controller query chains.
 - No repository/DTO/action layer by default.
@@ -135,5 +135,6 @@ Starter-kit conventions override generic Laravel conventions in these areas:
 
 - Inspect current code before generating.
 - Follow sibling files over generic advice.
-- Keep comments in the current style: section comments for class areas and short behavior comments only where useful.
+- Keep comments in the current style: section comment banners for class areas, and a short behaviour comment only where the code genuinely cannot say it — a non-obvious invariant, a workaround, an ordering that matters.
+- **Controllers get no inline comments at all.** Explain the mechanism in the docblock of the scope, model method, service, or collaborator that owns it, so the explanation is written once and found from every call site.
 - Do not generate frontend code from this skill.

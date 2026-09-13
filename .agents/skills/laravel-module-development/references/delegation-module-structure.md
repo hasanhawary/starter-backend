@@ -12,7 +12,7 @@ Inspect the modules present under `Modules/` for the live structural example. Th
 - `app/Http/Requests`: payload validation and normalization.
 - `app/Http/Resources`: API representation, permissions, and workflow buttons.
 - `app/Models`, `app/Scopes`, `app/Filters`, and `app/Policies`: persistence, query boundaries, request filtering, and authorization.
-- `app/Services`: cohesive writes and domain operations. One `XService` per module, holding domain-named methods such as `saveX()`, `syncX()`, and `manageX()` — never a transaction, and never one method per controller action. See the Statement shape in `.agents/skills/laravel-controller-development/SKILL.md`.
+- `app/Services`: cohesive writes and domain operations. One `XService` per module, with `store()` and `update()` as two separate public methods plus domain-named steps such as `publish()` and `manageX()` — never a transaction, and never a relation write (those belong to the model). See the service shape in `.agents/skills/laravel-controller-development/SKILL.md`.
 - `app/Tools`: optional domain patterns such as status strategies, reports, and exports.
 - `app/Support`, `app/Rules`, `app/Traits`, `app/Observers`, and `app/Console`: specialized responsibilities only when the domain needs them.
 - `config`, `database`, and `lang`: module-owned configuration, schema/seed data, and localized user-facing text.

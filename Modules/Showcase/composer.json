@@ -1,0 +1,23 @@
+{
+    "name": "nwidart/showcase",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Showcase\\": "app/",
+            "Modules\\Showcase\\Database\\Factories\\": "database/factories/",
+            "Modules\\Showcase\\Database\\Seeders\\": "database/seeders/"
+        }
+    }
+}

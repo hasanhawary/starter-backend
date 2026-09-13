@@ -141,6 +141,7 @@ return [
     'phone' => 'Phone',
     'type' => 'Type',
     'countries' => 'Countries',
+    'showcases' => 'Showcases',
 
     /*
     |--------------------------------------------------------------------------
@@ -191,6 +192,9 @@ return [
         'role' => 'Role',
         'setting' => 'Setting',
         'country' => 'Country',
+        'showcase' => 'Showcase',
+        'showcase_category' => 'Showcase Category',
+        'showcase_tag' => 'Showcase Tag',
     ],
 
     'not_allowed_to_force' => 'You are not allowed to permanently delete this record (:id).',
@@ -216,6 +220,15 @@ return [
             'gender' => 'Gender',
             'role' => 'Role',
             'last_login' => 'Last Login Date Range',
+        ],
+        'showcase' => [
+            'expires_at' => 'Expiry Date Range',
+            'status' => 'Status',
+            'priority' => 'Priority',
+            'visibility' => 'Visibility',
+            'category' => 'Category',
+            'tag' => 'Tag',
+            'owner' => 'Owner',
         ],
     ],
 

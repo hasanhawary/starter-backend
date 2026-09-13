@@ -50,9 +50,7 @@ class ExampleController extends BaseController implements HasMiddleware
         Gate::authorize('view', Example::class);
 
         $query = app(Pipeline::class)
-            ->send(Example::query()
-                ->related()
-                ->with(['creator']))
+            ->send(Example::query()->related()->withListingData())
             ->through([
                 ExampleFilter::class,
                 JsonNameFilter::class,
@@ -69,7 +67,7 @@ class ExampleController extends BaseController implements HasMiddleware
         $example = Example::query()->create($request->validated());
 
         return successResponse(
-            new ExampleResource($example->load('creator')),
+            new ExampleResource($example->loadDetailData()),
             __('api.global.created', ['item' => __('api.messages.example.example')])
         );
     }
@@ -78,7 +76,7 @@ class ExampleController extends BaseController implements HasMiddleware
     {
         Gate::authorize('view', $example);
 
-        return successResponse(new ExampleResource($example->load('creator')));
+        return successResponse(new ExampleResource($example->loadDetailData()));
     }
 
     public function update(ExampleRequest $request, Example $example): JsonResponse
@@ -88,7 +86,7 @@ class ExampleController extends BaseController implements HasMiddleware
         $example->update($request->validated());
 
         return successResponse(
-            new ExampleResource($example->load('creator')),
+            new ExampleResource($example->loadDetailData()),
             __('api.global.updated', ['item' => __('api.messages.example.example')])
         );
     }
@@ -116,7 +114,7 @@ public function store(ExampleRequest $request): JsonResponse
     });
 
     return successResponse(
-        new ExampleResource($example->load('creator')),
+        new ExampleResource($example->loadDetailData()),
         __('api.global.created', ['item' => __('api.messages.example.example')])
     );
 }
@@ -125,6 +123,36 @@ public function store(ExampleRequest $request): JsonResponse
 Introduce and inject a service when `store()` or `update()` carries substantial internal detail: several coordinated writes, state-transition rules, media handling, notifications, after-commit work, or reuse from another entry point. Decide by ownership and atomicity rather than a numeric line threshold.
 
 ## Relation Synchronization on the Model
+
+The pivot here carries attribution columns, and it is still the model's to write — a service does not take over a relation because its pivot has payload:
+
+```php
+// app/Models/Example.php — after the relations, before the other helpers.
+
+/**
+ * @param  array<int, int|string>  $memberIds
+ */
+public function syncMembers(array $memberIds = []): void
+{
+    if ($memberIds === []) {
+        return;
+    }
+
+    $now = now();
+
+    $this->members()->sync(collect($memberIds)->mapWithKeys(fn ($id) => [
+        $id => ['created_by' => auth()->id(), 'created_at' => $now, 'updated_at' => $now],
+    ])->all());
+}
+```
+
+The controller calls it straight after the service, inside the same transaction:
+
+```php
+$example = $this->service->store($data);
+$example->syncMembers($data['member_ids'] ?? []);
+```
+
 
 The relation write itself belongs to the model that owns the relation, following the project convention of `syncFiles()` and `syncParticipants()` in `app/Models/Cause.php`. The controller or service only calls it inside the transaction.
 
@@ -185,10 +213,10 @@ class ExampleController extends Controller
 
         return DB::transaction(function () use ($request) {
             $data = $request->validated();
-            $example = $this->service->saveExample($data);
-            $this->service->syncExampleFile($data, $example);
+            $example = $this->service->store($data);
+            $example->syncMembers($data['member_ids'] ?? []);
 
-            return successResponse(new ExampleResource($example), __('api.created_success'));
+            return successResponse(new ExampleResource($example->loadDetailData()), __('api.created_success'));
         });
     }
 
@@ -198,16 +226,16 @@ class ExampleController extends Controller
 
         return DB::transaction(function () use ($request, $example) {
             $data = $request->validated();
-            $example = $this->service->saveExample($data, $example);
-            $this->service->syncExampleFile($data, $example);
+            $example = $this->service->update($example, $data);
+            $example->syncMembers($data['member_ids'] ?? []);
 
-            return successResponse(new ExampleResource($example->refresh()), __('api.updated_success'));
+            return successResponse(new ExampleResource($example->refresh()->loadDetailData()), __('api.updated_success'));
         });
     }
 }
 ```
 
-The service is injected by constructor property promotion and called as `$this->service`. `Gate::authorize()` runs before the transaction. `$request->validated()` is taken once inside the closure and passed to each service call. `successResponse()` is returned from inside the closure, and the controller is the only place that touches Resources.
+The service is injected by constructor property promotion and called as `$this->service`. `Gate::authorize()` runs before the transaction. `$request->validated()` is taken once inside the closure and passed to the service call and to the model's relation sync. `successResponse()` is returned from inside the closure, and the controller is the only place that touches Resources.
 
 ### Service
 
@@ -224,58 +252,48 @@ use Modules\Example\App\Tools\Status\ExampleStatusFactory;
 
 class ExampleService
 {
-    public function saveExample(array $data, ?Example $example = null): Example
+    public function store(array $data): Example
     {
         $isDraft = $data['is_draft'] ?? false;
 
-        $attributes = [
-            'subject' => $data['subject'],
-            'description' => $data['description'],
-        ];
-
-        if ($example) {
-            $example->update($attributes);
-            $this->logExample($example, ExampleLogTypeEnum::Updated);
-
-            $wasDraft = $example->is_draft;
-            $this->syncMembers($data, $example);
-
-            if ($wasDraft && ! $isDraft) {
-                $this->enterLifeCycle($example, $isDraft);
-            }
-
-            return $example;
-        }
-
         $example = Example::create([
-            ...$attributes,
+            ...$this->attributesFrom($data),
             'is_draft' => $isDraft,
             'status' => $isDraft ? ExampleStatusEnum::Draft : ExampleStatusEnum::SentPending,
         ]);
 
         $this->logExample($example, $isDraft ? ExampleLogTypeEnum::CreatedDraft : ExampleLogTypeEnum::Created);
-        $this->syncMembers($data, $example);
         $this->enterLifeCycle($example, $isDraft);
 
         return $example;
     }
 
-    public function syncMembers(array $data, Example $example): void
+    public function update(Example $example, array $data): Example
     {
-        if (! isset($data['member_ids'])) {
-            return;
+        $wasDraft = $example->is_draft;
+        $isDraft = $data['is_draft'] ?? false;
+
+        $example->update($this->attributesFrom($data));
+
+        $this->logExample($example, ExampleLogTypeEnum::Updated);
+
+        // Only an update can leave the draft state; a create never re-enters it.
+        if ($wasDraft && ! $isDraft) {
+            $this->enterLifeCycle($example, $isDraft);
         }
 
-        $now = now();
-        $pivotData = collect($data['member_ids'])->mapWithKeys(fn ($id) => [
-            $id => [
-                'created_by' => auth()->id(),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-        ])->toArray();
+        return $example;
+    }
 
-        $example->members()->sync($pivotData);
+    /**
+     * The columns both writes share, so neither public method carries a copy.
+     */
+    private function attributesFrom(array $data): array
+    {
+        return [
+            'subject' => $data['subject'],
+            'description' => $data['description'],
+        ];
     }
 
     private function logExample(Example $example, ExampleLogTypeEnum $type): ExampleLog
@@ -300,10 +318,12 @@ class ExampleService
 What makes this the house shape:
 
 - **No `DB::transaction()` anywhere in the service.** The controller owns the boundary. None of the three real services in this backend contains one.
-- **`saveX(array $data, ?X $model = null)` covers create and update in one method.** Do not add `store()` and `update()` methods that mirror the controller's actions; a service built one-method-per-endpoint has no responsibility of its own.
-- **Public methods are the steps the controller composes** — `saveX()`, `syncX()`, `syncXFile()`, `manageX()`, `handleX()`. Helpers only called from inside — `logX()`, `enterLifeCycle()` — are private.
-- **`array $data` first, model second.** Each `syncX()` guards its own key with `isset()` and returns early, so an omitted key leaves the relation untouched.
-- **`saveX()` returns the model; sync and manage methods return `void`.** The service never returns a Resource or an HTTP response, never calls `Gate`, and never reads the `Request`. `auth()->id()` for attribution and `auth()->user()->name` in log messages is established and fine.
+- **Create and update are two public methods, `store()` and `update()`**, as `app/Services/User/UserService.php` writes them. Do not fold them into one `saveX(array $data, ?X $model = null)`: the branch above shows why — the two paths log different events, and only the update path can leave the draft state. A null-model signature hides that behind one name and makes each path harder to read and to test on its own.
+- **Whatever the two genuinely share goes in a private helper they both call** — `attributesFrom()` here — not in a branch inside one public method.
+- **Beyond that pair, public methods are named after the domain step the controller composes** — `manageX()`, `handleX()`, `publish()`. Helpers only called from inside — `logX()`, `enterLifeCycle()`, `attributesFrom()` — are private. A service whose every method mirrors a controller action one-for-one has no responsibility of its own.
+- **No `syncX()` on the service.** Relation writes live on the model that owns the relation, service-backed module or not — see *Relation Synchronization on the Model* below.
+- **Model first, payload second:** `update(X $model, array $data)`. `store(array $data)` takes only the payload because there is no model yet.
+- **Write methods return the model; sync and manage methods return `void`.** The service never returns a Resource or an HTTP response, never calls `Gate`, and never reads the `Request`. `auth()->id()` for attribution and `auth()->user()->name` in log messages is established and fine.
 - **A domain precondition that must abort throws from inside the service**, and the controller's open transaction rolls back with it:
 
 ```php
@@ -318,7 +338,7 @@ if (! $relatedExample) {
 
 ## Visibility Scope
 
-The index applies the scope before Pipeline filters. Its ownership rule must match the record Policy.
+`related()` is the visibility boundary and `withListingData()` the model's own representation scope; neither is assembled in the controller, and neither needs a comment saying so. The index applies the scope before Pipeline filters. Its ownership rule must match the record Policy.
 
 ```php
 <?php

@@ -29,7 +29,7 @@ Use this rule for generic Laravel concerns that support the starter-kit rules. W
 ## Security
 
 - Define `$fillable` or intentional guarded behavior on every model; in this starter use explicit `$fillable`.
-- Authorize protected actions with `PermissionMiddleware`, `Gate::authorize()`, or Policies according to the starter domain pattern.
+- Authorize protected actions with `Gate::authorize()` in the action for Policy rules, and `PermissionMiddleware` in `middleware()` for flat action permissions, following the starter domain pattern.
 - Do not use raw SQL with user input; bind parameters if raw SQL is unavoidable.
 - Validate MIME type, extension, and size for uploads.
 - Never commit `.env`, tokens, passwords, or secrets.

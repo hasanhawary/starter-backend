@@ -41,10 +41,14 @@ Modules/Example/
 ```php
 <?php
 
-namespace Modules\Example\App\Enum;
+namespace Modules\Example\app\Enum;
+
+use HasanHawary\LookupManager\Trait\EnumMethods;
 
 enum ExampleStatusEnum: string
 {
+    use EnumMethods;
+
     case Draft = 'draft';
     case SentPending = 'sent_pending';
     case InProgress = 'in_progress';
@@ -53,17 +57,19 @@ enum ExampleStatusEnum: string
 }
 ```
 
-Persist the status in a string column and cast it to this enum on the model.
+Persist the status in a string column, cast it to this enum on the model, and mirror the column default in the model's `$attributes` — a record straight out of `create()` has not re-read the row, so otherwise its status is null on the create path only.
+
+`EnumMethods` gives `selfResolve()`, which the strategies use for button labels, so the workflow needs no parallel log-type enum for them.
 
 ## Abstract Status Tool
 
 ```php
 <?php
 
-namespace Modules\Example\App\Tools\Status;
+namespace Modules\Example\app\Tools\Status;
 
 use App\Models\User;
-use Modules\Example\App\Models\Example;
+use Modules\Example\app\Models\Example;
 
 abstract class ExampleStatus
 {
@@ -90,7 +96,7 @@ abstract class ExampleStatus
 
     public function sendNotifications(): void {}
 
-    abstract public function handle(?array $params = []): void;
+    abstract public function handle(array $params = []): void;
 
     abstract public function policy(): bool;
 
@@ -109,7 +115,7 @@ Both constructor arguments are nullable and public: the Request resolves a strat
 ```php
 <?php
 
-namespace Modules\Example\App\Tools\Status;
+namespace Modules\Example\app\Tools\Status;
 
 class ExampleStatusContext
 {
@@ -122,8 +128,13 @@ class ExampleStatusContext
         return $this;
     }
 
-    public function handle(?array $params = []): void
+    public function handle(array $params = []): void
     {
+        // The guard lives here so every caller is gated, not just the controller.
+        if (! $this->policy()) {
+            throw new HttpResponseException(failResponse(__('example::api.action_not_allowed'), code: 403));
+        }
+
         $this->status->handle($params);
     }
 
@@ -165,23 +176,23 @@ class ExampleStatusContext
 }
 ```
 
-The root bypass lives here, once, so no strategy repeats it. `buttons()` resolves each outgoing target through the Factory and keeps only the ones whose own `policy()` passes for this actor.
+The root bypass and the transition guard live here, once, so neither a strategy nor a caller repeats them. `buttons()` resolves each outgoing target through the Factory and keeps only the ones whose own `policy()` passes for this actor.
 
 ## Factory
 
 ```php
 <?php
 
-namespace Modules\Example\App\Tools\Status;
+namespace Modules\Example\app\Tools\Status;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
-use Modules\Example\App\Enum\ExampleStatusEnum;
-use Modules\Example\App\Tools\Status\Strategies\AnsweredStatus;
-use Modules\Example\App\Tools\Status\Strategies\InProgressStatus;
-use Modules\Example\App\Tools\Status\Strategies\RejectedStatus;
-use Modules\Example\App\Tools\Status\Strategies\SentPendingStatus;
+use Modules\Example\app\Enum\ExampleStatusEnum;
+use Modules\Example\app\Tools\Status\Strategies\AnsweredStatus;
+use Modules\Example\app\Tools\Status\Strategies\InProgressStatus;
+use Modules\Example\app\Tools\Status\Strategies\RejectedStatus;
+use Modules\Example\app\Tools\Status\Strategies\SentPendingStatus;
 
 class ExampleStatusFactory
 {
@@ -198,7 +209,9 @@ class ExampleStatusFactory
 }
 ```
 
-One static `guess()`, one `match`, every supported value mapped explicitly, and a loud `InvalidArgumentException` for anything else. `Draft` has no strategy because nothing transitions *to* it.
+One static `guess()`, one `match`, every supported value mapped explicitly, and a loud `InvalidArgumentException` for anything else.
+
+`Draft` is mapped here only if a record can rest in it or a transition returns to it — `buttons()` is called on the strategy for the *current* state, so any state a record sits in needs one. Mapping every enum case (as `Modules/Showcase` does) is the simpler default and removes the short-circuit below; leave a status out only when nothing transitions to it and no record rests in it.
 
 ## Concrete Strategy
 
@@ -207,18 +220,18 @@ One class per target transition. It owns that transition's write, its eligibilit
 ```php
 <?php
 
-namespace Modules\Example\App\Tools\Status\Strategies;
+namespace Modules\Example\app\Tools\Status\Strategies;
 
 use Illuminate\Support\Str;
-use Modules\Example\App\Enum\ExampleLogTypeEnum;
-use Modules\Example\App\Enum\ExampleStatusEnum;
-use Modules\Example\App\Tools\Status\ExampleStatus;
+use Modules\Example\app\Enum\ExampleLogTypeEnum;
+use Modules\Example\app\Enum\ExampleStatusEnum;
+use Modules\Example\app\Tools\Status\ExampleStatus;
 use Modules\Notification\app\Enum\SystemEventSlugEnum;
 use Modules\Notification\app\Tools\Facades\Notification;
 
 class InProgressStatus extends ExampleStatus
 {
-    public function handle(?array $params = []): void
+    public function handle(array $params = []): void
     {
         $oldStatus = $this->model->status;
 
@@ -291,12 +304,12 @@ Notes on the shape:
 ```php
 <?php
 
-namespace Modules\Example\App\Http\Requests;
+namespace Modules\Example\app\Http\Requests;
 
 use Illuminate\Validation\Rules\Enum;
-use Modules\Example\App\Enum\ExampleStatusEnum;
-use Modules\Example\App\Tools\Status\ExampleStatusContext;
-use Modules\Example\App\Tools\Status\ExampleStatusFactory;
+use Modules\Example\app\Enum\ExampleStatusEnum;
+use Modules\Example\app\Tools\Status\ExampleStatusContext;
+use Modules\Example\app\Tools\Status\ExampleStatusFactory;
 
 class ExampleActionRequest extends BaseFormRequest
 {
@@ -333,22 +346,15 @@ The Factory is resolved with the selector alone — no model, no actor — becau
 public function takeAction(ExampleActionRequest $request, Example $example): JsonResponse
 {
     return DB::transaction(function () use ($request, $example) {
-        $example = Example::query()->whereKey($example->id)->lockForUpdate()->firstOrFail();
+        $example = $example->lockFresh();
 
-        $statusClass = ExampleStatusFactory::guess($request->input('status'), $example, auth()->user());
-
-        if (! isRoot() && ! $statusClass->policy()) {
-            return failResponse(__('api.no_required_permissions'), 403);
-        }
-
-        $statusClass->handle([
-            'notes' => $request->input('notes'),
-            ...$request->validated(),
-        ]);
+        (new ExampleStatusContext)
+            ->setStatus(ExampleStatusFactory::guess($request->validated('status'), $example, auth()->user()))
+            ->handle($request->validated());
 
         return successResponse(
-            new ExampleResource($example->refresh(), 'details'),
-            __('api.action_taken_successfully')
+            new ExampleResource($example->refresh()->loadDetailData()),
+            __('example::api.action_taken_success')
         );
     });
 }
@@ -357,9 +363,15 @@ public function takeAction(ExampleActionRequest $request, Example $example): Jso
 This is `StatementController::takeAction()`. The controller imports `DB` and the Factory and orchestrates the transition directly:
 
 - `DB::transaction()` opens in the action and `successResponse()` returns from inside the closure.
-- `lockForUpdate()->firstOrFail()` re-reads the row inside the transaction when the transition is race-prone.
-- The Factory is called directly with the model and actor. Where the Resource or Request needs the root bypass and button filtering, they go through the Context instead.
-- `! isRoot() && ! $statusClass->policy()` gates the transition as a domain invariant, returning `failResponse(..., 403)`.
+- `lockFresh()` is the model's own named method for "re-read me under a row lock inside the open transaction". Route binding resolved the record before the transaction and without a lock, so a race-prone transition needs it — and naming it is what keeps the line from reading as a pointless second fetch of an already-injected model:
+
+```php
+public function lockFresh(): static
+{
+    return $this->newQuery()->whereKey($this->getKey())->lockForUpdate()->firstOrFail();
+}
+```
+- **The action authorizes nothing.** The Factory resolves the strategy, the Context runs it, and the Context's own guard refuses a transition this actor may not take. Writing `! isRoot() && ! $statusClass->policy()` here would duplicate a rule the Context owns and leave a hole for any caller that copies the action without the check.
 - `handle()` receives the validated payload, and the controller formats the Resource from the refreshed model.
 
 Do not wrap any of this in a service method. A `transition()` or `changeStep()` service that only re-reads the row, resolves the Factory, and opens a transaction is a pass-through layer with no responsibility of its own.
@@ -385,6 +397,6 @@ The Resource goes through the Context so the root bypass and per-target `policy(
 
 A status workflow does not by itself call for a service — the strategies already own the transitions, and the controller already owns the transaction.
 
-`StatementService` exists because Statement has a *separate* responsibility beyond the workflow: creating and updating the record with its logs, departments, users, files, and lifecycle entry. That is `saveStatement()`, `syncUsers()`, `syncStatementFile()`, `manageUsers()` — domain operations, none of them named after a controller action, none of them opening a transaction.
+`StatementService` exists because Statement has a *separate* responsibility beyond the workflow: creating and updating the record with its logs and lifecycle entry. That is `store()`, `update()` and `manageUsers()` — the record's own writes and their side effects, none of them opening a transaction. Its relation writes (`syncUsers()`, `syncFiles()`) live on the model, as `.agents/skills/laravel-controller-development/SKILL.md` requires.
 
 Add a service to a strategy module only when it has that kind of work to own, and build it to the shape in `.agents/skills/laravel-controller-development/SKILL.md`. If the module is a workflow and nothing else, it ships without an `app/Services/` directory.

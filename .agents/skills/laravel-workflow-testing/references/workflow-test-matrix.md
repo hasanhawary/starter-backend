@@ -11,7 +11,7 @@ Use only the rows relevant to the changed behavior.
 | Rollback | A later failure leaves the model, relations, logs, and assignments unchanged. |
 | Concurrency | Repeated/racing actions cannot execute an invalid transition twice. |
 | Presentation | Resource buttons and display state match service eligibility. |
-| Side effects | Notification/job/event is dispatched after commit and absent after rollback. |
+| Side effects | The job is dispatched with the right payload and declares `afterCommit`; a rolled-back write persists nothing. Do not assert the deferral through `Bus::fake()`/`Queue::fake()` — both bypass it. |
 | System execution | Command/schedule uses the same domain path, handles a nullable/system actor deliberately, and is idempotent. |
 | HTTP | Route binding, response envelope, status, Resource data, and validation errors remain stable. |
 
