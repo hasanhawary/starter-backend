@@ -101,7 +101,7 @@ class UniqueCheck implements ValidationRule
         $stored = $this->storedTranslations($model, $attribute);
         $languages = [];
 
-        foreach (config('app.supported_languages', ['ar', 'en']) as $language) {
+        foreach (config('lang.available', ['ar', 'en']) as $language) {
             $submitted = $value[$language] ?? null;
 
             if ($submitted === null || $submitted === '') {
@@ -227,9 +227,18 @@ class UniqueCheck implements ValidationRule
      */
     protected function translatedLanguageAttribute(string $attribute, string $language): string
     {
-        $name = ($this->attributeKey ?? $attribute)."_{$language}";
+        $attribute = $this->attributeKey ?? $attribute;
 
-        foreach (["attributes.$name", "validation.attributes.$name"] as $key) {
+        // `attributes.name.ar` is the shape the project's lang files use; the
+        // underscore form is kept for any project that adopted it instead.
+        $candidates = [
+            "attributes.{$attribute}.{$language}",
+            "validation.attributes.{$attribute}.{$language}",
+            "attributes.{$attribute}_{$language}",
+            "validation.attributes.{$attribute}_{$language}",
+        ];
+
+        foreach ($candidates as $key) {
             $label = trans($key);
 
             if (is_string($label) && $label !== $key) {
@@ -237,6 +246,12 @@ class UniqueCheck implements ValidationRule
             }
         }
 
-        return $this->translatedAttribute($attribute);
+        // No per-language label for this field: compose one, so the message
+        // still says *which* language collided rather than naming the field
+        // alone. `:attribute in Arabic` / `:attribute بالعربية`.
+        return trans('validation.attribute_in_language', [
+            'attribute' => $this->translatedAttribute($attribute),
+            'language' => trans("validation.language_names.{$language}"),
+        ]);
     }
 }

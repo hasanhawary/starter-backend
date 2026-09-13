@@ -2,11 +2,12 @@
 
 namespace App\Filters\User;
 
+use App\Filters\BaseFilter;
 use App\Trait\Global\AdvancedFilter;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 
-class UserFilter
+class UserFilter extends BaseFilter
 {
     use AdvancedFilter;
 
@@ -23,7 +24,9 @@ class UserFilter
         ];
 
         if (request()->input('advanced') && is_array(request('advanced'))) {
-            $this->filter['advanced'] = request('advanced');
+            // A grouped multi-select submits value as an array of arrays; the
+            // base normalizer flattens it into the union AdvancedFilter expects.
+            $this->filter['advanced'] = $this->normalizeAdvancedFilters(request('advanced'));
         }
     }
 
@@ -33,6 +36,9 @@ class UserFilter
 
         $this->applySearchFilter($query)
             ->applyAdvancedFilter($query);
+
+        $this->applyDateRangeFilter($query, 'created_at');
+        $this->applyDateRangeFilter($query, 'last_login');
 
         return $query;
     }

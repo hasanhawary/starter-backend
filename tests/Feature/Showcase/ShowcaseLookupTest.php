@@ -91,8 +91,10 @@ class ShowcaseLookupTest extends TestCase
 
         $this->assertSuccessEnvelope($response);
 
+        // `filters` is keyed by the frontend's plural resource name; `sorting`
+        // by the module key getModelKey() produces, which wrapPaginate() uses.
         $filters = $response->json('data.discovery.filters.showcases');
-        $sorting = $response->json('data.discovery.sorting.showcases');
+        $sorting = $response->json('data.discovery.sorting.showcase');
 
         $this->assertNotEmpty($filters);
         $this->assertContains('reference', $sorting);

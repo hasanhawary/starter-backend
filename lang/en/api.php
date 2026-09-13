@@ -195,6 +195,11 @@ return [
         'showcase' => 'Showcase',
         'showcase_category' => 'Showcase Category',
         'showcase_tag' => 'Showcase Tag',
+        'form' => 'Form',
+        'form_step' => 'Form Step',
+        'form_field' => 'Form Field',
+        'form_submission' => 'Form Submission',
+        'form_submission_value' => 'Form Submission Value',
     ],
 
     'not_allowed_to_force' => 'You are not allowed to permanently delete this record (:id).',

@@ -223,19 +223,45 @@ class ShowcaseCrudTest extends TestCase
         $wanted->tags()->attach($tag->id);
         Showcase::factory()->create();
 
+        // The select options discovery declares are submitted through the
+        // shared `advanced[]` contract, the same as every other module.
         $filters = [
-            'status='.ShowcaseStatusEnum::Published->value,
-            'priority='.ShowcasePriorityEnum::Critical->value,
-            'showcase_category_id='.$wanted->showcase_category_id,
-            'tag_id='.$tag->id,
+            'status' => ShowcaseStatusEnum::Published->value,
+            'priority' => ShowcasePriorityEnum::Critical->value,
+            'showcase_category_id' => $wanted->showcase_category_id,
+            'tag_id' => $tag->id,
         ];
 
-        foreach ($filters as $filter) {
-            $response = $this->getJson("api/showcases?{$filter}");
+        foreach ($filters as $key => $value) {
+            $query = http_build_query(['advanced' => [['key' => $key, 'value' => [$value]]]]);
+
+            $response = $this->getJson("api/showcases?{$query}");
 
             $this->assertSuccessEnvelope($response);
-            $this->assertSame([$wanted->id], $response->json('data.data.*.id'), "Filter {$filter} returned the wrong records.");
+            $this->assertSame([$wanted->id], $response->json('data.data.*.id'), "Advanced filter `{$key}` returned the wrong records.");
         }
+    }
+
+    public function test_an_advanced_filter_accepts_a_grouped_multi_select(): void
+    {
+        $this->actingAsUserWithPermissions(['view-all-showcase']);
+
+        $wanted = Showcase::factory()->published()->create();
+        Showcase::factory()->create();
+
+        // BaseFilter::normalizeAdvancedFilters() flattens the array of arrays a
+        // grouped option submits into the union AdvancedFilter can use.
+        $query = http_build_query([
+            'advanced' => [[
+                'key' => 'status',
+                'value' => [[ShowcaseStatusEnum::Published->value], [ShowcaseStatusEnum::Archived->value]],
+            ]],
+        ]);
+
+        $response = $this->getJson("api/showcases?{$query}");
+
+        $this->assertSuccessEnvelope($response);
+        $this->assertSame([$wanted->id], $response->json('data.data.*.id'));
     }
 
     public function test_the_listing_flags_map_to_the_models_named_scopes(): void

@@ -10,7 +10,7 @@ class ActivityLogResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'type' => resolveTrans(prepareModelType($this->subject_type)),
+            'type' => resolveTrans(getModelKey($this->subject_type), 'api.action_modules'),
             'message' => $this->resolveMessage(),
             'event_key' => $this->event,
             'event' => resolveTrans($this->event, 'api'),
@@ -36,7 +36,7 @@ class ActivityLogResource extends JsonResource
 
         return resolveTrans('done', 'attributes')
             .' '.resolveTrans($this->description, 'attributes')
-            .' '.resolveTrans(getModelKey($this->subject_type), 'api')
+            .' '.resolveTrans(getModelKey($this->subject_type), 'api.action_modules')
             .' '.resolveTrans('id', 'attributes').' '.$subject?->id
             .' '.resolveTrans('causer', 'attributes').' '.$causerName;
     }

@@ -147,6 +147,11 @@ return [
     'password_no_personal_info' => 'The :attribute must not contain parts of your name.',
     'password_no_dictionary' => 'The :attribute must not contain common or predictable words.',
     'at_least_one_language' => 'At least one language must be provided (Arabic or English)',
+    'attribute_in_language' => ':attribute in :language',
+    'language_names' => [
+        'ar' => 'Arabic',
+        'en' => 'English',
+    ],
     'already_exists' => 'The :attribute already exists',
     'already_exists_deleted' => 'This item already exists',
     'empty_file' => 'The selected file is empty. Please upload a valid file.',

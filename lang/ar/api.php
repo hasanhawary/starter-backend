@@ -196,6 +196,11 @@ return [
         'showcase' => 'العرض',
         'showcase_category' => 'تصنيف العرض',
         'showcase_tag' => 'وسم العرض',
+        'form' => 'النموذج',
+        'form_step' => 'خطوة النموذج',
+        'form_field' => 'حقل النموذج',
+        'form_submission' => 'استجابة النموذج',
+        'form_submission_value' => 'قيمة استجابة النموذج',
     ],
 
     'not_allowed_to_force' => 'غير مسموح لك بحذف هذا السجل نهائياً (:id).',
