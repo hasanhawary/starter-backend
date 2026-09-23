@@ -15,126 +15,32 @@ metadata:
 
 # Starter Kit
 
-Single backend authority for this Starter Backend codebase. This skill merges Laravel best practices and the current starter-kit implementation details into one skill.
+Backend conventions for this Starter Backend project. Inspect current sibling implementations and apply these topic rules before generic Laravel advice. Each topic has one canonical rule file; read only those relevant to the task.
 
-Starter-kit rules always win when they conflict with generic Laravel best practices.
+## Rule Map
 
-## How To Apply
+| Task | Read |
+| --- | --- |
+| Folder placement, layer boundaries, naming, modules, feature scaffolding | [Architecture](rules/architecture.md) |
+| CRUD generation, controllers, routes, resources, response envelopes, consumer contracts | [API and CRUD](rules/api-controllers-routes.md) |
+| Models, relations, casts, media, permission metadata, migrations, factories/seeders | [Models and database](rules/models-database.md) |
+| Form Requests, normalization, validation boundaries, Arabic/English rules and messages | [Validation](rules/validation.md) |
+| Services, transactions, settings/cache, jobs, notifications, HTTP calls, schedules, environment/CI | [Services and background work](rules/services.md) |
+| Pipeline filters, sorting, scopes, eager loading and query performance | [Filters and performance](rules/filters-performance.md) |
+| Sanctum, OTP, LDAP, policies, permissions, secrets, uploads, exception security | [Security and authorization](rules/security-auth.md) |
+| PHPUnit, verification, minimal changes, code style, review, debugging and refactoring | [Testing and review](rules/review-debug-refactor.md) |
+| Status Strategy workflows across requests, transition policies and resource buttons | [Status pattern](status-pattern/SKILL.md) |
 
-1. Identify the backend task type.
-2. Read the matching rule files below before writing code.
-3. Inspect sibling project files and copy the nearest current pattern.
-4. Reuse existing filters, services, traits, rules, helpers, resources, and enums before creating new ones.
-5. Apply the checklist in `rules/review-debug-refactor.md` before finishing.
+The API rule links to the preserved User/Country source snapshots and their manifest. Status workflow snapshots remain under `status-pattern/references/`.
 
-## Quick Reference
+## Applying The Rules
 
-### Architecture → `rules/architecture.md`
+1. Identify the task and inspect the current working changes and nearest implementation.
+2. Read the matching topic rules, reuse existing project abstractions, and make the smallest complete change.
+3. Preserve API contracts and user-facing translation conventions; verify with the [testing and review workflow](rules/review-debug-refactor.md).
 
-- Laravel 13 API-only backend identity.
-- Folder structure and naming.
-- Layer responsibilities.
-- Non-negotiable starter rules.
-- Backend-only scope.
+## Resolving Overlap
 
-### Laravel Best Practices → `rules/laravel-best-practices.md`
+Project-specific conventions win over generic Laravel examples: response helpers, Pipeline filters, controller/middleware authorization, and existing service boundaries remain authoritative. A service may accept a Form Request in this starter, but it consumes validated fields and never owns request validation or authorization. Validation rules distinguish historical snapshots from the explicit Arabic-first convention for new requests. Do not infer an extra repository, DTO, action layer, or resource split from generic advice.
 
-- Generic Laravel performance, security, validation, testing, queue, migration, and style rules.
-- Version-aware Laravel guidance that supports the starter-kit rules.
-- Conflict handling: starter-kit conventions win over generic Laravel conventions.
-
-### API, Controllers, Routes, Resources → `rules/api-controllers-routes.md`
-
-- `successResponse()`, `failResponse()`, `wrapPaginate()`.
-- Simple permission CRUD controller template.
-- Ownership/service CRUD controller template.
-- Route pattern for delete/restore/force-delete/toggle-active.
-- Resource examples for translatable fields, enum display fields, and `whenLoaded()` relations.
-
-### Models And Database → `rules/models-database.md`
-
-- Simple data-entry model template.
-- User/auth-aware model template.
-- `$fillable`, `$hidden`, `$casts`, permissions, translations, media, relations.
-- Migration template and migration rules.
-- Factory and seeder rules.
-
-### Validation → `rules/validation.md`
-
-- `BaseFormRequest` rules.
-- Translatable/media Form Request template.
-- Payload normalization with `prepareForValidation()`.
-- Custom rules: `StrongPassword`, `UniqueCheck`, `ValidLength`, `TranslatableRequired`, `TranslatableNullable`, `TotalFileSize`.
-
-### Services → `rules/services.md`
-
-- Service layer boundaries.
-- Transaction and relation-sync service template.
-- `DB::afterCommit()` notification pattern.
-- Settings/cache service example.
-- Helper usage rules.
-
-### Filters And Performance → `rules/filters-performance.md`
-
-- Pipeline filter template.
-- `OrderByFilter` style sorting template.
-- Common filters and request params.
-- Scope rules.
-- Eager loading, pagination, caching, queue, and N+1 rules.
-
-### Security And Authorization → `rules/security-auth.md`
-
-- Sanctum, OTP, LDAP, throttling.
-- `PermissionMiddleware` (flat permissions, in `middleware()`) vs `Gate::authorize()`/Policies (contextual rules, in the action).
-- Policy template.
-- Sensitive data, upload, SQL injection, and mass-assignment rules.
-
-### Jobs, Notifications, Settings, Env → `rules/jobs-settings-env.md`
-
-- Queued job templates.
-- Notification resolver job.
-- Notification side effects and `DB::afterCommit()`.
-- Settings/cache rules.
-- Exports/reports.
-- Artisan command and schedule examples.
-- Environment and CI rules.
-
-### Modules And API Contracts → `rules/modules-contracts.md`
-
-- Full backend feature checklist.
-- Module paths.
-- API contract alignment.
-- Route and contract checklists.
-
-### Testing → `rules/testing.md`
-
-- PHPUnit-only rules.
-- Feature test template.
-- Auth, authorization, validation, and response envelope checks.
-- Verification commands.
-
-### Review, Debug, Refactor → `rules/review-debug-refactor.md`
-
-- Debugging flow.
-- Code review severity rules.
-- Refactoring rules.
-- Forbidden patterns.
-- Final quality checklist.
-
-## Conflict Resolution
-
-Starter-kit conventions override generic Laravel conventions in these areas:
-
-- Project response helpers beat generic resource/JSON response styles.
-- `Gate::authorize()` in the action, plus `PermissionMiddleware` for flat permissions, is the project's authorization location — ahead of Form Request `authorize()`.
-- Services accepting Form Requests are allowed because this starter uses that convention.
-- Pipeline filters beat ad-hoc controller query chains.
-- No repository/DTO/action layer by default.
-
-## Always Remember
-
-- Inspect current code before generating.
-- Follow sibling files over generic advice.
-- Keep comments in the current style: section comment banners for class areas, and a short behaviour comment only where the code genuinely cannot say it — a non-obvious invariant, a workaround, an ordering that matters.
-- **Controllers get no inline comments at all.** Explain the mechanism in the docblock of the scope, model method, service, or collaborator that owns it, so the explanation is written once and found from every call site.
-- Do not generate frontend code from this skill.
+This skill covers the backend and API consumer alignment; it does not generate frontend pages.

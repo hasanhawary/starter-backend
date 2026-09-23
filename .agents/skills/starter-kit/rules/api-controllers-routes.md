@@ -2,6 +2,10 @@
 
 Use this rule when creating or modifying API controllers, routes, API resources, response envelopes, or endpoint contracts.
 
+## Controller And Resource Bases
+
+Root API controllers extend `App\Http\Controllers\API\BaseController`; initialize the parent constructor and `$this->model` when using shared delete/toggle traits. Resources extend `Illuminate\Http\Resources\Json\JsonResource`. Module-specific bases follow the target module's existing convention. Request and model base contracts live in [validation](validation.md) and [models](models-database.md).
+
 ## Response Envelope
 
 All normal API responses use the project envelope.
@@ -22,162 +26,48 @@ return successResponse(wrapPaginate($query, ProductResource::class));
 
 Do not return raw resources directly from controllers unless the same area already intentionally does so.
 
-## Controller: Simple Permission CRUD
+## CRUD Source Patterns
 
-This is the current `CountryController` style. Use it for simple data-entry resources where create/update are protected by action middleware and delete/restore/toggle are delegated to traits.
+### Entry points and exact source
 
-**No service class is needed.** The controller handles `store`/`update` directly with `Model::create()` and `$model->update()` because there is no complex logic, relation syncing, notifications, or transactions.
+All snapshot links below preserve the original path after `snapshots/`; their `.txt` suffix prevents treating the references as application PHP. The [manifest](../references/crud/source-manifest.json) includes the remaining nested resources and request base class.
 
-```php
-<?php
+| Pattern | Controller | Request | Resource |
+| --- | --- | --- | --- |
+| User | [UserController](../references/crud/snapshots/app/Http/Controllers/API/User/UserController.php.txt) | [UserRequest](../references/crud/snapshots/app/Http/Requests/User/UserRequest.php.txt) | [UserResource](../references/crud/snapshots/app/Http/Resources/User/UserResource.php.txt) |
+| Country | [CountryController](../references/crud/snapshots/app/Http/Controllers/API/DataEntry/CountryController.php.txt) | [CountryRequest](../references/crud/snapshots/app/Http/Requests/DataEntry/CountryRequest.php.txt) | [CountryResource](../references/crud/snapshots/app/Http/Resources/DataEntry/CountryResource.php.txt) |
 
-namespace App\Http\Controllers\API\DataEntry;
+Both index methods use [PageRequest](../references/crud/snapshots/app/Http/Requests/Global/Other/PageRequest.php.txt). Their toggle trait uses [ToggleActiveRequest](../references/crud/snapshots/app/Http/Requests/Global/Other/ToggleActiveRequest.php.txt). All four requests extend [BaseFormRequest](../references/crud/snapshots/app/Http/Requests/BaseFormRequest.php.txt), which normalizes empty values and emits the established 422 `message` / `errors` validation response.
 
-use App\Filters\Global\ActiveFilter;
-use App\Filters\Global\JsonNameFilter;
-use App\Filters\Global\OrderByFilter;
-use App\Filters\Global\TrashedFilter;
-use App\Http\Controllers\API\BaseController;
-use App\Http\Requests\DataEntry\ProductRequest;
-use App\Http\Requests\Global\Other\PageRequest;
-use App\Http\Resources\DataEntry\ProductResource;
-use App\Models\Product;
-use App\Trait\Global\HasDeleteMethods;
-use App\Trait\Global\HasToggleActiveMethods;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Pipeline\Pipeline;
-use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
-use Spatie\Permission\Middleware\PermissionMiddleware;
+### User: service and Gate orchestration
 
-class ProductController extends BaseController implements HasMiddleware
-{
-    use HasDeleteMethods, HasToggleActiveMethods;
+- Constructor injects readonly `UserService`, initializes the base controller and model, and registers avatar cleanup only for the `force` delete callback.
+- Index authorizes `view` against `User::class`; its query is `User::with(['roles', 'departments', 'space'])->related()`. Pipeline order is `UserFilter`, `ActiveFilter`, `TrashedFilter`, `OrderByFilter`.
+- Store authorizes `create` against the class; update authorizes `update` against the bound instance; show authorizes `view` against the bound instance. Do not substitute `viewAny` merely because it is common elsewhere.
+- Store/update delegate to `UserService`; the controller then loads `departments` and `space`. Show loads `roles`, `departments`, and `space`. The live User model also declares default loading of `phoneCode`.
+- The service wraps persistence and role/permission synchronization in `DB::transaction()`, schedules `sendCredentials()` using `DB::afterCommit()`, and returns refreshed models. Inspect its exact conditions before reproducing notification behavior: callback registration does not guarantee that every update sends a notification.
+- `UserRequest` gets the uniqueness exclusion from route parameter `user`. It normalizes a nested phone payload into `phone` / `phone_code_id`, wraps scalar roles, and calls parent preparation first. Preserve its custom rules, enum validation, root-role exclusion, optional password and avatar semantics when maintaining this feature. These fields are domain-specific examples, not mandatory CRUD fields.
+- `UserResource` projects nested phone data, enum display, roles, departments, space, creator, settings, and timestamps. Its conditional relationships deliberately have different defaults (`[]`, `null`, empty string, or an id object). No dedicated list/detail resource split exists.
 
-    public function __construct()
-    {
-        parent::__construct();
-        $this->model = Product::class; // Required by delete/restore/toggle traits.
-    }
+### Country: inline reference-data persistence
 
-    public static function middleware(): array
-    {
-        return [
-            // Keep action permission names in {action}-{model} format.
-            new Middleware(PermissionMiddleware::using('create-product'), only: ['store']),
-            new Middleware(PermissionMiddleware::using('update-product'), only: ['update']),
-        ];
-    }
+- Implements `HasMiddleware`; static middleware applies `create-country` only to store and `update-country` only to update. The controller itself has no Gate calls in index/show. This does not mean the routes or trait methods lack authorization; inspect the route group and shared traits.
+- Index starts with `Country::query()`. Pipeline order is `JsonNameFilter`, `TrashedFilter`, `ActiveFilter`, `OrderByFilter`.
+- Store calls `Country::create($request->validated())`; update calls `$country->update($request->validated())`. Both refresh the model for `CountryResource`; show returns the bound model through that same resource.
+- `CountryRequest` validates translated `name` / `nationality` arrays using `TranslatableRequired`; name also has `UniqueCheck`. Code uniqueness excludes trashed rows and ignores the route-bound `country`. Flag accepts an optional nullable image; phone fields follow the exact rules in the snapshot. Do not tighten these rules while merely copying a reference.
+- `CountryResource` exposes localized `translation_name` / `translation_nationality` alongside full `name` / `nationality` translation maps. It also emits flag, code, phone code/length, and created timestamp. Do not replace the maps with strings or add unrequested fields.
+- The live Country model owns translatable attributes and flag upload/replacement/accessor behavior. Inline validated persistence therefore does not imply that media has no lifecycle behavior.
 
-    public function index(PageRequest $request): JsonResponse
-    {
-        $query = app(Pipeline::class)
-            ->send(Product::query())
-            ->through([JsonNameFilter::class, TrashedFilter::class, ActiveFilter::class, OrderByFilter::class])
-            ->thenReturn();
+### Shared route and trait integration
 
-        return successResponse(wrapPaginate($query, ProductResource::class));
-    }
+Inspect live `routes/api.php`, `app/Http/Controllers/API/BaseController.php`, `app/Trait/Global/HasDeleteMethods.php`, and `app/Trait/Global/HasToggleActiveMethods.php` when applying either pattern.
 
-    public function store(ProductRequest $request): JsonResponse
-    {
-        $product = Product::create($request->validated());
+The source uses plural `users` / `countries` prefixes and singular binding parameters `user` / `country`. Follow the Routes example below; parameter names must match Form Request route lookups and controller binding.
 
-        return successResponse(new ProductResource($product->refresh()), __('api.created_success'));
-    }
+The delete trait supplies the methods and its own policy/permission authorization, guards, and callbacks. The toggle trait validates ids, locks selected models within a transaction, authorizes, and updates their active state. Do not infer their behavior from the controller middleware alone or replace bulk action routes with a conventional single-record destroy signature.
 
-    public function show(Product $product): JsonResponse
-    {
-        return successResponse(new ProductResource($product));
-    }
+Inspect live `app/Helpers/App.php` for `successResponse()` and `wrapPaginate()`. Preserve their existing pagination and response behavior rather than claiming that a generic Laravel resource collection is equivalent.
 
-    public function update(ProductRequest $request, Product $product): JsonResponse
-    {
-        $product->update($request->validated());
-
-        return successResponse(new ProductResource($product->refresh()), __('api.updated_success'));
-    }
-}
-```
-
-## Controller: Ownership/Service CRUD
-
-This is the current `UserController` style. Use it when ownership, root protection, relation syncing, or notifications require policies/services.
-
-**A service class is required** because the controller has complex logic: relation syncing, `DB::transaction()`, or side effects like credential emails. Ownership rules are a Policy, declared through `can:` middleware — they are not a reason for a service and never an inline check in an action.
-
-```php
-class AdminController extends BaseController
-{
-    use HasDeleteMethods, HasToggleActiveMethods;
-
-    public function __construct(protected AdminService $service)
-    {
-        parent::__construct();
-        $this->model = Admin::class;
-
-        // Lifecycle hook keeps file cleanup outside the trait internals.
-        $this->beforeDelete('force', fn (Admin $admin) => Media::delete($admin->avatar));
-    }
-
-    public function index(PageRequest $request): JsonResponse
-    {
-        Gate::authorize('viewAny', Admin::class);
-
-        $query = app(Pipeline::class)
-            ->send(Admin::query()->related()->withListingData())
-            ->through([UserFilter::class, ActiveFilter::class, TrashedFilter::class, OrderByFilter::class])
-            ->thenReturn();
-
-        return successResponse(wrapPaginate($query, AdminResource::class));
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function store(AdminRequest $request): JsonResponse
-    {
-        Gate::authorize('create', Admin::class);
-
-        return DB::transaction(function () use ($request) {
-            $data = $request->validated();
-
-            $admin = $this->service->store($data);
-            $admin->syncAccess($data['roles'] ?? [], $data['permissions'] ?? []);
-
-            return successResponse(new AdminResource($admin->loadDetailData()), __('api.created_success'));
-        });
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function update(AdminRequest $request, Admin $admin): JsonResponse
-    {
-        Gate::authorize('update', $admin);
-
-        return DB::transaction(function () use ($request, $admin) {
-            $data = $request->validated();
-
-            $admin = $this->service->update($admin, $data);
-            $admin->syncAccess($data['roles'] ?? [], $data['permissions'] ?? []);
-
-            return successResponse(new AdminResource($admin->loadDetailData()), __('api.updated_success'));
-        });
-    }
-
-    public function show(Admin $admin): JsonResponse
-    {
-        Gate::authorize('view', $admin);
-
-        return successResponse(new AdminResource($admin->loadDetailData()));
-    }
-}
-```
-
-`Gate::authorize()` is the first line of each action, next to the model it guards. Middleware is kept for flat action permissions only — the `CountryController` style above, where the rule needs no model.
-
-Notice what is *not* in the actions: no inline `with()`/`load()` list, no pivot building, and no comments. The query shape is a model scope and the relation write is the model's; each name says what it does, so nothing is left to narrate.
 
 ## Routes
 
@@ -266,3 +156,19 @@ class AdminResource extends JsonResource
 - For enums/resolved labels, return `display_{field}` beside the raw field when sibling resources do so.
 - Do not query inside resources.
 - Keep validation field names, request body keys, and resource output keys aligned with the API contract.
+
+## Generating Or Extending CRUD
+
+1. Trace the closest controller through its request, resource, model, routes, filters, authorization, shared traits, service, translations, and tests. Search consumers before changing signatures or output.
+2. Choose Country's inline validated writes for simple reference data or User's service boundary for non-trivial related writes and side effects. Gate authorization alone does not require a service. Use the target feature's fields, route binding, permissions, and relationships.
+3. Preserve the existing bases and constructor/model initialization, filter order, query scope, response helpers, and translation keys. Inspect traits before creating duplicate delete/restore/toggle methods.
+4. Both source controllers use one resource for list, show, and write responses; add summary/detail variants only if the target contract requires them. Preserve relation fallback values and eager-load the needed projections.
+5. When adding a field, update migration, fillable/casts, request rules, resource, searchable filters, translations, and focused tests together. Verify auth, binding, validation, filters, pagination, and trait-backed actions using [verification guidance](review-debug-refactor.md).
+
+## API Contract Alignment
+
+Keep route prefixes, incoming field keys, output keys, and nested relationship shapes compatible with consumers. Search and sort parameters must match the Pipeline's keys (`sort_column` / `sort_direction` for sorting). Preserve the paginated response envelope and 422 field-key validation errors. Backend scope still includes API contract alignment.
+
+## Frozen Source References
+
+The [CRUD manifest](../references/crud/source-manifest.json) retains provenance and SHA-256 hashes for 16 complete controller/request/resource snapshots. They are reference evidence, not a runnable module. Supporting services/models/traits/helpers were traced but must be inspected in the current project before reuse. To refresh, copy source bytes and update manifest hashes; never silently edit the frozen snapshots. Current validation conventions are in [validation.md](validation.md), including distinctions from historical request examples.

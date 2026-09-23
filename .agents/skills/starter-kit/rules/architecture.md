@@ -64,7 +64,7 @@ routes/console.php              Scheduled commands/tasks
 | Layer | Responsibility | Not Allowed |
 | --- | --- | --- |
 | Controller | HTTP input, authorization, delegation, response helper | Complex business logic, inline validation, raw query filtering |
-| Form Request | Validation and input normalization | Database writes, response formatting, project authorization checks |
+| Form Request | Validation and input normalization | Database writes, business mutations; authorization follows [security-auth.md](security-auth.md) |
 | Service | Business logic, transactions, relation syncing, side effects | HTTP responses, `request()`, validation, authorization |
 | Model | Fillable, casts, relations, attributes, traits, scopes | HTTP response formatting, validation |
 | Resource | API transformation and conditional relation output | Queries, business logic |
@@ -88,20 +88,35 @@ routes/console.php              Scheduled commands/tasks
 - Helpers: `camelCase` functions in `app/Helpers/App.php`.
 - Permission names: `{action}-{model}`, for example `create-product`, `view-all-product`.
 
-## Non-Negotiable Rules
+## Feature Scaffolding And Modules
 
-- Controllers extend `App\Http\Controllers\API\BaseController`.
-- Form Requests extend `App\Http\Requests\BaseFormRequest`.
-- Models extend `App\Models\BaseModel` unless they intentionally extend vendor/auth base classes.
-- API resources extend `Illuminate\Http\Resources\Json\JsonResource`.
-- Responses use `successResponse()` or `failResponse()`, never raw `response()->json()` for normal endpoints.
-- Lists use `wrapPaginate($query, ResourceClass::class)`.
-- Writes use `$request->validated()`, never `$request->all()`.
-- Authorization: `Gate::authorize()` as the first line of the action for Policy rules such as resource ownership; `PermissionMiddleware` in `middleware()` only for flat action permissions and trait-supplied actions.
-- Services never return `JsonResponse`, call `response()`, call `request()`, validate input, or authorize users.
-- Multi-step writes use `DB::transaction()`.
-- Side effects inside transactions use `DB::afterCommit()`.
-- List endpoints use Pipeline filters.
-- User-facing messages use translations like `__('api.created_success')`.
-- Models use explicit `$fillable`; never `$guarded = []`.
-- Tests use PHPUnit, not Pest syntax.
+Inspect existing `app/` and `Modules/` files before creating a feature. Do not assume a module generator command exists merely because `Modules\` autoload is configured. Follow sibling namespaces, including exact casing.
+
+Create only the required layers: model/migration, request/resource/controller/routes, applicable filters and authorization, a service for non-trivial writes, factories/seeders, translations, and focused tests. Use [API and CRUD patterns](api-controllers-routes.md) for the end-to-end contract and the topic files linked in `../SKILL.md` for each layer.
+
+### Module Paths
+
+Use existing module conventions if working inside `Modules/{Name}/`. Typical paths are:
+
+```text
+Modules/{Name}/
+  app/Http/Controllers/...
+  app/Http/Requests/...
+  app/Http/Resources/...
+  app/Models/...
+  app/Observers/...
+  app/Services/...
+  database/migrations/...
+  database/seeders/...
+  routes/api.php
+  config/...
+  lang/{ar,en}/...
+```
+
+Match the exact namespace casing and path convention used by the target module.
+
+## Conventions And Scope
+
+Follow sibling code over generic Laravel advice; do not introduce a second architecture for the same concern. The topic rules own concrete implementation requirements, so consult them rather than duplicating their checklists here. The layer table describes responsibility: simple single-model CRUD can remain in the controller, and a service may accept an existing Form Request while consuming validated data only.
+
+New reference-data features belong under `DataEntry` in their controller/request/resource/filter layers. Models remain in `app/Models` unless the surrounding module defines otherwise. Reuse shared traits, filters, helpers, and enums; do not invent repositories, DTOs, action wrappers, or API versions without a concrete need. Backend-only scope includes API consumer alignment, not frontend generation.
