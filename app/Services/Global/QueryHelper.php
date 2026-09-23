@@ -9,8 +9,8 @@ class QueryHelper
     /**
      * Add a search condition for JSON fields in multiple languages.
      *
-     * Both sides are lower-cased so a search — and an exact uniqueness check —
-     * ignores case the way the plain text columns of a search group do.
+     * Every supported language is matched with an OR, so a value colliding in a
+     * single language is enough — the languages never have to match together.
      *
      * @param  bool  $isExact  To determine if the search should be exact or a partial match
      */
@@ -19,6 +19,12 @@ class QueryHelper
         return $query->where(function ($q) use ($field, $search, $isExact) {
             foreach (config('app.supported_languages', ['ar', 'en']) as $language) {
                 $searchQuery = is_array($search) ? ($search[$language] ?? '') : $search;
+
+                /** An exact match on an empty value is never a real hit, and would wrongly match rows storing "". */
+                if ($isExact && $searchQuery === '') {
+                    continue;
+                }
+
                 $searchQuery = $isExact ? $searchQuery : "%$searchQuery%";
                 $q->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT($field, '$.$language'))) LIKE LOWER(?)", [$searchQuery]);
             }
@@ -64,7 +70,7 @@ class QueryHelper
         }
 
         // Self-referencing `whereHas` constraints run against an aliased table
-        // (e.g. `users as laravel_reserved_0`), so qualify with the alias.
+        // (e.g. `causes as laravel_reserved_0`), so qualify with the alias.
         if (preg_match('/\s+as\s+(\S+)$/i', $from, $matches)) {
             return $matches[1].'.id';
         }

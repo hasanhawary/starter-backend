@@ -84,5 +84,154 @@
                 }
             ]
         }
+    },
+    "showcase": {
+        "models": {
+            "Modules\\Showcase\\app\\Models\\Showcase": [
+                {
+                    "module": "showcase",
+                    "access_key": "reference",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Showcase Reference",
+                        "ar": "الرقم المرجعي للعرض"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "name",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Showcase Name",
+                        "ar": "اسم العرض"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "description",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Description",
+                        "ar": "الوصف"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "status",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Status",
+                        "ar": "الحالة"
+                    },
+                    "enum_class": "Modules\\Showcase\\app\\Enum\\ShowcaseStatusEnum"
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "priority",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Priority",
+                        "ar": "الأولوية"
+                    },
+                    "enum_class": "Modules\\Showcase\\app\\Enum\\ShowcasePriorityEnum"
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "visibility",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Visibility",
+                        "ar": "مستوى الظهور"
+                    },
+                    "enum_class": "Modules\\Showcase\\app\\Enum\\ShowcaseVisibilityEnum"
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "rating",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Rating",
+                        "ar": "التقييم"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "is_active",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Active",
+                        "ar": "مفعّل"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "published_at",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Published At",
+                        "ar": "تاريخ النشر"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "expires_at",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Expires At",
+                        "ar": "تاريخ الانتهاء"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "created_at",
+                    "type": "column",
+                    "relation_type": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "category.name",
+                    "type": "relation",
+                    "relation_type": "belongsTo",
+                    "name": {
+                        "en": "Category",
+                        "ar": "التصنيف"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "owner.name",
+                    "type": "relation",
+                    "relation_type": "belongsTo",
+                    "name": {
+                        "en": "Owner",
+                        "ar": "المسؤول"
+                    }
+                },
+                {
+                    "module": "showcase",
+                    "access_key": "creator.name",
+                    "type": "relation",
+                    "relation_type": "belongsTo",
+                    "name": {
+                        "en": "Created By",
+                        "ar": "أنشئ بواسطة"
+                    }
+                }
+            ]
+        }
     }
 }

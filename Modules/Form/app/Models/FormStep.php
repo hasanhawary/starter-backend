@@ -11,12 +11,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Support\LogOptions;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
+// use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 
 class FormStep extends Model
 {
-    use CreatedByObserver, HasTranslations, LogsActivity, SoftDeletes;
+    use CreatedByObserver, HasTranslations, SoftDeletes;
 
     public bool $inPermission = true;
 

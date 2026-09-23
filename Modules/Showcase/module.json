@@ -1,0 +1,11 @@
+{
+    "name": "Showcase",
+    "alias": "showcase",
+    "description": "Reference module exercising every backend convention of this starter: traits, relations, enums, filters, policies, services, and notification events.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Showcase\\app\\Providers\\ShowcaseServiceProvider"
+    ],
+    "files": []
+}

@@ -1,1 +1,24 @@
-{}
+{
+    "showcase": {
+        "receivers": [
+            {
+                "type": "relation",
+                "relation": "owner",
+                "name": {
+                    "en": "Showcase Owner",
+                    "ar": "مسؤول العرض"
+                },
+                "note": "The user the record is assigned to."
+            },
+            {
+                "type": "relation",
+                "relation": "creator",
+                "name": {
+                    "en": "Showcase Creator",
+                    "ar": "منشئ العرض"
+                },
+                "note": "The user who created the record."
+            }
+        ]
+    }
+}

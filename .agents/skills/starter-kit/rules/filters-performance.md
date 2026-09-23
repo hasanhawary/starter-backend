@@ -52,7 +52,7 @@ class OrderByFilter
 
 ```php
 $query = app(Pipeline::class)
-    ->send(Product::query()->with(['creator']))
+    ->send(Product::query()->visibleTo()->withListingData())
     ->through([
         JsonNameFilter::class,
         ActiveFilter::class,
@@ -84,10 +84,39 @@ Create a custom filter only when existing filters cannot express the query. One 
 
 ## Scopes
 
-- Scope traits live in `app/Scopes/{Domain}/`.
+- Scope traits live in `app/Scopes/{Domain}/` (or `Modules/X/app/Scopes/` for a module).
 - Ownership scopes like `related()` belong in scope traits, not controllers.
 - Use scopes to centralize repeated ownership and protection rules.
 - Do not call `->get()` inside relationship or scope methods.
+
+### Name the query shape; never build it in the controller
+
+- A `baseQuery()`, `listQuery()` or `loadForResponse()` private helper in a controller is a scope that has not been written yet. Move it to the model's scope trait as `scopeWithListingData()`, and give a route-bound record the matching `loadDetailData()` loader — the `with`/`load` pairing Laravel itself uses. The action then reads:
+
+```php
+// listing
+Showcase::query()->visibleTo()->withListingData()
+
+// single record
+new ShowcaseResource($showcase->loadDetailData())
+```
+
+- Resolve per-row flags in SQL inside that scope — `withCount('pinUsers')`, `withExists(['pinUsers as is_pinned' => ...])` — and share the constraint between the scope and its loader so the Resource reads the same key either way. A Resource must never run a query to fill a field.
+- Keep the selection scopes (`visibleTo()`, `active()`, `published()`) separate from the representation scopes (`withListingData()`), and apply the selection one first so a filter can never widen access.
+
+### No generic scope dispatch from request input
+
+- **Do not wire `App\Trait\Global\HasDynamicScopes` (`applyScopesFilter()`, the `scopes[]`/`values[]` parameters, a `$scopeMap` on the model) into a resource controller.** Letting raw request input choose which model method runs makes the endpoint's real surface unreadable from the route, the controller or the tests, and turns every future scope into public API by accident.
+- Give each narrowing its own named request parameter in the Pipeline filter, mapped to the scope it means:
+
+```php
+$query->when(request()->boolean('mine'), fn (Builder $q) => $q->ownedBy());
+$query->when(request()->boolean('published'), fn (Builder $q) => $q->published());
+$query->when(request()->filled('expiring_within'), fn (Builder $q) => $q->expiringWithin((int) request('expiring_within')));
+```
+
+- The trait stays in the repository for the lookup layer (`help-models?scopes[]=active`), which takes a scope name as data on purpose. That is a different contract from a resource listing; do not copy it into one.
+- Every scope needs a named consumer — an action, a Policy, a filter, a lookup, a command. A scope reachable only through a generic dispatcher is dead code with an open door attached.
 
 ## Performance Rules
 

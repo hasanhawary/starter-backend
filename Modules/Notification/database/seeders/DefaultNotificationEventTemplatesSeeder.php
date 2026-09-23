@@ -60,9 +60,11 @@ class DefaultNotificationEventTemplatesSeeder extends Seeder
     ];
 
     /**
-     * Access keys that best identify a record, most specific first.
+     * Access keys that best identify a record, most specific first. A reference
+     * is quotable back to the system, so it outranks a name.
      */
     private const IDENTITY_KEYS = [
+        'reference',
         'name',
     ];
 
@@ -73,16 +75,20 @@ class DefaultNotificationEventTemplatesSeeder extends Seeder
      * generated body — they don't read as a message a person would send.
      */
     private const DETAIL_KEYS = [
-        'name', 'nationality', 'code', 'phone_code', 'phone_length',
-        'is_active', 'created_at',
+        'reference', 'name', 'nationality', 'code', 'phone_code', 'phone_length',
+        'category.name', 'status', 'priority', 'visibility', 'owner.name',
+        'is_active', 'published_at', 'expires_at', 'created_at',
     ];
 
     /**
      * Date columns worth reminding about, most meaningful first. A country carries
      * no business date of its own, so its reminders hang off the `created_at`
-     * fallback in verifiableDateFor().
+     * fallback in verifiableDateFor(); a showcase expires, which is the date its
+     * audience actually needs warning about.
      */
-    private const DATE_KEYS = [];
+    private const DATE_KEYS = [
+        'expires_at',
+    ];
 
     private ?int $roleId = null;
 

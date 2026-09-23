@@ -13,5 +13,38 @@
                 }
             ]
         }
+    },
+    "showcase": {
+        "models": {
+            "Modules\\Showcase\\app\\Models\\Showcase": [
+                {
+                    "access_key": "expires_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Expiry Date",
+                        "ar": "تاريخ الانتهاء"
+                    }
+                },
+                {
+                    "access_key": "published_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Publication Date",
+                        "ar": "تاريخ النشر"
+                    }
+                },
+                {
+                    "access_key": "created_at",
+                    "type": "datetime",
+                    "relation": null,
+                    "name": {
+                        "en": "Created At",
+                        "ar": "تاريخ الإنشاء"
+                    }
+                }
+            ]
+        }
     }
 }

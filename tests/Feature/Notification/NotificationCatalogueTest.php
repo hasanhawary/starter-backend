@@ -15,11 +15,17 @@ use Modules\Notification\app\Models\SystemEvent;
 use Modules\Notification\app\Models\Variable;
 use Modules\Notification\database\seeders\NotificationDatabaseSeeder;
 use Modules\Notification\database\seeders\SystemEventVariableSeeder;
+use Tests\Feature\Showcase\ShowcaseNotificationTest;
 use Tests\TestCase;
 
 /**
- * The catalogue covers exactly one module — country — and seeding it is what
- * removes anything left over from a module that is no longer in it.
+ * The catalogue covers the two modules this base template ships — `country`
+ * from the application and `showcase` from the reference module — and seeding
+ * it is what removes anything left over from a module that is no longer in it.
+ *
+ * The showcase half of the catalogue is asserted in
+ * {@see ShowcaseNotificationTest}; the cases here
+ * cover the country entries and the cross-module cleanup rules.
  */
 class NotificationCatalogueTest extends TestCase
 {
@@ -32,15 +38,19 @@ class NotificationCatalogueTest extends TestCase
         SystemEventVariableSeeder::flushCache();
     }
 
-    public function test_country_is_the_only_module_in_the_catalogue(): void
+    public function test_the_catalogue_carries_country_and_showcase_only(): void
     {
         $this->assertSame(
-            ['country'],
+            ['country', 'showcase'],
             array_map(fn (SystemEventModuleEnum $module) => $module->value, SystemEventModuleEnum::cases()),
         );
 
         $this->assertSame(
-            ['create_country', 'toggle_active_country', 'update_country'],
+            [
+                'create_country', 'create_showcase', 'publish_showcase',
+                'toggle_active_country', 'toggle_active_showcase',
+                'update_country', 'update_showcase',
+            ],
             collect(SystemEventSlugEnum::cases())->map->value->sort()->values()->all(),
         );
     }
@@ -49,7 +59,7 @@ class NotificationCatalogueTest extends TestCase
     {
         $this->seedCatalogue();
 
-        $events = SystemEvent::query()->get();
+        $events = SystemEvent::query()->where('module', 'country')->get();
 
         $this->assertSame(
             ['create_country', 'toggle_active_country', 'update_country'],
@@ -62,6 +72,18 @@ class NotificationCatalogueTest extends TestCase
             $this->assertNotSame('', (string) ($event->getTranslations('name')['ar'] ?? ''));
             $this->assertNotSame('', (string) ($event->getTranslations('name')['en'] ?? ''));
         }
+    }
+
+    public function test_every_seeded_event_belongs_to_a_module_the_enum_still_carries(): void
+    {
+        $this->seedCatalogue();
+
+        $catalogue = array_map(fn (SystemEventModuleEnum $module) => $module->value, SystemEventModuleEnum::cases());
+
+        $this->assertEqualsCanonicalizing(
+            $catalogue,
+            SystemEvent::query()->get()->map(fn (SystemEvent $event) => $this->moduleOf($event))->unique()->values()->all(),
+        );
     }
 
     public function test_seeding_drops_events_of_a_module_that_left_the_catalogue(): void
@@ -124,8 +146,8 @@ class NotificationCatalogueTest extends TestCase
         $this->assertDatabaseMissing('notification_receivers', ['id' => $staleReceiver->id]);
         $this->assertDatabaseMissing('notification_verifiable_dates', ['id' => $staleDate->id]);
 
-        $this->assertSame(['country'], Variable::query()->distinct()->pluck('module')->all());
-        $this->assertSame(['country'], NotificationReceiver::query()->distinct()->pluck('module')->all());
+        $this->assertEqualsCanonicalizing(['country', 'showcase'], Variable::query()->distinct()->pluck('module')->all());
+        $this->assertEqualsCanonicalizing(['country', 'showcase'], NotificationReceiver::query()->distinct()->pluck('module')->all());
     }
 
     public function test_country_events_expose_the_country_columns_and_never_the_flag(): void
@@ -203,7 +225,7 @@ class NotificationCatalogueTest extends TestCase
 
         $this->assertSame($first, SystemEvent::query()->pluck('id')->sort()->values()->all());
         $this->assertSame($templateIds, NotificationEvent::query()->first()->templates()->pluck('id')->sort()->values()->all());
-        $this->assertSame(3, SystemEvent::query()->count());
+        $this->assertSame(count(SystemEventSlugEnum::cases()), SystemEvent::query()->count());
     }
 
     private function seedCatalogue(): void

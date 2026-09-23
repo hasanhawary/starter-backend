@@ -13,12 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection as SupportCollection;
 use Spatie\Activitylog\Support\LogOptions;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
+// use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 
 class Form extends Model
 {
-    use CreatedByObserver, HasTranslations, LogsActivity, SoftDeletes;
+    use CreatedByObserver, HasTranslations, SoftDeletes;
 
     public bool $inPermission = true;
 

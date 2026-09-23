@@ -28,4 +28,27 @@ return [
     'notification_group' => [
         'global' => 'Global',
     ],
+    'showcase_status' => [
+        'draft' => 'Draft',
+        'in_review' => 'In Review',
+        'published' => 'Published',
+        'archived' => 'Archived',
+    ],
+    'showcase_priority' => [
+        'low' => 'Low',
+        'medium' => 'Medium',
+        'high' => 'High',
+        'critical' => 'Critical',
+    ],
+    'showcase_visibility' => [
+        'private' => 'Private',
+        'internal' => 'Internal',
+        'public' => 'Public',
+    ],
+    'showcase_note_type' => [
+        'comment' => 'Comment',
+        'decision' => 'Decision',
+        'risk' => 'Risk',
+        'status_change' => 'Status Change',
+    ],
 ];

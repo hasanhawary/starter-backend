@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Support\LogOptions;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
+// use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 
 class FormField extends Model
 {
-    use CreatedByObserver, HasTranslations, LogsActivity, SoftDeletes;
+    use CreatedByObserver, HasTranslations, SoftDeletes;
 
     public bool $inPermission = true;
 

@@ -1,12 +1,30 @@
 {
     "global": {
-        "note": "Variables kept in the catalogue but never attached to an event. `*` applies to every module; a module key applies to that module only. A country's flag is an uploaded image path, not message text, so it never enters a notification body.",
+        "note": "Variables kept in the catalogue but never attached to an event. `*` applies to every module; a module key applies to that module only. A country's flag and a showcase's cover are uploaded image paths, not message text, so they never enter a notification body.",
         "exclude": {
             "*": [],
             "country": [
                 "flag"
+            ],
+            "showcase": [
+                "cover",
+                "metadata"
             ]
         }
     },
-    "events": {}
+    "events": {
+        "create_showcase": {
+            "note": "A record is created as a draft, so it can carry no publication date yet.",
+            "exclude": [
+                "published_at"
+            ]
+        },
+        "toggle_active_showcase": {
+            "note": "Activation says nothing about the publication lifecycle; keep the message to what changed.",
+            "exclude": [
+                "published_at",
+                "description"
+            ]
+        }
+    }
 }

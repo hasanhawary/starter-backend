@@ -4,14 +4,13 @@ namespace App\Trait\Global;
 
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Throwable;
 
 trait HasOrder
 {
     /**
      * Change the order of a model instance.
      *
-     * @throws Exception|Throwable
+     * @throws Exception
      */
     public function changeOrder(string $orderField, string $stepField, $request): void
     {
@@ -20,14 +19,11 @@ trait HasOrder
             $to = (int) $request->input($orderField);
 
             DB::beginTransaction();
-
             $this->updateOrderField($request, $orderField, $stepField, $from, $to);
-
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
-        } catch (Throwable $e) {
         }
     }
 

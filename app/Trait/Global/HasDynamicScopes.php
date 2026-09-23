@@ -10,7 +10,8 @@ trait HasDynamicScopes
     /**
      * Apply dynamic query scopes based on request input.
      *
-     * @param  array<string, string>|null  $scopeMap
+     * @param Builder $query
+     * @return HasDynamicScopes
      */
     public function applyScopesFilter(Builder $query): static
     {

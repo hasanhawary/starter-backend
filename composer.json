@@ -27,7 +27,7 @@
         "maatwebsite/excel": "^3.1",
         "nwidart/laravel-modules": "^13.0",
         "opcodesio/log-viewer": "^3.24",
-        "spatie/laravel-activitylog": "^5.0",
+        "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-ignition": "^2.10",
         "spatie/laravel-permission": "^6.24",
         "spatie/laravel-translatable": "^6.12"
