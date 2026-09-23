@@ -1,0 +1,68 @@
+<?php
+
+namespace Modules\Statement\App\Policies;
+
+use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Modules\Statement\App\Models\Statement;
+
+class StatementPolicy
+{
+    use HandlesAuthorization;
+
+    public function view(Authenticatable $user): bool
+    {
+        return $user->canAny(['view-all-statement', 'view-own-statement']);
+    }
+
+    public function create(Authenticatable $user): bool
+    {
+        return $user->canAny(['create-all-statement', 'create-own-statement']);
+    }
+
+    public function assignUser(Authenticatable $user, Statement $model): bool
+    {
+        return $user->can('assign-user-statement')
+            || $model->created_by == $user->id
+            || $model->isDelegatedAssignee($model->created_by, (int) $user->id);
+    }
+
+    public function update(Authenticatable $user, Statement $model): bool
+    {
+        return $this->isRouteRule($user) || (
+            ($user->canAny(['create-all-statement', 'create-own-statement']) || $model->isDelegatedAssignee($model->created_by, (int) $user->id))
+            && ($user->id == $model->created_by || $model->isDelegatedAssignee($model->created_by, (int) $user->id))
+        );
+    }
+
+    public function assignOrUpdate(Authenticatable $user, Statement $model): bool
+    {
+        return $this->update($user, $model) || $this->assignUser($user, $model);
+    }
+
+    public function delete(Authenticatable $user, Statement $model): bool
+    {
+        return $this->isRouteRule($user) || (
+            $user->canAny(['create-all-statement', 'create-own-statement'])
+            && $model->is_draft
+            && (
+                $user->id == $model->created_by
+                || $model->isDelegatedAssignee($model->created_by, (int) $user->id)
+            )
+        );
+    }
+
+    private function userOwn(Authenticatable $user, Statement $model): bool
+    {
+        if ((int) $model->created_by === (int) $user->id) {
+            return true;
+        }
+
+        return $model->isDelegatedAssignee($model->created_by, (int) $user->id);
+    }
+
+    private function isRouteRule(Authenticatable $user): bool
+    {
+        return isRoot($user);
+    }
+}

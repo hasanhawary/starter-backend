@@ -1,0 +1,76 @@
+<?php
+
+use App\Enum\Global\ActiveTypeEnum;
+use App\Http\Resources\Global\Other\BasicResource;
+use App\Http\Resources\Global\Other\BasicUserResource;
+use App\Models\Cause;
+use App\Models\Department;
+use App\Models\User;
+use Modules\Statement\App\Http\Resources\StatementResource;
+use Modules\Statement\App\Models\Statement;
+use Modules\Task\app\Http\Resources\TaskResource;
+
+return [
+    'name' => 'Statement',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Models
+    |--------------------------------------------------------------------------
+    */
+    'creator_model' => User::class,
+    'statementable_model' => Cause::class,
+    'department_model' => Department::class,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Resources
+    |--------------------------------------------------------------------------
+    */
+    'basic_resource' => BasicResource::class,
+    'creator_resource' => BasicUserResource::class,
+    'task_resource' => TaskResource::class,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delegation
+    |--------------------------------------------------------------------------
+    */
+    'delegation' => [
+        'type' => 'statement',
+        'model' => Statement::class,
+        'resource' => StatementResource::class,
+        'owner_scope' => 'assignedTo',
+        'ownership' => [
+            'columns' => ['created_by'],
+            'relations' => [
+                ['name' => 'users', 'constraints' => ['statement_users.is_active' => ActiveTypeEnum::Active->value]],
+            ],
+        ],
+        'relations' => ['statementable', 'creator', 'tasks'],
+        'assignee_permissions' => [
+            'view-own-statement',
+            'prepare-statement',
+            'create-own-statement',
+            'create-all-statement',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reports
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Exports
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Constants
+    |--------------------------------------------------------------------------
+    */
+];

@@ -179,7 +179,8 @@ class Admin extends Authenticatable
 - Use `LogsActivityOptions` for auditable models.
 - Use `HasTranslations` and `$translatable` for JSON multi-language fields.
 - Permission-managed models define `$inPermission`, `$basicOperations`, and `$specialOperations` as needed.
-- Use scope traits under `app/Scopes/{Domain}/` for reusable ownership/filter scopes.
+- Use scope traits under `app/Scopes/{Domain}/` for reusable ownership/filter scopes; see [query and scope rules](filters-performance.md).
+- Do not hardcode table names when model methods or Eloquent queries provide them.
 
 ## Migration Template
 
@@ -216,6 +217,7 @@ return new class extends Migration
 
 ## Migration Rules
 
+- Generate migrations with Artisan when creating them through commands.
 - Use anonymous migration classes.
 - Use one concern per migration.
 - Add indexes for columns used in filters, sorts, searches, joins, and foreign keys.

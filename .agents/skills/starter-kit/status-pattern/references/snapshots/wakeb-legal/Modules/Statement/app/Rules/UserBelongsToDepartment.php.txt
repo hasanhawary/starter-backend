@@ -1,0 +1,29 @@
+<?php
+
+namespace Modules\Statement\App\Rules;
+
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+
+class UserBelongsToDepartment implements ValidationRule
+{
+    public function __construct(
+        protected array $departmentIds,
+    ) {}
+
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        $userModel = config('statement.creator_model');
+        $user = $userModel::find($value);
+
+        if (! $user) {
+            $fail(__('validation.exists', ['attribute' => $attribute]));
+
+            return;
+        }
+
+        if (! $user->departments()->whereIn('departments.id', $this->departmentIds)->exists()) {
+            $fail(__('statement::validation.user_not_in_department'));
+        }
+    }
+}

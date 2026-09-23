@@ -1,0 +1,22 @@
+<?php
+
+namespace Modules\Statement\App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Modules\Statement\App\Enum\StatementReplyTypeEnum;
+
+class StatementReplyResource extends BaseResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'reply_type' => $this->reply_type,
+            'display_reply_type' => StatementReplyTypeEnum::resolve($this->reply_type),
+            'reply' => $this->reply,
+            'creator' => $this->whenLoaded('creator', fn () => new $this->creatorResource($this->creator)),
+            'files' => $this->whenLoaded('files', fn () => StatementFileResource::collection($this->files)),
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+        ];
+    }
+}

@@ -1,0 +1,38 @@
+<?php
+
+namespace Modules\Statement\App\Tools\Status;
+
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Tools\Status\Strategies\AnsweredStatus;
+use Modules\Statement\App\Tools\Status\Strategies\ClosedAndNewStatus;
+use Modules\Statement\App\Tools\Status\Strategies\ClosedAndRelatedNewStatus;
+use Modules\Statement\App\Tools\Status\Strategies\ClosedStatus;
+use Modules\Statement\App\Tools\Status\Strategies\InProgressStatus;
+use Modules\Statement\App\Tools\Status\Strategies\ReceivedStatus;
+use Modules\Statement\App\Tools\Status\Strategies\RejectedStatus;
+use Modules\Statement\App\Tools\Status\Strategies\RequestedStatus;
+use Modules\Statement\App\Tools\Status\Strategies\ReturnedForReviewStatus;
+use Modules\Statement\App\Tools\Status\Strategies\SentPendingStatus;
+
+class StatementStatusFactory
+{
+    public static function guess(int|string $status, ?Model $model = null, ?User $user = null): StatementStatus
+    {
+        return match ($status) {
+            StatementStatusEnum::SentPending->value => new SentPendingStatus($model, $user),
+            StatementStatusEnum::Received->value => new ReceivedStatus($model, $user),
+            StatementStatusEnum::InProgress->value => new InProgressStatus($model, $user),
+            StatementStatusEnum::Answered->value => new AnsweredStatus($model, $user),
+            StatementStatusEnum::ReturnedForReview->value => new ReturnedForReviewStatus($model, $user),
+            StatementStatusEnum::Closed->value => new ClosedStatus($model, $user),
+            StatementStatusEnum::ClosedAndNew->value => new ClosedAndNewStatus($model, $user),
+            StatementStatusEnum::ClosedAndRelatedNew->value => new ClosedAndRelatedNewStatus($model, $user),
+            StatementStatusEnum::Rejected->value => new RejectedStatus($model, $user),
+            StatementStatusEnum::Requested->value => new RequestedStatus($model, $user),
+            default => throw new InvalidArgumentException("Unknown statement status: {$status}"),
+        };
+    }
+}

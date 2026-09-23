@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "captured_on": "2026-09-16",
+  "source_repository": "C:/laragon/www/nwc-vms",
+  "files": [
+    {
+      "source": "app/Http/Controllers/API/User/UserController.php",
+      "snapshot": "references/crud/snapshots/app/Http/Controllers/API/User/UserController.php.txt",
+      "sha256": "fba2e5324345f8869325205844f17551b11f59720fc1bad07354bb39cffa86e0"
+    },
+    {
+      "source": "app/Http/Controllers/API/DataEntry/CountryController.php",
+      "snapshot": "references/crud/snapshots/app/Http/Controllers/API/DataEntry/CountryController.php.txt",
+      "sha256": "18e618a4f803b454e32fb6aea5fa47d9cb43ff428256379825ba1bb3d5972caa"
+    },
+    {
+      "source": "app/Http/Requests/User/UserRequest.php",
+      "snapshot": "references/crud/snapshots/app/Http/Requests/User/UserRequest.php.txt",
+      "sha256": "f757b25aadd20a63804d37ad2f9384fc3afc33a354a873df7729e0080765af3c"
+    },
+    {
+      "source": "app/Http/Requests/DataEntry/CountryRequest.php",
+      "snapshot": "references/crud/snapshots/app/Http/Requests/DataEntry/CountryRequest.php.txt",
+      "sha256": "b976c5d6627c5ad969cb7ab297cc4afaba650581b5add2908e935eff17d27d76"
+    },
+    {
+      "source": "app/Http/Requests/Global/Other/PageRequest.php",
+      "snapshot": "references/crud/snapshots/app/Http/Requests/Global/Other/PageRequest.php.txt",
+      "sha256": "b28f150c3360d5c06b8a54e5769133ef6faafade5ec73df823deea6aa5bc76a7"
+    },
+    {
+      "source": "app/Http/Requests/Global/Other/ToggleActiveRequest.php",
+      "snapshot": "references/crud/snapshots/app/Http/Requests/Global/Other/ToggleActiveRequest.php.txt",
+      "sha256": "9130463039f466cd3df4527713ce6c9ce8427894526fb40045f5c946ed0fe82e"
+    },
+    {
+      "source": "app/Http/Requests/BaseFormRequest.php",
+      "snapshot": "references/crud/snapshots/app/Http/Requests/BaseFormRequest.php.txt",
+      "sha256": "5fd90e975b613ef00b014c14e5e074744109fce3a4d132292021e76e0d47b98a"
+    },
+    {
+      "source": "app/Http/Resources/User/UserResource.php",
+      "snapshot": "references/crud/snapshots/app/Http/Resources/User/UserResource.php.txt",
+      "sha256": "7d5c355b9a80a3f71599b9ca74bd6a01e5589f22a43c8fcaf723853276aeed23"
+    },
+    {
+      "source": "app/Http/Resources/DataEntry/CountryResource.php",
+      "snapshot": "references/crud/snapshots/app/Http/Resources/DataEntry/CountryResource.php.txt",
+      "sha256": "93ffb8ce61c086a1773164912da9dcecdcacda2e8bae7523be3589f94e51f7d2"
+    },
+    {
+      "source": "app/Http/Resources/DataEntry/DepartmentResource.php",
+      "snapshot": "references/crud/snapshots/app/Http/Resources/DataEntry/DepartmentResource.php.txt",
+      "sha256": "e9537515e688a215c2a4b459c1cd90142f762f0245482cdc650d2ecad1371789"
+    },
+    {
+      "source": "app/Http/Resources/DataEntry/UserSpaceResource.php",
+      "snapshot": "references/crud/snapshots/app/Http/Resources/DataEntry/UserSpaceResource.php.txt",
+      "sha256": "641a2f3ac94aa6b5f1aa6dbf105f1de4d6deb6075860f2641f8d4340d4817cce"
+    },
+    {
+      "source": "app/Http/Resources/Global/Other/BasicResource.php",
+      "snapshot": "references/crud/snapshots/app/Http/Resources/Global/Other/BasicResource.php.txt",
+      "sha256": "d5665251b4743267bcdded257ca3c0cea196690c774b9d1e5d03efca280bf659"
+    },
+    {
+      "source": "app/Http/Resources/Global/Other/BasicUserResource.php",
+      "snapshot": "references/crud/snapshots/app/Http/Resources/Global/Other/BasicUserResource.php.txt",
+      "sha256": "9db589556734cf388b2d68d1b4358538c2a7af02d473e7e271d36448091fc515"
+    },
+    {
+      "source": "app/Http/Resources/User/UserSettingResource.php",
+      "snapshot": "references/crud/snapshots/app/Http/Resources/User/UserSettingResource.php.txt",
+      "sha256": "56ab656d41614996a6148d9a4289c75752b2b6e1c4ecb8b29d342c634c9508bb"
+    },
+    {
+      "source": "app/Http/Resources/DataEntry/DepartmentLocationResource.php",
+      "snapshot": "references/crud/snapshots/app/Http/Resources/DataEntry/DepartmentLocationResource.php.txt",
+      "sha256": "15c7249ddaf2a318b312e32984c8faab476d3a822a32541d2c47da650f8e686a"
+    },
+    {
+      "source": "app/Http/Resources/DataEntry/DepartmentLocationUserResource.php",
+      "snapshot": "references/crud/snapshots/app/Http/Resources/DataEntry/DepartmentLocationUserResource.php.txt",
+      "sha256": "e3ddce92627fdf3790efd1ad4a92c7693d662c5b5006129533c28f5a8601a192"
+    }
+  ]
+}

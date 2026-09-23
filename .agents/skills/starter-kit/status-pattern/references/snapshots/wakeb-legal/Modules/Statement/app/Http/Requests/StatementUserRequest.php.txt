@@ -1,0 +1,49 @@
+<?php
+
+namespace Modules\Statement\App\Http\Requests;
+
+use Modules\Statement\App\Rules\UserBelongsToDepartment;
+
+class StatementUserRequest extends BaseFormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        $departmentIds = $this->statement?->departments()->pluck('department_id')->toArray() ?? [];
+
+        return [
+            'user_ids' => ['sometimes', 'nullable', 'array'],
+            'user_ids.*' => ['required', 'integer', 'exists:users,id', new UserBelongsToDepartment($departmentIds)],
+            'remove_user_ids' => ['sometimes', 'nullable', 'array'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return __('statement::validation.attributes');
+    }
+
+    public function messages(): array
+    {
+        return [
+            'user_ids.array' => __('validation.array'),
+
+            'user_ids.*.required' => __('validation.required'),
+            'user_ids.*.integer' => __('validation.integer'),
+            'user_ids.*.exists' => __('validation.exists'),
+
+            'remove_user_ids.array' => __('validation.array'),
+        ];
+    }
+
+    protected function passedValidation(): void
+    {
+        if (empty($this->input('user_ids')) && empty($this->input('remove_user_ids'))) {
+            failResponse(__('validation.required', ['attribute' => __('statement::validation.attributes.user_ids')]), 422)->throwResponse();
+        }
+    }
+}

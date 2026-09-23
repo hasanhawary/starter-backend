@@ -1,0 +1,31 @@
+<?php
+
+namespace Modules\Statement\App\Http\Requests;
+
+class StatementFileRequest extends BaseFormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'file_id' => ['required', 'exists:statement_files,id'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return __('statement::validation.attributes');
+    }
+
+    public function messages(): array
+    {
+        return [
+            'file_id.required' => __('validation.required'),
+            'file_id.exists' => __('validation.exists'),
+        ];
+    }
+}

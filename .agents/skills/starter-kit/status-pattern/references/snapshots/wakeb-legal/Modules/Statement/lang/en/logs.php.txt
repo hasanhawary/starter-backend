@@ -1,0 +1,19 @@
+<?php
+
+return [
+    'created' => 'Statement created by (:name)',
+    'updated' => 'Statement updated by (:name)',
+    'created_draft' => 'Statement draft created by (:name)',
+    'sent' => 'Statement request submitted by (:name)',
+    'received' => 'Receipt confirmed by (:name)',
+    'started_processing' => 'Processing started by (:name)',
+    'send_reply' => 'Reply sent by (:name)',
+    'return_for_review' => 'Returned for review by (:name)',
+    'accept_and_close' => 'Accepted and closed by (:name)',
+    'rejected' => 'Rejected by (:name)',
+    'requested_data' => 'Additional data requested by (:name)',
+    'redirect_same_and_closed' => 'Redirected to same department and closed by (:name)',
+    'redirect_different_and_closed' => 'Redirected to different department and closed by (:name)',
+    'user_assigned' => 'Users assigned to statement by (:name)',
+    'user_removed' => 'Users removed from statement by (:name)',
+];

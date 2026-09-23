@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'user_not_in_department' => 'The selected user does not belong to the specified department.',
+
+    'attributes' => [
+        'is_draft' => 'draft',
+        'related_statement_id' => 'related statement',
+        'related_statement_status' => 'related statement status',
+        'subject' => 'subject',
+        'description' => 'description',
+        'deadline' => 'deadline',
+        'cause_id' => 'cause',
+        'department_ids' => 'departments',
+        'department_ids.*' => 'department',
+        'user_ids' => 'users',
+        'user_ids.*' => 'user',
+        'notes' => 'notes',
+        'files' => 'files',
+        'files.*' => 'file',
+        'status' => 'status',
+        'reply' => 'reply',
+        'reply_type' => 'reply type',
+        'file_id' => 'file',
+        'remove_user_ids' => 'removed users',
+    ],
+];

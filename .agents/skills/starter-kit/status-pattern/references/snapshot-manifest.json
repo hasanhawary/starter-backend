@@ -1,0 +1,341 @@
+{
+  "source_root": "D:\\laragon\\www\\wakeb-legal",
+  "captured_on": "2026-09-16",
+  "files": [
+    {
+      "source": "app/Enum/Global/ActiveTypeEnum.php",
+      "snapshot": "references/snapshots/wakeb-legal/app/Enum/Global/ActiveTypeEnum.php.txt",
+      "sha256": "c5f9d628661e8bff8b5bd4a0a78e83128377d2c693eaa2a9a009bbcb44159179"
+    },
+    {
+      "source": "app/Rules/ModelExists.php",
+      "snapshot": "references/snapshots/wakeb-legal/app/Rules/ModelExists.php.txt",
+      "sha256": "0913a78411b3374a165275cbcc49f25b64a715204e42a724e89a37857dd3c738"
+    },
+    {
+      "source": "app/Services/Global/AssignmentPermissionService.php",
+      "snapshot": "references/snapshots/wakeb-legal/app/Services/Global/AssignmentPermissionService.php.txt",
+      "sha256": "e023d5178a6621572179badd8d4304229b8c80371c2f3c9eab83341b962d711d"
+    },
+    {
+      "source": "app/Services/Global/UploadService.php",
+      "snapshot": "references/snapshots/wakeb-legal/app/Services/Global/UploadService.php.txt",
+      "sha256": "31b89da87b7750642adcaa14a263206c4d52b0f2a626c311eeaee0f968144700"
+    },
+    {
+      "source": "Modules/Delegation/app/Traits/HasAssignedToScope.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Delegation/app/Traits/HasAssignedToScope.php.txt",
+      "sha256": "c921fe9cc0aa5fade37a7f4c47881d61ba933a3f5cc9f3d96d4434fcedf546cc"
+    },
+    {
+      "source": "Modules/Delegation/app/Traits/InteractsWithDelegation.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Delegation/app/Traits/InteractsWithDelegation.php.txt",
+      "sha256": "84c0ee75ac4b32539d997463694c0e73db5314b3df992173e2f6862dc46aee4d"
+    },
+    {
+      "source": "Modules/Notification/app/Enum/SystemEventSlugEnum.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Notification/app/Enum/SystemEventSlugEnum.php.txt",
+      "sha256": "bf15ce4e1beb2a47eff643545157d96021672b2817b78ecf5d55b0bda8ed7489"
+    },
+    {
+      "source": "Modules/Notification/app/Tools/Facades/Notification.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Notification/app/Tools/Facades/Notification.php.txt",
+      "sha256": "42db88610c4224e11f7440f8a84dd78d227f545a481465f05c5ef6115447f04c"
+    },
+    {
+      "source": "Modules/Statement/app/Enum/StatementAssignedUserTypeEnum.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Enum/StatementAssignedUserTypeEnum.php.txt",
+      "sha256": "2265a991caaa6441c3b70dd2e7b566ec28b6a15bde8ec391cd362ab540f7542b"
+    },
+    {
+      "source": "Modules/Statement/app/Enum/StatementLogTypeEnum.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Enum/StatementLogTypeEnum.php.txt",
+      "sha256": "e65985649933fe3512bf9bca645c0f54bee23a642743ac03dfaf5c322ed62699"
+    },
+    {
+      "source": "Modules/Statement/app/Enum/StatementReplyTypeEnum.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Enum/StatementReplyTypeEnum.php.txt",
+      "sha256": "05546b330e0cff6ba14640af28a76ef7cb055ae4979f2e8d58738881dbd2d5bd"
+    },
+    {
+      "source": "Modules/Statement/app/Enum/StatementStatusEnum.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Enum/StatementStatusEnum.php.txt",
+      "sha256": "3b4d0116fb5665f1221ab26edf72a6543032904641521ba43eef168ff33a79f6"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Controllers/StatementController.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Controllers/StatementController.php.txt",
+      "sha256": "3df472296ea7269eeb97ccd1a56d1e0907accef6599d0b2c4fc794426afd4fea"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Requests/BaseFormRequest.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Requests/BaseFormRequest.php.txt",
+      "sha256": "f7ff8dc48e3acba7cad7f39d6a7bc86e434a967279e60f6f3244be05ff53939b"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Requests/StatementActionRequest.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Requests/StatementActionRequest.php.txt",
+      "sha256": "538c39772b284631ea163a685fd9f0aeb12e4f12cd38531101bd6d128a0eb984"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Requests/StatementFileRequest.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Requests/StatementFileRequest.php.txt",
+      "sha256": "eb1cf33d9b2e85c820c24fa1c4a67534a34cc289d556d4b1ab3db7dde97dba5f"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Requests/StatementRequest.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Requests/StatementRequest.php.txt",
+      "sha256": "5f8670f538a76570fbf9a271bf267c0ecaf6c91245694c70d60631efc30eb088"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Requests/StatementUserRequest.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Requests/StatementUserRequest.php.txt",
+      "sha256": "496d3810cdb5bb8b4f2841102cb4630241abb9aef97489491b4ea52484219f15"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Resources/BaseResource.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Resources/BaseResource.php.txt",
+      "sha256": "9074310b13f69ce7d50d2dfed37ddda925ff6930efd2cce6714eef98357bbdb6"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Resources/StatementFileResource.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Resources/StatementFileResource.php.txt",
+      "sha256": "dfe32eb9fa53b928a78c1de11b865fb3c80649f81d1f84734188fcd5a2ed089b"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Resources/StatementLogActionResource.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Resources/StatementLogActionResource.php.txt",
+      "sha256": "987ff721dfed581c11a710edd3077b466ba7a7318f97bc73bbfdce3e2fc8bd7a"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Resources/StatementLogResource.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Resources/StatementLogResource.php.txt",
+      "sha256": "5b47a6d52a63ef307d1cbe4f520c06d4ed691973d358b31597c8a7ad0da8d2b1"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Resources/StatementReplyResource.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Resources/StatementReplyResource.php.txt",
+      "sha256": "44e37703e73a3cd6b0df3a0532455a7c86033fab3596f2ba426e4cf04ef4e0d8"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Resources/StatementResource.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Resources/StatementResource.php.txt",
+      "sha256": "5b33d243fe2501725ade441adcdfc1db85b546ff5b02118adfc6f3f1392abd8c"
+    },
+    {
+      "source": "Modules/Statement/app/Http/Resources/StatementSimpleResource.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Http/Resources/StatementSimpleResource.php.txt",
+      "sha256": "ee89de7f6b40b16d18a1cf332c625e7a6083d65cbadce1754492440f5ea69f94"
+    },
+    {
+      "source": "Modules/Statement/app/Models/Statement.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Models/Statement.php.txt",
+      "sha256": "56132b66692b5564d05d29969ba7156d4111fdeb70c8ad58ea1fa8064bb012d6"
+    },
+    {
+      "source": "Modules/Statement/app/Models/StatementFile.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Models/StatementFile.php.txt",
+      "sha256": "5609a7ea8aedb732dd2768c8999fd8b1dcad86b1189564b36457e38ef5548579"
+    },
+    {
+      "source": "Modules/Statement/app/Models/StatementLog.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Models/StatementLog.php.txt",
+      "sha256": "48bf57ea12346231ab4d835c42547f0190f151c1e21ca15b623bea86788c8cd7"
+    },
+    {
+      "source": "Modules/Statement/app/Models/StatementLogAction.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Models/StatementLogAction.php.txt",
+      "sha256": "41ac47544f9e13d32ecae69685d84b3cfd437e7d2cedea80e9b75ef6ea448d56"
+    },
+    {
+      "source": "Modules/Statement/app/Models/StatementReply.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Models/StatementReply.php.txt",
+      "sha256": "984efee458c34a71c7fb275d95d669c6d852cc106db60e95478ab702938f5941"
+    },
+    {
+      "source": "Modules/Statement/app/Models/StatementUser.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Models/StatementUser.php.txt",
+      "sha256": "d47aab7c643ebe5f7eddea6afae9f7d9ac4603bc945165f1d096ee8df6ce3ee9"
+    },
+    {
+      "source": "Modules/Statement/app/Observers/StatementObserver.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Observers/StatementObserver.php.txt",
+      "sha256": "e58c1bae3c72b6e0fcb62497a48858d97f8f10915a39849f75eafda9c14852cb"
+    },
+    {
+      "source": "Modules/Statement/app/Policies/StatementPolicy.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Policies/StatementPolicy.php.txt",
+      "sha256": "4c793fe905946dbdb802055f589bb071b044ebeec94da867b75684284d3648b2"
+    },
+    {
+      "source": "Modules/Statement/app/Providers/RouteServiceProvider.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Providers/RouteServiceProvider.php.txt",
+      "sha256": "50fdb1a5c9458296557933fd82f09d255fde518ae3644ca9bc68189cfe67dc3a"
+    },
+    {
+      "source": "Modules/Statement/app/Providers/StatementServiceProvider.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Providers/StatementServiceProvider.php.txt",
+      "sha256": "777ce4dfccbded2a3112142fb1ea390aaca2607fd3ffe3ff0079a1d3fa09aa74"
+    },
+    {
+      "source": "Modules/Statement/app/Rules/UserBelongsToDepartment.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Rules/UserBelongsToDepartment.php.txt",
+      "sha256": "48c472bb195aa47bd372f0c1cccde0099d95a8488149d13cdb0e151189621e42"
+    },
+    {
+      "source": "Modules/Statement/app/Scopes/StatementScopes.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Scopes/StatementScopes.php.txt",
+      "sha256": "20dfc3efcec93fefc7f568d397e5fa6f6a2a068bd764221664c6858a1e20aee5"
+    },
+    {
+      "source": "Modules/Statement/app/Services/StatementService.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Services/StatementService.php.txt",
+      "sha256": "f368725c3d4e40e1ea60b797d9b8845cb3647947ee0e8bc75e69eef743f5d2e7"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/StatementStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/StatementStatus.php.txt",
+      "sha256": "d11d009f5aa2fc89dc93000284fd15241851b217c178d84eb62ea7302fffa04e"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/StatementStatusContext.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/StatementStatusContext.php.txt",
+      "sha256": "7fbd4c075f001f9e5969b112aadbb02b55cc19c28c285f2d6a8162c83a666de6"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/StatementStatusFactory.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/StatementStatusFactory.php.txt",
+      "sha256": "dd8611e776cca48965f8118219d819bed5bfbd85f5fd9b89aafd44924966f9a4"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/AnsweredStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/AnsweredStatus.php.txt",
+      "sha256": "c128276bdb29da2850ddbf304b9720a7d177d553a3d934c9bbfb595ff6d13ac7"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/ClosedAndNewStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/ClosedAndNewStatus.php.txt",
+      "sha256": "fb8bacf30e6969c95b14929bbabd5c1391667c7ee59a0c1b49b6318cb6113d0e"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/ClosedAndRelatedNewStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/ClosedAndRelatedNewStatus.php.txt",
+      "sha256": "5fbb6baa81b9d235781b32041089108d77eed5071761a6c18d71d64990cd99ac"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/ClosedStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/ClosedStatus.php.txt",
+      "sha256": "66fd97a5b710599ecc93f8d23154076ea217fe03b1b7821c923df25b9d60eee8"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/InProgressStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/InProgressStatus.php.txt",
+      "sha256": "98b0f76cf16485f3e7bef2df0511fc8eb585879ae2b582f377e16cf345df049c"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/ReceivedStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/ReceivedStatus.php.txt",
+      "sha256": "1f5a2bf878adfe099b5f8be5e016d1d1e5adc142f8264c4106fc1db285e774e7"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/RejectedStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/RejectedStatus.php.txt",
+      "sha256": "da434e844886866bfbce8b02ec4c9b12f4c5831e1541d91636790be6be0b5928"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/RequestedStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/RequestedStatus.php.txt",
+      "sha256": "4940b0b84b832e7664c89de11783dcdf7fe9d708f13cb7c09431fe48ce58e5d7"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/ReturnedForReviewStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/ReturnedForReviewStatus.php.txt",
+      "sha256": "6cc76814106e0f88b145fd69472c413690aa9e5427cf587961b86e89b838377e"
+    },
+    {
+      "source": "Modules/Statement/app/Tools/Status/Strategies/SentPendingStatus.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Tools/Status/Strategies/SentPendingStatus.php.txt",
+      "sha256": "e3ca9cb65cdd491e5bfb796318bdf45698ff2dac2f0defc3b3919a010fffd6c9"
+    },
+    {
+      "source": "Modules/Statement/app/Traits/StatementNumberObserver.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/app/Traits/StatementNumberObserver.php.txt",
+      "sha256": "1f840227b525121188a5209a28a02b7bcf24db8cca1c0d1fb732a3ab32554748"
+    },
+    {
+      "source": "Modules/Statement/config/config.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/config/config.php.txt",
+      "sha256": "6b8f06523bcf1921e8dcf0c9cde02817bb969e7941366567987875e7b6ee0561"
+    },
+    {
+      "source": "Modules/Statement/database/migrations/2026_01_10_100400_create_statement_tables.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/database/migrations/2026_01_10_100400_create_statement_tables.php.txt",
+      "sha256": "bc83b3162a8eb9026c2e761f9176fb557d0a0fc991c2ea2231d756929fcb3467"
+    },
+    {
+      "source": "Modules/Statement/database/migrations/2026_01_10_100500_update_statement_tables_add_deleted_by.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/database/migrations/2026_01_10_100500_update_statement_tables_add_deleted_by.php.txt",
+      "sha256": "b0f598700266aa37ab55d93eb74c59af59f16a68b66503cfaabe32dee3c3b8fe"
+    },
+    {
+      "source": "Modules/Statement/database/migrations/2026_01_10_100600_update_statement_tables_make_columns_nullable.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/database/migrations/2026_01_10_100600_update_statement_tables_make_columns_nullable.php.txt",
+      "sha256": "2918ab07913c940e6fcf2471ccedd7becc035cc9210fb2e1c97d6a7f28a427f7"
+    },
+    {
+      "source": "Modules/Statement/lang/ar/enums.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/ar/enums.php.txt",
+      "sha256": "5adb0d21c0fc3076344dccee3178277671da4f7220cc912fab98628a2ed4ec3d"
+    },
+    {
+      "source": "Modules/Statement/lang/ar/logs.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/ar/logs.php.txt",
+      "sha256": "0a745e7bb0e786f43b39f6dd073e92d7a55ae57233cb51eea6373494730f3b8e"
+    },
+    {
+      "source": "Modules/Statement/lang/ar/messages.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/ar/messages.php.txt",
+      "sha256": "1df415344481bd6faf116f39056a78d50182e66b3ed7785a43a4763f211b9aa1"
+    },
+    {
+      "source": "Modules/Statement/lang/ar/notifications.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/ar/notifications.php.txt",
+      "sha256": "af6afda41b009cc79f781258771576b40af143a9552d9e26f233a73176ffb1c7"
+    },
+    {
+      "source": "Modules/Statement/lang/ar/validation.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/ar/validation.php.txt",
+      "sha256": "ac294abf69c733b8595da5e1d1a7a7b32c03b6d3a515557029eed755ee6d2556"
+    },
+    {
+      "source": "Modules/Statement/lang/en/enums.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/en/enums.php.txt",
+      "sha256": "397359695fa4ebb1a72cc71032c1cf5a003e1e100fb7bcd9da84ddcd93e3812f"
+    },
+    {
+      "source": "Modules/Statement/lang/en/logs.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/en/logs.php.txt",
+      "sha256": "13f002201bcfc8ed72d507a932379d57f896908b49d1613619cb7e78bdbc56c9"
+    },
+    {
+      "source": "Modules/Statement/lang/en/messages.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/en/messages.php.txt",
+      "sha256": "08a0ca7b4734417e0791ed6e244f788cf9ef5919a9cce2df7332a9819ff0b677"
+    },
+    {
+      "source": "Modules/Statement/lang/en/notifications.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/en/notifications.php.txt",
+      "sha256": "af6afda41b009cc79f781258771576b40af143a9552d9e26f233a73176ffb1c7"
+    },
+    {
+      "source": "Modules/Statement/lang/en/validation.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/lang/en/validation.php.txt",
+      "sha256": "b3e2c7a5fba37a3ccae7d96ccf4f1201d70a37295b3b9636632f418df450a89b"
+    },
+    {
+      "source": "Modules/Statement/routes/api.php",
+      "snapshot": "references/snapshots/wakeb-legal/Modules/Statement/routes/api.php.txt",
+      "sha256": "e8fbf4089114feaafeeab8372ec7d36bce452a36129eb5da28840e104aed5340"
+    }
+  ]
+}

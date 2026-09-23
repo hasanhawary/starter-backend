@@ -1,0 +1,70 @@
+<?php
+
+namespace Modules\Statement\App\Http\Requests;
+
+use Illuminate\Validation\Rules\Enum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Tools\Status\StatementStatusContext;
+use Modules\Statement\App\Tools\Status\StatementStatusFactory;
+
+class StatementActionRequest extends BaseFormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        $statusRules = (new StatementStatusContext)
+            ->setStatus(StatementStatusFactory::guess($this->request->get('status')))
+            ->validateRules();
+
+        return [
+            'status' => ['required', 'string', new Enum(StatementStatusEnum::class)],
+            'notes' => ['nullable', 'string'],
+            ...$statusRules,
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return __('statement::validation.attributes');
+    }
+
+    public function messages(): array
+    {
+        return [
+            'status.required' => __('validation.required'),
+            'status.string' => __('validation.string'),
+
+            'notes.required' => __('validation.required'),
+            'notes.string' => __('validation.string'),
+
+            'reply.required' => __('validation.required'),
+            'reply.string' => __('validation.string'),
+
+            'reply_type.required' => __('validation.required'),
+            'reply_type.string' => __('validation.string'),
+            'reply_type.in' => __('validation.in'),
+
+            'files.array' => __('validation.array'),
+
+            'files.*.required' => __('validation.required'),
+
+            'department_ids.required' => __('validation.required'),
+            'department_ids.array' => __('validation.array'),
+            'department_ids.min' => __('validation.min.array'),
+
+            'department_ids.*.required' => __('validation.required'),
+            'department_ids.*.integer' => __('validation.integer'),
+
+            'user_ids.required' => __('validation.required'),
+            'user_ids.array' => __('validation.array'),
+            'user_ids.min' => __('validation.min.array'),
+
+            'user_ids.*.required' => __('validation.required'),
+            'user_ids.*.integer' => __('validation.integer'),
+        ];
+    }
+}

@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Http\Resources\DataEntry;
+
+use App\Enum\DataEntry\DepartmentLocationUserTypeEnum;
+use App\Http\Resources\Global\Other\BasicUserResource;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class DepartmentLocationUserResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'department_location_id' => $this->department_location_id,
+            'user_id' => $this->user_id,
+            'type' => $this->type,
+            'display_type' => DepartmentLocationUserTypeEnum::resolve($this->type),
+            'is_active' => $this->is_active,
+            'user' => $this->whenLoaded('user', fn () => new BasicUserResource($this->user), ['id' => $this->user_id]),
+        ];
+    }
+}

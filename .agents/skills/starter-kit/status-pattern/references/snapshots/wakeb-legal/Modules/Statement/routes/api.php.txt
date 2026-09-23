@@ -1,0 +1,38 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Modules\Statement\App\Http\Controllers\StatementController;
+use Modules\Statement\App\Http\Controllers\StatementFileController;
+
+/*
+    |--------------------------------------------------------------------------
+    | API Routes
+    |--------------------------------------------------------------------------
+    |
+    | Here is where you can register API routes for your application. These
+    | routes are loaded by the RouteServiceProvider within a group which
+    | is assigned the "api" middleware group. Enjoy building your API!
+    |
+*/
+
+Route::group([], function () {
+    Route::group(['middleware' => ['auth:sanctum', 'has-space']], function () {
+        /*
+        |--------------------------------------------------------------------------
+        | Statement Routes
+        |--------------------------------------------------------------------------
+        */
+        Route::group(['prefix' => 'statements'], function () {
+            Route::delete('force-delete', [StatementController::class, 'forceDelete']);
+            Route::delete('delete', [StatementController::class, 'destroy']);
+            Route::post('restore', [StatementController::class, 'restore']);
+
+            Route::get('requested-info', [StatementController::class, 'requestedInfo']);
+            Route::post('{statement}/take-action', [StatementController::class, 'takeAction']);
+            Route::post('{statement}/sync-users', [StatementController::class, 'syncUsers']);
+            Route::post('{statement}/delete-files', StatementFileController::class);
+
+            Route::apiResource('/', StatementController::class)->names('statements')->parameters(['' => 'statement'])->except(['destroy']);
+        });
+    });
+});

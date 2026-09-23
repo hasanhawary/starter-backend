@@ -1,0 +1,53 @@
+<?php
+
+namespace Modules\Statement\App\Models;
+
+use App\Trait\Global\CreatedByObserver;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Modules\Statement\App\Enum\StatementReplyTypeEnum;
+
+class StatementReply extends Model
+{
+    use CreatedByObserver;
+
+    public bool $inPermission = false;
+
+    protected $fillable = [
+        'statement_id',
+        'created_by',
+        'reply_type',
+        'reply',
+    ];
+
+    protected $casts = [
+        'reply_type' => StatementReplyTypeEnum::class,
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes && Casts methods
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations methods
+    |--------------------------------------------------------------------------
+    */
+    public function statement(): BelongsTo
+    {
+        return $this->belongsTo(Statement::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(config('statement.creator_model'), 'created_by');
+    }
+
+    public function files(): MorphMany
+    {
+        return $this->morphMany(StatementFile::class, 'fileable');
+    }
+}

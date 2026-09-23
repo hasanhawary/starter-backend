@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    private mixed $creatorModel;
+
+    public function __construct()
+    {
+        $this->creatorModel = config('statement.creator_model');
+    }
+
+    public function up(): void
+    {
+        Schema::table('statements', function (Blueprint $table) {
+            $table->foreignId('deleted_by')->nullable()->after('created_by')->constrained((new $this->creatorModel)->getTable())->nullOnDelete();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('statements', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('deleted_by');
+        });
+    }
+};

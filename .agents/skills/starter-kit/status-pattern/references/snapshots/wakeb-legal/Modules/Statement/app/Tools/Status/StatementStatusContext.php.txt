@@ -1,0 +1,56 @@
+<?php
+
+namespace Modules\Statement\App\Tools\Status;
+
+class StatementStatusContext
+{
+    protected StatementStatus $status;
+
+    public function setStatus(StatementStatus $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function handle(?array $params = []): void
+    {
+        $this->status->handle($params);
+    }
+
+    public function policy(): bool
+    {
+        if (isRoot()) {
+            return true;
+        }
+
+        return $this->status->policy();
+    }
+
+    public function validateRules(): array
+    {
+        return $this->status->validateRules();
+    }
+
+    public function buttons(): array
+    {
+        if (isRoot()) {
+            return $this->status->buttons();
+        }
+
+        return collect($this->status->buttons())->filter(function ($button) {
+            $tempStatus = clone $this;
+
+            return $tempStatus->setStatus($this->createStatusFromFactory($button['key']))->policy();
+        })->values()->toArray();
+    }
+
+    protected function createStatusFromFactory(string $buttonKey): StatementStatus
+    {
+        return StatementStatusFactory::guess(
+            $buttonKey,
+            $this->status->getModel(),
+            $this->status->getUser()
+        );
+    }
+}

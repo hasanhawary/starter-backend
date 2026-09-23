@@ -1,0 +1,25 @@
+<?php
+
+namespace Modules\Statement\App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+
+class StatementLogResource extends BaseResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'old_status' => StatementStatusEnum::resolve($this->old_status),
+            'new_status' => StatementStatusEnum::resolve($this->new_status),
+            'type' => StatementLogTypeEnum::resolve($this->type),
+            'notes' => $this->notes,
+            'message' => transWithParams($this->message, 'statement::logs'),
+            'actor' => $this->whenLoaded('actor', fn () => new $this->creatorResource($this->actor)),
+            'actions' => $this->whenLoaded('actions', fn () => StatementLogActionResource::collection($this->actions)),
+            'created_at' => $this->created_at,
+        ];
+    }
+}

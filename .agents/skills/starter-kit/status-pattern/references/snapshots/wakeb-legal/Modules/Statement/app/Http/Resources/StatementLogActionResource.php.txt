@@ -1,0 +1,17 @@
+<?php
+
+namespace Modules\Statement\App\Http\Resources;
+
+use Illuminate\Http\Request;
+
+class StatementLogActionResource extends BaseResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'action_id' => $this->action_id,
+            'action_type' => $this->action_type,
+        ];
+    }
+}

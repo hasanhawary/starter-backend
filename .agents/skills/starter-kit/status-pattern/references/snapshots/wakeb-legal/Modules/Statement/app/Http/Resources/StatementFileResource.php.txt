@@ -1,0 +1,22 @@
+<?php
+
+namespace Modules\Statement\App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Number;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+
+class StatementFileResource extends BaseResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'path' => $this->path,
+            'size' => $this->size ? Number::fileSize($this->size, precision: 2) : null,
+            'status' => StatementStatusEnum::resolve($this->status?->name ?? $this->status),
+            'created_at' => $this->created_at,
+        ];
+    }
+}

@@ -1,6 +1,27 @@
-# Review, Debugging, Refactoring, Anti-Patterns, And Quality Checklist
+# Review, Debugging, Minimal Changes, And Testing
 
-Use this rule when reviewing code, diagnosing bugs, refactoring, or doing final quality checks.
+Use this rule when implementing or simplifying code, reviewing changes, diagnosing bugs, refactoring, writing PHPUnit tests, or checking quality before finishing.
+
+## Minimal Changes And Refactoring
+
+- Inspect sibling files and follow the existing architecture; generic Laravel advice must not introduce a second style for the same concern.
+- Every line, word, import, variable, query, wrapper, abstraction, and file must have a concrete need. Start with the smallest behavior-preserving change and refactor only what the task needs, one refactoring type at a time.
+- Preserve public APIs, route names, request keys, response keys, and behavior unless explicitly asked to change them.
+- Reuse and extend the existing controller/model/resource/request/service before creating a class. Do not create a file for stylistic purity, one method, or hypothetical reuse; create one only when framework-required or it has a real separate reusable responsibility. Explain why each new file is necessary.
+- Use route model binding directly; do not re-query unless a scope/access constraint or transactional row lock requires it.
+- Remove redundant authorization/query layers, but never remove validation, authorization, data-access boundaries, deterministic ordering, or tests as "boilerplate".
+- Extract business logic to [services](services.md), query branches to [Pipeline filters](filters-performance.md), and reusable model/controller behavior to traits only when reused or clearly cross-cutting.
+- Replace repeated magic strings with enums/constants/translations.
+- Do not introduce repositories, DTOs, action classes, or API versioning by default; use them only when current code uses them or the user explicitly requests them.
+- Verify each meaningful refactor with focused tests or direct reproduction.
+- Remove debug leftovers (`dd()`, `dump()`, temporary debug responses), unused imports/variables, and commented-out code before finishing.
+
+## Collections, Types, And Comments
+
+- Use Collection methods where they improve clarity.
+- Prefer Laravel helpers such as `Str`, `Arr`, `Number`, and `Uri` over raw PHP when appropriate.
+- Use explicit return and parameter types; use PHPDoc for useful array shapes or exceptions.
+- Comments should explain non-obvious behavior, not restate code. Avoid speculative abstractions.
 
 ## Debugging Flow
 
@@ -25,24 +46,21 @@ Use this rule when reviewing code, diagnosing bugs, refactoring, or doing final 
 - 500: logs, missing class/namespace/import, DB schema mismatch, enum/cast issue.
 - Empty list: Pipeline filters, `related()` scope, soft deletes, pagination, eager loading, auth ownership scope.
 
-## Code Review Behavior
+## Code Review And Quality Checks
 
-Findings come first and are ordered by severity. Include file and line references when possible.
+Present findings first, ordered by severity, with file and line references when possible. Use the canonical topics below for their detailed requirements rather than duplicating their anti-pattern lists:
 
-Check:
-
-- Base classes and folder placement.
-- Response envelope and translation use.
-- Form Request validation and `$request->validated()`.
-- Authorization through `PermissionMiddleware` and/or `Gate`/Policy, matching the current domain pattern.
-- Service boundaries.
-- Fillable, casts, relations, and sensitive hidden fields.
-- Pipeline filters and pagination.
-- Transactions and after-commit side effects.
-- N+1 risks and unbounded queries.
-- SQL injection, hardcoded secrets, insecure uploads, over-broad mass assignment.
-- Tests for happy path, validation, auth, and authorization.
-- Debug artifacts and unused code.
+| Review area | Canonical checks |
+| --- | --- |
+| Context and structure | [Architecture](architecture.md): sibling conventions, reuse, folder placement, and layer responsibilities; verify base classes in the corresponding API, validation, and model rules. |
+| API contract | [Controllers and routes](api-controllers-routes.md): response envelope, translated messages, `wrapPaginate()` lists, protected `auth:sanctum` routes, delete/restore/force-delete/toggle-active patterns, and resource keys. |
+| Validation | [Validation](validation.md): Form Requests, validated writes, custom rules and uploads. |
+| Security and error handling | [Security and authorization](security-auth.md): middleware/Gate/Policy protection, SQL injection, secrets/logging, upload safety, password hashing/casts, mass assignment, and exception handling. |
+| Business mutations | [Services](services.md): thin controllers, dependency injection instead of `new SomeService()`, transactions for multiple writes, after-commit side effects, and no HTTP responses, request access, validation, or authorization in services. |
+| Data | [Models and database](models-database.md): fillable/casts/hidden fields, typed relation objects, migration indexes/FKs/delete behavior/timestamps/soft deletes, new migrations for production schema changes, idempotent seeders, and useful factories. |
+| Queries and performance | [Filters and performance](filters-performance.md): reusable Pipeline filters, eager loading, N+1 avoidance, bounded lists/pagination, and no resource/loop queries or duplicated filter/search logic. |
+| Background work and configuration | [Jobs, settings, and environment](services.md): queue heavy work and invalidate changed settings/config caches. |
+| Verification and cleanup | [Testing](#testing): meaningful happy-path, validation, authentication and authorization coverage; focused verification; formatting; no debug artifacts or unused code. |
 
 Severity:
 
@@ -51,90 +69,77 @@ Severity:
 - Medium: missing test, missing index, inconsistent naming, missing translation, cache invalidation issue.
 - Low: maintainability or small consistency improvements.
 
-## Refactoring Rules
+## Testing
 
-- Refactor only what is necessary for the task.
-- Preserve public API, route names, request keys, response keys, and behavior unless explicitly asked to change them.
-- One refactoring type at a time.
-- Extract business logic to services.
-- Extract query branches to Pipeline filters.
-- Extract reusable model/controller behavior to traits only when reused or clearly cross-cutting.
-- Replace repeated magic strings with enums/constants/translations.
-- Do not introduce repositories, DTOs, or action classes unless current code uses them or the user explicitly asks.
-- Run focused verification after each meaningful refactor.
+- Use PHPUnit only; do not use Pest syntax. Prefer feature tests for API endpoints.
+- Feature tests live in `tests/Feature/` and extend `Tests\TestCase`; unit tests live in `tests/Unit/`.
+- Name tests `test_{behavior_description}`.
+- Use factories and Faker; avoid raw inserts unless testing a database edge case.
+- Prefer `assertModelExists()` and model assertions where suitable.
+- Cover response envelopes, database effects, happy paths, unauthenticated, unauthorized, and authorized flows as applicable.
+- Test required fields, invalid types, uniqueness, file rules, and relation existence. Follow the exact translated error/message assertions in [validation](validation.md#translated-validation-verification).
+- Set up fakes for mail, notifications, events, queues, and HTTP clients after factory setup. For HTTP calls, use `Http::fake()` and `preventStrayRequests()`.
 
-## Forbidden Patterns
+### PHPUnit Feature Test Template
 
-- Fat controllers with business logic, transactions, relation syncing, and notifications inline.
-- Inline validation in controllers.
-- `$request->all()` for create/update.
-- Raw `response()->json()` for normal API responses.
-- Missing authorization through `PermissionMiddleware`, `Gate::authorize()`, or policy checks on protected operations.
-- Services returning `JsonResponse` or calling `response()`, `request()`, or `Gate::authorize()`.
-- `new SomeService()` in controllers; use dependency injection.
-- `$guarded = []`.
-- Raw SQL or `whereRaw()` using unsanitized user input.
-- Querying inside loops or resources.
-- Loading all records from list endpoints.
-- Modifying production migrations instead of adding a new migration.
-- Hardcoded user-facing messages.
-- Hardcoded secrets or `.env` values.
-- Plain password storage; use hashing/casts.
-- Unvalidated uploads.
-- Duplicated filter/search logic across controllers.
-- API versioning, repository pattern, DTOs, or action classes by default.
-- Form Request `authorize()` as the primary authorization layer unless nearby code already uses it.
-- Pest syntax.
-- Debug leftovers: `dd()`, `dump()`, temporary debug responses, unused imports, commented-out code.
+Use PHPUnit method names and Laravel HTTP assertions. Cover response envelope, auth, validation, and database effects.
 
-## Quality Checklist
+```php
+<?php
 
-```text
-Context
-[ ] Inspected existing sibling files and followed local conventions.
-[ ] Reused existing filters, services, traits, requests, resources, rules, helpers, and enums where possible.
+namespace Tests\Feature\DataEntry;
 
-Structure
-[ ] Controller extends BaseController.
-[ ] Request extends BaseFormRequest.
-[ ] Model extends BaseModel or justified vendor/auth base.
-[ ] Resource extends JsonResource.
-[ ] Service created for non-trivial business logic.
+use App\Models\User;
+use Tests\TestCase;
 
-API
-[ ] Responses use successResponse()/failResponse().
-[ ] Lists use wrapPaginate().
-[ ] Routes are under auth:sanctum when protected.
-[ ] Delete/restore/force-delete/toggle-active routes follow project pattern.
-[ ] Resource keys match request/API contract needs.
+class ProductTest extends TestCase
+{
+    public function test_authorized_user_can_create_product(): void
+    {
+        $user = User::factory()->create();
 
-Security
-[ ] Form Request validates all input.
-[ ] Writes use $request->validated().
-[ ] Authorization is present through PermissionMiddleware and/or Gate/Policy, matching sibling controllers.
-[ ] No raw SQL with user input.
-[ ] No secrets or sensitive data exposed/logged.
-[ ] File uploads validate type and size.
+        $payload = [
+            'name' => ['ar' => 'منتج', 'en' => 'Product'],
+            'description' => ['ar' => 'وصف', 'en' => 'Description'],
+            'code' => 'PRD-001',
+            'is_active' => true,
+        ];
 
-Data
-[ ] Model has fillable, casts, hidden as needed.
-[ ] Relations have correct types and return relation objects.
-[ ] Migration has indexes/FKs/delete behavior/timestamps/soft deletes as appropriate.
-[ ] Seeders are idempotent and factories are used where useful.
+        $response = $this->actingAs($user, 'sanctum')
+            ->postJson('/api/products', $payload);
 
-Performance
-[ ] List endpoint uses Pipeline filters.
-[ ] Relations are eager loaded where resources need them.
-[ ] No unbounded table results.
-[ ] Heavy work is queued.
-[ ] Cache invalidation is handled when settings/config data changes.
+        $response
+            ->assertOk()
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('data.code', 'PRD-001');
 
-Testing
-[ ] PHPUnit tests added or updated for meaningful behavior.
-[ ] Auth, authorization, validation, and happy path are covered when applicable.
-[ ] Focused tests were run when feasible.
-[ ] Pint/formatting was run when feasible.
+        $this->assertDatabaseHas('products', [
+            'code' => 'PRD-001',
+        ]);
+    }
+
+    public function test_product_name_is_required(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->postJson('/api/products', [
+                'code' => 'PRD-002',
+            ]);
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonStructure(['message', 'errors' => ['name']]);
+    }
+}
 ```
+
+### Verification Commands
+
+- Run focused tests after changes: `php artisan test --compact --filter=ProductTest`.
+- For broad changes, run `php artisan test --compact` or `composer test`.
+- Run `vendor/bin/pint` after PHP edits when feasible.
+- If tests cannot run because the environment is incomplete, state what blocked verification.
 
 ## Pattern Learning
 

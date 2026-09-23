@@ -1,0 +1,23 @@
+<?php
+
+namespace Modules\Statement\App\Observers;
+
+use Modules\Statement\App\Models\Statement;
+
+class StatementObserver
+{
+    public function created(Statement $model): void
+    {
+        //
+    }
+
+    public function updated(Statement $model): void
+    {
+        //
+    }
+
+    public function deleted(Statement $model): void
+    {
+        //
+    }
+}

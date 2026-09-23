@@ -1,0 +1,8 @@
+<?php
+
+return [
+    'related_statement_not_found_or_status_incorrect' => 'The related statement was not found or its status is incorrect.',
+    'can_not_close_related_statement' => 'Cannot close the related statement.',
+    'statement_not_in_requested_info_status' => 'Statement is not in requested info status.',
+    'you_do_not_own_this_statement' => 'You don\'t own this statement.',
+];

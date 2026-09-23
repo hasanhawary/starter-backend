@@ -64,9 +64,9 @@ class AdminPolicy
 
 - Never expose passwords, tokens, secrets, OTPs, private keys, or raw encrypted values.
 - Use `$hidden` for sensitive model fields.
+- Store passwords through the existing hashing/cast/mutator flow; never store plaintext passwords.
 - Never log passwords, OTPs, tokens, or full request bodies containing secrets.
-- Use `config()` for config values; use `env()` only inside config files.
-- `.env` must not be committed; `.env.example` can be updated safely.
+- Never commit `.env`, tokens, passwords, or other secrets; see [configuration rules](services.md) for application access and `.env.example`.
 - `APP_DEBUG` must be false in production.
 
 ## Uploads

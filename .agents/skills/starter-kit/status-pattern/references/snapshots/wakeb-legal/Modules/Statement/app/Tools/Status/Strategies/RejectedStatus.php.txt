@@ -1,0 +1,95 @@
+<?php
+
+namespace Modules\Statement\App\Tools\Status\Strategies;
+
+use App\Enum\Global\ActiveTypeEnum;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Modules\Notification\app\Enum\SystemEventSlugEnum;
+use Modules\Notification\app\Tools\Facades\Notification;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementReplyTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Tools\Status\StatementStatus;
+
+class RejectedStatus extends StatementStatus
+{
+    public function handle(?array $params = []): void
+    {
+        $oldStatus = $this->model->status;
+
+        $this->model->update(['status' => StatementStatusEnum::Rejected->value]);
+
+        $this->model->replies()->create([
+            'reply_type' => $params['reply_type'],
+            'reply' => $params['reply'],
+        ]);
+
+        $logType = $params['reply_type'] == StatementReplyTypeEnum::InsufficientData->value
+            ? StatementLogTypeEnum::RequestedData
+            : StatementLogTypeEnum::Rejected;
+
+        $this->model->log(
+            $oldStatus,
+            $logType->value,
+            buildDelimiterMessage(Str::snake($logType->name), [
+                'name' => auth()->user()->name,
+            ]),
+            $params['notes'] ?? null
+        );
+
+        $this->handleNotifications();
+    }
+
+    public function sendNotifications(): void
+    {
+        if ($this->model?->status === StatementStatusEnum::Rejected) {
+            Notification::send(SystemEventSlugEnum::StatementRejected->value, $this->model->refresh());
+
+            return;
+        }
+
+        // Insufficient-data path: status is left unchanged, only a data request was logged.
+        Notification::send(SystemEventSlugEnum::StatementRequested->value, $this->model->refresh());
+    }
+
+    public function policy(): bool
+    {
+        return in_array($this->model?->status?->value, [
+            StatementStatusEnum::InProgress->value,
+            StatementStatusEnum::ReturnedForReview->value,
+        ])
+            && (
+                $this->model?->users()
+                    ->where('users.id', $this->user?->id)
+                    ->wherePivot('is_active', ActiveTypeEnum::Active->value)
+                    ->exists()
+                || $this->model?->isDelegatedAssignee($this->model?->mainUser?->id, $this->user?->id)
+            );
+    }
+
+    public function validateRules(): array
+    {
+        return [
+            'reply_type' => ['required', 'string', Rule::in(StatementReplyTypeEnum::getRejectedTypes())],
+            'reply' => ['required', 'string'],
+            'notes' => ['nullable', 'string'],
+        ];
+    }
+
+    public function buttons(): array
+    {
+        return [
+            [
+                'key' => StatementStatusEnum::ClosedAndNew->value,
+                'label' => StatementLogTypeEnum::RedirectSameAndClosed->selfResolve(),
+                'type' => 'modal',
+            ],
+            [
+                'key' => StatementStatusEnum::ClosedAndRelatedNew->value,
+                'label' => StatementLogTypeEnum::RedirectDifferentAndClosed->selfResolve(),
+                'type' => 'modal',
+            ],
+        ];
+    }
+}

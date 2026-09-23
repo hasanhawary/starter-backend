@@ -1,0 +1,276 @@
+<?php
+
+namespace Modules\Statement\App\Providers;
+
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
+use Modules\Statement\App\Console\Commands\ProcessStatementDeadlinesCommand;
+use Modules\Statement\App\Models\Statement;
+use Modules\Statement\App\Observers\StatementObserver;
+use Modules\Statement\App\Policies\StatementPolicy;
+
+class StatementServiceProvider extends ServiceProvider
+{
+    /**
+     * @var string
+     */
+    protected $moduleName = 'Statement';
+
+    /**
+     * @var string
+     */
+    protected $moduleNameLower = 'statement';
+
+    /**
+     * Boot the application events.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->registerTranslations();
+        $this->registerConfig();
+        $this->registerViews();
+        $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
+
+        $this->registerObservers();
+        $this->registerPolicies();
+
+        $this->mergeEnumTranslation();
+        $this->mergeReportTranslation();
+        $this->mergeExportTranslation();
+        $this->mergeNotificationTranslation();
+
+        $this->extendReportPages();
+
+        $this->registerSchedule();
+    }
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->register(RouteServiceProvider::class);
+
+        $this->commands([
+            ProcessStatementDeadlinesCommand::class,
+        ]);
+    }
+
+    /**
+     * Register config.
+     *
+     * @return void
+     */
+    protected function registerConfig()
+    {
+        $this->publishes([
+            module_path($this->moduleName, 'config/config.php') => config_path($this->moduleNameLower.'.php'),
+        ], 'config');
+        $this->mergeConfigFrom(
+            module_path($this->moduleName, 'config/config.php'), $this->moduleNameLower
+        );
+        $this->mergeConfigFrom(
+            module_path($this->moduleName, 'config/report.php'), $this->moduleNameLower.'.report'
+        );
+    }
+
+    /**
+     * Register views.
+     *
+     * @return void
+     */
+    public function registerViews()
+    {
+        $viewPath = resource_path('views/modules/'.$this->moduleNameLower);
+
+        $sourcePath = module_path($this->moduleName, 'resources/views');
+
+        $this->publishes([
+            $sourcePath => $viewPath,
+        ], ['views', $this->moduleNameLower.'-module-views']);
+
+        $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->moduleNameLower);
+    }
+
+    /**
+     * Register translations.
+     *
+     * @return void
+     */
+    public function registerTranslations()
+    {
+        $langPath = resource_path('lang/modules/'.$this->moduleNameLower);
+
+        if (is_dir($langPath)) {
+            $this->loadTranslationsFrom($langPath, $this->moduleNameLower);
+        } else {
+            $this->loadTranslationsFrom(module_path($this->moduleName, 'lang'), $this->moduleNameLower);
+        }
+    }
+
+    /**
+     * Get the services provided by the service provider.
+     *
+     * @return array
+     */
+    public function provides()
+    {
+        return [];
+    }
+
+    private function getPublishableViewPaths(): array
+    {
+        $paths = [];
+        foreach (\Config::get('view.paths') as $path) {
+            if (is_dir($path.'/modules/'.$this->moduleNameLower)) {
+                $paths[] = $path.'/modules/'.$this->moduleNameLower;
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * Register Observers
+     */
+    protected function registerObservers(): void
+    {
+        Statement::observe(StatementObserver::class);
+    }
+
+    /**
+     * Register Policies
+     */
+    protected function registerPolicies(): void
+    {
+        Gate::policy(Statement::class, StatementPolicy::class);
+    }
+
+    /**
+     * Merge export translations to main export file in lang.
+     */
+    protected function mergeExportTranslation(): void
+    {
+        $this->mergeTranslations('export');
+    }
+
+    /**
+     * Merge report translations to main report file in lang.
+     */
+    protected function mergeReportTranslation(): void
+    {
+        $this->mergeTranslations('report');
+    }
+
+    /**
+     * Merge enum translations to main enum file in lang.
+     */
+    protected function mergeEnumTranslation(): void
+    {
+        $this->mergeTranslations('enums');
+    }
+
+    /**
+     * Merge notifications translations to main notifications file in lang.
+     */
+    protected function mergeNotificationTranslation(): void
+    {
+        $this->mergeTranslations('notifications');
+    }
+
+    /**
+     * Generic helper to merge module translations into the application translator.
+     *
+     * @param  string  $fileName  The name of the file (e.g., 'report' or 'enums')
+     */
+    protected function mergeTranslations(string $fileName): void
+    {
+        $langPath = module_path('Statement', 'lang');
+
+        if (! is_dir($langPath)) {
+            return;
+        }
+
+        foreach (glob("{$langPath}/*/{$fileName}.php") as $filePath) {
+            $locale = basename(dirname($filePath));
+            $moduleTranslations = require $filePath;
+
+            if (! is_array($moduleTranslations)) {
+                continue;
+            }
+
+            $this->callAfterResolving('translator', function ($translator) use ($moduleTranslations, $locale, $fileName) {
+                $appFile = lang_path("{$locale}/{$fileName}.php");
+                $appTranslations = file_exists($appFile) ? require $appFile : [];
+
+                $merged = $appTranslations;
+                foreach ($moduleTranslations as $section => $entries) {
+                    if (is_array($entries)) {
+                        $merged[$section] = array_merge(
+                            $entries,
+                            $merged[$section] ?? []
+                        );
+                    } else {
+                        $merged[$section] ??= $entries;
+                    }
+                }
+
+                $translator->addLines(
+                    $this->dotFlatten($merged, $fileName),
+                    $locale
+                );
+            });
+        }
+    }
+
+    /**
+     * Flatten nested array into dot-notation keys with a prefix.
+     */
+    protected function dotFlatten(array $array, string $prefix = ''): array
+    {
+        $result = [];
+
+        foreach ($array as $key => $value) {
+            $fullKey = $prefix ? "{$prefix}.{$key}" : $key;
+
+            if (is_array($value)) {
+                $result = array_merge($result, $this->dotFlatten($value, $fullKey));
+            } else {
+                $result[$fullKey] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Generic helper to merge pages to report config.
+     */
+    protected function extendReportPages(): void
+    {
+        $pages = config('report.types', []);
+
+        $modulePages = config('statement.report.types', []);
+
+        config([
+            'report.types' => array_merge($pages, $modulePages),
+        ]);
+    }
+
+    /**
+     * Register the scheduled cron for notifying about statements
+     * whose deadline is within 48 hours.
+     */
+    protected function registerSchedule(): void
+    {
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+            $schedule->command('statements:process-deadlines')->daily();
+        });
+    }
+}

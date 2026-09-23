@@ -1,0 +1,25 @@
+<?php
+
+namespace Modules\Delegation\App\Traits;
+
+use Illuminate\Database\Eloquent\Builder;
+use Modules\Delegation\App\Support\AssignedToScopeBuilder;
+use Modules\Delegation\App\Support\DelegatableRegistry;
+
+trait HasAssignedToScope
+{
+    /**
+     * Records owned by the given user according to the `ownership` block
+     * declared in the model's delegation config.
+     */
+    public function scopeAssignedTo(Builder $query, int $userId): Builder
+    {
+        $definition = DelegatableRegistry::definition(static::class);
+
+        return AssignedToScopeBuilder::apply(
+            $query,
+            $userId,
+            $definition['ownership'] ?? []
+        );
+    }
+}

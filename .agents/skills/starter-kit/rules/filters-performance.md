@@ -96,8 +96,15 @@ Create a custom filter only when existing filters cannot express the query. One 
 - Use `withCount()` for counts instead of loading whole relations.
 - Select only needed columns where safe.
 - Paginate all list endpoints; never return all records for a table endpoint.
-- Use chunking/lazy iteration for large datasets.
+- Use `chunk()`, `chunkById()`, `lazy()`, or `cursor()` for large datasets.
 - Use indexes for filter/sort/search columns.
-- Cache expensive settings/config queries with brand-aware keys when following `SettingService` patterns.
-- Use queues for exports, email, SMS, notifications, reports, and heavy work.
+- Use the [service, cache, and queue guidance](services.md) for expensive settings queries and background work.
 - Avoid queries in loops, resources, mail views, notifications, or templates unless explicitly preloaded.
+
+## Advanced Queries
+
+- Prefer `addSelect()` subqueries when only one related value is needed.
+- Use conditional aggregates instead of multiple count queries when useful.
+- Use `setRelation()` when an already-known parent relation prevents circular N+1 issues.
+- Prefer simple indexed queries over one complex query when clearer and faster.
+- Match compound indexes to common filter and sort order.

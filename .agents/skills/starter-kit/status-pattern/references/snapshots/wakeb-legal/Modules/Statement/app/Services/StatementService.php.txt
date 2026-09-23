@@ -1,0 +1,288 @@
+<?php
+
+namespace Modules\Statement\App\Services;
+
+use App\Jobs\ProcessImageUploadJob;
+use App\Services\Global\AssignmentPermissionService;
+use App\Services\Global\UploadService;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Str;
+use Modules\Notification\app\Enum\SystemEventSlugEnum;
+use Modules\Notification\app\Tools\Facades\Notification;
+use Modules\Statement\App\Enum\StatementAssignedUserTypeEnum;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Models\Statement;
+use Modules\Statement\App\Models\StatementLog;
+use Modules\Statement\App\Models\StatementUser;
+use Modules\Statement\App\Tools\Status\StatementStatusFactory;
+
+class StatementService
+{
+    public function saveStatement(array $data, ?Statement $statement = null): Statement
+    {
+        $isDraft = $data['is_draft'] ?? false;
+        $statementableModel = config('statement.statementable_model');
+
+        $cause = $statementableModel::query()->where('id', $data['cause_id'])->first();
+
+        $attributes = [
+            'subject' => $data['subject'],
+            'description' => $data['description'],
+            'deadline' => $data['deadline'] ?? null,
+            'statementable_type' => $statementableModel,
+            'statementable_id' => $cause->id,
+            // 'parent_id' => $data['parent_id'] ?? null,
+        ];
+
+        if ($statement) {
+            $statement->update($attributes);
+
+            $this->logStatement($statement, StatementLogTypeEnum::Updated);
+
+            $wasDraft = $statement->is_draft;
+
+            $this->syncDepartments($data, $statement);
+            $this->syncUsers($data, $statement);
+
+            if ($wasDraft && ! $isDraft) {
+                $this->enterLifeCycle($statement, $isDraft);
+            }
+
+            return $statement;
+        }
+
+        $statement = Statement::create([
+            ...$attributes,
+            'is_draft' => $isDraft,
+            'status' => $isDraft ? StatementStatusEnum::Draft : StatementStatusEnum::SentPending,
+        ]);
+
+        $type = $isDraft ? StatementLogTypeEnum::CreatedDraft : StatementLogTypeEnum::Created;
+        $this->logStatement($statement, $type);
+
+        $this->syncDepartments($data, $statement);
+        $this->syncUsers($data, $statement);
+
+        $this->enterLifeCycle($statement, $isDraft);
+
+        return $statement;
+    }
+
+    public function syncDepartments(array $data, Statement $statement): void
+    {
+        if (! isset($data['department_ids'])) {
+            return;
+        }
+
+        $statement->departments()->sync($data['department_ids']);
+    }
+
+    public function syncUsers(array $data, Statement $statement): void
+    {
+        if (! isset($data['user_ids'])) {
+            return;
+        }
+
+        $now = now();
+        $pivotData = collect($data['user_ids'])->mapWithKeys(fn ($id) => [
+            $id => [
+                'type' => StatementAssignedUserTypeEnum::Reserve,
+                'created_by' => auth()->id(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ])->toArray();
+
+        $statement->users()->sync($pivotData);
+
+        $this->grantViewOwnPermission($data['user_ids']);
+    }
+
+    public function syncStatementFile(array $data, Model $model, bool $isUpdate = false): void
+    {
+        if (! isset($data['files'])) {
+            return;
+        }
+
+        $files = collect($data['files']);
+
+        if ($isUpdate && $files->isNotEmpty()) {
+            $model->files()->forceDelete();
+        }
+
+        foreach ($files as $file) {
+            $path = UploadService::store($file, 'statements');
+            $file = $model->files()->create([
+                'name' => $file->getClientOriginalName(),
+                'path' => $path,
+                'size' => $file->getSize(),
+                'status' => $model->status->value ?? $model->status,
+                'created_by' => auth()->id(),
+            ]);
+
+            try {
+                $file->refresh();
+                dispatch(new ProcessImageUploadJob($file, ['path' => $file->path]));
+            } catch (\Exception $e) {
+                logError($e);
+            }
+        }
+    }
+
+    public function copyStatement(Statement $statement, array $data): Statement
+    {
+        $newStatement = $this->saveStatement([
+            'subject' => $statement->subject,
+            'description' => $statement->description,
+            'deadline' => $statement->deadline,
+            'cause_id' => $statement->statementable_id,
+            'is_draft' => false,
+            'department_ids' => $data['department_ids'] ?? [],
+            'user_ids' => $data['user_ids'] ?? [],
+        ]);
+
+        $this->copyStatementFiles($statement, $newStatement);
+
+        return $newStatement;
+    }
+
+    private function copyStatementFiles(Statement $source, Statement $target): void
+    {
+        foreach ($source->files as $file) {
+            $file = $target->files()->create([
+                'name' => $file->name,
+                'path' => $file->getRawOriginal('path'),
+                'size' => $file->size,
+                'status' => $target->status->value ?? $target->status,
+                'created_by' => auth()->id(),
+            ]);
+
+            try {
+                $file->refresh();
+                dispatch(new ProcessImageUploadJob($file, ['path' => $file->path]));
+            } catch (\Exception $e) {
+                logError($e);
+            }
+        }
+    }
+
+    public function handleClosedRelated(array $data, Statement $statement): void
+    {
+        if (empty($data['related_statement_id']) || empty($data['related_statement_status'])) {
+            return;
+        }
+
+        $relatedStatement = Statement::query()->where('id', $data['related_statement_id'])->where('status', StatementStatusEnum::Rejected)->first();
+        if (! $relatedStatement) {
+            throw new HttpResponseException(failResponse(trans('statement::messages.related_statement_not_found_or_status_incorrect'), 400));
+        }
+
+        $status = StatementStatusFactory::guess($data['related_statement_status'], $relatedStatement);
+
+        if ($status->policy()) {
+            throw new HttpResponseException(failResponse(trans('statement::messages.can_not_close_related_statement'), 400));
+        }
+
+        $status->handle(['statement_id' => $statement->id]);
+
+        if ($data['related_statement_status'] == StatementStatusEnum::ClosedAndRelatedNew->value) {
+            $statement->update(['parent_id' => $relatedStatement->id]);
+        }
+    }
+
+    public function manageUsers(Statement $statement, array $assignIds = [], array $removeIds = []): void
+    {
+        if (empty($assignIds) && empty($removeIds)) {
+            return;
+        }
+
+        if (! empty($removeIds)) {
+            $this->removeUsers($statement, $removeIds);
+        }
+
+        if (! empty($assignIds)) {
+            $this->assignUsers($statement, $assignIds);
+        }
+    }
+
+    private function assignUsers(Statement $statement, array $assignIds): void
+    {
+        $existingUserIds = StatementUser::query()
+            ->where('statement_id', $statement->id)
+            ->whereIn('user_id', $assignIds)
+            ->pluck('user_id')
+            ->toArray();
+        $newUserIds = array_diff($assignIds, $existingUserIds);
+
+        $now = now();
+        $pivotData = collect($assignIds)->mapWithKeys(fn ($id) => [
+            $id => [
+                'type' => StatementAssignedUserTypeEnum::Reserve,
+                'is_active' => true,
+                'created_by' => auth()->id(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ])->toArray();
+
+        $statement->users()->syncWithoutDetaching($pivotData);
+
+        $this->grantViewOwnPermission($assignIds);
+
+        $log = $this->logStatement($statement, StatementLogTypeEnum::UserAssigned);
+
+        foreach ($assignIds as $userId) {
+            $log->actions()->create([
+                'action_id' => $userId,
+                'action_type' => config('statement.creator_model'),
+            ]);
+        }
+
+        if (! empty($newUserIds)) {
+            Notification::send(SystemEventSlugEnum::StatementAssignUser->value, $statement->refresh());
+        }
+    }
+
+    private function removeUsers(Statement $statement, array $removeIds): void
+    {
+        $statement->users()->detach($removeIds);
+
+        $log = $this->logStatement($statement, StatementLogTypeEnum::UserRemoved);
+
+        foreach ($removeIds as $userId) {
+            $log->actions()->create([
+                'action_id' => $userId,
+                'action_type' => config('statement.creator_model'),
+            ]);
+        }
+    }
+
+    private function grantViewOwnPermission(array $userIds): void
+    {
+        AssignmentPermissionService::grantViewOwn('statement', $userIds);
+    }
+
+    private function logStatement(Statement $statement, StatementLogTypeEnum $type): StatementLog
+    {
+        $data = [
+            'type' => $type->value,
+            'message' => buildDelimiterMessage(Str::snake($type->name), [
+                'name' => auth()->user()->name,
+            ]),
+        ];
+
+        return $statement->logs()->create($data);
+    }
+
+    private function enterLifeCycle(Statement $statement, bool $isDraft): void
+    {
+        if ($isDraft) {
+            return;
+        }
+
+        $statusClass = StatementStatusFactory::guess(StatementStatusEnum::SentPending->value, $statement);
+        $statusClass->handle();
+    }
+}

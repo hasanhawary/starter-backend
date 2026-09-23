@@ -1,0 +1,114 @@
+<?php
+
+namespace Modules\Statement\App\Http\Requests;
+
+use App\Rules\ModelExists;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\File;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Rules\UserBelongsToDepartment;
+
+class StatementRequest extends BaseFormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        $isUpdate = (bool) $this->route('statement');
+        $isDraft = $this->boolean('is_draft');
+
+        $baseRules = [
+            'is_draft' => ['sometimes', 'boolean'],
+            'related_statement_id' => ['nullable', 'integer', Rule::exists('statements', 'id')],
+            'related_statement_status' => ['nullable', 'string', Rule::in(StatementStatusEnum::getClosedTypes())],
+            'subject' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'deadline' => ['nullable', 'date', 'after:today'],
+            'cause_id' => ['required', 'integer', new ModelExists(config('statement.statementable_model'))],
+            'department_ids' => ['required', 'array', 'min:1'],
+            'department_ids.*' => ['required', 'integer', new ModelExists(config('statement.department_model'))],
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['required', 'integer', new UserBelongsToDepartment($this->input('department_ids', []))],
+            'notes' => ['nullable', 'string'],
+            'files' => ['nullable', 'array'],
+            'files.*' => ['required', File::types(['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'svg', 'eml'])->max(20480)],
+        ];
+
+        if ($isDraft && ! $isUpdate) {
+            $baseRules = collect($baseRules)->map(function ($rules) {
+                return collect($rules)->map(function ($rule) {
+                    if ($rule === 'required') {
+                        return 'nullable';
+                    }
+
+                    return $rule;
+                })->toArray();
+            })->toArray();
+        }
+
+        return $baseRules;
+    }
+
+    public function attributes(): array
+    {
+        return __('statement::validation.attributes');
+    }
+
+    public function messages(): array
+    {
+        return [
+            'is_draft.boolean' => __('validation.boolean'),
+
+            'related_statement_id.integer' => __('validation.integer'),
+            'related_statement_id.exists' => __('validation.exists'),
+
+            'related_statement_status.string' => __('validation.string'),
+            'related_statement_status.in' => __('validation.in'),
+
+            'subject.required' => __('validation.required'),
+            'subject.string' => __('validation.string'),
+            'subject.max' => __('validation.max.string'),
+
+            'description.required' => __('validation.required'),
+            'description.string' => __('validation.string'),
+
+            'deadline.date' => __('validation.date'),
+            'deadline.after' => __('validation.after'),
+
+            'cause_id.required' => __('validation.required'),
+            'cause_id.integer' => __('validation.integer'),
+
+            'department_ids.required' => __('validation.required'),
+            'department_ids.array' => __('validation.array'),
+            'department_ids.min' => __('validation.min.array'),
+
+            'department_ids.*.required' => __('validation.required'),
+            'department_ids.*.integer' => __('validation.integer'),
+
+            'user_ids.required' => __('validation.required'),
+            'user_ids.array' => __('validation.array'),
+            'user_ids.min' => __('validation.min.array'),
+
+            'user_ids.*.required' => __('validation.required'),
+            'user_ids.*.integer' => __('validation.integer'),
+
+            'notes.string' => __('validation.string'),
+
+            'files.array' => __('validation.array'),
+
+            'files.*.required' => __('validation.required'),
+        ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('is_draft')) {
+            $this->merge([
+                'is_draft' => filter_var($this->is_draft, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $this->is_draft,
+            ]);
+        }
+    }
+}

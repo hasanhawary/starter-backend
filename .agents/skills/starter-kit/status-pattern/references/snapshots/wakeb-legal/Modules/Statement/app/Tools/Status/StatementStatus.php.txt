@@ -1,0 +1,40 @@
+<?php
+
+namespace Modules\Statement\App\Tools\Status;
+
+use App\Models\User;
+use Modules\Statement\App\Models\Statement;
+
+abstract class StatementStatus
+{
+    public function __construct(
+        public ?Statement $model = null,
+        public ?User $user = null
+    ) {}
+
+    public function getModel(): ?Statement
+    {
+        return $this->model;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    protected function handleNotifications(): void
+    {
+        app()->setLocale('ar');
+        $this->sendNotifications();
+    }
+
+    public function sendNotifications(): void {}
+
+    abstract public function handle(?array $params = []): void;
+
+    abstract public function policy(): bool;
+
+    abstract public function validateRules(): array;
+
+    abstract public function buttons(): array;
+}

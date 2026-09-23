@@ -1,0 +1,80 @@
+<?php
+
+namespace Modules\Statement\App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Tools\Status\StatementStatusContext;
+use Modules\Statement\App\Tools\Status\StatementStatusFactory;
+
+class StatementResource extends BaseResource
+{
+    public function __construct($resource, protected string $context = 'summery')
+    {
+        parent::__construct($resource);
+    }
+
+    public function toArray(Request $request): array
+    {
+        return array_merge(
+            $this->summaryFields(),
+            $this->context === 'details' ? $this->detailedFields() : [],
+            $this->actionFields()
+        );
+    }
+
+    private function actionFields(): array
+    {
+        return [
+            'actions' => [
+                'can_update' => Gate::allows('update', $this->resource) || Gate::allows('assignUser', $this->resource),
+                'can_delete' => Gate::allows('delete', $this->resource),
+            ],
+        ];
+    }
+
+    private function summaryFields(): array
+    {
+        return [
+            'id' => $this->id,
+            'statement_number' => $this->statement_number,
+            'departments' => $this->whenLoaded('departments', fn () => $this->basicResource::collection($this->departments)),
+            'creator' => $this->whenLoaded('creator', fn () => new $this->creatorResource($this->creator->load('departments'))),
+            'reserved_users' => $this->whenLoaded('reservedUsers', fn () => $this->creatorResource::collection($this->reservedUsers), []),
+            'status' => $this->status,
+            'display_status' => StatementStatusEnum::resolve($this->status),
+            'is_draft' => $this->is_draft,
+            'subject' => $this->subject,
+            'deadline' => $this->deadline?->format('Y-m-d'),
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    private function detailedFields(): array
+    {
+        return [
+            'buttons' => $this->status != StatementStatusEnum::Draft ? $this->getStepButtons() : [],
+            'description' => $this->description,
+            'tasks' => $this->whenLoaded('tasks', fn () => ($this->taskResource)::collection($this->tasks), []),
+            'statementable' => $this->whenLoaded('statementable', fn () => new $this->basicResource($this->statementable)),
+            'parent' => $this->whenLoaded('parent', fn () => new StatementResource($this->parent)),
+            'children' => $this->whenLoaded('children', fn () => StatementResource::collection($this->children)),
+            'files' => $this->whenLoaded('files', fn () => StatementFileResource::collection($this->files)),
+            'replies' => $this->whenLoaded('replies', fn () => StatementReplyResource::collection($this->replies)),
+            'latest_log' => $this->whenLoaded('latestLog', fn () => new StatementLogResource($this->latestLog)),
+            'logs' => $this->whenLoaded('logs', fn () => StatementLogResource::collection($this->visibleLogsForAuth())),
+        ];
+    }
+
+    private function getStepButtons(): array
+    {
+        if (! $this->status) {
+            return [];
+        }
+
+        return (new StatementStatusContext)
+            ->setStatus(StatementStatusFactory::guess($this->status->value ?? $this->status, $this->resource, auth()->user()))
+            ->buttons();
+    }
+}

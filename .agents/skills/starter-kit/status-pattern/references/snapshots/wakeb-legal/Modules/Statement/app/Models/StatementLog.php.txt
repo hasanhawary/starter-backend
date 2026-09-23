@@ -1,0 +1,60 @@
+<?php
+
+namespace Modules\Statement\App\Models;
+
+use App\Trait\Global\CreatedByObserver;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+
+class StatementLog extends Model
+{
+    use CreatedByObserver, SoftDeletes;
+
+    public bool $inPermission = false;
+
+    protected static string $createdByColumn = 'action_by';
+
+    protected $fillable = [
+        'old_status',
+        'new_status',
+        'type',
+        'notes',
+        'message',
+        'statement_id',
+        'action_by',
+    ];
+
+    protected $casts = [
+        'old_status' => StatementStatusEnum::class,
+        'new_status' => StatementStatusEnum::class,
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes && Casts methods
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations methods
+    |--------------------------------------------------------------------------
+    */
+    public function statement(): BelongsTo
+    {
+        return $this->belongsTo(Statement::class);
+    }
+
+    public function actor(): BelongsTo
+    {
+        return $this->belongsTo(config('statement.creator_model'), 'action_by');
+    }
+
+    public function actions(): HasMany
+    {
+        return $this->hasMany(StatementLogAction::class);
+    }
+}

@@ -1,0 +1,38 @@
+<?php
+
+namespace Modules\Statement\App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class StatementLogAction extends Model
+{
+    use SoftDeletes;
+
+    public bool $inPermission = false;
+
+    protected $fillable = ['statement_log_id', 'action_id', 'action_type'];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes && Casts methods
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations methods
+    |--------------------------------------------------------------------------
+    */
+    public function statementLog(): BelongsTo
+    {
+        return $this->belongsTo(StatementLog::class);
+    }
+
+    public function action(): MorphTo
+    {
+        return $this->morphTo();
+    }
+}

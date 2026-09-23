@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'user_not_in_department' => 'المستخدم المحدد لا ينتمي إلى القسم المحدد.',
+
+    'attributes' => [
+        'is_draft' => 'مسودة',
+        'related_statement_id' => 'المذكرة المرتبطة',
+        'related_statement_status' => 'حالة المذكرة المرتبطة',
+        'subject' => 'الموضوع',
+        'description' => 'الوصف',
+        'deadline' => 'الموعد النهائي',
+        'cause_id' => 'القضية',
+        'department_ids' => 'الأقسام',
+        'department_ids.*' => 'القسم',
+        'user_ids' => 'المستخدمون',
+        'user_ids.*' => 'المستخدم',
+        'notes' => 'ملاحظات',
+        'files' => 'الملفات',
+        'files.*' => 'ملف',
+        'status' => 'الحالة',
+        'reply' => 'الرد',
+        'reply_type' => 'نوع الرد',
+        'file_id' => 'الملف',
+        'remove_user_ids' => 'المستخدمون المحذوفون',
+    ],
+];

@@ -1,0 +1,39 @@
+<?php
+
+namespace Modules\Statement\App\Enum;
+
+use HasanHawary\LookupManager\Trait\EnumMethods;
+use Illuminate\Support\Collection;
+
+enum StatementReplyTypeEnum: string
+{
+    use EnumMethods;
+
+    case Answer = 'answer';
+    case InsufficientData = 'insufficient_data';
+    case NotCompetent = 'not_competent';
+
+    // Groups
+    private const REJECTED_TYPES = [self::InsufficientData, self::NotCompetent];
+
+    public static function default(): string
+    {
+        return self::Answer->value;
+    }
+
+    public static function getRejectedTypes(): array
+    {
+        return array_map(fn ($case) => $case->value, self::REJECTED_TYPES);
+    }
+
+    public static function rejectedTypesCollection(): Collection
+    {
+        return self::collectionOf(self::REJECTED_TYPES);
+    }
+
+    // --- Helpers ---
+    private static function collectionOf(array $cases): Collection
+    {
+        return collect($cases)->map(fn ($case) => self::format($case->name, $case->value));
+    }
+}

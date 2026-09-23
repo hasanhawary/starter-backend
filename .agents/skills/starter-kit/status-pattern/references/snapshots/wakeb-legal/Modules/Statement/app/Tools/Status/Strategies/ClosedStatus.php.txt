@@ -1,0 +1,59 @@
+<?php
+
+namespace Modules\Statement\App\Tools\Status\Strategies;
+
+use Illuminate\Support\Str;
+use Modules\Notification\app\Enum\SystemEventSlugEnum;
+use Modules\Notification\app\Tools\Facades\Notification;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Tools\Status\StatementStatus;
+
+class ClosedStatus extends StatementStatus
+{
+    public function handle(?array $params = []): void
+    {
+        $oldStatus = $this->model->status;
+
+        $this->model->update([
+            'status' => StatementStatusEnum::Closed->value,
+        ]);
+
+        $logType = StatementLogTypeEnum::AcceptAndClose;
+        $this->model->log(
+            $oldStatus,
+            $logType->value,
+            buildDelimiterMessage(Str::snake($logType->name), [
+                'name' => auth()->user()->name,
+            ]),
+            $params['notes'] ?? null
+        );
+
+        $this->handleNotifications();
+    }
+
+    public function sendNotifications(): void
+    {
+        Notification::send(SystemEventSlugEnum::StatementClosed->value, $this->model->refresh());
+    }
+
+    public function policy(): bool
+    {
+        return ($this->user?->can('approval-statement')
+            || $this->model?->created_by == $this->user?->id
+            || $this->model?->isDelegatedAssignee($this->model?->created_by, $this->user?->id))
+            && $this->model?->status === StatementStatusEnum::Answered;
+    }
+
+    public function validateRules(): array
+    {
+        return [
+            'notes' => ['nullable', 'string'],
+        ];
+    }
+
+    public function buttons(): array
+    {
+        return [];
+    }
+}

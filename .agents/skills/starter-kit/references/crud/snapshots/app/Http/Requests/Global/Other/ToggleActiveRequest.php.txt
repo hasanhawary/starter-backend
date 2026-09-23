@@ -1,0 +1,17 @@
+<?php
+
+namespace App\Http\Requests\Global\Other;
+
+use App\Http\Requests\BaseFormRequest;
+
+class ToggleActiveRequest extends BaseFormRequest
+{
+    public function rules(): array
+    {
+        return [
+            'id' => ['required_without:ids', 'integer', 'min:1', 'prohibits:ids'],
+            'ids' => ['required_without:id', 'array', 'min:1', 'max:100', 'prohibits:id'],
+            'ids.*' => ['required', 'integer', 'min:1', 'distinct'],
+        ];
+    }
+}

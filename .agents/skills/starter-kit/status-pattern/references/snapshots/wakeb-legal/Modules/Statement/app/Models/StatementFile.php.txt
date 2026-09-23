@@ -1,0 +1,50 @@
+<?php
+
+namespace Modules\Statement\App\Models;
+
+use App\Services\Global\UploadService;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+
+class StatementFile extends Model
+{
+    use SoftDeletes;
+
+    public bool $inPermission = false;
+
+    protected $fillable = ['name', 'path', 'size', 'status', 'fileable_id', 'fileable_type', 'created_by'];
+
+    protected $casts = [
+        'status' => StatementStatusEnum::class,
+        'size' => 'integer',
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes && Casts methods
+    |--------------------------------------------------------------------------
+    */
+    public function scopeIsActive(Builder $query, $value = true): Builder
+    {
+        return $query->where('is_active', $value);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations methods
+    |--------------------------------------------------------------------------
+    */
+    public function path(): Attribute
+    {
+        return Attribute::make(get: static fn ($value) => UploadService::url($value));
+    }
+
+    public function fileable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+}

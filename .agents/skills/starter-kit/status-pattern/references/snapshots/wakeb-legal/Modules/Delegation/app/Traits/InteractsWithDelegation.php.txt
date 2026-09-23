@@ -1,0 +1,52 @@
+<?php
+
+namespace Modules\Delegation\App\Traits;
+
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Modules\Delegation\App\Models\DelegationAssignment;
+
+trait InteractsWithDelegation
+{
+    public function delegationAssignments(): MorphMany
+    {
+        return $this->morphMany(DelegationAssignment::class, 'delegatable');
+    }
+
+    /**
+     * Whether the current user stands in for one of the given owners on this record.
+     *
+     * Pass the owner id(s) for this specific check (created_by, manager, assigner, ...).
+     * The assignee defaults to the authenticated user.
+     *
+     * @param  int|list<int|null>|null  $ownerIds
+     */
+    public function isDelegatedAssignee(int|array|null $ownerIds, ?int $userId = null): bool
+    {
+        $userId ??= (int) auth()->id();
+        $ownerIds = $this->normalizeDelegationOwnerIds($ownerIds);
+
+        if ($userId < 1 || $ownerIds === []) {
+            return false;
+        }
+
+        return $this->delegationAssignments()
+            ->where('assignee_id', $userId)
+            ->whereIn('owner_id', $ownerIds)
+            ->where('is_active', true)
+            ->exists();
+    }
+
+    /**
+     * @param  int|list<int|null>|null  $ownerIds
+     * @return list<int>
+     */
+    protected function normalizeDelegationOwnerIds(int|array|null $ownerIds): array
+    {
+        $ids = is_array($ownerIds) ? $ownerIds : [$ownerIds];
+
+        return array_values(array_unique(array_filter(
+            array_map(static fn ($id) => is_numeric($id) ? (int) $id : null, $ids),
+            static fn (?int $id) => $id !== null && $id > 0
+        )));
+    }
+}

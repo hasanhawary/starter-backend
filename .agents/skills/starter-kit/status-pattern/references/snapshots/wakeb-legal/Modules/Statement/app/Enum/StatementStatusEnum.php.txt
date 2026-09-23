@@ -1,0 +1,48 @@
+<?php
+
+namespace Modules\Statement\App\Enum;
+
+use HasanHawary\LookupManager\Trait\EnumMethods;
+use Illuminate\Support\Collection;
+
+enum StatementStatusEnum: string
+{
+    use EnumMethods;
+
+    case Draft = 'draft';
+    case SentPending = 'sent_pending';
+    case Received = 'received';
+    case InProgress = 'in_progress';
+    case Answered = 'answered';
+    case ReturnedForReview = 'returned_for_review';
+    case Closed = 'closed';
+    case Rejected = 'rejected';
+    case Requested = 'requested';
+
+    case ClosedAndNew = 'closed_and_new';
+    case ClosedAndRelatedNew = 'closed_and_related_new';
+
+    // Groups
+    private const CLOSED_TYPES = [self::ClosedAndNew, self::ClosedAndRelatedNew];
+
+    public static function default(): string
+    {
+        return self::Draft->value;
+    }
+
+    public static function getClosedTypes(): array
+    {
+        return array_map(fn ($case) => $case->value, self::CLOSED_TYPES);
+    }
+
+    public static function closedTypesCollection(): Collection
+    {
+        return self::collectionOf(self::CLOSED_TYPES);
+    }
+
+    // --- Helpers ---
+    private static function collectionOf(array $cases): Collection
+    {
+        return collect($cases)->map(fn ($case) => self::format($case->name, $case->value));
+    }
+}

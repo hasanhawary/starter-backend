@@ -1,0 +1,28 @@
+<?php
+
+namespace Modules\Statement\App\Enum;
+
+use HasanHawary\LookupManager\Trait\EnumMethods;
+
+enum StatementLogTypeEnum: int
+{
+    use EnumMethods;
+
+    case Created = 1;
+    case Updated = 2;
+    case CreatedDraft = 3;
+    case Sent = 4;
+    case Received = 5;
+    case StartedProcessing = 6;
+    case SendReply = 7;
+    case ReturnForReview = 8;
+    case AcceptAndClose = 9;
+    case Rejected = 10;
+    case RequestedData = 11;
+
+    case RedirectSameAndClosed = 12;
+    case RedirectDifferentAndClosed = 13;
+
+    case UserAssigned = 14;
+    case UserRemoved = 15;
+}

@@ -1,0 +1,19 @@
+<?php
+
+return [
+    'created' => 'تم إنشاء الإفادة بواسطة (:name)',
+    'updated' => 'تم تحديث الإفادة بواسطة (:name)',
+    'created_draft' => 'إنشاء مسودة الإفادة بواسطة (:name)',
+    'sent' => 'إرسال طلب الإفادة بواسطة (:name)',
+    'received' => 'تأكيد استلام الإفادة بواسطة (:name)',
+    'started_processing' => 'بدء معالجة الإفادة بواسطة (:name)',
+    'send_reply' => 'إرسال رد على الإفادة بواسطة (:name)',
+    'return_for_review' => 'إعادة الإفادة للمراجعة بواسطة (:name)',
+    'accept_and_close' => 'قبول وإغلاق الإفادة بواسطة (:name)',
+    'rejected' => 'رفض الإفادة بواسطة (:name)',
+    'requested_data' => 'طلب بيانات إضافية للإفادة بواسطة (:name)',
+    'redirect_same_and_closed' => 'إحالة لنفس الجهة وإغلاق الإفادة بواسطة (:name)',
+    'redirect_different_and_closed' => 'إحالة لجهة مختلفة وإغلاق الإفادة بواسطة (:name)',
+    'user_assigned' => 'تعيين مستخدمين على الإفادة بواسطة (:name)',
+    'user_removed' => 'إزالة مستخدمين من الإفادة بواسطة (:name)',
+];

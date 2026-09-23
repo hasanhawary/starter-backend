@@ -1,0 +1,120 @@
+<?php
+
+use App\Enum\Global\ActiveTypeEnum;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Modules\Statement\App\Enum\StatementAssignedUserTypeEnum;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementReplyTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+
+return new class extends Migration
+{
+    private mixed $creatorModel;
+
+    private mixed $departmentModel;
+
+    public function __construct()
+    {
+        $this->creatorModel = config('statement.creator_model');
+        $this->departmentModel = config('statement.department_model');
+    }
+
+    public function up(): void
+    {
+        Schema::create('statements', function (Blueprint $table) {
+            $table->id();
+            $table->boolean('is_draft')->default(true);
+            $table->string('statement_number')->unique()->nullable();
+
+            $table->foreignId('parent_id')->nullable()->constrained('statements');
+            $table->morphs('statementable');
+
+            $table->string('subject');
+            $table->text('description');
+
+            $table->string('status')->default(StatementStatusEnum::default())->index();
+            $table->dateTime('deadline')->nullable();
+            $table->timestamp('deadline_notified_at')->nullable();
+
+            $table->foreignId('created_by')->constrained((new $this->creatorModel)->getTable());
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('statement_departments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('statement_id')->constrained('statements')->cascadeOnDelete();
+            $table->foreignId('department_id')->constrained((new $this->departmentModel)->getTable());
+        });
+
+        Schema::create('statement_users', function (Blueprint $table) {
+            $table->string('type')->default(StatementAssignedUserTypeEnum::default());
+            $table->boolean('is_active')->default(ActiveTypeEnum::default());
+            $table->foreignId('user_id')->constrained((new $this->creatorModel)->getTable())->cascadeOnDelete();
+            $table->foreignId('statement_id')->constrained('statements')->cascadeOnDelete();
+
+            $table->foreignId('created_by')->constrained((new $this->creatorModel)->getTable());
+            $table->foreignId('deleted_by')->nullable()->constrained((new $this->creatorModel)->getTable());
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->primary(['user_id', 'statement_id']);
+            $table->index('statement_id');
+        });
+
+        Schema::create('statement_logs', function (Blueprint $table) {
+            $table->id();
+            $table->string('old_status')->nullable();
+            $table->string('new_status')->nullable();
+            $table->string('type')->comment(implode(',', StatementLogTypeEnum::values()));
+            $table->text('notes')->nullable();
+            $table->text('message');
+            $table->foreignId('statement_id')->constrained('statements')->cascadeOnDelete();
+            $table->foreignId('action_by')->nullable()->constrained((new $this->creatorModel)->getTable());
+            $table->softDeletes();
+            $table->timestamps();
+        });
+
+        Schema::create('statement_log_actions', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('action');
+            $table->foreignId('statement_log_id')->constrained('statement_logs')->cascadeOnDelete();
+            $table->softDeletes();
+            $table->timestamps();
+        });
+
+        Schema::create('statement_replies', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('statement_id')->constrained('statements')->cascadeOnDelete();
+            $table->foreignId('created_by')->constrained((new $this->creatorModel)->getTable());
+            $table->string('reply_type')->default(StatementReplyTypeEnum::default());
+            $table->text('reply');
+            $table->timestamps();
+        });
+
+        Schema::create('statement_files', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('fileable');
+            $table->string('name')->nullable();
+            $table->string('path');
+            $table->unsignedBigInteger('size')->nullable();
+            $table->string('status')->default(StatementStatusEnum::default());
+            $table->foreignId('created_by')->nullable()->constrained((new $this->creatorModel)->getTable());
+            $table->softDeletes();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('statement_files');
+        Schema::dropIfExists('statement_replies');
+        Schema::dropIfExists('statement_log_actions');
+        Schema::dropIfExists('statement_logs');
+        Schema::dropIfExists('statement_users');
+        Schema::dropIfExists('statement_departments');
+        Schema::dropIfExists('statements');
+    }
+};

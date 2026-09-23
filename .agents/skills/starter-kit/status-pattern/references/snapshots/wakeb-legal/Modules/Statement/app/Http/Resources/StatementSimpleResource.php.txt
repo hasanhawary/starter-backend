@@ -1,0 +1,17 @@
+<?php
+
+namespace Modules\Statement\App\Http\Resources;
+
+use Illuminate\Http\Request;
+
+class StatementSimpleResource extends BaseResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'statement_number' => $this->statement_number,
+            'subject' => $this->subject,
+        ];
+    }
+}

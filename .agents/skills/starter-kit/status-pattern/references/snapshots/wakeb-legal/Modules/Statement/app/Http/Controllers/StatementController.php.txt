@@ -1,0 +1,139 @@
+<?php
+
+namespace Modules\Statement\App\Http\Controllers;
+
+use App\Filters\Global\DateFilter;
+use App\Filters\Global\OrderByFilter;
+use App\Filters\Global\TrashedFilter;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Global\Other\PageRequest;
+use App\Trait\Global\HasDeleteMethods;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Filters\StatementFilter;
+use Modules\Statement\App\Http\Requests\StatementActionRequest;
+use Modules\Statement\App\Http\Requests\StatementRequest;
+use Modules\Statement\App\Http\Requests\StatementUserRequest;
+use Modules\Statement\App\Http\Resources\StatementResource;
+use Modules\Statement\App\Http\Resources\StatementSimpleResource;
+use Modules\Statement\App\Models\Statement;
+use Modules\Statement\App\Services\StatementService;
+use Modules\Statement\App\Tools\Status\StatementStatusFactory;
+
+class StatementController extends Controller
+{
+    use HasDeleteMethods;
+
+    public function __construct(protected StatementService $service)
+    {
+        $this->model = Statement::class;
+
+        $this->beforeDelete('delete', function (Statement $statement) {
+            $deletable = ($statement->is_draft && auth()->id() === $statement->created_by) || isRoot();
+
+            if (! $deletable) {
+                throw new HttpResponseException(failResponse(__('api.cannot_delete_submitted'), 400));
+            }
+        });
+    }
+
+    public function index(PageRequest $request): JsonResponse
+    {
+        Gate::authorize('view', $this->model);
+
+        $query = app(Pipeline::class)
+            ->send(Statement::query()->with(['creator.departments', 'departments'])->related())
+            ->through([StatementFilter::class, DateFilter::class, TrashedFilter::class, OrderByFilter::class])
+            ->thenReturn();
+
+        return successResponse(fetchData($query, $request->pageSize ?? config('project.pagination.per_page'), StatementResource::class));
+    }
+
+    public function requestedInfo(Request $request): JsonResponse
+    {
+        $result = $this->model::query()
+            ->where('status', StatementStatusEnum::Requested)
+            ->where('created_by', auth()->user()->id)
+            ->get();
+
+        return successResponse(StatementSimpleResource::collection($result));
+    }
+
+    public function store(StatementRequest $request): JsonResponse
+    {
+        Gate::authorize('create', $this->model);
+
+        return DB::transaction(function () use ($request) {
+            $data = $request->validated();
+            $statement = $this->service->saveStatement($data);
+            $this->service->syncStatementFile($data, $statement);
+            $this->service->handleClosedRelated($data, $statement);
+
+            return successResponse(new StatementResource($statement), __('api.created_success'));
+        });
+    }
+
+    public function show(Statement $statement): JsonResponse
+    {
+        Gate::authorize('view', $statement);
+
+        $statement->load(['creator.departments', 'reservedUsers', 'departments', 'statementable', 'tasks', 'parent', 'children', 'files', 'replies.files', 'replies.creator', 'latestLog.actor', 'logs.actor', 'logs.actions', 'notes', 'tasks']);
+
+        return successResponse(new StatementResource($statement, 'details'));
+    }
+
+    public function update(StatementRequest $request, Statement $statement): JsonResponse
+    {
+        Gate::authorize('assignOrUpdate', $statement);
+
+        return DB::transaction(function () use ($request, $statement) {
+            $data = $request->validated();
+            $statement = $this->service->saveStatement($data, $statement);
+            $this->service->syncStatementFile($data, $statement);
+
+            return successResponse(new StatementResource($statement->refresh()), __('api.updated_success'));
+        });
+    }
+
+    public function takeAction(StatementActionRequest $request, Statement $statement): JsonResponse
+    {
+        return DB::transaction(function () use ($request, $statement) {
+            $statement = Statement::query()->whereKey($statement->id)->lockForUpdate()->firstOrFail();
+
+            $statusClass = StatementStatusFactory::guess($request->input('status'), $statement, auth()->user());
+
+            // if (!$statusClass->policy()) {
+            if (! isRoot() && ! $statusClass->policy()) {
+                return failResponse(__('api.no_required_permissions'), 403);
+            }
+
+            $statusClass->handle([
+                'notes' => $request->input('notes'),
+                ...$request->validated(),
+            ]);
+
+            return successResponse(new StatementResource($statement->refresh(), 'details'), __('api.action_taken_successfully'));
+        });
+    }
+
+    public function syncUsers(StatementUserRequest $request, Statement $statement): JsonResponse
+    {
+        Gate::authorize('assignUser', $statement);
+
+        return DB::transaction(function () use ($request, $statement) {
+
+            $this->service->manageUsers(
+                $statement,
+                $request->user_ids ?? [],
+                $request->remove_user_ids ?? []
+            );
+
+            return successResponse(new StatementResource($statement->refresh()), __('api.users_synced_successfully'));
+        });
+    }
+}

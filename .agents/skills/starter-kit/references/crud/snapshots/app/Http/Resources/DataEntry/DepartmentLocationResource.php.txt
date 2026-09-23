@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Http\Resources\DataEntry;
+
+use App\Http\Resources\Global\Other\BasicResource;
+use App\Http\Resources\Global\Other\BasicUserResource;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class DepartmentLocationResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'department_id' => $this->department_id,
+            'location_id' => $this->location_id,
+            'is_active' => $this->is_active,
+            'department' => $this->whenLoaded('department', fn () => new BasicResource($this->department), ['id' => $this->department_id]),
+            'location' => $this->whenLoaded('location', fn () => new BasicResource($this->location), ['id' => $this->location_id]),
+            'users' => $this->whenLoaded('activeDepartmentLocationUsers', fn () => DepartmentLocationUserResource::collection($this->activeDepartmentLocationUsers), []),
+            'creator' => $this->whenLoaded('creator', fn () => new BasicUserResource($this->creator), ['id' => $this->created_by]),
+            'created_at' => $this->created_at,
+        ];
+    }
+}

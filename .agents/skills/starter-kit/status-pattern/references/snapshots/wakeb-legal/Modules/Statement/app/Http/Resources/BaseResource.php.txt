@@ -1,0 +1,22 @@
+<?php
+
+namespace Modules\Statement\App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BaseResource extends JsonResource
+{
+    protected $basicResource;
+
+    protected $creatorResource;
+
+    protected $taskResource;
+
+    public function __construct($resource)
+    {
+        parent::__construct($resource);
+        $this->basicResource = config('statement.basic_resource');
+        $this->creatorResource = config('statement.creator_resource');
+        $this->taskResource = config('statement.task_resource');
+    }
+}

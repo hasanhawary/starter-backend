@@ -1,0 +1,70 @@
+<?php
+
+namespace Modules\Statement\App\Tools\Status\Strategies;
+
+use App\Rules\ModelExists;
+use Illuminate\Support\Str;
+use Modules\Notification\app\Enum\SystemEventSlugEnum;
+use Modules\Notification\app\Tools\Facades\Notification;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Models\Statement;
+use Modules\Statement\App\Rules\UserBelongsToDepartment;
+use Modules\Statement\App\Services\StatementService;
+use Modules\Statement\App\Tools\Status\StatementStatus;
+
+class ClosedAndNewStatus extends StatementStatus
+{
+    public function handle(?array $params = []): void
+    {
+        $oldStatus = $this->model->status;
+
+        $newStatement = app(StatementService::class)->copyStatement($this->model, $params);
+
+        $this->model->update([
+            'status' => StatementStatusEnum::ClosedAndNew->value,
+        ]);
+
+        $logType = StatementLogTypeEnum::RedirectSameAndClosed;
+        $log = $this->model->log(
+            $oldStatus,
+            $logType->value,
+            buildDelimiterMessage(Str::snake($logType->name), [
+                'name' => auth()->user()->name,
+            ]),
+            $params['notes'] ?? null
+        );
+
+        $log->actions()->create(['action_id' => $newStatement->id, 'action_type' => Statement::class]);
+
+        $this->handleNotifications();
+    }
+
+    public function sendNotifications(): void
+    {
+        Notification::send(SystemEventSlugEnum::StatementClosedAndNew->value, $this->model->refresh());
+    }
+
+    public function policy(): bool
+    {
+        return $this->user?->can('approval-statement')
+            || $this->model?->created_by == $this->user?->id
+            || $this->model?->isDelegatedAssignee($this->model?->created_by, $this->user?->id);
+    }
+
+    public function validateRules(): array
+    {
+        return [
+            'department_ids' => ['required', 'array', 'min:1'],
+            'department_ids.*' => ['required', 'integer', new ModelExists(config('statement.department_model'))],
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['required', 'integer', new UserBelongsToDepartment(request()->input('department_ids', []))],
+            'notes' => ['nullable', 'string'],
+        ];
+    }
+
+    public function buttons(): array
+    {
+        return [];
+    }
+}

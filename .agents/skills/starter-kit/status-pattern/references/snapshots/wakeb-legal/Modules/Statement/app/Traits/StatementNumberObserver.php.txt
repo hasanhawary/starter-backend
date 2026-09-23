@@ -1,0 +1,23 @@
+<?php
+
+namespace Modules\Statement\App\Traits;
+
+use Illuminate\Database\Eloquent\Model;
+
+trait StatementNumberObserver
+{
+    public static function bootStatementNumberObserver(): void
+    {
+        static::created(static function (Model $model): void {
+            $model->syncOriginal();
+
+            $model->updateQuietly([
+                'statement_number' => sprintf(
+                    'IFD-%s-%d',
+                    $model->created_at?->year ?? now()->year,
+                    $model->id
+                ),
+            ]);
+        });
+    }
+}

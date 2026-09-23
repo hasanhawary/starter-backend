@@ -1,0 +1,18 @@
+<?php
+
+namespace Modules\Statement\App\Enum;
+
+use HasanHawary\LookupManager\Trait\EnumMethods;
+
+enum StatementAssignedUserTypeEnum: string
+{
+    use EnumMethods;
+
+    case Main = 'main';
+    case Reserve = 'reserve';
+
+    public static function default(): string
+    {
+        return self::Main->value;
+    }
+}

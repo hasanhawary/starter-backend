@@ -1,0 +1,66 @@
+<?php
+
+namespace Modules\Statement\App\Tools\Status\Strategies;
+
+use Illuminate\Support\Str;
+use Modules\Notification\app\Enum\SystemEventSlugEnum;
+use Modules\Notification\app\Tools\Facades\Notification;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Tools\Status\StatementStatus;
+
+class SentPendingStatus extends StatementStatus
+{
+    public function handle(?array $params = []): void
+    {
+        $this->model->update([
+            'status' => StatementStatusEnum::SentPending->value,
+            'is_draft' => false,
+        ]);
+
+        $logType = StatementLogTypeEnum::Sent;
+        
+        $this->model->log(
+            null,
+            $logType->value,
+            buildDelimiterMessage(Str::snake($logType->name), [
+                'name' => auth()->user()->name,
+            ]),
+            $params['notes'] ?? null
+        );
+
+        $this->handleNotifications();
+    }
+
+    public function sendNotifications(): void
+    {
+        Notification::send(SystemEventSlugEnum::StatementSentPending->value, $this->model->refresh());
+    }
+
+    public function policy(): bool
+    {
+        return $this->user?->canAny(['create-all-statement', 'create-own-statement'])
+            && (
+                $this->model?->created_by == $this->user?->id
+                || $this->model?->isDelegatedAssignee($this->model?->created_by, $this->user?->id)
+            );
+    }
+
+    public function validateRules(): array
+    {
+        return [
+            'notes' => ['nullable', 'string'],
+        ];
+    }
+
+    public function buttons(): array
+    {
+        return [
+            [
+                'key' => StatementStatusEnum::Received->value,
+                'label' => StatementLogTypeEnum::Received->selfResolve(),
+                'type' => 'modal',
+            ],
+        ];
+    }
+}

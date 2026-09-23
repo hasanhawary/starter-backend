@@ -1,0 +1,87 @@
+<?php
+
+namespace Modules\Statement\App\Tools\Status\Strategies;
+
+use App\Enum\Global\ActiveTypeEnum;
+use Illuminate\Support\Str;
+use Modules\Notification\app\Enum\SystemEventSlugEnum;
+use Modules\Notification\app\Tools\Facades\Notification;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Tools\Status\StatementStatus;
+
+class InProgressStatus extends StatementStatus
+{
+    public function handle(?array $params = []): void
+    {
+        $oldStatus = $this->model->status;
+
+        $this->model->update([
+            'status' => StatementStatusEnum::InProgress->value,
+        ]);
+
+        $logType = StatementLogTypeEnum::StartedProcessing;
+        $this->model->log(
+            $oldStatus,
+            $logType->value,
+            buildDelimiterMessage(Str::snake($logType->name), [
+                'name' => auth()->user()->name,
+            ]),
+            $params['notes'] ?? null
+        );
+
+        $this->handleNotifications();
+    }
+
+    public function sendNotifications(): void
+    {
+        Notification::send(SystemEventSlugEnum::StatementInProgress->value, $this->model->refresh());
+    }
+
+    public function policy(): bool
+    {
+        if ($this->model?->status === StatementStatusEnum::Received) {
+            return $this->model?->users()
+                ->where('users.id', $this->user?->id)
+                ->wherePivot('is_active', ActiveTypeEnum::Active->value)
+                ->exists()
+                || $this->model?->isDelegatedAssignee($this->model?->mainUser?->id, $this->user?->id);
+        }
+
+        if ($this->model?->status === StatementStatusEnum::Requested) {
+            return $this->user?->can('approval-statement')
+                || $this->model?->created_by == $this->user?->id
+                || $this->model?->isDelegatedAssignee($this->model?->created_by, $this->user?->id);
+        }
+
+        return false;
+    }
+
+    public function validateRules(): array
+    {
+        return [
+            'notes' => ['nullable', 'string'],
+        ];
+    }
+
+    public function buttons(): array
+    {
+        return [
+            [
+                'key' => StatementStatusEnum::Answered->value,
+                'label' => StatementLogTypeEnum::SendReply->selfResolve(),
+                'type' => 'modal',
+            ],
+            [
+                'key' => StatementStatusEnum::Rejected->value,
+                'label' => StatementLogTypeEnum::Rejected->selfResolve(),
+                'type' => 'modal',
+            ],
+            [
+                'key' => StatementStatusEnum::Requested->value,
+                'label' => StatementLogTypeEnum::RequestedData->selfResolve(),
+                'type' => 'modal',
+            ],
+        ];
+    }
+}

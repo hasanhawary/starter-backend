@@ -1,0 +1,120 @@
+<?php
+
+namespace Modules\Statement\App\Tools\Status\Strategies;
+
+use App\Enum\Global\ActiveTypeEnum;
+use App\Services\Global\UploadService;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\File;
+use Modules\Notification\app\Enum\SystemEventSlugEnum;
+use Modules\Notification\app\Tools\Facades\Notification;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementReplyTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Models\StatementReply;
+use Modules\Statement\App\Tools\Status\StatementStatus;
+
+class AnsweredStatus extends StatementStatus
+{
+    public function handle(?array $params = []): void
+    {
+        $oldStatus = $this->model->status;
+
+        $this->model->update([
+            'status' => StatementStatusEnum::Answered->value,
+        ]);
+
+        $reply = $this->model->replies()->create([
+            'reply_type' => StatementReplyTypeEnum::Answer->value,
+            'reply' => $params['reply'],
+        ]);
+
+        $this->syncReplayFiles($reply, $params);
+
+        $logType = StatementLogTypeEnum::SendReply;
+        $this->model->log(
+            $oldStatus,
+            $logType->value,
+            buildDelimiterMessage(Str::snake($logType->name), [
+                'name' => auth()->user()->name,
+            ]),
+            $params['notes'] ?? null
+        );
+
+        $this->handleNotifications();
+    }
+
+    public function sendNotifications(): void
+    {
+        Notification::send(SystemEventSlugEnum::StatementAnswered->value, $this->model->refresh());
+    }
+
+    public function policy(): bool
+    {
+        return in_array($this->model?->status?->value, [
+            StatementStatusEnum::InProgress->value,
+            StatementStatusEnum::ReturnedForReview->value,
+        ])
+            && (
+                $this->model?->users()
+                    ->where('users.id', $this->user?->id)
+                    ->wherePivot('is_active', ActiveTypeEnum::Active->value)
+                    ->exists()
+                || $this->model?->isDelegatedAssignee($this->model?->mainUser?->id, $this->user?->id)
+            );
+    }
+
+    public function validateRules(): array
+    {
+        return [
+            'reply' => ['required', 'string'],
+            'files' => ['nullable', 'array'],
+            'files.*' => ['required', File::types(['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'svg', 'eml'])->max(20480)],
+        ];
+    }
+
+    public function buttons(): array
+    {
+        return [
+            [
+                'key' => StatementStatusEnum::ReturnedForReview->value,
+                'label' => StatementLogTypeEnum::ReturnForReview->selfResolve(),
+                'type' => 'modal',
+            ],
+            [
+                'key' => StatementStatusEnum::Closed->value,
+                'label' => StatementLogTypeEnum::AcceptAndClose->selfResolve(),
+                'type' => 'modal',
+            ],
+            [
+                'key' => StatementStatusEnum::ClosedAndNew->value,
+                'label' => StatementLogTypeEnum::RedirectSameAndClosed->selfResolve(),
+                'type' => 'modal',
+            ],
+            [
+                'key' => StatementStatusEnum::ClosedAndRelatedNew->value,
+                'label' => StatementLogTypeEnum::RedirectDifferentAndClosed->selfResolve(),
+                'type' => 'modal',
+            ],
+        ];
+    }
+
+    private function syncReplayFiles(StatementReply $reply, array $data): void
+    {
+        if (! isset($data['files'])) {
+            return;
+        }
+
+        $files = collect($data['files']);
+
+        foreach ($files as $file) {
+            $path = UploadService::store($file, 'statements');
+            $reply->files()->create([
+                'name' => $file->getClientOriginalName(),
+                'path' => $path,
+                'size' => $file->getSize(),
+                'status' => StatementStatusEnum::Answered,
+            ]);
+        }
+    }
+}

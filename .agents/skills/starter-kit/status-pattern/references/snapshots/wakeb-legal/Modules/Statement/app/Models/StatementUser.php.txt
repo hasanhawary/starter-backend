@@ -1,0 +1,52 @@
+<?php
+
+namespace Modules\Statement\App\Models;
+
+use App\Trait\Global\CreatedByObserver;
+use App\Trait\Global\HasDeletedBy;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Statement\App\Enum\StatementAssignedUserTypeEnum;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+
+class StatementUser extends Model
+{
+    use CreatedByObserver, HasDeletedBy, LogsActivity, SoftDeletes;
+
+    public bool $inPermission = false;
+
+    protected $fillable = ['type', 'is_active', 'user_id', 'statement_id', 'created_by', 'deleted_by'];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'type' => StatementAssignedUserTypeEnum::class,
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes && Casts methods
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations methods
+    |--------------------------------------------------------------------------
+    */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logOnlyDirty()->logOnly($this->fillable);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(config('statement.creator_model'));
+    }
+
+    public function statement(): BelongsTo
+    {
+        return $this->belongsTo(Statement::class);
+    }
+}

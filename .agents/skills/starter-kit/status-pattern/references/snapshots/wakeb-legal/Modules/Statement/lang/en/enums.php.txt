@@ -1,0 +1,53 @@
+<?php
+
+return [
+    'statement_status' => [
+        'draft' => 'Draft',
+        'sent_pending' => 'Sent / Pending',
+        'received' => 'Received',
+        'in_progress' => 'In Progress',
+        'answered' => 'Answered',
+        'returned_for_review' => 'Returned for Review',
+        'closed' => 'Closed',
+        'rejected' => 'Rejected',
+        'requested' => 'Requested Details',
+        'closed_and_new' => 'Closed and New Created',
+        'closed_and_related_new' => 'Closed and Related New Created',
+    ],
+    'statement_log_type' => [
+        'created' => 'Statement Created',
+        'updated' => 'Statement Updated',
+        'created_draft' => 'Statement Draft Created',
+        'sent' => 'Statement Request Sent',
+        'received' => 'Receipt Confirmed',
+        'started_processing' => 'Processing Started',
+        'send_reply' => 'Reply Sent',
+        'return_for_review' => 'Returned for Review',
+        'accept_and_close' => 'Statement Closed',
+        'rejected' => 'Statement Rejected',
+        'requested_data' => 'Additional Data Requested',
+        'redirect_same_and_closed' => 'Redirected to Same Department and Closed',
+        'redirect_different_and_closed' => 'Redirected to Different Department and Closed',
+        'user_assigned' => 'Users Assigned',
+        'user_removed' => 'Users Removed',
+    ],
+    'statement_assigned_user_type' => [
+        'main' => 'Main',
+        'reserve' => 'Reserve',
+    ],
+    'statement_reply_type' => [
+        'answer' => 'Answer',
+        'insufficient_data' => 'Insufficient Data',
+        'not_competent' => 'Not Competent',
+        'note' => 'Note',
+    ],
+    'statement_action' => [
+        'send' => 'Send Statement Request',
+        'receive' => 'Confirm Receipt',
+        'start_processing' => 'Start Processing',
+        'send_reply' => 'Send Reply',
+        'return_for_review' => 'Return for Review',
+        'accept_and_close' => 'Accept and Close',
+        'reject' => 'Reject',
+    ],
+];

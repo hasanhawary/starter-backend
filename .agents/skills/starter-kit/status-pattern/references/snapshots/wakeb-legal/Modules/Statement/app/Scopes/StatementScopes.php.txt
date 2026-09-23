@@ -1,0 +1,77 @@
+<?php
+
+namespace Modules\Statement\App\Scopes;
+
+use App\Enum\Global\ActiveTypeEnum;
+use Illuminate\Database\Eloquent\Builder;
+use Modules\Statement\App\Filters\StatementAccessFilter;
+
+trait StatementScopes
+{
+    public function scopeRelated(Builder $builder): void
+    {
+        StatementAccessFilter::apply($builder);
+    }
+
+    public function scopeCanView(Builder $builder): Builder
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole(['root', 'admin'])) {
+            return $builder->withDrafts(false);
+        }
+
+        $builder
+            ->when($user->canAny(['assign-user-statement', 'review-statement']), function ($query) {
+                $query->withDrafts(false);
+            })
+            ->when($user->can('prepare-statement'), function ($query) use ($user) {
+                $query->withDrafts(false)->whereHas('users', function ($q) use ($user) {
+                    $q->where('users.id', $user->id)
+                        ->where('statement_users.is_active', ActiveTypeEnum::Active->value);
+                });
+            })
+            ->orWhere('created_by', $user->id);
+
+        return $builder;
+    }
+
+    public function scopeWithDrafts(Builder $builder, bool $flag = true): Builder
+    {
+        return $builder->orWhere('is_draft', $flag)->orWhere('created_by', auth()->id());
+    }
+
+    /**
+     * Match records whose own date OR any related log falls inside the period.
+     * Mirrors the treatment/legal-document period filter (all logs, no type restriction).
+     */
+    public function scopeApplyPeriodFilter(Builder $query, ?string $fromDate, ?string $toDate): Builder
+    {
+        if (! $fromDate && ! $toDate) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $outer) use ($fromDate, $toDate) {
+            foreach (['created_at', 'deadline'] as $column) {
+                $outer->orWhere(fn (Builder $q) => $this->applyDateRange($q, $column, $fromDate, $toDate));
+            }
+
+            // Any log recorded within the period.
+            $outer->orWhereHas('logs', fn (Builder $q) => $this->applyDateRange($q, 'created_at', $fromDate, $toDate));
+        });
+    }
+
+    /**
+     * Restrict a date column to the requested period (either bound optional).
+     */
+    protected function applyDateRange(Builder $query, string $column, ?string $fromDate, ?string $toDate): void
+    {
+        if ($fromDate) {
+            $query->whereDate($column, '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate($column, '<=', $toDate);
+        }
+    }
+}

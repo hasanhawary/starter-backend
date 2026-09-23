@@ -1,0 +1,225 @@
+<?php
+
+namespace Modules\Statement\App\Models;
+
+use App\Enum\Global\ActiveTypeEnum;
+use App\Trait\Global\CreatedByObserver;
+use App\Trait\Global\HasDeletedBy;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Delegation\App\Traits\HasAssignedToScope;
+use Modules\Delegation\App\Traits\InteractsWithDelegation;
+use Modules\Statement\App\Enum\StatementAssignedUserTypeEnum;
+use Modules\Statement\App\Enum\StatementLogTypeEnum;
+use Modules\Statement\App\Enum\StatementStatusEnum;
+use Modules\Statement\App\Scopes\StatementScopes;
+use Modules\Statement\App\Traits\StatementNumberObserver;
+use Modules\Task\app\Models\Task;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+
+class Statement extends Model
+{
+    use CreatedByObserver, HasAssignedToScope, HasDeletedBy, HasFactory, InteractsWithDelegation, LogsActivity, SoftDeletes, StatementNumberObserver, StatementScopes;
+
+    protected $fillable = [
+        'is_draft',
+        'statement_number',
+        'statementable_type',
+        'statementable_id',
+        'parent_id',
+        'subject',
+        'description',
+        'status',
+        'deadline',
+        'deadline_notified_at',
+        'created_by',
+    ];
+
+    public bool $inPermission = true;
+
+    public array $sortableRelations = [
+        'creator' => ['users', 'name', 'created_by'],
+    ];
+
+    public array $basicOperations = [];
+
+    public array $specialOperations = ['view-all', 'view-own', 'create-all', 'create-own', 'assign-user', 'approval', 'export', 'report'];
+
+    protected $casts = [
+        'is_draft' => 'boolean',
+        'deadline' => 'date',
+        'deadline_notified_at' => 'datetime',
+        'status' => StatementStatusEnum::class,
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes && Casts methods
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations methods
+    |--------------------------------------------------------------------------
+    */
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnlyDirty()
+            ->logOnly($this->fillable);
+    }
+
+    public function log($oldStatus, $type, $message, $notes = null): StatementLog
+    {
+        return $this->logs()->create([
+            'old_status' => $oldStatus,
+            'new_status' => $this->status,
+            'type' => $type,
+            'notes' => $notes,
+            'message' => $message,
+        ]);
+    }
+
+    public function visibleLogsForAuth(): Collection|array
+    {
+        if (auth()->id() === $this->created_by && ! isRoot()) {
+            return $this->logs()
+                ->latest()
+                ->with('actor')
+                ->whereIn('type', [
+                    StatementLogTypeEnum::Created->value,
+                    StatementLogTypeEnum::Sent->value,
+                    StatementLogTypeEnum::ReturnForReview->value,
+                    StatementLogTypeEnum::AcceptAndClose->value,
+                    StatementLogTypeEnum::Rejected->value,
+                ])
+                ->get();
+        }
+
+        return $this->logs()->latest()->with('actor')->get();
+    }
+
+    public function isCreator(): bool
+    {
+        return $this->created_by == auth()->user()->id;
+    }
+
+    public function canViewLog(): bool
+    {
+        return auth()->user()?->can('view-all-statement')
+            || auth()->id() === $this->created_by;
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(config('statement.creator_model'), 'created_by');
+    }
+
+    public function statementable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Statement::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Statement::class, 'parent_id');
+    }
+
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(config('statement.department_model'), 'statement_departments', 'statement_id', 'department_id');
+    }
+
+    public function files(): MorphMany
+    {
+        return $this->morphMany(StatementFile::class, 'fileable');
+    }
+
+    public function replies(): HasMany
+    {
+        return $this->hasMany(StatementReply::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(config('statement.creator_model'), StatementUser::class)
+            ->withPivot(['type', 'is_active']);
+    }
+
+    public function mainUser(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            config('statement.creator_model'),
+            StatementUser::class,
+            'statement_id',
+            'id',
+            'id',
+            'user_id'
+        )
+            ->where('statement_users.type', StatementAssignedUserTypeEnum::Main->value)
+            ->where('statement_users.is_active', ActiveTypeEnum::Active->value)
+            ->latest();
+    }
+
+    public function reservedUsers(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            config('statement.creator_model'),
+            StatementUser::class,
+            'statement_id',
+            'id',
+            'id',
+            'user_id'
+        )
+            ->where('statement_users.type', StatementAssignedUserTypeEnum::Reserve->value)
+            ->where('statement_users.is_active', ActiveTypeEnum::Active->value);
+    }
+
+    public function logs(): HasMany
+    {
+        return $this->hasMany(StatementLog::class);
+    }
+
+    public function latestLog(): HasOne
+    {
+        return $this->hasOne(StatementLog::class)->latestOfMany();
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(StatementLog::class)->whereNotNull('notes')->latest();
+    }
+
+    public function actions(): MorphMany
+    {
+        return $this->morphMany(StatementLogAction::class, 'action');
+    }
+
+    public function logsRelated(): MorphMany
+    {
+        return $this->morphMany(StatementLog::class, 'action');
+    }
+
+    public function tasks(): MorphMany
+    {
+        return $this->morphMany(Task::class, 'taskable');
+    }
+}

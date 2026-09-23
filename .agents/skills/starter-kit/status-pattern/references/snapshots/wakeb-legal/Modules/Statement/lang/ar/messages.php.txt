@@ -1,0 +1,8 @@
+<?php
+
+return [
+    'related_statement_not_found_or_status_incorrect' => 'الإفادة ذات الصلة غير موجودة أو حالتها غير صحيحة.',
+    'can_not_close_related_statement' => 'لا يمكن إغلاق الإفادة ذات الصلة.',
+    'statement_not_in_requested_info_status' => 'الإفادة ليست في حالة طلب المعلومات.',
+    'you_do_not_own_this_statement' => 'أنت لا تملك هذه الإفادة.',
+];

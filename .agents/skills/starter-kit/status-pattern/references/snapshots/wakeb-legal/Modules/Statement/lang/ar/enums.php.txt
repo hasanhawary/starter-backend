@@ -1,0 +1,53 @@
+<?php
+
+return [
+    'statement_status' => [
+        'draft' => 'مسودة',
+        'sent_pending' => 'مُرسَلة / قيد الانتظار',
+        'received' => 'مُستلَمة',
+        'in_progress' => 'قيد المعالجة',
+        'answered' => 'تمت الإجابة',
+        'returned_for_review' => 'مُعادة للمراجعة',
+        'closed' => 'مُغلقة',
+        'rejected' => 'مرفوضة',
+        'requested' => 'مطلوب بيانات',
+        'closed_and_new' => 'إغلاق وإنشاء جديدة',
+        'closed_and_related_new' => 'إغلاق وإنشاء جديدة مرتبطة',
+    ],
+    'statement_log_type' => [
+        'created' => 'إنشاء الإفادة',
+        'updated' => 'تحديث الإفادة',
+        'created_draft' => 'إنشاء مسودة الإفادة',
+        'sent' => 'إرسال طلب الإفادة',
+        'received' => 'تأكيد الاستلام',
+        'started_processing' => 'بدء المعالجة',
+        'send_reply' => 'إرسال الرد',
+        'return_for_review' => 'إعادة للمراجعة',
+        'accept_and_close' => 'إغلاق الإفادة',
+        'rejected' => 'رفض الإفادة',
+        'requested_data' => 'طلب بيانات إضافية',
+        'redirect_same_and_closed' => 'إحالة لنفس الجهة وإغلاق الطلب',
+        'redirect_different_and_closed' => 'إحالة لجهة مختلفة وإغلاق الطلب',
+        'user_assigned' => 'تعيين مستخدمين',
+        'user_removed' => 'إزالة مستخدمين',
+    ],
+    'statement_assigned_user_type' => [
+        'main' => 'رئيسي',
+        'reserve' => 'احتياطي',
+    ],
+    'statement_reply_type' => [
+        'answer' => 'إجابة',
+        'insufficient_data' => 'بيانات غير كافية',
+        'not_competent' => 'عدم الاختصاص',
+        'note' => 'ملاحظة',
+    ],
+    'statement_action' => [
+        'send' => 'إرسال طلب الإفادة',
+        'receive' => 'تأكيد الاستلام',
+        'start_processing' => 'بدء المعالجة',
+        'send_reply' => 'إرسال الرد',
+        'return_for_review' => 'إعادة للمراجعة',
+        'accept_and_close' => 'قبول الرد وإغلاق الإفادة',
+        'reject' => 'رفض',
+    ],
+];
